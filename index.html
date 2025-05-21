@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapyUniverse IA - Agentes de IA Prontos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #161824;
+      color: #e5e7eb;
+    }
+    .parallax-bg {
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      min-height: 100vh;
+      position: relative;
+      
+    }
+    .glow {
+      box-shadow: 0 0 60px 10px #d946ef80, 0 0 160px 30px #fbbf24a0;
+      filter: blur(0.5px);
+    }
+    .floating-hero {
+      animation: floatyHero 3s ease-in-out infinite alternate;
+    }
+    @keyframes floatyHero {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-20px); }
+    }
+    .card-float {
+        animation: floatyCard 3s ease-in-out infinite alternate;
+    }
+    @keyframes floatyCard {
+        from { transform: translateY(0px); }
+        to   { transform: translateY(-8px); } /* Slightly reduced float for smaller cards */
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1f2937; }
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    #no-tools-message {
+        text-align: center;
+        font-size: 1.25rem; /* text-xl */
+        color: #9ca3af; /* text-gray-400 */
+        margin-top: 2rem; /* mt-8 */
+        padding: 2rem; /* p-8 */
+        background-color: #374151; /* bg-gray-700 */
+        border-radius: 0.75rem; /* rounded-xl */
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        transition: opacity 0.3s ease-in-out;
+    }
+    .modal-content {
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    .modal-hidden .modal-overlay {
+        opacity: 0;
+    }
+    .modal-hidden .modal-content {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    .modal-visible .modal-overlay {
+        opacity: 1;
+    }
+    .modal-visible .modal-content {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+#toolModal.modal-hidden {
+    pointer-events: none;
+}
+#toolModal.modal-visible {
+    pointer-events: auto;
+}
+#toolModal.modal-hidden .modal-overlay,
+#toolModal.modal-hidden .modal-content {
+    pointer-events: none;
+}
+#toolModal.modal-visible .modal-overlay,
+#toolModal.modal-visible .modal-content {
+    pointer-events: auto;
+}
+
+  .logo {
+    width: 100%;
+    height: auto;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+  
+  /* Estilos do Carrossel */
+  .carrossel-container {
+    position: relative;
+    /* width: auto; */ /* Removido, Tailwind w-full cuida disso */
+    /* height: 100%; */ /* Removido para permitir altura dinâmica */
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* A transição de altura será aplicada ao .carrossel interno */
+  }
+  
+  .carrossel {
+    /* transition: transform 0.5s ease-in-out; */ /* Removido para efeito de fade */
+    /* display: flex; */ /* Removido, não necessário para fade com position:absolute */
+    position: relative; /* Para conter os slides absolutos */
+    width: 100%; /* Garante que ocupe a largura do container */
+    /* height: 100%; */ /* Removido, altura será definida por JS */
+    transition: height 0.4s ease-in-out; /* Para animar mudanças de altura */
+  }
+  
+  .carrossel-slide {
+    /* min-width: auto; */ /* Removido, width: 100% é suficiente */
+    transition: opacity 0.7s ease-in-out; /* Apenas transição de opacidade, duração ajustável */
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Garante que ocupe toda a largura do .carrossel */
+    /* height: 100%; */ /* Removido, altura será auto baseada no conteúdo */
+    padding: 1.5rem;
+    box-sizing: border-box;
+    /* transform: translateX(100%); */ /* Removido para efeito de fade */
+    pointer-events: none; /* Slides inativos não são interativos */
+    z-index: 1; /* Slides inativos ficam abaixo */
+  }
+  
+  .carrossel-slide.active {
+    opacity: 1;
+    /* position: relative; */ /* Mantém absolute para sobreposição correta com z-index */
+    /* transform: translateX(0); */ /* Removido para efeito de fade */
+    pointer-events: auto; /* Slide ativo é interativo */
+    z-index: 2; /* Slide ativo fica na frente */
+  }
+  
+  .carrossel-dots {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    z-index: 10;
+  }
+  
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .dot.active {
+    background: #f59e0b;
+    transform: scale(1.2);
+  }
+  </style>
+</head>
+<body class="text-gray-100">
+
+  <div class="parallax-bg flex items-center justify-center relative py-16 px-4 min-h-screen">
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+      <div class="absolute -top-24 left-1/3 w-72 h-72 md:w-96 md:h-96 rounded-full glow bg-fuchsia-400 opacity-25"></div>
+      <div class="absolute top-24 right-1/4 w-56 h-56 md:w-64 md:h-64 rounded-full glow bg-yellow-400 opacity-25"></div>
+      <div class="absolute bottom-0 left-1/2 w-60 h-60 md:w-72 md:h-72 rounded-full glow bg-sky-400 opacity-20"></div>
+    </div>
+    
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-4">
+      <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-8">
+        <!-- Coluna da Esquerda - Logo e Título -->
+        <div class="w-full lg:w-5/12 flex flex-col justify-center text-center lg:text-left">
+          <div class="inline-flex items-center justify-center bg-gray-900/60 rounded-full p-3 mb-6 shadow-xl border-2 border-yellow-400 lg:mx-0 mx-auto w-24 h-24 md:w-28 md:h-28">
+            <img src="img/logo.png" class="w-full h-full object-contain" alt="Logo CapyUniverse">
+          </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent">
+            CapyUniverse IA
+          </h1>
+          <p class="text-xl sm:text-2xl text-gray-300 mb-8 max-w-2xl lg:max-w-none">
+            Potencialize sua produtividade e aprendizado com nossas ferramentas de IA
+            <span class="block font-bold text-yellow-400 mt-2">Descubra o poder da inteligência artificial hoje mesmo</span>
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <a href="#ferramentas" class="px-8 py-4 rounded-xl font-semibold bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 shadow-lg hover:scale-105 transition-all duration-300 text-center">
+              Explorar Ferramentas
+            </a>
+          </div>
+        </div>
+        
+        <!-- Coluna da Direita - Carrossel -->
+        <div class="w-full lg:w-7/12 hidden lg:block"> 
+          <div class="carrossel-container w-full">
+      <div class="carrossel">
+        <!-- Slide 1 - CapyResumo -->
+        <div class="carrossel-slide active">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-blue-900/50 to-sky-900/50 rounded-2xl border border-blue-500/30 shadow-xl">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Em Destaque
+              </div>
+              <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyResumo</h2>
+              <p class="text-lg text-gray-300 mb-6">Resuma qualquer texto, artigo ou documento em segundos com nossa IA avançada. Economize tempo e aprenda de forma mais eficiente.</p>
+              <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
+                <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Resumos Rápidos</span>
+                <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Análise de Texto</span>
+                <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">IA Avançada</span>
+              </div>
+              <a href="capyresumo.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">
+                Experimentar Agora
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+            <div class="flex-1">
+              <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                <div class="text-center mb-4">
+               
+                </div>
+                <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4">
+                  <p class="text-gray-400 text-sm mb-1">Exemplo de resumo:</p>
+                  <p class="text-blue-300 font-medium">"A IA revolucionou a forma como processamos informações, permitindo análises complexas em segundos que antes levariam horas ou dias."</p>
+                </div>
+                <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-blue-500 to-sky-500 rounded-full w-3/4"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2 text-right">75% mais conciso</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Slide 2 - CapyExplica -->
+        <div class="carrossel-slide">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-yellow-900/50 to-amber-900/50 rounded-2xl border border-yellow-500/30 shadow-xl">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-300 text-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Exclusivo
+              </div>
+              <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyExplica</h2>
+              <p class="text-lg text-gray-300 mb-6">Entenda conceitos complexos de forma simples e didática. Nossa IA explica qualquer tópico com clareza e profundidade.</p>
+              <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
+                <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Explicações Clara</span>
+                <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Didática</span>
+                <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Aprendizado</span>
+              </div>
+              <a href="capyexplica.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-gray-900 font-medium rounded-lg hover:opacity-90 transition-opacity">
+                Explicar Agora
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+              </a>
+            </div>
+            <div class="flex-1">
+              <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                <div class="text-center mb-4">
+                 
+                </div>
+                <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4">
+                  <p class="text-gray-400 text-sm mb-1">Pergunte:</p>
+                  <p class="text-yellow-300 font-medium">"O que é inteligência artificial?"</p>
+                </div>
+                <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full w-4/5"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2 text-right">Resposta em 2s</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Slide 3 - CapyFlashcards -->
+        <div class="carrossel-slide">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-purple-900/50 to-fuchsia-900/50 rounded-2xl border border-purple-500/30 shadow-xl">
+            <div class="flex-1 text-center md:text-left">
+              <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Popular
+              </div>
+              <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyFlashcards</h2>
+              <p class="text-lg text-gray-300 mb-6">Crie flashcards para estudar qualquer assunto. Nossa IA gera cartões de estudo personalizados para maximizar seu aprendizado.</p>
+              <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Estudo Ativo</span>
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Memorização</span>
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Revisão Espaçada</span>
+              </div>
+              <a href="capyflashcards.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">
+                Criar Flashcards
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+              </a>
+            </div>
+            <div class="flex-1">
+              <div class="relative h-64 bg-gray-800/50 rounded-xl border-2 border-dashed border-purple-500/30 flex items-center justify-center">
+                <div class="absolute top-0 left-0 right-0 p-4 text-center">
+                
+                </div>
+                <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform rotate-2 -translate-y-3 -translate-x-1 shadow-lg">
+                  <p class="text-purple-300 font-medium mb-2">O que é Machine Learning?</p>
+                  <p class="text-sm text-gray-400">Clique para ver a resposta</p>
+                </div>
+                <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform -rotate-2 translate-y-3 translate-x-1 shadow-lg">
+                  <p class="text-purple-300 font-medium mb-2">R: Um subcampo da IA que permite aos sistemas aprenderem com dados.</p>
+                  <div class="flex gap-2 mt-4">
+                    <button class="text-xs px-3 py-1 bg-red-500/20 text-red-300 rounded-full">Errei</button>
+                    <button class="text-xs px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full">Quase</button>
+                    <button class="text-xs px-3 py-1 bg-green-500/20 text-green-300 rounded-full">Fácil</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Indicadores -->
+      <div class="carrossel-dots">
+        <span class="dot active" data-slide="0"></span>
+        <span class="dot" data-slide="1"></span>
+        <span class="dot" data-slide="2"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="max-w-7xl mx-auto px-4 py-10">
+    <div class="bg-gray-800/70 p-6 rounded-xl shadow-xl mb-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+        <div>
+          <label for="search-input" class="block text-sm font-medium text-gray-300 mb-1">Buscar Ferramenta</label>
+          <input type="text" id="search-input" placeholder="Nome, categoria ou serviço..." class="w-full bg-gray-700 border border-gray-600 text-gray-200 placeholder-gray-400 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition duration-150 ease-in-out">
+        </div>
+        <div>
+          <label for="category-select" class="block text-sm font-medium text-gray-300 mb-1">Filtrar por Categoria</label>
+          <select id="category-select" class="w-full bg-gray-700 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition duration-150 ease-in-out">
+            <option value="">Todas as Categorias</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20">
+    <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+     
+    </div>
+    <div id="no-tools-message" class="hidden">Nenhuma ferramenta encontrada com os critérios selecionados.</div>
+  </section>
+
+  <footer class="relative text-center mt-8 py-10 px-4 bg-gradient-to-tr from-fuchsia-950/80 via-gray-900/90 to-yellow-900/50 rounded-t-3xl shadow-2xl">
+    <h2 class="text-2xl font-extrabold mb-2 bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent drop-shadow-2xl">Entre no CapyUniverse agora</h2>
+    <p class="text-gray-400 mb-4 max-w-xl mx-auto">Deixe a IA fazer o pesado. Desbloqueie sua criatividade, produtividade e aprendizado em outro nível.</p>
+    <a href="#" class="inline-block px-8 py-3 rounded-xl font-semibold bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300">Começar de Graça</a>
+    <p class="text-gray-600 mt-8 text-xs">&copy; <span id="current-year"></span> CapyUniverse IA • Feito para insanos como você.</p>
+  </footer>
+
+  <div id="toolModal" class="fixed inset-0 bg-black bg-opacity-0 flex items-center justify-center z-50 p-4 modal-hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+    <div class="modal-content bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md relative transform transition-all">
+      <button id="closeModalButton" class="absolute top-3 right-3 text-gray-400 hover:text-gray-200 transition-colors" aria-label="Fechar modal">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      
+      <div class="flex items-center mb-4">
+        <div id="modalIconContainer" class="w-12 h-12 rounded-full flex items-center justify-center mr-4 text-3xl shadow-inner">
+        
+        </div>
+        <h2 id="modalToolName" class="text-2xl font-bold text-gray-100">Nome da Ferramenta</h2>
+      </div>
+      <p id="modalToolCategory" class="text-sm text-gray-400 mb-1">Categoria</p>
+      <p id="modalToolDescription" class="text-gray-300 mb-6">Descrição detalhada da ferramenta aparecerá aqui.</p>
+      <a id="modalToolLink" href="#" target="_blank" class="w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300">
+        Acessar IA &rarr;
+      </a>
+    </div>
+  </div>
+
+  <script>
+    // --- Data for Tools ---
+    const toolsData = [
+      // Each tool should have an imageSrc property, e.g., imageSrc: 'img/capyresumo.png'
+      // For now, we'll use a placeholder in the card creation.
+      // Analise e compreensão de texto
+      { name: "CapyResumo", category: "Análise e compreensão de texto", description: "Faça resumos inteligentes de qualquer texto, artigo ou documento.", icon: "📝", link: "capyresumo.html", color: "fuchsia", imageSrc: "img/capyresumo.png" },
+      { name: "CapyExplica", category: "Análise e compreensão de texto", description: "Explique conteúdos difíceis em linguagem simples e didática.", icon: "💡", link: "capyexplica.html", color: "yellow", imageSrc: "img/CapyExplica.png" },
+      { name: "CapyDetector", category: "Análise e compreensão de texto", description: "Descubra se um texto foi escrito por humano ou IA.", icon: "🤖", link: "capydetector.html", color: "sky", imageSrc: "img/CapyDetector.png" },
+      // Criação e Edição de Conteudo
+      { name: "CapyEmail", category: "Criação e Edição de Conteúdo", description: "Crie e-mails profissionais e personalizados em segundos.", icon: "✉️", link: "capyemail.html", color: "pink", imageSrc: "img/CapyEmail.png" },
+      { name: "CapyTone", category: "Criação e Edição de Conteúdo", description: "Ajuste o tom e estilo de seus textos com facilidade.", icon: "🎶", link: "capytone.html", color: "rose", imageSrc: "img/CapyTone.png" },
+      { name: "CapyEscritor", category: "Criação e Edição de Conteúdo", description: "Assistente de escrita para blogs, artigos e mais.", icon: "✍️", link: "capyescritor.html", color: "teal", imageSrc: "img/CapyEscritor.png" },
+      { name: "CapyPrompt", category: "Criação e Edição de Conteúdo", description: "Gerador de nomes criativos para projetos e empresas.", icon: "🏷️", link: "capyprompt.html", color: "cyan", imageSrc: "img/CapyPrompt.png" },
+      { name: "CapyDirector", category: "Criação e Edição de Conteúdo", description: "Crie roteiros e scripts para vídeos e apresentações.", icon: "🎬", link: "capydirector.html", color: "orange", imageSrc: "img/CapyDirector.png" },
+      { name: "CapyCriativo", category: "Criação e Edição de Conteúdo", description: "Gere ideias inovadoras e soluções criativas.", icon: "✨", link: "capyicriativo.html", color: "amber", imageSrc: "img/CapyCriativo.png" },
+      // Documentos e PDF
+      { name: "CapyDoc", category: "Documentos e PDF", description: "Analise e interaja com seus documentos PDF de forma inteligente.", icon: "📄", link: "capydoc.html", color: "blue", imageSrc: "img/CapyDoc.png" },
+      { name: "CapyVagaMatch", category: "Documentos e PDF", description: "Combine seu currículo com vagas de emprego ideais.", icon: "🎯", link: "capyvagamatch.html", color: "green", imageSrc: "img/CapyVagaMatch.png" },
+      { name: "CapyPDF", category: "Documentos e PDF", description: "Ferramentas completas para edição e conversão de PDFs.", icon: "📑", link: "capypdf.html", color: "indigo", imageSrc: "img/CapyPDF.png" },
+      // Chatbots Personalizados
+      { name: "CapyChat", category: "Chatbots Personalizados", description: "Crie chatbots personalizados para diversas finalidades.", icon: "💬", link: "capychat.html", color: "purple", imageSrc: "img/CapyChat.png" },
+      { name: "CapyPsico", category: "Chatbots Personalizados", description: "Um chatbot para conversas de apoio e bem-estar emocional.", icon: "🧠", link: "capypsico.html", color: "red", imageSrc: "img/CapyPsico.png" },
+      { name: "CapyHistoriador", category: "Chatbots Personalizados", description: "Converse com um historiador IA sobre eventos passados.", icon: "📜", link: "capyhistoriador.html", color: "lime", imageSrc: "img/CapyHistoriador.png" },
+      // Produtividade e Organização
+      { name: "CapyPlanner", category: "Produtividade e Organização", description: "Planeje seu dia, semana ou projetos com IA.", icon: "🗓️", link: "capyplanner.html", color: "emerald", imageSrc: "img/CapyPlanner.png" },
+      { name: "CapyMetas", category: "Produtividade e Organização", description: "Defina e acompanhe suas metas com ajuda da IA.", icon: "🏁", link: "capymetas.html", color: "violet", imageSrc: "img/CapyMetas.png" },
+      { name: "CapyMinutas", category: "Produtividade e Organização", description: "Gereatas e minutas de reuniões automaticamente.", icon: "🗒️", link: "capyminutas.html", color: "trueGray", imageSrc: "img/CapyMinutas.png" },
+      // Aprendiz e Educação
+      { name: "CapyQuiz", category: "Aprendiz e Educação", description: "Crie e responda quizzes interativos sobre qualquer tema.", icon: "❓", link: "capyquiz.html", color: "lightBlue", imageSrc: "img/CapyQuiz.png" },
+      { name: "CapyTradutor", category: "Aprendiz e Educação", description: "Traduza textos e documentos para diversos idiomas.", icon: "🌐", link: "capytradutor.html", color: "warmGray", imageSrc: "img/CapyTradutor.png" },
+      { name: "CapyDebate", category: "Aprendiz e Educação", description: "Participe de debates simulados com IA sobre temas variados.", icon: "🗣️", link: "capydebate.html", color: "coolGray", imageSrc: "img/CapyDebate.png" },
+      // Analise de Dados
+      { name: "CapyChart", category: "Análise de Dados", description: "Crie gráficos e visualizações de dados de forma simples.", icon: "📊", link: "capychart.html", color: "orange", imageSrc: "img/CapyChart.png" },
+      { name: "CapyDados", category: "Análise de Dados", description: "Analise conjuntos de dados e extraia insights valiosos.", icon: "📈", link: "capydados.html", color: "amber", imageSrc: "img/CapyDados.png" },
+      { name: "CapyFiscal", category: "Análise de Dados", description: "Assistente IA para questões fiscais e tributárias.", icon: "🧾", link: "capyfiscal.html", color: "yellow", imageSrc: "img/CapyFiscal.png" },
+      // Recursos Acadêmicos
+      { name: "CapyTeste", category: "Recursos Acadêmicos", description: "Prepare-se para provas e testes com simulados IA.", icon: "✔️", link: "capyteste.html", color: "green", imageSrc: "img/CapyTeste.png" },
+      { name: "CapyTCC", category: "Recursos Acadêmicos", description: "Auxílio na estruturação e escrita de trabalhos acadêmicos.", icon: "🎓", link: "capytcc.html", color: "blue", imageSrc: "img/CapyTCC.png" },
+      { name: "CapySolução", category: "Recursos Acadêmicos", description: "Encontre soluções e explicações para problemas complexos.", icon: "🔑", link: "capysolucao.html", color: "indigo", imageSrc: "img/CapySolucao.png" },
+      // Bem Estar e Autoconhecimento
+      { name: "CapyDiário", category: "Bem Estar e Autoconhecimento", description: "Um diário inteligente para registrar pensamentos e emoções.", icon: "📔", link: "capydiario.html", color: "pink", imageSrc: "img/CapyDiario.png" },
+      { name: "CapyMeditação", category: "Bem Estar e Autoconhecimento", description: "Guias de meditação e relaxamento com IA.", icon: "🧘", link: "capymeditacao.html", color: "purple", imageSrc: "img/CapyMeditacao.png" }
+    ];
+
+    const colorClasses = {
+        fuchsia: { text: 'text-fuchsia-400', hoverShadow: 'hover:shadow-fuchsia-400/30', bg: 'bg-fuchsia-500', bgIcon: 'bg-fuchsia-400/20' },
+        yellow: { text: 'text-yellow-400', hoverShadow: 'hover:shadow-yellow-400/30', bg: 'bg-yellow-500', bgIcon: 'bg-yellow-400/20' },
+        sky: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' },
+        pink: { text: 'text-pink-400', hoverShadow: 'hover:shadow-pink-400/30', bg: 'bg-pink-500', bgIcon: 'bg-pink-400/20' },
+        rose: { text: 'text-rose-400', hoverShadow: 'hover:shadow-rose-400/30', bg: 'bg-rose-500', bgIcon: 'bg-rose-400/20' },
+        teal: { text: 'text-teal-400', hoverShadow: 'hover:shadow-teal-400/30', bg: 'bg-teal-500', bgIcon: 'bg-teal-400/20' },
+        cyan: { text: 'text-cyan-400', hoverShadow: 'hover:shadow-cyan-400/30', bg: 'bg-cyan-500', bgIcon: 'bg-cyan-400/20' },
+        orange: { text: 'text-orange-400', hoverShadow: 'hover:shadow-orange-400/30', bg: 'bg-orange-500', bgIcon: 'bg-orange-400/20' },
+        amber: { text: 'text-amber-400', hoverShadow: 'hover:shadow-amber-400/30', bg: 'bg-amber-500', bgIcon: 'bg-amber-400/20' },
+        blue: { text: 'text-blue-400', hoverShadow: 'hover:shadow-blue-400/30', bg: 'bg-blue-500', bgIcon: 'bg-blue-400/20' },
+        green: { text: 'text-green-400', hoverShadow: 'hover:shadow-green-400/30', bg: 'bg-green-500', bgIcon: 'bg-green-400/20' },
+        indigo: { text: 'text-indigo-400', hoverShadow: 'hover:shadow-indigo-400/30', bg: 'bg-indigo-500', bgIcon: 'bg-indigo-400/20' },
+        purple: { text: 'text-purple-400', hoverShadow: 'hover:shadow-purple-400/30', bg: 'bg-purple-500', bgIcon: 'bg-purple-400/20' },
+        red: { text: 'text-red-400', hoverShadow: 'hover:shadow-red-400/30', bg: 'bg-red-500', bgIcon: 'bg-red-400/20' },
+        lime: { text: 'text-lime-400', hoverShadow: 'hover:shadow-lime-400/30', bg: 'bg-lime-500', bgIcon: 'bg-lime-400/20' },
+        emerald: { text: 'text-emerald-400', hoverShadow: 'hover:shadow-emerald-400/30', bg: 'bg-emerald-500', bgIcon: 'bg-emerald-400/20' },
+        violet: { text: 'text-violet-400', hoverShadow: 'hover:shadow-violet-400/30', bg: 'bg-violet-500', bgIcon: 'bg-violet-400/20' },
+        trueGray: { text: 'text-gray-400', hoverShadow: 'hover:shadow-gray-400/30', bg: 'bg-gray-500', bgIcon: 'bg-gray-400/20' },
+        lightBlue: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' }, // Mapped to sky as lightBlue is v2
+        warmGray: { text: 'text-stone-400', hoverShadow: 'hover:shadow-stone-400/30', bg: 'bg-stone-500', bgIcon: 'bg-stone-400/20' }, // Mapped to stone
+        coolGray: { text: 'text-slate-400', hoverShadow: 'hover:shadow-slate-400/30', bg: 'bg-slate-500', bgIcon: 'bg-slate-400/20' }  // Mapped to slate
+    };
+
+    // --- DOM Elements ---
+    const toolsGrid = document.getElementById('tools-grid');
+    const searchInput = document.getElementById('search-input');
+    const categorySelect = document.getElementById('category-select');
+    const noToolsMessage = document.getElementById('no-tools-message');
+    const currentYearSpan = document.getElementById('current-year');
+
+    // Modal DOM Elements
+    const toolModal = document.getElementById('toolModal');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const modalIconContainer = document.getElementById('modalIconContainer');
+    const modalToolName = document.getElementById('modalToolName');
+    const modalToolCategory = document.getElementById('modalToolCategory');
+    const modalToolDescription = document.getElementById('modalToolDescription');
+    const modalToolLink = document.getElementById('modalToolLink');
+
+    // --- Functions ---
+    function createToolCard(tool, index) {
+      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
+      const card = document.createElement('div');
+      // Reduced padding, adjusted shadow and hover effect for smaller cards
+      card.className = `group bg-gray-800/80 rounded-xl p-0 shadow-lg hover:shadow-xl ${colorTheme.hoverShadow} transition-all duration-300 ease-in-out card-float overflow-hidden flex flex-col`;
+      card.style.animationDelay = `${index * 0.05}s`; // Faster stagger for more cards
+
+      // Store all tool data on the card element for modal use
+      Object.keys(tool).forEach(key => {
+        card.dataset[key] = tool[key];
+      });
+      
+      card.innerHTML = `
+        <div class="aspect-[3/2] w-full bg-gray-700/50 flex items-center justify-center cursor-pointer tool-image-placeholder">
+          <img src="${tool.imageSrc || 'https://placehold.co/300x200/4A5568/E2E8F0?text=Imagem+Indispon%C3%ADvel'}" alt="Visualização da ferramenta ${tool.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null;this.src='https://placehold.co/300x200/4A5568/E2E8F0?text=Erro+ao+Carregar';">
+        </div>
+        <div class="p-4 flex-grow flex flex-col justify-between">
+            <div>
+                <h3 class="text-md font-bold text-gray-100 truncate" title="${tool.name}">${tool.name}</h3>
+                <p class="text-xs text-gray-400 mb-2 truncate">${tool.category}</p>
+            </div>
+            <button class="mt-2 text-sm ${colorTheme.text} font-semibold hover:underline text-left w-full open-modal-button">
+              Ver Detalhes &rarr;
+            </button>
+        </div>
+      `;
+      // Event listener for opening modal (on image placeholder or button)
+      card.querySelector('.tool-image-placeholder').addEventListener('click', () => openModal(tool));
+      card.querySelector('.open-modal-button').addEventListener('click', () => openModal(tool));
+      return card;
+    }
+    
+    function openModal(tool) {
+      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
+
+      modalIconContainer.innerHTML = `<span class="text-3xl">${tool.icon}</span>`;
+      modalIconContainer.className = `w-12 h-12 rounded-full flex items-center justify-center mr-4 text-3xl shadow-inner ${colorTheme.bgIcon} ${colorTheme.text}`;
+      modalToolName.textContent = tool.name;
+      modalToolCategory.textContent = `Categoria: ${tool.category}`;
+      modalToolDescription.textContent = tool.description;
+      modalToolLink.href = tool.link;
+      
+      // Clear existing color classes from button and add new ones
+      modalToolLink.className = `w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300 ${colorTheme.bg}`;
+
+      toolModal.classList.remove('modal-hidden');
+      toolModal.classList.add('modal-visible');
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeModal() {
+      toolModal.classList.add('modal-hidden');
+      toolModal.classList.remove('modal-visible');
+      document.body.style.overflow = ''; // Restore background scrolling
+    }
+
+    function displayTools(filteredTools) {
+      toolsGrid.innerHTML = '';
+      if (filteredTools.length === 0) {
+        noToolsMessage.classList.remove('hidden');
+      } else {
+        noToolsMessage.classList.add('hidden');
+        filteredTools.forEach((tool, index) => {
+          const card = createToolCard(tool, index);
+          toolsGrid.appendChild(card);
+        });
+      }
+    }
+
+    function populateCategories() {
+      const categories = [...new Set(toolsData.map(tool => tool.category))].sort();
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    function filterTools() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedCategory = categorySelect.value;
+      const filtered = toolsData.filter(tool => {
+        const termCondition = tool.name.toLowerCase().includes(searchTerm) ||
+                              tool.category.toLowerCase().includes(searchTerm) ||
+                              tool.description.toLowerCase().includes(searchTerm);
+        const categoryCondition = selectedCategory ? tool.category === selectedCategory : true;
+        return termCondition && categoryCondition;
+      });
+      displayTools(filtered);
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+    categorySelect.addEventListener('change', filterTools);
+    closeModalButton.addEventListener('click', closeModal);
+    
+    // Close modal on Escape key
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toolModal.classList.contains('modal-visible')) {
+        closeModal();
+      }
+    });
+    
+    // Close modal if clicking on the overlay (outside content)
+
+// --- Fechamento pelo overlay (fora do modal) ---
+const modalOverlay = document.querySelector('#toolModal .modal-overlay');
+if (modalOverlay) {
+  modalOverlay.addEventListener('click', closeModal);
+}
+
+// --- Prevenir clique dentro do modal-content de fechar o modal (só fecha se clicar no overlay!) ---
+const modalContent = document.querySelector('#toolModal .modal-content');
+if (modalContent) {
+  modalContent.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+}
+    // The onclick on the overlay div itself also handles this.
+
+    // --- Initial Setup ---
+    if (currentYearSpan) {
+        currentYearSpan.textContent = new Date().getFullYear();
+    }
+    populateCategories();
+    displayTools(toolsData);
+
+    // Parallax for hero elements
+    const heroFloatingElements = document.querySelectorAll('.floating-hero');
+    window.addEventListener('scroll', () => {
+      // Hero floating is CSS driven, JS parallax for scroll can be added if desired
+      // but might conflict or overcomplicate. CSS animations are generally smoother.
+    });
+
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Elementos do carrossel
+      const carrossel = document.querySelector('.carrossel');
+      const slides = document.querySelectorAll('.carrossel-slide');
+      const dots = document.querySelectorAll('.dot');
+      // const prevBtn = document.querySelector('.prev-btn'); // Removido
+      // const nextBtn = document.querySelector('.next-btn'); // Removido
+      
+      let currentSlide = 0;
+      let isAnimating = false;
+      const totalSlides = slides.length;
+      let slideInterval;
+      
+      // Inicializa o carrossel
+      function initCarrossel() {
+        // Verifica se o contêiner do carrossel está visível antes de inicializar
+        // O elemento que controla a visibilidade é o pai do .carrossel-container
+        const carrosselWrapper = document.querySelector('.lg\\:w-7\\/12'); // Seletor do wrapper do carrossel
+        if (!carrosselWrapper || getComputedStyle(carrosselWrapper).display === 'none') {
+          return; // Não inicializa o carrossel se estiver oculto
+        }
+
+        // Configura o primeiro slide como ativo
+        slides[0].classList.add('active');
+        dots[0].classList.add('active');
+
+        // Definir altura inicial do carrossel com base no primeiro slide
+        requestAnimationFrame(() => {
+          const initialSlideHeight = slides[0].scrollHeight;
+          carrossel.style.height = `${initialSlideHeight}px`;
+        });
+        
+        startAutoPlay();
+        
+        // Event listeners para navegação
+        // prevBtn.addEventListener('click', prevSlide); // Removido
+        // nextBtn.addEventListener('click', nextSlide); // Removido
+        
+        // Event listeners para os dots
+        dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => goToSlide(index));
+        });
+        
+        // Pausa o autoplay quando o mouse está sobre o carrossel
+        carrossel.addEventListener('mouseenter', pauseAutoPlay);
+        carrossel.addEventListener('mouseleave', startAutoPlay);
+        
+        // A classe 'carrossel-loaded' não parece ser usada no CSS do carrossel.
+        // Se não for necessária para outros fins, pode ser removida.
+        // setTimeout(() => {
+        //   document.body.classList.add('carrossel-loaded');
+        // }, 100);
+      }
+      
+      // Atualiza a exibição do carrossel com animação
+      function updateCarrossel(newSlideIndexOrDirection) {
+        if (isAnimating) return;
+        isAnimating = true; // Inicia a animação
+        
+        const oldSlideIndex = currentSlide;
+        let newSlideIndex;
+        
+        // Determina o índice do novo slide
+        if (typeof newSlideIndexOrDirection === 'string') {
+          if (newSlideIndexOrDirection === 'next') {
+            newSlideIndex = (oldSlideIndex + 1) % totalSlides;
+          } else { // 'prev'
+            newSlideIndex = (oldSlideIndex - 1 + totalSlides) % totalSlides;
+          }
+        } else {
+          newSlideIndex = newSlideIndexOrDirection; // É um índice numérico
+        }
+        
+        if (oldSlideIndex === newSlideIndex) {
+          isAnimating = false; // Nenhum slide para mudar
+          return;
+        }
+
+        const oldSlide = slides[oldSlideIndex];
+        const newSlide = slides[newSlideIndex];
+
+        // Atualiza os dots
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[newSlideIndex].classList.add('active');
+        
+        // Aplica a classe 'active' ao novo slide para iniciar o fade-in
+        // Remove a classe 'active' do slide antigo para iniciar o fade-out
+        newSlide.classList.add('active');
+        oldSlide.classList.remove('active');
+        
+        currentSlide = newSlideIndex;
+
+        // Ajustar a altura do carrossel para a altura do novo slide
+        requestAnimationFrame(() => {
+          const newSlideHeight = newSlide.scrollHeight; // scrollHeight inclui padding
+          carrossel.style.height = `${newSlideHeight}px`;
+        });
+        
+        // Define isAnimating como false após a duração da transição CSS
+        setTimeout(() => {
+          isAnimating = false;
+        }, 700); // Deve corresponder à duração da transição de opacidade no CSS (0.7s = 700ms)
+      }
+      
+      // Vai para o slide anterior
+      function prevSlide() {
+        updateCarrossel('prev'); // Passa a direção
+        resetAutoPlay();
+      }
+      
+      // Vai para o próximo slide
+      function nextSlide() {
+        updateCarrossel('next'); // Passa a direção
+        resetAutoPlay();
+      }
+      
+      // Vai para um slide específico
+      function goToSlide(index) {
+        if (isAnimating || index === currentSlide) return;
+        updateCarrossel(index); // Passa o índice do slide alvo
+        resetAutoPlay();
+      }
+      
+      // Inicia o autoplay
+      function startAutoPlay() {
+        pauseAutoPlay();
+        slideInterval = setInterval(() => {
+          if (!document.hidden) {
+            nextSlide();
+          }
+        }, 7000); // Muda a cada 7 segundos
+      }
+      
+      // Pausa o autoplay
+      function pauseAutoPlay() {
+        clearInterval(slideInterval);
+      }
+      
+      // Reseta o autoplay
+      function resetAutoPlay() {
+        pauseAutoPlay();
+        startAutoPlay();
+      }
+      
+      // Pausa o carrossel quando a aba não está visível
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          pauseAutoPlay();
+        } else {
+          startAutoPlay();
+        }
+      });
+      
+      // Inicializa o carrossel
+      initCarrossel();
+      
+      // Adiciona suporte para navegação por teclado
+      // Removida a navegação por teclado para setas, pois os botões foram removidos.
+      // document.addEventListener('keydown', (e) => {
+      //   if (e.key === 'ArrowLeft') {
+      //     e.preventDefault();
+      //     prevSlide();
+      //   } else if (e.key === 'ArrowRight') {
+      //     e.preventDefault();
+      //     nextSlide();
+      //   }
+      // });
+    });
+  </script>
+  
+  <script src="js/script.js"></script>
+</body>
+  </html>
