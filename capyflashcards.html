@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Flashcards - CapyUniverse IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        .loader {
+            border: 4px solid #f3f3f3; /* Tailwind gray-100 for loader track */
+            border-top: 4px solid #8b5cf6; /* Purple-500 for CapyUniverse theme */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .category-content.expanded {
+            max-height: 1000px; /* Ajuste conforme necessário para mais itens */
+        }
+        .sidebar-link.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Flashcard Specific CSS - Adapted for CapyUniverse Dark Theme */
+        :root {
+            /* Base colors from CapyUniverse (dark theme) */
+            --flashcard-dark-bg: #111827;              /* gray-900 (body background) */
+            --flashcard-dark-surface: #1f2937;         /* gray-800 (main content area bg) */
+            --flashcard-dark-card-bg: #374151;         /* gray-700 (flashcard, textarea bg) */
+            --flashcard-dark-text-primary: #f3f4f6;    /* gray-100 (primary text) */
+            --flashcard-dark-text-secondary: #d1d5db;  /* gray-300 (secondary text) */
+            --flashcard-dark-primary: #8b5cf6;         /* purple-500 (accent/button) */
+            --flashcard-dark-primary-hover: #7c3aed;   /* purple-600 (accent/button hover) */
+            --flashcard-dark-border: #4b5563;          /* gray-600 (borders) */
+            --flashcard-dark-error: #f87171;           /* red-400 (error text) */
+            --flashcard-dark-button-text: white;
+            --flashcard-dark-disabled-bg: #4b5563;     /* gray-600 */
+            --flashcard-dark-disabled-text: #9ca3af;   /* gray-400 */
+            --flashcard-dark-shadow-color-1: rgba(0, 0, 0, 0.3);
+            --flashcard-dark-shadow-color-2: rgba(0, 0, 0, 0.2);
+            --flashcard-dark-focus-shadow-color: rgba(139, 92, 246, 0.3); /* purple-500 with opacity */
+
+            --flashcard-width: 220px;
+            --flashcard-height: 150px;
+        }
+
+        /* Styles for the flashcard generator section */
+        .flashcard-generator-content h1 { /* Corresponds to the H1 in original flashcard app */
+          color: var(--flashcard-dark-primary);
+          margin-bottom: 15px;
+          font-size: 1.75em; /* Slightly smaller than original H2 to fit hierarchy */
+          font-weight: 500;
+          text-align: center;
+        }
+
+        .flashcard-generator-content p.description { /* Corresponds to the P in original flashcard app */
+          margin-bottom: 25px;
+          color: var(--flashcard-dark-text-secondary);
+          line-height: 1.6;
+          text-align: center;
+        }
+
+        .flashcard-generator-content textarea {
+          width: 100%; /* Tailwind w-full is better if used on parent */
+          padding: 15px;
+          margin-bottom: 25px;
+          border: 1px solid var(--flashcard-dark-border);
+          border-radius: 8px;
+          font-size: 16px;
+          min-height: 120px;
+          background-color: var(--flashcard-dark-card-bg);
+          color: var(--flashcard-dark-text-primary);
+          resize: vertical;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .flashcard-generator-content textarea:focus {
+          outline: none;
+          border-color: var(--flashcard-dark-primary);
+          box-shadow: 0 0 0 2px var(--flashcard-dark-focus-shadow-color);
+        }
+
+        .flashcard-generator-content button#generateFlashcardsButton { /* More specific ID */
+          background-color: var(--flashcard-dark-primary);
+          color: var(--flashcard-dark-button-text);
+          padding: 14px 24px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 500;
+          transition: background-color 0.3s ease, box-shadow 0.2s ease;
+          box-shadow: 0 1px 2px var(--flashcard-dark-shadow-color-2);
+          display: flex; /* For loader alignment */
+          align-items: center;
+          justify-content: center;
+          width: 100%; /* Make it full width like other buttons */
+        }
+
+        .flashcard-generator-content button#generateFlashcardsButton:hover {
+          background-color: var(--flashcard-dark-primary-hover);
+          box-shadow: 0 1px 3px var(--flashcard-dark-shadow-color-1);
+        }
+
+        .flashcard-generator-content button#generateFlashcardsButton:focus {
+          outline: none;
+          box-shadow: 0 0 0 3px var(--flashcard-dark-focus-shadow-color);
+        }
+
+        .flashcard-generator-content button#generateFlashcardsButton:disabled {
+          background-color: var(--flashcard-dark-disabled-bg);
+          color: var(--flashcard-dark-disabled-text);
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+        /* Custom loader for this button if needed, or use existing .loader */
+        .flashcard-generator-content button#generateFlashcardsButton .btn-text.hidden { display: none; }
+        .flashcard-generator-content button#generateFlashcardsButton .loader.hidden { display: none; }
+
+
+        .flashcard-messages { /* For loading and error messages specific to flashcards */
+          color: var(--flashcard-dark-error);
+          margin-top: 20px;
+          font-weight: 500;
+          min-height: 1.5em;
+          text-align: center;
+        }
+
+        .flashcards-display-container { /* Renamed from flashcardsContainer */
+          display: flex;
+          flex-wrap: wrap;
+          gap: 25px;
+          margin-top: 40px;
+          justify-content: center;
+          perspective: 1000px;
+        }
+
+        .flashcard {
+          background-color: transparent;
+          width: var(--flashcard-width);
+          height: var(--flashcard-height);
+          border: none;
+          border-radius: 10px;
+          cursor: pointer;
+          perspective: 1000px;
+          box-shadow: none;
+        }
+
+        .flashcard-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          text-align: center;
+          transition: transform 0.6s;
+          transform-style: preserve-3d;
+          box-shadow: 0 1px 2px var(--flashcard-dark-shadow-color-2);
+          border-radius: 10px;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+          transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 15px;
+          box-sizing: border-box;
+          border-radius: 10px;
+          border: 1px solid var(--flashcard-dark-border);
+          background-color: var(--flashcard-dark-card-bg);
+        }
+
+        .flashcard-back {
+          transform: rotateY(180deg);
+        }
+
+        .flashcard:hover .flashcard-inner {
+          box-shadow: 0 4px 8px var(--flashcard-dark-shadow-color-1);
+        }
+
+        .flashcard:hover .flashcard-front,
+        .flashcard:hover .flashcard-back {
+           border-color: var(--flashcard-dark-primary);
+        }
+
+        .term {
+          font-size: 1.2em;
+          font-weight: 500;
+          color: var(--flashcard-dark-text-primary);
+        }
+
+        .definition {
+          font-size: 0.95em;
+          color: var(--flashcard-dark-text-secondary);
+          line-height: 1.4;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button id="homeButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white mr-2">Inicio</button>
+
+            <!-- Botão para abrir o modal de chaves API -->
+            <button id="openApiKeysModalButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white">Chaves API IA's</button>
+        </div>
+    </header>
+
+    <div id="notificationArea" class="fixed top-20 right-4 z-50 space-y-2 w-full max-w-xs sm:max-w-sm">
+    </div>
+
+    <div class="flex flex-1 pt-16">
+        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-2 p-4 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-20 lg:pt-4">
+            </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <div class="space-y-6 bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl mx-auto">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-yellow-400 mb-2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <h2 class="text-3xl font-bold text-yellow-400">Gerador de Flashcards</h2>
+                    <p class="text-md text-gray-400 mt-1">Crie flashcards interativos instantaneamente para qualquer tópico.</p>
+                </div>
+
+                <div class="flashcard-generator-content">
+                    <h1>Crie seus Flashcards</h1>
+                    <p class="description">
+                        Insira um tópico ou uma lista de termos e definições para gerar flashcards.
+                    </p>
+                    <textarea
+                        id="flashcardTopicInput"
+                        class="w-full"
+                        placeholder="Insira o tópico (ex: Roma Antiga) ou pares 'Termo: Definição' (um por linha)"
+                    ></textarea>
+                    <button id="generateFlashcardsButton">
+                        <span class="btn-text">Gerar Flashcards</span>
+                        <span class="loader hidden ml-2"></span>
+                    </button>
+                    <div id="flashcardUserMessages" class="flashcard-messages"></div>
+                    <div id="flashcardsDisplayContainer" class="flashcards-display-container">
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-800 text-center p-4 text-sm text-gray-500 mt-auto">
+        CapyUniverse IA &copy; 2025
+    </footer>
+
+    <!-- Modal de Chaves API -->
+    <div id="apiKeysModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4 relative">
+            <button id="closeApiKeysModalButton" class="absolute top-3 right-3 text-gray-400 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h3 class="text-xl font-bold text-white mb-4">Configurar Chaves API</h3>
+            <p class="text-gray-300 mb-6">Insira suas chaves API para usar os modelos de IA.</p>
+            
+            <!-- Gemini API Key -->
+            <div class="mb-4 border border-gray-700 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-purple-400 mr-2">Gemini</h4>
+                    <input id="gemini-key-modal-input" type="password" placeholder="Sua API Key Gemini" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm mr-2">
+                    <button id="save-gemini-key-modal-button" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-md text-sm">Salvar</button>
+                </div>
+                
+                <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://ai.google.dev/" target="_blank" class="text-purple-400 hover:underline">ai.google.dev</a></p>
+            </div>
+            
+            <!-- OpenAI API Key -->
+            <div class="mb-6 border border-gray-700 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-green-400 mr-2">OpenAI</h4>
+                    <input id="openai-key-modal-input" type="password" placeholder="Sua API Key OpenAI" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm mr-2">
+                    <button id="save-openai-key-modal-button" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm">Salvar</button>
+                </div>
+               
+                <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://platform.openai.com/api-keys" target="_blank" class="text-green-400 hover:underline">platform.openai.com</a></p>
+            </div>
+            
+            <!-- Claude API Key -->
+            <div class="mb-6 border border-gray-700 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-orange-400 mr-2">Anthropic Claude</h4>
+                    <input id="claude-key-modal-input" type="password" placeholder="Sua API Key Claude" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm mr-2">
+                    <button id="save-claude-key-modal-button" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded-md text-sm">Salvar</button>
+                </div>
+                
+                <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://console.anthropic.com/" target="_blank" class="text-orange-400 hover:underline">console.anthropic.com</a></p>
+            </div>
+            
+            <!-- Perplexity API Key -->
+            <div class="mb-6 border border-gray-700 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-blue-400 mr-2">Perplexity</h4>
+                    <input id="perplexity-key-modal-input" type="password" placeholder="Sua API Key Perplexity" class="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white text-sm mr-2">
+                    <button id="save-perplexity-key-modal-button" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm">Salvar</button>
+                </div>
+                
+                <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://www.perplexity.ai/settings/api" target="_blank" class="text-blue-400 hover:underline">perplexity.ai</a></p>
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="continueWithoutKeyButtonModal" class="text-gray-400 hover:text-white text-sm">Continuar sem chave</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
+        const currentPageId = 'CapyFlashcards'; // ID da página atual para destacar na sidebar
+        const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
+
+        // Elementos da UI
+        const notificationArea = document.getElementById('notificationArea');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        // Elementos do Modal de API Keys
+        const apiKeysModal = document.getElementById('apiKeysModal');
+        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
+        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
+        const continueWithoutKeyButtonModal = document.getElementById('continueWithoutKeyButtonModal');
+        
+        // Inputs de API Keys no Modal
+        const geminiKeyModalInput = document.getElementById('gemini-key-modal-input');
+        const openaiKeyModalInput = document.getElementById('openai-key-modal-input');
+        const claudeKeyModalInput = document.getElementById('claude-key-modal-input');
+        const perplexityKeyModalInput = document.getElementById('perplexity-key-modal-input');
+        
+        // Botões de salvar no Modal
+        const saveGeminiKeyModalButton = document.getElementById('save-gemini-key-modal-button');
+        const saveOpenAIKeyModalButton = document.getElementById('save-openai-key-modal-button');
+        const saveClaudeKeyModalButton = document.getElementById('save-claude-key-modal-button');
+        const savePerplexityKeyModalButton = document.getElementById('save-perplexity-key-modal-button');
+        const homeButton = document.getElementById('homeButton');
+
+
+        const tools = [
+            // Análise e Compreensão de Texto
+            { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyresumo.html', color: 'blue' },
+            { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyexplica.html', color: 'yellow' },
+            { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capydetector.html', color: 'purple'},
+            
+            // Criação e Edição de Conteúdo
+            { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição', pageUrl: 'capyemail.html', color: 'pink' },
+            { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição', pageUrl: 'capytone.html', color: 'lime' },
+            { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição', pageUrl: 'capyescritor.html', color: 'rose' },
+            { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
+            { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição', pageUrl: 'capyroteiro.html', color: 'orange' },
+            
+            // Ferramentas de Documentos
+            { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
+            { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
+            { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
+            { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
+
+            // Chatbots Especializados
+            { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
+            { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
+            { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
+
+            // Produtividade e Organização
+            { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
+            { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' }, 
+            { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
+            
+            // Aprendizagem e Educação
+            { id: 'CapyDidatica', title: 'Planos de Aula', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 14l6-3-6-3-6 3 6 3z"></path><path d="M12 14v7"></path><path d="M6 12.5L12 17l6-4.5"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydidatica.html', color: 'emerald' },
+            { id: 'CapyQuiz', title: 'Gerador de Quizzes', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 11.17L12 8"></path><path d="M12 15h.01"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyquiz.html', color: 'fuchsia' }, 
+            { id: 'CapyTradutor', title: 'Tradutor Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path><path d="M12 19l-7-7 7-7"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytradutor.html', color: 'red' },
+            { id: 'CapyDebate', title: 'Simulador de Debates', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydebate.html', color: 'violet' }, 
+            { id: 'CapySolucao', title: 'Professor de Matemática', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path><line x1="12" y1="22" x2="12" y2="17"></line><line x1="12" y1="12" x2="20" y2="8"></line><line x1="12" y1="12" x2="4" y2="8"></line></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capysolucao.html', color: 'red' },
+            { id: 'CapyTeste', title: 'Gerador de Avaliações', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="m9 14 2 2 4-4"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyteste.html', color: 'purple' },
+            { id: 'CapyTCC', title: 'Tutor de TCC', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 13L12 7"></path><path d="M9 10L15 10"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytcc.html', color: 'indigo' },
+            
+            // Análise de Dados
+            { id: 'CapyChart', title: 'Visualizador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>', category: 'Análise de Dados', pageUrl: 'capychart.html', color: 'teal' },
+            { id: 'CapyDados', title: 'Analisador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>', category: 'Análise de Dados', pageUrl: 'capydados.html', color: 'blue' },
+            { id: 'CapyFiscal', title: 'Assistente Fiscal', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>', category: 'Análise de Dados', pageUrl: 'capyfiscal.html', color: 'green' },
+            
+            // Bem-Estar e Mindfulness
+            { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
+
+            // Ferramentas de IA Avançadas
+            { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
+        ];
+
+        // --- Funções de Notificação ---
+        function addNotification(message, type = 'info') {
+            const notificationId = 'notif-' + Date.now();
+            const typeClasses = {
+                error: 'bg-red-600 text-white',
+                success: 'bg-green-600 text-white',
+                info: 'bg-blue-600 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            const notificationHTML = `
+                <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
+                    <span>${message}</span>
+                    <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
+                </div>`;
+            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
+            const newNotification = document.getElementById(notificationId);
+            requestAnimationFrame(() => {
+                newNotification.classList.remove('opacity-0', 'translate-x-full');
+                newNotification.classList.add('opacity-100', 'translate-x-0');
+            });
+            setTimeout(() => removeNotification(notificationId), 6000);
+        }
+        window.removeNotification = (id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => el.remove(), 300);
+            }
+        };
+
+        // --- Lógica da API Key com LocalStorage (Múltiplos Provedores) ---
+        const API_KEYS_STORAGE = {
+            GEMINI: 'geminiApiKeyCapyUniverse',
+            OPENAI: 'openaiApiKeyCapyUniverse',
+            CLAUDE: 'claudeApiKeyCapyUniverse',
+            PERPLEXITY: 'perplexityApiKeyCapyUniverse'
+        };
+
+        // Função para carregar todas as chaves API do localStorage
+        function loadApiKeysFromStorage() {
+            // Carregar chave Gemini (usada como padrão para compatibilidade)
+            const storedGeminiKey = localStorage.getItem(API_KEYS_STORAGE.GEMINI);
+            if (storedGeminiKey) {
+                apiKey = storedGeminiKey; // Define a chave principal para compatibilidade
+                geminiKeyModalInput.value = storedGeminiKey;
+            }
+            
+            // Carregar outras chaves
+            const storedOpenAIKey = localStorage.getItem(API_KEYS_STORAGE.OPENAI);
+            if (storedOpenAIKey) {
+                openaiKeyModalInput.value = storedOpenAIKey;
+            }
+            
+            const storedClaudeKey = localStorage.getItem(API_KEYS_STORAGE.CLAUDE);
+            if (storedClaudeKey) {
+                claudeKeyModalInput.value = storedClaudeKey;
+            }
+            
+            const storedPerplexityKey = localStorage.getItem(API_KEYS_STORAGE.PERPLEXITY);
+            if (storedPerplexityKey) {
+                perplexityKeyModalInput.value = storedPerplexityKey;
+            }
+        }
+
+        // Função para salvar uma chave API específica
+        function saveApiKeyToStorage(provider, key) {
+            if (key && key.trim()) {
+                localStorage.setItem(provider, key.trim());
+                addNotification('Chave API guardada com sucesso!', 'success');
+                
+                // Se for Gemini, atualiza a variável apiKey principal para compatibilidade
+                if (provider === API_KEYS_STORAGE.GEMINI) {
+                    apiKey = key.trim();
+                }
+            } else {
+                localStorage.removeItem(provider);
+                addNotification('Chave API removida.', 'warning');
+                
+                // Se for Gemini, limpa a variável apiKey principal
+                if (provider === API_KEYS_STORAGE.GEMINI) {
+                    apiKey = '';
+                }
+            }
+        }
+
+        // Event listeners para os botões do modal
+        openApiKeysModalButton.addEventListener('click', () => {
+            apiKeysModal.classList.remove('hidden');
+        });
+        
+        closeApiKeysModalButton.addEventListener('click', () => {
+            apiKeysModal.classList.add('hidden');
+        });
+        
+        continueWithoutKeyButtonModal.addEventListener('click', () => {
+            apiKeysModal.classList.add('hidden');
+        });
+        
+        // Event listeners para salvar as chaves
+        saveGeminiKeyModalButton.addEventListener('click', () => {
+            saveApiKeyToStorage(API_KEYS_STORAGE.GEMINI, geminiKeyModalInput.value);
+        });
+        
+        saveOpenAIKeyModalButton.addEventListener('click', () => {
+            saveApiKeyToStorage(API_KEYS_STORAGE.OPENAI, openaiKeyModalInput.value);
+        });
+        
+        saveClaudeKeyModalButton.addEventListener('click', () => {
+            saveApiKeyToStorage(API_KEYS_STORAGE.CLAUDE, claudeKeyModalInput.value);
+        });
+        
+        savePerplexityKeyModalButton.addEventListener('click', () => {
+            saveApiKeyToStorage(API_KEYS_STORAGE.PERPLEXITY, perplexityKeyModalInput.value);
+        });
+
+        if (homeButton) {
+            homeButton.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        }
+
+
+
+        // --- Lógica da Sidebar ---
+        function renderSidebar() {
+            const categories = {};
+            tools.forEach(tool => {
+                if (!categories[tool.category]) {
+                    categories[tool.category] = [];
+                }
+                categories[tool.category].push(tool);
+            });
+            sidebar.innerHTML = ''; 
+            for (const categoryName in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'mb-2';
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full flex justify-between items-center p-3 text-left text-gray-200 hover:bg-gray-700 rounded-md focus:outline-none';
+                categoryButton.innerHTML = `
+                    <span class="font-semibold">${categoryName}</span>
+                    <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
+                categories[categoryName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    link.className = `sidebar-link w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-gray-600 transition-colors duration-150 ${tool.id === currentPageId ? 'active' : ''}`;
+                    link.innerHTML = `${tool.icon.replace('currentColor', `text-${tool.color}-400`)} <span class="${tool.id === currentPageId ? 'text-white' : `text-gray-300`}">${tool.title}</span>`;
+                    categoryContent.appendChild(link);
+                });
+                categoryButton.addEventListener('click', () => {
+                    categoryContent.classList.toggle('expanded');
+                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                });
+                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                    categoryContent.classList.add('expanded');
+                    categoryButton.querySelector('svg').classList.add('rotate-180');
+                }
+                categoryDiv.appendChild(categoryButton);
+                categoryDiv.appendChild(categoryContent);
+                sidebar.appendChild(categoryDiv);
+            }
+        }
+        sidebarToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // --- Função de Loading para Botões ---
+        function showLoading(buttonElement, show = true) {
+            const btnText = buttonElement.querySelector('.btn-text');
+            const loader = buttonElement.querySelector('.loader');
+            if (show) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+                buttonElement.disabled = true;
+            } else {
+                if(btnText) btnText.classList.remove('hidden');
+                if(loader) loader.classList.add('hidden');
+                buttonElement.disabled = false;
+            }
+        }
+
+        // --- Função para Chamar a API Gemini (Modificada para aceitar callback) ---
+        async function callGeminiAPI(prompt, buttonElement, resultContainer, successCallback) {
+            if (!apiKey) {
+                addNotification("API Key não informada. Verifique o cabeçalho.", "error");
+                if(buttonElement) showLoading(buttonElement, false);
+                return;
+            }
+            if (!prompt || (typeof prompt === 'string' && !prompt.trim())) {
+                addNotification("O prompt para análise não pode estar vazio.", "warning");
+                if(buttonElement) showLoading(buttonElement, false);
+                return;
+            }
+
+            if(buttonElement) showLoading(buttonElement, true);
+            if (resultContainer) { // Mostrar carregando no container de resultado
+                resultContainer.innerHTML = `<div class="flex items-center justify-center p-4 text-gray-400"><span class="loader mr-2"></span>Gerando flashcards com a CapyIA...</div>`;
+            }
+            // Limpar mensagens de erro/sucesso anteriores específicas do flashcard
+            const flashcardUserMessagesEl = document.getElementById('flashcardUserMessages');
+            if (flashcardUserMessagesEl) flashcardUserMessagesEl.textContent = '';
+
+
+            try {
+                const res = await fetch(GEMINI_API_URL_BASE + apiKey, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    let msg = `Erro ${res.status}: ${errorData?.error?.message || res.statusText}`;
+                    if (res.status === 400 && msg.toLowerCase().includes("api key not valid")) {
+                        msg = "Erro: API Key inválida ou mal formatada. Verifique a chave no cabeçalho.";
+                    }
+                    throw new Error(msg);
+                }
+                const data = await res.json();
+                if (data.promptFeedback?.blockReason) {
+                    throw new Error(`Conteúdo bloqueado pela API: ${data.promptFeedback.blockReason}`);
+                }
+                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (textResponse === undefined) { 
+                    throw new Error("Resposta da IA vazia ou em formato inesperado.");
+                }
+                
+                if (successCallback) {
+                    successCallback(textResponse, resultContainer); // Passa o container para o callback
+                } else if (resultContainer) {
+                    resultContainer.innerText = textResponse; // Comportamento padrão se não houver callback
+                }
+                // addNotification("Análise concluída!", "success"); // Notificação movida para dentro do callback se necessário
+            } catch (err) {
+                console.error("Falha na chamada da API:", err);
+                const errorMsg = err.message || "Erro desconhecido ao contatar a API.";
+                if (resultContainer) { // Limpar o container em caso de erro
+                    resultContainer.innerHTML = '';
+                }
+                if (flashcardUserMessagesEl) { // Mostrar erro no espaço de mensagens do flashcard
+                    flashcardUserMessagesEl.textContent = `Erro: ${errorMsg}`;
+                } else {
+                    addNotification(errorMsg, "error"); // Fallback para notificação global
+                }
+            } finally {
+                if(buttonElement) showLoading(buttonElement, false);
+            }
+        }
+
+        // --- Lógica Específica do Gerador de Flashcards ---
+        const flashcardTopicInput = document.getElementById('flashcardTopicInput');
+        const generateFlashcardsButton = document.getElementById('generateFlashcardsButton');
+        const flashcardsDisplayContainer = document.getElementById('flashcardsDisplayContainer');
+        const flashcardUserMessages = document.getElementById('flashcardUserMessages');
+
+        function renderFlashcards(responseText, container) {
+            container.innerHTML = ''; // Limpar resultados anteriores ou mensagem de carregamento
+            flashcardUserMessages.textContent = ''; // Limpar mensagens de usuário anteriores
+
+            if (responseText) {
+                const flashcards = responseText
+                    .split('\n')
+                    .map(line => {
+                        const parts = line.split(':');
+                        if (parts.length >= 2 && parts[0].trim()) {
+                            const term = parts[0].trim();
+                            const definition = parts.slice(1).join(':').trim();
+                            if (definition) {
+                                return { term, definition };
+                            }
+                        }
+                        return null;
+                    })
+                    .filter(card => card !== null);
+
+                if (flashcards.length > 0) {
+                    flashcards.forEach((flashcard, index) => {
+                        const cardDiv = document.createElement('div');
+                        cardDiv.classList.add('flashcard');
+                        cardDiv.dataset['index'] = index.toString();
+
+                        const cardInner = document.createElement('div');
+                        cardInner.classList.add('flashcard-inner');
+
+                        const cardFront = document.createElement('div');
+                        cardFront.classList.add('flashcard-front');
+                        const termDiv = document.createElement('div');
+                        termDiv.classList.add('term');
+                        termDiv.textContent = flashcard.term;
+
+                        const cardBack = document.createElement('div');
+                        cardBack.classList.add('flashcard-back');
+                        const definitionDiv = document.createElement('div');
+                        definitionDiv.classList.add('definition');
+                        definitionDiv.textContent = flashcard.definition;
+
+                        cardFront.appendChild(termDiv);
+                        cardBack.appendChild(definitionDiv);
+                        cardInner.appendChild(cardFront);
+                        cardInner.appendChild(cardBack);
+                        cardDiv.appendChild(cardInner);
+
+                        container.appendChild(cardDiv);
+
+                        cardDiv.addEventListener('click', () => {
+                            cardDiv.classList.toggle('flipped');
+                        });
+                    });
+                    addNotification("Flashcards gerados com sucesso!", "success");
+                } else {
+                    flashcardUserMessages.textContent = 'Não foi possível gerar flashcards válidos a partir da resposta. Verifique o formato ou tente um tópico diferente.';
+                }
+            } else {
+                flashcardUserMessages.textContent = 'Falha ao gerar flashcards ou resposta vazia recebida. Tente novamente.';
+            }
+        }
+
+        generateFlashcardsButton.addEventListener('click', () => {
+            const topic = flashcardTopicInput.value.trim();
+            if (!topic) { 
+                addNotification("Por favor, insira um tópico ou termos para os flashcards.", "warning"); 
+                return; 
+            }
+            
+            const prompt = `Gere uma lista de flashcards para o tópico "${topic}". Cada flashcard deve ter um termo e uma definição concisa. Formate a saída como uma lista de pares "Termo: Definição", com cada par em uma nova linha. Certifique-se de que os termos e as definições sejam distintos e claramente separados por dois pontos. Não adicione nenhuma introdução ou conclusão, apenas os pares. Exemplo de saída:
+Olá: Hola
+Adeus: Adiós
+Manhã: Mañana
+Noite: Noche`;
+            
+            callGeminiAPI(prompt, generateFlashcardsButton, flashcardsDisplayContainer, renderFlashcards);
+        });
+
+
+        // --- Inicialização da Página ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeysFromStorage(); 
+            renderSidebar();
+        });
+    </script>
+</body>
+</html>
