@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyTI - Seu Assistente IA de Suporte Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        .loader {
+            border: 4px solid #f3f3f3; /* light grey */
+            border-top: 4px solid #4f46e5; /* Cor indigo-600 para CapyTI */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .category-content.expanded {
+            max-height: 1500px; 
+        }
+        .sidebar-link.active {
+            background-color: #4338ca; /* indigo-700 (um pouco mais escuro que o tema principal) */
+            color: white;
+            font-weight: 600;
+        }
+        .step-section {
+            background-color: #1f2937; /* gray-800 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #6366f1; /* indigo-500 */
+        }
+        .step-section h3 {
+            color: #818cf8; /* indigo-400 */
+            font-weight: 600;
+            font-size: 1.25rem; /* text-xl */
+            margin-bottom: 0.75rem;
+        }
+        .command-display {
+            background-color: #0f172a; /* slate-900 */
+            color: #cbd5e1; /* slate-300 */
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap; /* Permite quebra de linha e mantém espaços */
+            word-break: break-all;
+            margin-bottom: 0.5rem;
+            border: 1px solid #334155; /* slate-700 */
+        }
+        .solution-display {
+             background-color: #1e293b; /* slate-800 */
+             color: #e2e8f0; /* slate-200 */
+             padding: 1rem;
+             border-radius: 0.375rem;
+             border: 1px solid #334155;
+             min-height: 150px;
+        }
+        .solution-display h4 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: #818cf8; /* indigo-400 */
+            margin-bottom: 0.5rem;
+        }
+        .solution-display p, .solution-display li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+        .solution-display ul { list-style-type: disc; margin-left: 1.25rem; }
+        .solution-display strong { font-weight: bold; color: #a5b4fc; /* indigo-300 */}
+        .solution-display code {
+            background-color: #334155; /* slate-700 */
+            color: #f1f5f9; /* slate-100 */
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+         .solution-display pre {
+            background-color: #0f172a;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            overflow-x: auto;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button id="openApiKeysModalButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white">Chaves API IA's</button>
+        </div>
+    </header>
+
+    <div id="notificationArea" class="fixed top-20 right-4 z-[60] space-y-2 w-full max-w-xs sm:max-w-sm">
+    </div>
+
+    <div class="flex flex-1 pt-16">
+        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-2 p-4 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-20 lg:pt-4">
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <div class="space-y-6 bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl mx-auto">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-indigo-400 mb-2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M6 11h.01M10 11h.01M14 11h.01"></path></svg>
+                    <h2 class="text-3xl font-bold text-indigo-400">CapyTI</h2>
+                    <p class="text-md text-gray-400 mt-1">Seu especialista IA para diagnóstico e solução de problemas de TI.</p>
+                </div>
+                
+                <div id="step1" class="step-section">
+                    <h3>Etapa 1: Descreva o Problema</h3>
+                    <label for="problemDescription" class="block text-sm font-medium text-gray-300 mb-1">Detalhe o problema que você está enfrentando com seu computador, software ou hardware:</label>
+                    <textarea id="problemDescription" rows="5" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y shadow-sm" placeholder="Ex: Meu computador está muito lento e demora para iniciar. O Photoshop trava ao abrir arquivos grandes. Minha impressora não é reconhecida."></textarea>
+                    <button id="submitProblemButton" class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-75 px-6 py-3 rounded-md text-lg font-semibold text-white shadow-md transition-colors duration-150 flex items-center justify-center">
+                        <span class="btn-text">Analisar Problema e Obter Comando de Sistema</span>
+                        <span class="loader hidden ml-2"></span>
+                    </button>
+                </div>
+
+                <div id="step2" class="step-section hidden">
+                    <h3>Etapa 2: Coletar Informações do Sistema</h3>
+                    <p class="text-gray-300 mb-2">Para ajudar no diagnóstico, precisamos de algumas informações sobre seu sistema. Por favor, siga os passos:</p>
+                    <ol class="list-decimal list-inside text-gray-400 space-y-1 mb-3">
+                        <li>Abra o <strong class="text-indigo-300">Prompt de Comando (CMD)</strong> como <strong class="text-indigo-300">Administrador</strong>. (Pesquise "cmd" no menu Iniciar, clique com o botão direito em "Prompt de Comando" e selecione "Executar como administrador").</li>
+                        <li>Copie o comando abaixo e cole no Prompt de Comando:</li>
+                    </ol>
+                    <div id="systemInfoCommandDisplay" class="command-display p-3 rounded-md mb-2"></div>
+                    <ol start="3" class="list-decimal list-inside text-gray-400 space-y-1 mb-3">
+                        <li>Pressione <strong class="text-indigo-300">Enter</strong>. O comando criará um arquivo chamado <code class="text-indigo-300">SystemInfo.txt</code> no seu Desktop (Área de Trabalho).</li>
+                        <li>Abra o arquivo <code class="text-indigo-300">SystemInfo.txt</code>, copie todo o seu conteúdo e cole no campo abaixo:</li>
+                    </ol>
+                    <label for="systemInfoInput" class="block text-sm font-medium text-gray-300 mb-1">Cole o conteúdo do SystemInfo.txt aqui:</label>
+                    <textarea id="systemInfoInput" rows="8" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y shadow-sm" placeholder="Cole o conteúdo completo do arquivo SystemInfo.txt aqui..."></textarea>
+                    <button id="submitSystemInfoButton" class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-75 px-6 py-3 rounded-md text-lg font-semibold text-white shadow-md transition-colors duration-150 flex items-center justify-center">
+                        <span class="btn-text">Enviar Informações do Sistema e Obter Comando de Logs</span>
+                        <span class="loader hidden ml-2"></span>
+                    </button>
+                </div>
+
+                <div id="step3" class="step-section hidden">
+                    <h3>Etapa 3: Coletar Logs de Erro do Sistema</h3>
+                    <p class="text-gray-300 mb-2">Agora, vamos coletar alguns logs de eventos que podem nos dar mais pistas sobre o problema:</p>
+                     <ol class="list-decimal list-inside text-gray-400 space-y-1 mb-3">
+                        <li>Mantenha o <strong class="text-indigo-300">Prompt de Comando (CMD) como Administrador</strong> aberto ou abra um novo.</li>
+                        <li>Copie o comando abaixo e cole no Prompt de Comando:</li>
+                    </ol>
+                    <div id="errorLogsCommandDisplay" class="command-display p-3 rounded-md mb-2"></div>
+                     <ol start="3" class="list-decimal list-inside text-gray-400 space-y-1 mb-3">
+                        <li>Pressione <strong class="text-indigo-300">Enter</strong>. O comando criará um arquivo chamado <code class="text-indigo-300">ErrorLogs.txt</code> no seu Desktop.</li>
+                        <li>Abra o arquivo <code class="text-indigo-300">ErrorLogs.txt</code>, copie todo o seu conteúdo e cole no campo abaixo:</li>
+                    </ol>
+                    <label for="errorLogsInput" class="block text-sm font-medium text-gray-300 mb-1">Cole o conteúdo do ErrorLogs.txt aqui:</label>
+                    <textarea id="errorLogsInput" rows="8" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y shadow-sm" placeholder="Cole o conteúdo completo do arquivo ErrorLogs.txt aqui..."></textarea>
+                    <button id="submitErrorLogsButton" class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-75 px-6 py-3 rounded-md text-lg font-semibold text-white shadow-md transition-colors duration-150 flex items-center justify-center">
+                        <span class="btn-text">Enviar Logs e Obter Solução</span>
+                        <span class="loader hidden ml-2"></span>
+                    </button>
+                </div>
+
+                <div id="step4" class="step-section hidden">
+                    <h3>Etapa 4: Diagnóstico e Solução da CapyTI</h3>
+                    <div id="aiSolutionDisplay" class="solution-display p-4 rounded-md">
+                        Aguardando análise completa para fornecer a solução...
+                    </div>
+                     <p class="text-xs text-yellow-400 mt-3 text-center bg-yellow-900/30 p-2 rounded">
+                        <strong>Atenção:</strong> As soluções e comandos fornecidos são baseados na análise da IA. Execute comandos de reparo com cautela. 
+                        Se não tiver certeza, procure um técnico especializado. O CapyUniverse IA não se responsabiliza por quaisquer danos.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-800 text-center p-4 text-sm text-gray-500 mt-auto">
+        CapyUniverse IA &copy; 2025
+    </footer>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-purple-400">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-sky-400 mb-2">Google Gemini</h3>
+                    <label for="geminiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-sky-500 outline-none"/>
+                        <button data-provider="gemini" class="save-key-modal-button bg-sky-500 hover:bg-sky-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.<br>O Gemini 1.5 Flash (usado aqui) possui um nível gratuito generoso.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-emerald-400 mb-2">OpenAI (Modelos GPT)</h3>
+                    <label for="openaiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key OpenAI:</label>
+                    <div class="flex">
+                        <input id="openaiApiKeyInputModal" type="password" placeholder="Sua API Key OpenAI (sk-...)" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-emerald-500 outline-none"/>
+                        <button data-provider="openai" class="save-key-modal-button bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Para usar modelos como GPT-3.5-turbo, GPT-4, etc. Requer créditos na <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">plataforma OpenAI</a>.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-orange-400 mb-2">Anthropic Claude</h3>
+                    <label for="claudeApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Claude:</label>
+                    <div class="flex">
+                        <input id="claudeApiKeyInputModal" type="password" placeholder="Sua API Key Claude" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-orange-500 outline-none"/>
+                        <button data-provider="claude" class="save-key-modal-button bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Para usar modelos Claude. Verifique a disponibilidade e chaves na <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" class="text-orange-400 hover:underline">Anthropic Console</a>.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-violet-400 mb-2">Perplexity AI</h3>
+                    <label for="perplexityApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Perplexity (Opcional):</label>
+                    <div class="flex">
+                        <input id="perplexityApiKeyInputModal" type="password" placeholder="Sua API Key Perplexity" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-violet-500 outline-none"/>
+                        <button data-provider="perplexity" class="save-key-modal-button bg-violet-500 hover:bg-violet-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                     <p class="text-xs text-gray-400 mt-2">Se disponível, para modelos Perplexity.</p>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-400 mb-3"><strong>Recomendamos usar uma chave API do Google Gemini (gratuita para começar) para a melhor experiência com as ferramentas CapyUniverse.</strong></p>
+                <button id="continueWithoutKeyButtonModal" class="bg-gray-600 hover:bg-gray-500 px-6 py-2.5 rounded-md text-sm font-semibold">Continuar sem Chave (Funcionalidade Limitada)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKeys = { gemini: '', openai: '', claude: '', perplexity: '' };
+        let apiKey = ''; 
+        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
+        const currentPageId = 'CapyTI'; 
+        const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
+
+        const notificationArea = document.getElementById('notificationArea');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        // Elementos das Etapas
+        const step1Div = document.getElementById('step1');
+        const problemDescriptionInput = document.getElementById('problemDescription');
+        const submitProblemButton = document.getElementById('submitProblemButton');
+
+        const step2Div = document.getElementById('step2');
+        const systemInfoCommandDisplay = document.getElementById('systemInfoCommandDisplay');
+        const systemInfoInput = document.getElementById('systemInfoInput');
+        const submitSystemInfoButton = document.getElementById('submitSystemInfoButton');
+
+        const step3Div = document.getElementById('step3');
+        const errorLogsCommandDisplay = document.getElementById('errorLogsCommandDisplay');
+        const errorLogsInput = document.getElementById('errorLogsInput');
+        const submitErrorLogsButton = document.getElementById('submitErrorLogsButton');
+
+        const step4Div = document.getElementById('step4');
+        const aiSolutionDisplay = document.getElementById('aiSolutionDisplay');
+
+        let userProblemDescription = ""; // Para armazenar a descrição inicial do problema
+        let userSystemInfo = ""; // Para armazenar o systeminfo
+
+        const tools = [
+            { id: 'CapyTI', title: 'Assistente de Suporte TI', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M6 11h.01M10 11h.01M14 11h.01"></path></svg>', category: 'Suporte Técnico', pageUrl: 'capyti.html', color: 'indigo' },
+            { id: 'CapyContrato', title: 'Gerador de Contratos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 12h8"></path><path d="M8 16h8"></path><path d="M10 19H8"></path><path d="M16 19h-2"></path></svg>', category: 'Documentos e Jurídico', pageUrl: 'capycontrato.html', color: 'violet' },
+            { id: 'CapySEO', title: 'Otimizador de Meta Tags', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14l-4-4 4-4"/><path d="M12 14l4-4-4-4"/><path d="M12 22V10"/><path d="M12 10V2"/></svg>', category: 'SEO e Marketing', pageUrl: 'capyseo.html', color: 'teal' },
+            { id: 'CapyExcel', title: 'Tutor de Excel', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyexcel.html', color: 'emerald' },
+            { id: 'CapyValor', title: 'Precificador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyvalor.html', color: 'lime' },
+            { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyresumo.html', color: 'blue' },
+            { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyexplica.html', color: 'yellow' },
+            { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capydetector.html', color: 'purple'},
+            { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição', pageUrl: 'capyemail.html', color: 'pink' },
+            { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição', pageUrl: 'capytone.html', color: 'lime' }, 
+            { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição', pageUrl: 'capyescritor.html', color: 'rose' },
+            { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
+            { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição', pageUrl: 'capyroteiro.html', color: 'orange' },
+            { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
+            { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
+            { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
+            { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
+            { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
+            { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
+            { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
+            { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
+            { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' }, 
+            { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
+            { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
+            { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
+        ];
+
+        function addNotification(message, type = 'info') {
+            const notificationId = 'notif-' + Date.now();
+            const typeClasses = {
+                error: 'bg-red-600 text-white',
+                success: 'bg-green-600 text-white',
+                info: 'bg-blue-600 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            const notificationHTML = `
+                <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
+                    <span>${message}</span>
+                    <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
+                </div>`;
+            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
+            const newNotification = document.getElementById(notificationId);
+            void newNotification.offsetWidth; 
+            requestAnimationFrame(() => {
+                newNotification.classList.remove('opacity-0', 'translate-x-full');
+                newNotification.classList.add('opacity-100', 'translate-x-0');
+            });
+            setTimeout(() => removeNotification(notificationId), 6000);
+        }
+        window.removeNotification = (id) => { 
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => el.remove(), 300);
+            }
+        };
+
+        function loadApiKeysFromStorage() {
+            Object.keys(apiKeys).forEach(provider => {
+                const storedKey = localStorage.getItem(API_KEY_STORAGE_PREFIX + provider);
+                if (storedKey) {
+                    apiKeys[provider] = storedKey;
+                    const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
+                    if (modalInput) modalInput.value = storedKey; 
+                }
+            });
+            apiKey = apiKeys.gemini || ''; 
+        }
+
+        function saveApiKeyToStorage(provider, key) {
+            if (key) {
+                apiKeys[provider] = key;
+                localStorage.setItem(API_KEY_STORAGE_PREFIX + provider, key);
+                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} guardada!`, 'success');
+                if (provider === 'gemini') apiKey = key; 
+            } else {
+                apiKeys[provider] = '';
+                localStorage.removeItem(API_KEY_STORAGE_PREFIX + provider);
+                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} removida.`, 'warning');
+                if (provider === 'gemini') apiKey = ''; 
+            }
+        }
+
+        function renderSidebar() {
+            const categories = {};
+            tools.forEach(tool => {
+                if (!categories[tool.category]) {
+                    categories[tool.category] = [];
+                }
+                categories[tool.category].push(tool);
+            });
+
+            sidebar.innerHTML = ''; 
+
+            for (const categoryName in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'mb-2';
+
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full flex justify-between items-center p-3 text-left text-gray-200 hover:bg-gray-700 rounded-md focus:outline-none';
+                categoryButton.innerHTML = `
+                    <span class="font-semibold">${categoryName}</span>
+                    <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+                
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
+
+                categories[categoryName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    const isActive = tool.id === currentPageId;
+                    link.className = `sidebar-link w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-gray-600 transition-colors duration-150 ${isActive ? 'active bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:text-white'}`;
+                    
+                    let iconHtml = tool.icon;
+                    if (tool.color && iconHtml.includes('currentColor')) {
+                        const colorMapping = {
+                            blue: 'text-blue-400', yellow: 'text-yellow-400', purple: 'text-purple-400',
+                            pink: 'text-pink-400', rose: 'text-rose-400', teal: 'text-teal-400',
+                            cyan: 'text-cyan-400', orange: 'text-orange-400', amber: 'text-amber-400',
+                            green: 'text-green-400', indigo: 'text-indigo-400', red: 'text-red-400',
+                            lime: 'text-lime-400', emerald: 'text-emerald-400', violet: 'text-violet-400',
+                            trueGray: 'text-gray-400', lightBlue: 'text-sky-400', warmGray: 'text-stone-400',
+                            coolGray: 'text-slate-400', sky: 'text-sky-400', slate: 'text-slate-400'
+                        };
+                        iconHtml = iconHtml.replace('currentColor', colorMapping[tool.color] || 'text-gray-400');
+                    }
+                    link.innerHTML = `${iconHtml} <span class="${isActive ? 'text-white' : 'text-gray-300'}">${tool.title}</span>`;
+                    categoryContent.appendChild(link);
+                });
+
+                categoryButton.addEventListener('click', () => {
+                    categoryContent.classList.toggle('expanded');
+                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                });
+                
+                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                    categoryContent.classList.add('expanded');
+                    categoryButton.querySelector('svg').classList.add('rotate-180');
+                }
+
+                categoryDiv.appendChild(categoryButton);
+                categoryDiv.appendChild(categoryContent);
+                sidebar.appendChild(categoryDiv);
+            }
+        }
+
+        sidebarToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        sidebarOverlay.addEventListener('click', () => { 
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
+        const apiKeysModal = document.getElementById('apiKeysModal');
+        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
+        const continueWithoutKeyButtonModal = document.getElementById('continueWithoutKeyButtonModal');
+
+        if (openApiKeysModalButton) {
+            openApiKeysModalButton.addEventListener('click', () => {
+                if (apiKeysModal) {
+                    apiKeysModal.classList.remove('hidden');
+                    Object.keys(apiKeys).forEach(provider => {
+                        const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
+                        if (modalInput) modalInput.value = apiKeys[provider] || '';
+                    });
+                }
+            });
+        }
+        if (closeApiKeysModalButton) closeApiKeysModalButton.addEventListener('click', () => apiKeysModal && apiKeysModal.classList.add('hidden'));
+        if (continueWithoutKeyButtonModal) {
+            continueWithoutKeyButtonModal.addEventListener('click', () => {
+                if (apiKeysModal) apiKeysModal.classList.add('hidden');
+                addNotification('Continuando sem chave de API. Funcionalidades podem ser limitadas ou indisponíveis.', 'info');
+            });
+        }
+        document.querySelectorAll('.save-key-modal-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const provider = button.dataset.provider;
+                const inputElement = document.getElementById(provider + 'ApiKeyInputModal');
+                if (inputElement) saveApiKeyToStorage(provider, inputElement.value.trim());
+            });
+        });
+
+        function showLoading(buttonElement, show = true, defaultText = null) {
+            const btnText = buttonElement.querySelector('.btn-text');
+            const loader = buttonElement.querySelector('.loader');
+            if (show) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+                buttonElement.disabled = true;
+            } else {
+                if(btnText) {
+                     btnText.classList.remove('hidden');
+                     if(defaultText) btnText.textContent = defaultText;
+                }
+                if(loader) loader.classList.add('hidden');
+                buttonElement.disabled = false;
+            }
+        }
+
+        // --- Lógica da CapyTI ---
+        let currentStep = 1;
+
+        async function callAIForStep(step, dataPayload, buttonElement, outputElementId, nextStepToShow) {
+            if (!apiKey) {
+                addNotification("API Key Gemini não configurada. Adicione sua chave no menu 'Chaves API IA's'.", "error");
+                showLoading(buttonElement, false);
+                if (outputElementId) document.getElementById(outputElementId).textContent = "API Key não configurada.";
+                return;
+            }
+            if (!dataPayload.user_problem_description && step > 1) { // Precisa da descrição do problema para os passos seguintes
+                addNotification("Por favor, descreva o problema primeiro na Etapa 1.", "warning");
+                showLoading(buttonElement, false);
+                return;
+            }
+
+            showLoading(buttonElement, true);
+            if (outputElementId) {
+                 document.getElementById(outputElementId).innerHTML = `<div class="flex items-center justify-center p-4 text-gray-400"><span class="loader mr-2"></span>Aguarde, CapyTI está pensando...</div>`;
+            }
+
+
+            let prompt = "";
+            if (step === 1) { // Gerar comando systeminfo
+                prompt = `Você é CapyTI, um engenheiro de ciência da computação e redes.
+O usuário descreveu o seguinte problema: "${dataPayload.user_problem_description}"
+Sua primeira tarefa é fornecer o comando CMD para coletar informações básicas do sistema Windows.
+O comando deve ser 'systeminfo > "%UserProfile%\\Desktop\\SystemInfo.txt"'.
+Responda APENAS com este comando. Não adicione nenhuma outra formatação ou texto.`;
+            } else if (step === 2) { // Gerar comando para logs de erro
+                 prompt = `Você é CapyTI.
+O usuário descreveu o problema: "${dataPayload.user_problem_description}"
+As informações do sistema coletadas são:
+--- SYSTEM INFO ---
+${dataPayload.system_info}
+--- FIM SYSTEM INFO ---
+Com base no problema e nas informações do sistema, forneça os comandos CMD para coletar os logs de eventos do Sistema e de Aplicativos mais relevantes do Windows (últimos 50-100 eventos de cada, em formato de texto).
+Os comandos devem salvar a saída em um arquivo chamado "ErrorLogs.txt" no Desktop do usuário.
+Exemplo de comando para um tipo de log: wevtutil qe System /rd:true /f:Text /c:50 > "%UserProfile%\\Desktop\\ErrorLogs_System.txt"
+Combine os logs em um único arquivo ErrorLogs.txt se possível, ou forneça comandos separados e instrua o usuário a concatenar ou copiar de ambos.
+Responda APENAS com o(s) comando(s) CMD. Se for mais de um comando, coloque cada um em uma nova linha.`;
+            } else if (step === 3) { // Gerar solução final
+                 prompt = `Você é CapyTI, um engenheiro de ciência da computação e redes.
+Analise TODAS as informações a seguir para diagnosticar e propor uma solução passo a passo para o problema do usuário.
+
+**Problema Descrito pelo Usuário:**
+${dataPayload.user_problem_description}
+
+**Informações do Sistema (SystemInfo):**
+${dataPayload.system_info}
+
+**Logs de Erro Coletados:**
+${dataPayload.error_logs}
+
+**Sua Tarefa:**
+1.  **Diagnóstico:** Com base em todas as informações, identifique a causa mais provável do problema.
+2.  **Solução Passo a Passo:** Forneça instruções claras e detalhadas para um usuário (que pode não ser técnico) resolver o problema. Use linguagem simples.
+3.  **Comandos de Reparo (Se Aplicável e Seguro):** Se houver comandos CMD que possam ajudar a reparar o problema de forma segura (ex: sfc /scannow, DISM, chkdsk), inclua-os, explicando o que fazem e como usá-los. SEMPRE avise o usuário para fazer backup de dados importantes antes de executar comandos que alterem o sistema.
+4.  **Formato da Resposta:** Responda em HTML formatado para ser exibido dentro de uma div. Use títulos (<h4>), parágrafos (<p>), listas (<ul><li>), texto em negrito (<strong>) e blocos de código (<code> para inline, <pre><code> para blocos de comando CMD) para clareza.
+    * Exemplo de título de seção: \`<h4>Possível Causa:</h4>\`
+    * Exemplo de passo: \`<p><strong>Passo 1:</strong> Abra o Menu Iniciar.</p>\`
+    * Exemplo de comando: \`<p>Execute o seguinte comando no Prompt de Comando (Admin):</p><pre><code class="language-cmd">sfc /scannow</code></pre>\`
+5.  **Seja Conciso mas Completo:** A resposta deve ser útil e acionável.
+6.  **Aviso de Segurança:** Se sugerir comandos que alteram o sistema, inclua um aviso sobre backup e riscos.
+
+Responda APENAS com o HTML da solução. Não inclua \`<html>\`, \`<head>\` ou \`<body>\`.
+Comece com um título como \`<h4>Diagnóstico da CapyTI:</h4>\`.`;
+            }
+
+            const requestPayload = { contents: [{ parts: [{ text: prompt }] }] };
+            const currentApiKey = apiKey;
+
+            try {
+                const res = await fetch(`${GEMINI_API_URL_BASE}${currentApiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(requestPayload)
+                });
+                const responseData = await res.json();
+
+                if (!res.ok) {
+                    let msg = `Erro ${res.status}: ${responseData?.error?.message || res.statusText}`;
+                    throw new Error(msg);
+                }
+                if (responseData.promptFeedback?.blockReason) {
+                    throw new Error(`Conteúdo bloqueado pela API: ${responseData.promptFeedback.blockReason}.`);
+                }
+
+                const aiResponseText = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!aiResponseText) {
+                    throw new Error("Resposta da IA vazia ou em formato inesperado.");
+                }
+
+                if (outputElementId) {
+                    document.getElementById(outputElementId).innerHTML = aiResponseText; // Para comandos, é texto. Para solução, é HTML.
+                }
+                
+                // Avança para a próxima etapa
+                if (nextStepToShow === 2) {
+                    step1Div.classList.add('hidden');
+                    step2Div.classList.remove('hidden');
+                    systemInfoCommandDisplay.textContent = aiResponseText.trim(); // Mostra o comando
+                } else if (nextStepToShow === 3) {
+                    step2Div.classList.add('hidden');
+                    step3Div.classList.remove('hidden');
+                    errorLogsCommandDisplay.textContent = aiResponseText.trim(); // Mostra o comando
+                } else if (nextStepToShow === 4) {
+                    step3Div.classList.add('hidden');
+                    step4Div.classList.remove('hidden');
+                    aiSolutionDisplay.innerHTML = aiResponseText; // Mostra a solução HTML
+                }
+                 addNotification(`Etapa ${step} concluída. Siga para a próxima.`, 'success');
+
+
+            } catch (err) {
+                console.error(`Erro na Etapa ${step}:`, err);
+                addNotification(`Erro na Etapa ${step}: ${err.message}`, "error");
+                if (outputElementId) document.getElementById(outputElementId).textContent = `Erro: ${err.message}`;
+            } finally {
+                showLoading(buttonElement, false);
+            }
+        }
+        
+        submitProblemButton.addEventListener('click', () => {
+            userProblemDescription = problemDescriptionInput.value.trim();
+            if (!userProblemDescription) {
+                addNotification("Por favor, descreva o problema antes de continuar.", "warning");
+                return;
+            }
+            callAIForStep(1, { user_problem_description: userProblemDescription }, submitProblemButton, 'systemInfoCommandDisplay', 2);
+        });
+
+        submitSystemInfoButton.addEventListener('click', () => {
+            userSystemInfo = systemInfoInput.value.trim();
+            if (!userSystemInfo) {
+                addNotification("Por favor, cole as informações do sistema.", "warning");
+                return;
+            }
+            callAIForStep(2, { user_problem_description: userProblemDescription, system_info: userSystemInfo }, submitSystemInfoButton, 'errorLogsCommandDisplay', 3);
+        });
+
+        submitErrorLogsButton.addEventListener('click', () => {
+            const errorLogs = errorLogsInput.value.trim();
+            if (!errorLogs) {
+                addNotification("Por favor, cole os logs de erro.", "warning");
+                return;
+            }
+            callAIForStep(3, { 
+                user_problem_description: userProblemDescription, 
+                system_info: userSystemInfo,
+                error_logs: errorLogs 
+            }, submitErrorLogsButton, 'aiSolutionDisplay', 4);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeysFromStorage(); 
+            renderSidebar();
+        });
+    </script>
+</body>
+</html>
+

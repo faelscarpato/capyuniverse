@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyByte - Seu Oráculo Tecnológico IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827; /* gray-900 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        .loader {
+            border: 4px solid #f3f3f3; /* light grey */
+            border-top: 4px solid #f97316; /* Cor orange-500 para CapyByte */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .category-content.expanded {
+            max-height: 1500px; 
+        }
+        .sidebar-link.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            font-weight: 600;
+        }
+        .form-section {
+            background-color: #1f2937; /* gray-800 */
+            padding: 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #fb923c; /* orange-400 */
+        }
+        .form-section h3 {
+            color: #fdba74; /* orange-300 */
+            font-weight: 600;
+            font-size: 1.25rem; /* text-xl */
+            margin-bottom: 1rem;
+        }
+        .ai-response-area {
+             background-color: #1e293b; /* slate-800 */
+             color: #e2e8f0; /* slate-200 */
+             padding: 1.5rem;
+             border-radius: 0.5rem;
+             border: 1px solid #334155; /* slate-700 */
+             min-height: 200px;
+             line-height: 1.7;
+        }
+        .ai-response-area h4 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            color: #fb923c; /* orange-400 */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+         .ai-response-area p, .ai-response-area li {
+            margin-bottom: 0.75rem;
+        }
+        .ai-response-area ul { list-style-type: disc; margin-left: 1.5rem; }
+        .ai-response-area strong { font-weight: bold; color: #fed7aa; /* orange-200 */}
+        .ai-response-area code {
+            background-color: #334155; /* slate-700 */
+            color: #f1f5f9; /* slate-100 */
+            padding: 0.1rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+         .ai-response-area pre {
+            background-color: #0f172a; /* slate-900 */
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9em;
+        }
+        .ai-response-area img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem; 
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid #475569; /* slate-600 */
+        }
+        /* Estilo para o input de arquivo */
+        input[type="file"]::file-selector-button {
+            margin-right: 0.5rem;
+            border: none;
+            background: #f97316; /* orange-500 */
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem; /* rounded-md */
+            color: white;
+            cursor: pointer;
+            transition: background-color .15s ease-in-out;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background: #ea580c; /* orange-600 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button id="openApiKeysModalButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white">Chaves API IA's</button>
+        </div>
+    </header>
+
+    <div id="notificationArea" class="fixed top-20 right-4 z-[60] space-y-2 w-full max-w-xs sm:max-w-sm">
+    </div>
+
+    <div class="flex flex-1 pt-16">
+        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-2 p-4 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-20 lg:pt-4">
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            <div class="space-y-6 bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl mx-auto">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-orange-400 mb-2"><path d="M9 6V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1Z"/><path d="M12 13V9"/><path d="M10.5 9.5 9 11"/><path d="m13.5 9.5 1.5 1.5"/><path d="M8 16H7a1 1 0 0 1-1-1v-2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V15a1 1 0 0 1-1 1Z"/><path d="M16 16h1a1 1 0 0 0 1-1v-2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5V15a1 1 0 0 0 1 1Z"/><path d="M5 11h.01"/><path d="M19 11h.01"/><path d="M12 18a4 4 0 0 0 4-4h-2a2 2 0 0 1-4 0H8a4 4 0 0 0 4 4Z"/><path d="M20 13V9.5A2.5 2.5 0 0 0 17.5 7h-11A2.5 2.5 0 0 0 4 9.5V13a4 4 0 0 0 2.74 3.77"/><path d="M4 13A4 4 0 0 0 8 18h8a4 4 0 0 0 4-4"/></svg>
+                    <h2 class="text-3xl font-bold text-orange-400">CapyByte</h2>
+                    <p class="text-md text-gray-400 mt-1">Seu oráculo tecnológico para desvendar mistérios da eletrônica e informática! 💡</p>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Descreva seu Desafio Tecnológico</h3>
+                    <div>
+                        <label for="problemDescription" class="block text-sm font-medium text-gray-300 mb-1">Qual enigma eletrônico ou de informática você gostaria de desvendar hoje? 💻🔬</label>
+                        <textarea id="problemDescription" rows="5" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-y shadow-sm" placeholder="Ex: Meu PC gamer não liga mais após uma queda de energia. A placa-mãe é uma ASUS ROG Strix Z790-E... ou Tenho esta placa eletrônica antiga, código XPT0-2000, e não sei para que serve..."></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label for="componentInfo" class="block text-sm font-medium text-gray-300 mb-1">Informações do Componente/Placa (Nome, Código, Serial Number, etc.)</label>
+                        <input type="text" id="componentInfo" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm" placeholder="Ex: Resistor R12, CI LM741, Placa XPT0-2000, Serial: SN00345XYZ">
+                    </div>
+                    <div class="mt-4">
+                        <label for="componentImage" class="block text-sm font-medium text-gray-300 mb-1">Imagem do Componente/Placa (Opcional, mas ajuda muito! 📸)</label>
+                        <input type="file" id="componentImage" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-500 file:text-white hover:file:bg-orange-600">
+                        <img id="imagePreview" src="#" alt="Pré-visualização da imagem" class="mt-2 rounded-md max-h-48 hidden object-contain">
+                    </div>
+                     <div class="mt-4">
+                        <label for="userKnowledgeLevel" class="block text-sm font-medium text-gray-300 mb-1">Seu nível de conhecimento técnico:</label>
+                        <select id="userKnowledgeLevel" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 shadow-sm">
+                            <option value="iniciante">Iniciante (Explique como se eu tivesse 5 anos! 🧸)</option>
+                            <option value="intermediario" selected>Intermediário (Já entendo alguns termos técnicos. 🤓)</option>
+                            <option value="avancado">Avançado (Pode ir direto ao ponto, mestre! 🚀)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button id="consultCapyByteButton" class="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-75 px-6 py-3 rounded-md text-lg font-semibold text-white shadow-md transition-colors duration-150 flex items-center justify-center">
+                    <span class="btn-text">Consultar CapyByte</span>
+                    <span class="loader hidden ml-2"></span>
+                </button>
+                
+                <div id="aiResponseArea" class="mt-6 ai-response-area hidden">
+                    <p class="text-gray-500 text-center py-8">CapyByte está processando sua consulta... ⚙️</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="bg-gray-800 text-center p-4 text-sm text-gray-500 mt-auto">
+        CapyUniverse IA &copy; 2025
+    </footer>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-purple-400">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-4">
+                 <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-sky-400 mb-2">Google Gemini</h3>
+                    <label for="geminiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-sky-500 outline-none"/>
+                        <button data-provider="gemini" class="save-key-modal-button bg-sky-500 hover:bg-sky-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.<br>O Gemini 1.5 Flash (usado aqui) possui um nível gratuito generoso.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-emerald-400 mb-2">OpenAI (Modelos GPT)</h3>
+                    <label for="openaiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key OpenAI:</label>
+                    <div class="flex">
+                        <input id="openaiApiKeyInputModal" type="password" placeholder="Sua API Key OpenAI (sk-...)" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-emerald-500 outline-none"/>
+                        <button data-provider="openai" class="save-key-modal-button bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Para usar modelos como GPT-3.5-turbo, GPT-4, etc. Requer créditos na <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">plataforma OpenAI</a>.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-orange-400 mb-2">Anthropic Claude</h3>
+                    <label for="claudeApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Claude:</label>
+                    <div class="flex">
+                        <input id="claudeApiKeyInputModal" type="password" placeholder="Sua API Key Claude" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-orange-500 outline-none"/>
+                        <button data-provider="claude" class="save-key-modal-button bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Para usar modelos Claude. Verifique a disponibilidade e chaves na <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" class="text-orange-400 hover:underline">Anthropic Console</a>.</p>
+                </div>
+                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
+                    <h3 class="text-lg font-medium text-violet-400 mb-2">Perplexity AI</h3>
+                    <label for="perplexityApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Perplexity (Opcional):</label>
+                    <div class="flex">
+                        <input id="perplexityApiKeyInputModal" type="password" placeholder="Sua API Key Perplexity" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-violet-500 outline-none"/>
+                        <button data-provider="perplexity" class="save-key-modal-button bg-violet-500 hover:bg-violet-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                    </div>
+                     <p class="text-xs text-gray-400 mt-2">Se disponível, para modelos Perplexity.</p>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-400 mb-3"><strong>Recomendamos usar uma chave API do Google Gemini (gratuita para começar) para a melhor experiência com as ferramentas CapyUniverse.</strong></p>
+                <button id="continueWithoutKeyButtonModal" class="bg-gray-600 hover:bg-gray-500 px-6 py-2.5 rounded-md text-sm font-semibold">Continuar sem Chave (Funcionalidade Limitada)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKeys = { gemini: '', openai: '', claude: '', perplexity: '' };
+        let apiKey = ''; 
+        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="; // Alterado para gemini-1.5-flash
+        const currentPageId = 'CapyByte'; 
+        const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
+
+        const notificationArea = document.getElementById('notificationArea');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        const problemDescriptionInput = document.getElementById('problemDescription');
+        const componentInfoInput = document.getElementById('componentInfo');
+        const componentImageInput = document.getElementById('componentImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const userKnowledgeLevelSelect = document.getElementById('userKnowledgeLevel');
+        const consultCapyByteButton = document.getElementById('consultCapyByteButton');
+        const aiResponseArea = document.getElementById('aiResponseArea');
+
+        const tools = [
+             { id: 'CapyByte', title: 'Oráculo Tecnológico', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1Z"/><path d="M12 13V9"/><path d="M10.5 9.5 9 11"/><path d="m13.5 9.5 1.5 1.5"/><path d="M8 16H7a1 1 0 0 1-1-1v-2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V15a1 1 0 0 1-1 1Z"/><path d="M16 16h1a1 1 0 0 0 1-1v-2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5V15a1 1 0 0 0 1 1Z"/><path d="M5 11h.01"/><path d="M19 11h.01"/><path d="M12 18a4 4 0 0 0 4-4h-2a2 2 0 0 1-4 0H8a4 4 0 0 0 4 4Z"/><path d="M20 13V9.5A2.5 2.5 0 0 0 17.5 7h-11A2.5 2.5 0 0 0 4 9.5V13a4 4 0 0 0 2.74 3.77"/><path d="M4 13A4 4 0 0 0 8 18h8a4 4 0 0 0 4-4"/></svg>', category: 'Diagnóstico e Suporte Avançado', pageUrl: 'capybyte.html', color: 'orange' },
+            { id: 'CapyTI', title: 'Assistente de Suporte TI', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M6 11h.01M10 11h.01M14 11h.01"></path></svg>', category: 'Suporte Técnico', pageUrl: 'capyti.html', color: 'indigo' },
+            { id: 'CapyContrato', title: 'Gerador de Contratos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 12h8"></path><path d="M8 16h8"></path><path d="M10 19H8"></path><path d="M16 19h-2"></path></svg>', category: 'Documentos e Jurídico', pageUrl: 'capycontrato.html', color: 'violet' },
+            { id: 'CapySEO', title: 'Otimizador de Meta Tags', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14l-4-4 4-4"/><path d="M12 14l4-4-4-4"/><path d="M12 22V10"/><path d="M12 10V2"/></svg>', category: 'SEO e Marketing', pageUrl: 'capyseo.html', color: 'teal' },
+            { id: 'CapyExcel', title: 'Tutor de Excel', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyexcel.html', color: 'emerald' },
+            { id: 'CapyValor', title: 'Precificador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyvalor.html', color: 'lime' },
+            { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyresumo.html', color: 'blue' },
+            { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyexplica.html', color: 'yellow' },
+            { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capydetector.html', color: 'purple'},
+            { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição', pageUrl: 'capyemail.html', color: 'pink' },
+            { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição', pageUrl: 'capytone.html', color: 'lime' }, 
+            { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição', pageUrl: 'capyescritor.html', color: 'rose' },
+            { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
+            { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição', pageUrl: 'capyroteiro.html', color: 'orange' },
+            { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
+            { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
+            { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
+            { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
+            { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
+            { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
+            { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
+            { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
+            { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' }, 
+            { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
+            { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
+            { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
+        ];
+
+        function addNotification(message, type = 'info') {
+            const notificationId = 'notif-' + Date.now();
+            const typeClasses = {
+                error: 'bg-red-600 text-white',
+                success: 'bg-green-600 text-white',
+                info: 'bg-blue-600 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            const notificationHTML = `
+                <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
+                    <span>${message}</span>
+                    <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
+                </div>`;
+            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
+            const newNotification = document.getElementById(notificationId);
+            void newNotification.offsetWidth; 
+            requestAnimationFrame(() => {
+                newNotification.classList.remove('opacity-0', 'translate-x-full');
+                newNotification.classList.add('opacity-100', 'translate-x-0');
+            });
+            setTimeout(() => removeNotification(notificationId), 6000);
+        }
+        window.removeNotification = (id) => { 
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => el.remove(), 300);
+            }
+        };
+
+        function loadApiKeysFromStorage() {
+            Object.keys(apiKeys).forEach(provider => {
+                const storedKey = localStorage.getItem(API_KEY_STORAGE_PREFIX + provider);
+                if (storedKey) {
+                    apiKeys[provider] = storedKey;
+                    const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
+                    if (modalInput) modalInput.value = storedKey; 
+                }
+            });
+            apiKey = apiKeys.gemini || ''; 
+        }
+
+        function saveApiKeyToStorage(provider, key) {
+            if (key) {
+                apiKeys[provider] = key;
+                localStorage.setItem(API_KEY_STORAGE_PREFIX + provider, key);
+                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} guardada!`, 'success');
+                if (provider === 'gemini') apiKey = key; 
+            } else {
+                apiKeys[provider] = '';
+                localStorage.removeItem(API_KEY_STORAGE_PREFIX + provider);
+                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} removida.`, 'warning');
+                if (provider === 'gemini') apiKey = ''; 
+            }
+        }
+
+        function renderSidebar() {
+            const categories = {};
+            tools.forEach(tool => {
+                if (!categories[tool.category]) {
+                    categories[tool.category] = [];
+                }
+                categories[tool.category].push(tool);
+            });
+
+            sidebar.innerHTML = ''; 
+
+            for (const categoryName in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'mb-2';
+
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full flex justify-between items-center p-3 text-left text-gray-200 hover:bg-gray-700 rounded-md focus:outline-none';
+                categoryButton.innerHTML = `
+                    <span class="font-semibold">${categoryName}</span>
+                    <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                `;
+                
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
+
+                categories[categoryName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    const isActive = tool.id === currentPageId;
+                    link.className = `sidebar-link w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-gray-600 transition-colors duration-150 ${isActive ? 'active bg-indigo-600 text-white font-semibold' : 'text-gray-300 hover:text-white'}`;
+                    
+                    let iconHtml = tool.icon;
+                    if (tool.color && iconHtml.includes('currentColor')) {
+                        const colorMapping = {
+                            blue: 'text-blue-400', yellow: 'text-yellow-400', purple: 'text-purple-400',
+                            pink: 'text-pink-400', rose: 'text-rose-400', teal: 'text-teal-400',
+                            cyan: 'text-cyan-400', orange: 'text-orange-400', amber: 'text-amber-400',
+                            green: 'text-green-400', indigo: 'text-indigo-400', red: 'text-red-400',
+                            lime: 'text-lime-400', emerald: 'text-emerald-400', violet: 'text-violet-400',
+                            trueGray: 'text-gray-400', lightBlue: 'text-sky-400', warmGray: 'text-stone-400',
+                            coolGray: 'text-slate-400', sky: 'text-sky-400', slate: 'text-slate-400'
+                        };
+                        iconHtml = iconHtml.replace('currentColor', colorMapping[tool.color] || 'text-gray-400');
+                    }
+                    link.innerHTML = `${iconHtml} <span class="${isActive ? 'text-white' : 'text-gray-300'}">${tool.title}</span>`;
+                    categoryContent.appendChild(link);
+                });
+
+                categoryButton.addEventListener('click', () => {
+                    categoryContent.classList.toggle('expanded');
+                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                });
+                
+                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                    categoryContent.classList.add('expanded');
+                    categoryButton.querySelector('svg').classList.add('rotate-180');
+                }
+
+                categoryDiv.appendChild(categoryButton);
+                categoryDiv.appendChild(categoryContent);
+                sidebar.appendChild(categoryDiv);
+            }
+        }
+
+        sidebarToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        sidebarOverlay.addEventListener('click', () => { 
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
+        const apiKeysModal = document.getElementById('apiKeysModal');
+        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
+        const continueWithoutKeyButtonModal = document.getElementById('continueWithoutKeyButtonModal');
+
+        if (openApiKeysModalButton) {
+            openApiKeysModalButton.addEventListener('click', () => {
+                if (apiKeysModal) {
+                    apiKeysModal.classList.remove('hidden');
+                    Object.keys(apiKeys).forEach(provider => {
+                        const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
+                        if (modalInput) modalInput.value = apiKeys[provider] || '';
+                    });
+                }
+            });
+        }
+        if (closeApiKeysModalButton) closeApiKeysModalButton.addEventListener('click', () => apiKeysModal && apiKeysModal.classList.add('hidden'));
+        if (continueWithoutKeyButtonModal) {
+            continueWithoutKeyButtonModal.addEventListener('click', () => {
+                if (apiKeysModal) apiKeysModal.classList.add('hidden');
+                addNotification('Continuando sem chave de API. Funcionalidades podem ser limitadas ou indisponíveis.', 'info');
+            });
+        }
+        document.querySelectorAll('.save-key-modal-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const provider = button.dataset.provider;
+                const inputElement = document.getElementById(provider + 'ApiKeyInputModal');
+                if (inputElement) saveApiKeyToStorage(provider, inputElement.value.trim());
+            });
+        });
+
+        function showLoading(buttonElement, show = true, defaultText = null) {
+            const btnText = buttonElement.querySelector('.btn-text');
+            const loader = buttonElement.querySelector('.loader');
+            if (show) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+                buttonElement.disabled = true;
+            } else {
+                if(btnText) {
+                     btnText.classList.remove('hidden');
+                     if(defaultText) btnText.textContent = defaultText;
+                }
+                if(loader) loader.classList.add('hidden');
+                buttonElement.disabled = false;
+            }
+        }
+        
+        // Função para converter imagem para Base64
+        function imageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // Remove o prefixo data:image/...;base64,
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Preview da imagem selecionada
+        componentImageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+                imagePreview.src = "#";
+            }
+        });
+
+
+        async function callGeminiAPI_getByteAnalysis(promptConfig, buttonElement, resultElement) {
+            if (!apiKey) { 
+                addNotification("API Key Gemini não configurada. Adicione sua chave no menu 'Chaves API IA's'.", "error");
+                if(buttonElement) showLoading(buttonElement, false, "Consultar CapyByte");
+                resultElement.innerHTML = `<p class="text-red-400 text-center py-8">Por favor, configure sua API Key Gemini para usar esta ferramenta.</p>`;
+                aiResponseArea.classList.add('hidden');
+                return;
+            }
+            if (!promptConfig.user_problem_description) {
+                 addNotification("Por favor, descreva seu problema ou dúvida para CapyByte analisar.", "warning");
+                 if(buttonElement) showLoading(buttonElement, false, "Consultar CapyByte");
+                return;
+            }
+
+            if(buttonElement) showLoading(buttonElement, true);
+            resultElement.innerHTML = `<div class="flex items-center justify-center p-8 text-gray-400"><span class="loader mr-3"></span>CapyByte está mergulhando nos circuitos da sua questão... 🧐 Aguarde um instante!</div>`;
+            aiResponseArea.classList.remove('hidden');
+            
+            const parts = [{ text: promptConfig.prompt }];
+            if (promptConfig.imageBase64 && promptConfig.imageMimeType) {
+                parts.push({
+                    inlineData: {
+                        mimeType: promptConfig.imageMimeType,
+                        data: promptConfig.imageBase64
+                    }
+                });
+            }
+            
+            const payload = { contents: [{ parts: parts }] };
+            const currentApiKey = apiKey; 
+
+            try {
+                const res = await fetch(`${GEMINI_API_URL_BASE}${currentApiKey}`, { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json(); 
+
+                if (!res.ok) {
+                    let msg = `Erro ${res.status}: ${data?.error?.message || res.statusText}`;
+                    if (res.status === 400 && msg.toLowerCase().includes("api key not valid")) { 
+                        msg = "Erro: API Key Gemini inválida ou mal formatada. Verifique a chave.";
+                    } else if (res.status === 403 ) { 
+                        msg = "Erro 403: Acesso negado. Verifique sua API Key e configurações do projeto Google Cloud.";
+                    }
+                    throw new Error(msg);
+                }
+                
+                if (data.promptFeedback?.blockReason) { 
+                    throw new Error(`Conteúdo bloqueado pela API: ${data.promptFeedback.blockReason}. Tente reformular sua consulta.`);
+                }
+
+                const htmlResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (htmlResponse === undefined) { 
+                    throw new Error("Resposta da IA vazia ou em formato inesperado.");
+                }
+                
+                resultElement.innerHTML = htmlResponse; 
+                addNotification("CapyByte desvendou o mistério! ✨", "success");
+
+            } catch (err) {
+                console.error("Falha na chamada da API (CapyByte):", err);
+                const errorMsg = err.message || "Erro desconhecido ao contatar a API.";
+                resultElement.innerHTML = `<p class="text-red-400 text-center py-8">Oops! Parece que CapyByte encontrou um bug inesperado: ${errorMsg} 🐞</p>`;
+                addNotification(errorMsg, "error");
+            } finally {
+                if(buttonElement) showLoading(buttonElement, false, "Consultar CapyByte");
+            }
+        }
+        
+        consultCapyByteButton.addEventListener('click', async () => {
+            const problemDescription = problemDescriptionInput.value.trim();
+            const componentInfo = componentInfoInput.value.trim();
+            const imageFile = componentImageInput.files[0];
+            const knowledgeLevel = userKnowledgeLevelSelect.value;
+
+            if (!problemDescription && !componentInfo && !imageFile) {
+                addNotification("Por favor, descreva seu problema, forneça informações do componente ou envie uma imagem.", "warning");
+                return;
+            }
+
+            let imageBase64 = null;
+            let imageMimeType = null;
+            if (imageFile) {
+                if (imageFile.size > 4 * 1024 * 1024) { // Limite de 4MB para a imagem (API Gemini pode ter limites)
+                    addNotification("A imagem é muito grande! Por favor, use uma imagem com menos de 4MB.", "error");
+                    return;
+                }
+                try {
+                    imageBase64 = await imageToBase64(imageFile);
+                    imageMimeType = imageFile.type;
+                } catch (error) {
+                    addNotification("Erro ao processar a imagem. Tente novamente ou prossiga sem ela.", "error");
+                    console.error("Erro ao converter imagem para Base64:", error);
+                }
+            }
+            
+            const promptText = `
+Você é CapyByte, um oráculo tecnológico, um mentor experiente e entusiasmado que adora desvendar mistérios da tecnologia. Sua inteligência é equilibrada com paciência infinita. Explique conceitos complexos de forma clara, concisa e com analogias criativas, como se estivesse ensinando seu próprio neto. Use um tom amigável, com humor sutil e emoticons quando apropriado (ex: 🧐, 💡, ✨, 🛠️, ✅, 😅, 🚀, 🧸, 🤓). Seu objetivo é educar, diagnosticar, resolver problemas e capacitar o usuário.
+
+O usuário (nível de conhecimento: ${userKnowledgeLevelSelect.options[userKnowledgeLevelSelect.selectedIndex].text}) precisa de ajuda com o seguinte:
+**Descrição do Problema/Dúvida:** ${problemDescription || "Não fornecida."}
+**Informações do Componente/Placa (Nome, Código, Serial):** ${componentInfo || "Não fornecidas."}
+${imageBase64 ? "**Uma imagem foi fornecida para análise.**" : "**Nenhuma imagem foi fornecida.**"}
+
+**Sua Tarefa:**
+1.  **Saudação e Análise Inicial:** Comece com uma saudação amigável. Se a informação for complexa ou exigir pesquisa, simule isso com uma frase como: "Hmm, que desafio interessante! 🧐 Deixe-me vasculhar meus circuitos e a vasta rede de dados para encontrar a melhor solução para você... Um momento, por favor! 💾".
+2.  **Diagnóstico/Identificação:**
+    * Se uma imagem foi fornecida, tente identificar a placa ou componente. Mencione o que você vê.
+    * Com base em TODAS as informações (descrição, texto, imagem), diagnostique o problema ou identifique o componente.
+3.  **Explicação Detalhada:**
+    * Explique a função do componente, a natureza do problema, ou o conceito em questão. Adapte a linguagem ao nível de conhecimento do usuário.
+    * Use analogias e exemplos práticos.
+4.  **Solução Passo a Passo (se aplicável a um problema):**
+    * Forneça instruções claras e numeradas.
+    * Se houver riscos, alerte o usuário (ex: "Cuidado ao manusear componentes sensíveis! ⚡").
+5.  **Recomendações Proativas (se aplicável):**
+    * Sugira otimizações, atualizações, medidas preventivas, ou onde encontrar mais informações/peças.
+6.  **Formato da Resposta:** Responda em HTML formatado para ser exibido dentro de uma div. Use:
+    * \`<h4>Título da Seção</h4>\` (ex: "Diagnóstico do CapyByte 🕵️‍♂️", "Entendendo o Componente 💡", "Solução Passo a Passo 🛠️", "Dicas Extras do CapyByte ✨")
+    * \`<p>\`, \`<ul><li>\`, \`<strong>\`, \`<code>\`
+    * Para simular diagramas ou ilustrações (SE NECESSÁRIO e não houver imagem do usuário), use placeholders: \`<img src="https://placehold.co/WIDTHxHEIGHT/1f2937/fdba74?text=Descricao+da+Ilustracao" alt="Descrição detalhada da ilustração">\`.
+7.  **Conclusão:** Termine com uma mensagem de encorajamento e se coloque à disposição para mais perguntas. (Ex: "Espero que isso ilumine seu caminho tecnológico! Se tiver mais alguma dúvida, é só chamar o CapyByte! 🚀")
+8.  **Restrição:** A resposta HTML gerada não deve exceder 1500 palavras.
+
+Responda APENAS com o HTML do conteúdo da sua análise/solução. Não inclua \`<html>\`, \`<head>\` ou \`<body>\`.
+Se a imagem for crucial e não for fornecida, ou se as informações forem insuficientes para um diagnóstico preciso, explique isso educadamente e peça mais detalhes.
+`;
+            const promptConfig = {
+                prompt: promptText,
+                user_problem_description: problemDescription, // Mantém para lógica de validação
+                imageBase64: imageBase64,
+                imageMimeType: imageMimeType
+            };
+
+            callGeminiAPI_getByteAnalysis(promptConfig, consultCapyByteButton, aiResponseArea);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeysFromStorage(); 
+            renderSidebar();
+        });
+    </script>
+</body>
+</html>
+

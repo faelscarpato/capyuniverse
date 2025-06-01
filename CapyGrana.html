@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyDindin - Gestão Financeira</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos globais para a fonte e transições de cor para o modo escuro */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* Estilos específicos para o modo escuro */
+        body.dark {
+            background-color: #1a202c; /* Fundo escuro */
+            color: #e2e8f0; /* Texto claro */
+        }
+        body.dark .bg-white {
+            background-color: #2d3748; /* Fundo de card mais escuro */
+        }
+        body.dark .text-gray-700 {
+            color: #cbd5e0; /* Cor de texto ajustada para modo escuro */
+        }
+        body.dark .border-gray-200 {
+            border-color: #4a5568; /* Cor da borda ajustada */
+        }
+        body.dark .hover\:bg-gray-100:hover {
+            background-color: #4a5568; /* Cor de hover ajustada */
+        }
+        body.dark .text-blue-600 {
+            color: #90cdf4; /* Cor de destaque para modo escuro */
+        }
+        body.dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1); /* Sombra mais escura */
+        }
+        /* Estilos personalizados para a barra de rolagem para melhor estética */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Estilos da barra de rolagem no modo escuro */
+        body.dark ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        body.dark ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+        }
+        body.dark ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        /* Estilo para o toggle de modo escuro */
+        .dot {
+            left: 0.25rem; /* Posição inicial do "dot" */
+        }
+        #dark-mode-toggle:checked + .block {
+            background-color: #48bb78; /* Cor de fundo do toggle quando ativado */
+        }
+        #dark-mode-toggle:checked + .block + .dot {
+            transform: translateX(100%); /* Move o "dot" para a direita */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 transition-colors duration-300">
+    <div class="flex h-screen">
+        <aside class="w-64 bg-white shadow-lg p-4 flex flex-col justify-between transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full fixed md:relative z-40" id="sidebar">
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-blue-600">CapyDindin</h1>
+                    <button id="close-sidebar-btn" class="md:hidden text-gray-600 hover:text-gray-800 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <nav>
+                    <ul class="space-y-2">
+                        <li><a href="#general-report" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="general-report">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Relatório Geral
+                        </a></li>
+                        <li><a href="#payments" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="payments">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Pagamentos
+                        </a></li>
+                        <li><a href="#receipts" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="receipts">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0h.01M9 12h6m-5 0h.01M9 16h6m-5 0h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Recebimentos
+                        </a></li>
+                        <li><a href="#accounts-payable" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="accounts-payable">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v6"></path></svg>
+                            Contas a Pagar
+                        </a></li>
+                        <li><a href="#accounts-receivable" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="accounts-receivable">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v6"></path></svg>
+                            Contas a Receber
+                        </a></li>
+                        <li><a href="#recurring-expenses" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="recurring-expenses">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Gastos Recorrentes
+                        </a></li>
+                        <li><a href="#add-entry" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="add-entry">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Adicionar Entrada/Saída
+                        </a></li>
+                        <li><a href="#statement" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="statement">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            Extrato
+                        </a></li>
+                        <li><a href="#register" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="register">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9a2 2 0 00-2-2h-7m-2 4H5a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v3m-7 4v4m-2 2h4"></path></svg>
+                            Cadastro
+                        </a></li>
+                        <li><a href="#ai-chat" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="ai-chat">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Chat com IA
+                        </a></li>
+                        <li><a href="#settings" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="settings">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            Configurações
+                        </a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="p-3">
+                <label for="dark-mode-toggle" class="flex items-center cursor-pointer">
+                    <div class="relative">
+                        <input type="checkbox" id="dark-mode-toggle" class="sr-only">
+                        <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform"></div>
+                    </div>
+                    <div class="ml-3 text-gray-700 font-medium">
+                        Modo Escuro
+                    </div>
+                </label>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto relative">
+            <button id="open-sidebar-btn" class="md:hidden fixed top-4 left-4 bg-blue-600 text-white p-2 rounded-full shadow-lg z-50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <div id="content" class="min-h-full bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Bem-vindo ao CapyDindin!</h2>
+                <p class="text-gray-600">Selecione um módulo no menu lateral para começar.</p>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-200">
+                        <h3 class="text-xl font-semibold text-blue-700 mb-2">Gestão Financeira Intuitiva</h3>
+                        <p class="text-blue-600">Organize suas finanças de forma simples e eficiente.</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg shadow-sm border border-green-200">
+                        <h3 class="text-xl font-semibold text-green-700 mb-2">Automação com IA</h3>
+                        <p class="text-green-600">Deixe a inteligência artificial categorizar e analisar seus dados.</p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg shadow-sm border border-purple-200">
+                        <h3 class="text-xl font-semibold text-purple-700 mb-2">Relatórios Detalhados</h3>
+                        <p class="text-purple-600">Obtenha insights claros sobre sua saúde financeira.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Função para simular o armazenamento local de dados financeiros
+        // Em uma aplicação real, isso seria mais robusto, talvez com IndexedDB ou Firestore
+        function getFinancialData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveFinancialData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // Simula algumas transações para o relatório geral
+        if (getFinancialData('transactions').length === 0) {
+            saveFinancialData('transactions', [
+                { id: 1, date: '2023-05-01', description: 'Salário de Abril', type: 'income', amount: 4500, category: 'Salário' },
+                { id: 2, date: '2023-05-05', description: 'Aluguel', type: 'expense', amount: 1500, category: 'Moradia' },
+                { id: 3, date: '2023-05-10', description: 'Supermercado', type: 'expense', amount: 350, category: 'Alimentação' },
+                { id: 4, date: '2023-05-12', description: 'Internet', type: 'expense', amount: 100, category: 'Contas' },
+                { id: 5, date: '2023-05-15', description: 'Freelance Design', type: 'income', amount: 800, category: 'Trabalho Extra' },
+                { id: 6, date: '2023-05-18', description: 'Cinema com amigos', type: 'expense', amount: 80, category: 'Lazer' },
+                { id: 7, date: '2023-05-20', description: 'Transporte público', type: 'expense', amount: 50, category: 'Transporte' },
+                { id: 8, date: '2023-05-22', description: 'Restaurante', type: 'expense', amount: 120, category: 'Alimentação' },
+            ]);
+        }
+
+        // Função para chamar a API de IA (simplificada para demonstração)
+        async function callAIApi(prompt) {
+            const apiKey = localStorage.getItem('aiApiKey');
+            const aiProvider = localStorage.getItem('aiProvider') || 'gemini'; // Padrão para Gemini
+
+            if (!apiKey) {
+                return 'Erro: Chave da API da IA não configurada. Por favor, vá em Configurações.';
+            }
+
+            let apiUrl = '';
+            let model = '';
+            let headers = { 'Content-Type': 'application/json' };
+            let payload = {};
+
+            // Configuração da API baseada no provedor selecionado
+            if (aiProvider === 'gemini') {
+                model = 'gemini-2.0-flash';
+                // A chave da API é injetada automaticamente pelo ambiente Canvas se for vazia
+                apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            } else if (aiProvider === 'openai') {
+                model = 'gpt-3.5-turbo'; // Exemplo de modelo OpenAI
+                apiUrl = 'https://api.openai.com/v1/chat/completions';
+                headers['Authorization'] = `Bearer ${apiKey}`;
+                payload = {
+                    model: model,
+                    messages: [{ role: "user", content: prompt }]
+                };
+            } else if (aiProvider === 'claude') {
+                model = 'claude-3-opus-20240229'; // Exemplo de modelo Claude
+                apiUrl = 'https://api.anthropic.com/v1/messages';
+                headers['x-api-key'] = apiKey;
+                headers['anthropic-version'] = '2023-06-01'; // Versão da API Anthropic
+                payload = {
+                    model: model,
+                    max_tokens: 1024,
+                    messages: [{ role: "user", content: prompt }]
+                };
+            } else {
+                return 'Provedor de IA não suportado.';
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Erro na resposta da API de IA:', errorData);
+                    return `Erro na API de IA: ${response.status} - ${errorData.error?.message || response.statusText}`;
+                }
+
+                const result = await response.json();
+
+                // Extrai o texto da resposta baseado no provedor
+                if (aiProvider === 'gemini' && result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else if (aiProvider === 'openai' && result.choices && result.choices.length > 0 && result.choices[0].message) {
+                    return result.choices[0].message.content;
+                } else if (aiProvider === 'claude' && result.content && result.content.length > 0) {
+                    return result.content[0].text;
+                }
+
+                return 'Não foi possível obter insights da IA.';
+
+            } catch (error) {
+                console.error('Erro ao chamar a API da IA:', error);
+                return 'Erro ao gerar insights da IA. Verifique a chave da API e a conexão.';
+            }
+        }
+
+        // Função para carregar o conteúdo de um módulo na área principal
+        function loadModule(moduleName) {
+            const contentDiv = document.getElementById('content');
+            let moduleContent = '';
+
+            // Conteúdo simulado para cada módulo
+            switch (moduleName) {
+                case 'general-report':
+                    moduleContent = `
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Relatório Geral</h2>
+                        <p class="text-gray-600 mb-4">Visão geral da sua saúde financeira.</p>
+                        <div class="bg-blue-100 p-4 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-2">Dados do Relatório</h3>
+                            <div id="report-data" class="mt-4 text-gray-800">
+                                <p>Carregando dados financeiros...</p>
+                            </div>
+                            <button id="generate-report-btn" class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">Gerar Relatório com IA</button>
+                        </div>
+                    `;
+                    break;
+                case 'payments':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Pagamentos</h2><p class="text-gray-600">Gerencie seus pagamentos aqui.</p>`;
+                    break;
+                case 'receipts':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Recebimentos</h2><p class="text-gray-600">Acompanhe seus recebimentos.</p>`;
+                    break;
+                case 'accounts-payable':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Contas a Pagar</h2><p class="text-gray-600">Visualize suas contas a pagar.</p>`;
+                    break;
+                case 'accounts-receivable':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Contas a Receber</h2><p class="text-gray-600">Visualize suas contas a receber.</p>`;
+                    break;
+                case 'recurring-expenses':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Gastos Recorrentes</h2><p class="text-gray-600">Configure e monitore seus gastos recorrentes.</p>`;
+                    break;
+                case 'add-entry':
+                    moduleContent = `
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Adicionar Entrada/Saída</h2>
+                        <p class="text-gray-600 mb-4">Registre suas transações financeiras.</p>
+                        <div class="bg-green-100 p-4 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-semibold text-green-700 mb-2">Nova Transação</h3>
+                            <form class="space-y-4">
+                                <div>
+                                    <label for="transaction-type" class="block text-gray-700 text-sm font-bold mb-2">Tipo:</label>
+                                    <select id="transaction-type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                        <option value="income">Receita</option>
+                                        <option value="expense">Despesa</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="transaction-amount" class="block text-gray-700 text-sm font-bold mb-2">Valor:</label>
+                                    <input type="number" id="transaction-amount" placeholder="0.00" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <div>
+                                    <label for="transaction-description" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
+                                    <input type="text" id="transaction-description" placeholder="Ex: Aluguel, Salário" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200">Salvar Transação</button>
+                            </form>
+                        </div>
+                    `;
+                    break;
+                case 'statement':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Extrato</h2><p class="text-gray-600">Visualize seu extrato por período.</p>`;
+                    break;
+                case 'register':
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Cadastro</h2><p class="text-gray-600">Gerencie suas contas, categorias e bancos.</p>`;
+                    break;
+                case 'ai-chat':
+                    moduleContent = `
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Chat com IA</h2>
+                        <p class="text-gray-600 mb-4">Converse com a IA para registrar dados e obter insights.</p>
+                        <div class="bg-purple-100 p-4 rounded-lg shadow-sm flex flex-col h-96">
+                            <div id="chat-messages" class="flex-1 overflow-y-auto p-2 border border-purple-200 rounded-lg mb-4 bg-white">
+                                <div class="text-gray-700 mb-2"><span class="font-semibold text-purple-700">IA:</span> Olá! Como posso ajudar com suas finanças hoje?</div>
+                            </div>
+                            <div class="flex">
+                                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." class="flex-1 shadow appearance-none border rounded-l-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <button id="send-chat-btn" class="px-6 py-3 bg-purple-600 text-white rounded-r-lg shadow-md hover:bg-purple-700 transition-colors duration-200">Enviar</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'settings':
+                    moduleContent = `
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Configurações</h2>
+                        <p class="text-gray-600 mb-4">Gerencie as configurações da aplicação, incluindo a chave da API de IA.</p>
+                        <div class="bg-yellow-100 p-4 rounded-lg shadow-sm">
+                            <h3 class="text-xl font-semibold text-yellow-700 mb-2">Chave da API de IA</h3>
+                            <p class="text-yellow-600 mb-4 text-sm">
+                                <strong class="text-red-600">Atenção:</strong> Armazenar chaves de API diretamente no navegador (localStorage) não é seguro para ambientes de produção. Para aplicações reais, considere um proxy de servidor para gerenciar e proteger suas chaves.
+                            </p>
+                            <form class="space-y-4">
+                                <div>
+                                    <label for="ai-api-key" class="block text-gray-700 text-sm font-bold mb-2">Chave da API:</label>
+                                    <input type="password" id="ai-api-key" placeholder="Sua chave de API da IA" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                </div>
+                                <div>
+                                    <label for="ai-provider" class="block text-gray-700 text-sm font-bold mb-2">Provedor de IA:</label>
+                                    <select id="ai-provider" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                        <option value="gemini">Google Gemini</option>
+                                        <option value="openai">OpenAI</option>
+                                        <option value="claude">Anthropic Claude</option>
+                                    </select>
+                                </div>
+                                <button id="save-api-key-btn" type="button" class="px-6 py-3 bg-yellow-600 text-white rounded-lg shadow-md hover:bg-yellow-700 transition-colors duration-200">Salvar Chave</button>
+                            </form>
+                        </div>
+                    `;
+                    break;
+                default:
+                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Módulo Não Encontrado</h2><p class="text-gray-600">O módulo solicitado não pôde ser carregado.</p>`;
+            }
+            contentDiv.innerHTML = moduleContent;
+
+            // Adiciona event listener para o botão "Gerar Relatório com IA" se for o módulo Relatório Geral
+            if (moduleName === 'general-report') {
+                const aiInsightsDiv = document.getElementById('ai-insights');
+                const reportDataElement = document.getElementById('report-data');
+                const generateReportBtn = document.getElementById('generate-report-btn');
+
+                const loadAndDisplayReport = async () => {
+                    reportDataElement.innerHTML = '<p>Carregando dados financeiros...</p>';
+                    aiInsightsDiv.textContent = 'Aguardando análise da IA...';
+
+                    try {
+                        const allTransactions = getFinancialData('transactions');
+                        
+                        // Agrega dados para o resumo financeiro
+                        const financialSummary = {
+                            totalRevenue: 0,
+                            totalExpenses: 0,
+                            balance: 0,
+                            recentTransactions: []
+                        };
+
+                        const parsedTransactions = allTransactions.map(JSON.parse);
+                        parsedTransactions.forEach(t => {
+                            if (t.type === 'income') {
+                                financialSummary.totalRevenue += t.amount;
+                            } else if (t.type === 'expense') {
+                                financialSummary.totalExpenses += t.amount;
+                            }
+                        });
+                        financialSummary.balance = financialSummary.totalRevenue - financialSummary.totalExpenses;
+                        financialSummary.recentTransactions = parsedTransactions.slice(-5); // Últimas 5 transações
+
+                        // Atualiza a UI com os dados financeiros básicos
+                        reportDataElement.innerHTML = `
+                            <p><strong>Receitas Totais:</strong> R$ ${financialSummary.totalRevenue.toFixed(2)}</p>
+                            <p><strong>Despesas Totais:</strong> R$ ${financialSummary.totalExpenses.toFixed(2)}</p>
+                            <p><strong>Saldo Atual:</strong> R$ ${financialSummary.balance.toFixed(2)}</p>
+                            <p class="mt-4 font-semibold text-green-700">Insights da IA:</p>
+                            <p id="ai-insights" class="text-gray-700">Aguardando análise da IA...</p>
+                        `;
+                        
+                        const prompt = `Analise os seguintes dados financeiros e forneça um resumo conciso com insights sobre a saúde financeira do usuário, destacando pontos fortes e áreas de melhoria.
+                        Dados: ${JSON.stringify(financialSummary, null, 2)}
+                        `;
+
+                        const aiText = await callAIApi(prompt);
+                        aiInsightsDiv.textContent = aiText;
+
+                    } catch (error) {
+                        console.error('Erro ao carregar ou gerar relatório:', error);
+                        reportDataElement.innerHTML = '<p class="text-red-600">Erro ao carregar o relatório. Tente novamente.</p>';
+                        aiInsightsDiv.textContent = '';
+                    }
+                };
+
+                if (generateReportBtn) {
+                    generateReportBtn.addEventListener('click', loadAndDisplayReport);
+                }
+                loadAndDisplayReport(); // Carrega o relatório ao entrar no módulo
+            }
+
+            // Adiciona event listener para o botão "Salvar Chave" no módulo de configurações
+            if (moduleName === 'settings') {
+                const apiKeyInput = document.getElementById('ai-api-key');
+                const aiProviderSelect = document.getElementById('ai-provider');
+                const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+
+                if (saveApiKeyBtn) {
+                    saveApiKeyBtn.addEventListener('click', () => {
+                        localStorage.setItem('aiApiKey', apiKeyInput.value);
+                        localStorage.setItem('aiProvider', aiProviderSelect.value);
+                        // Substituindo alert por uma mensagem na UI para melhor UX
+                        const messageDiv = document.createElement('div');
+                        messageDiv.textContent = 'Chave da API e Provedor salvos com sucesso!';
+                        messageDiv.className = 'bg-green-200 text-green-800 p-3 rounded-lg mt-4';
+                        apiKeyInput.closest('form').appendChild(messageDiv);
+                        setTimeout(() => messageDiv.remove(), 3000); // Remove a mensagem após 3 segundos
+                    });
+                }
+                // Carrega a chave e o provedor salvos, se existirem
+                apiKeyInput.value = localStorage.getItem('aiApiKey') || '';
+                aiProviderSelect.value = localStorage.getItem('aiProvider') || 'gemini';
+            }
+        }
+
+        // Função para lidar com a mudança de hash na URL (roteamento simples)
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1); // Remove o '#'
+            const moduleName = hash || 'general-report'; // Padrão para 'general-report' se nenhum hash for especificado
+            loadModule(moduleName);
+
+            // Fecha a sidebar em telas menores após a navegação
+            if (window.innerWidth < 768) { // O breakpoint 'md' do Tailwind é 768px
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        // Event listeners para os links de navegação da sidebar
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault(); // Evita o comportamento padrão do link de recarregar a página
+                const moduleName = e.target.dataset.module;
+                window.location.hash = moduleName; // Atualiza o hash da URL, o que acionará 'handleHashChange'
+            });
+        });
+
+        // Lógica para o Toggle de Modo Escuro/Claro
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark', darkModeToggle.checked);
+            localStorage.setItem('darkMode', darkModeToggle.checked); // Salva a preferência do usuário
+        });
+
+        // Carrega a preferência de modo escuro ao iniciar a aplicação
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark');
+            darkModeToggle.checked = true;
+        }
+
+        // Lógica para abrir e fechar a sidebar em dispositivos móveis
+        const openSidebarBtn = document.getElementById('open-sidebar-btn');
+        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+
+        openSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full'); // Mostra a sidebar
+        });
+
+        closeSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full'); // Esconde a sidebar
+        });
+
+        // Fecha a sidebar se o usuário clicar fora dela em telas pequenas
+        document.addEventListener('click', (event) => {
+            // Verifica se está em tela pequena, se o clique não foi na sidebar ou no botão de abrir, e se a sidebar está aberta
+            if (window.innerWidth < 768 && !sidebar.contains(event.target) && !openSidebarBtn.contains(event.target) && !sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Carrega o módulo inicial ao carregar a página ou quando o hash da URL muda
+        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('load', handleHashChange); // Garante que o módulo inicial seja carregado na primeira carga da página
+    </script>
+</body>
+</html>
