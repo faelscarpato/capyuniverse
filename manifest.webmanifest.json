@@ -1,7 +1,7 @@
 {
   "name": "CapyIDE Dinâmico",
   "short_name": "CapyIDE",
-  "start_url": "/",
+  "start_url": "https://faelscarpato.github.io/capyuniverse/index.html",
   "display": "standalone",
   "background_color": "#121217",
   "theme_color": "#9333ea",
