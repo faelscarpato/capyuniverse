@@ -22,6 +22,9 @@
   <meta name="twitter:creator" content="@rafaelscarpato">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#9333ea">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -838,6 +841,12 @@
       
       initCarrossel();
     });
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registrado'))
+    .catch(err => console.error('Erro no SW', err));
+}
+
   </script>
 
 
