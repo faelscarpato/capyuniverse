@@ -1,7 +1,7 @@
 {
   "name": "CapyUniverse",
   "short_name": "CapyUniverse",
-  "start_url": "/",
+  "start_url": "https://faelscarpato.github.io/capyuniverse/index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#9333ea",
