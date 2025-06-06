@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CapyMetas - Definidor de Metas com IA</title>
+    <title>CapyChat - Chat Geral com IA</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,6 @@
         }
 
 
-
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
@@ -57,21 +56,30 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        textarea {
-            min-height: 100px;
+        .chat-bubble-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; 
+            padding: 0.5rem; 
         }
-        .output-card {
-            background-color: rgba(30, 30, 40, 0.5);
-            border: 1px solid rgba(80, 80, 100, 0.5);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-top: 1.5rem;
+        .chat-bubble {
+            padding: 0.75rem 1rem; 
+            border-radius: 1rem; 
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.6;
         }
-         .output-card h3 {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-size: 1.25rem; /* text-xl */
+        .user-bubble {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .ai-bubble {
+            background-color: #374151; /* gray-700 */
+            color: #e5e7eb; 
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem; 
         }
         .markdown-output strong, .markdown-output b { font-weight: bold; }
         .markdown-output em, .markdown-output i { font-style: italic; }
@@ -80,12 +88,6 @@
         .markdown-output li { margin-bottom: 0.25rem; }
         .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; }
         .markdown-output p:last-child { margin-bottom: 0; }
-        .markdown-output h1, .markdown-output h2, .markdown-output h3, .markdown-output h4 {
-            font-family: 'Syne', sans-serif; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem;
-        }
-        .markdown-output h1 { font-size: 1.5rem; } 
-        .markdown-output h2 { font-size: 1.25rem; }   
-        .markdown-output h3 { font-size: 1.125rem; } 
     </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
@@ -110,59 +112,28 @@
             <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
         </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
-
+    
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
             <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-3xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-orange-400">CapyMetas 🎯</h1>
-                    <p class="text-zinc-300 mt-1">Defina e alcance os seus objetivos com a ajuda da Capy-IA!</p>
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyChat 💬</h1>
+                    <p class="text-zinc-300 mt-1">Converse com a Capy-IA sobre qualquer assunto!</p>
                 </div>
 
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label for="main-goal" class="block text-sm font-semibold mb-1 text-zinc-200">Qual é o teu Grande Objetivo?</label>
-                        <input type="text" id="main-goal" placeholder="Ex: Correr uma maratona, Lançar um negócio online, Aprender um novo idioma" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="deadline" class="block text-sm font-semibold mb-1 text-zinc-200">Prazo Desejado (opcional):</label>
-                            <input type="text" id="deadline" placeholder="Ex: 6 meses, Final do ano, 3 semanas" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
-                        </div>
-                        <div>
-                             <label for="priority-level" class="block text-sm font-semibold mb-1 text-zinc-200">Nível de Prioridade:</label>
-                            <select id="priority-level" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="alta">Alta</option>
-                                <option value="media" selected>Média</option>
-                                <option value="baixa">Baixa</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label for="resources" class="block text-sm font-semibold mb-1 text-zinc-200">Recursos Disponíveis (opcional):</label>
-                        <textarea id="resources" rows="3" placeholder="Ex: Acesso a ginásio, 1 hora livre por dia, Orçamento de X para cursos" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 scrollbar-thin"></textarea>
-                    </div>
-                     <div>
-                        <label for="obstacles" class="block text-sm font-semibold mb-1 text-zinc-200">Possíveis Obstáculos ou Desafios (opcional):</label>
-                        <textarea id="obstacles" rows="3" placeholder="Ex: Falta de tempo, Procrastinação, Dificuldade em manter a motivação" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 scrollbar-thin"></textarea>
-                    </div>
+                <div id="chat-container" class="flex-grow bg-zinc-800/50 border border-zinc-700 rounded-lg p-4 overflow-y-auto scrollbar-thin min-h-[calc(100vh-20rem)] mb-4 chat-bubble-container">
+                    <div class="ai-bubble">Olá! Sou o CapyChat, a tua capivara IA para conversas gerais. Sobre o que gostarias de falar hoje?</div>
                 </div>
-
-                <button id="generate-goals-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
-                    <span class="btn-text">Definir Metas com IA</span>
-                    <div class="loader hidden"></div>
-                </button>
-
-                <div id="output-section" class="output-card hidden">
-                    <h3 class="text-orange-300">Plano de Metas Sugerido:</h3>
-                    <div id="goals-output" class="markdown-output font-jetbrains text-zinc-300">
-                        <p class="text-center text-zinc-400">As tuas metas e plano de ação aparecerão aqui...</p>
-                    </div>
-                    <button id="copy-plan-button" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm hidden">
-                        Copiar Plano de Metas
+                
+                <div class="mt-auto flex items-center gap-3">
+                    <textarea id="user-input" placeholder="Escreve a tua mensagem..." rows="1" class="flex-grow bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-violet-500 scrollbar-thin resize-none"></textarea>
+                    <button id="send-button" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-5 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                        <span class="btn-text"><i class="fas fa-paper-plane"></i></span>
+                        <div class="loader hidden"></div>
                     </button>
+                </div>
+                 <div class="mt-4 flex justify-end">
+                    <button id="clear-chat-button" class="text-xs text-zinc-400 hover:text-violet-400 transition-colors">Limpar Conversa</button>
                 </div>
             </section>
         </main>
@@ -188,9 +159,10 @@
     </div>
 
     <script>
-        const currentPageId = 'CapyMetas';
+        const currentPageId = 'CapyChat';
         let apiKey = '';
         const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let chatHistory = [];
 
         const dom = {
             sidebar: document.getElementById('sidebar'),
@@ -202,24 +174,16 @@
             geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
             saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
             
-            mainGoalInput: document.getElementById('main-goal'),
-            deadlineInput: document.getElementById('deadline'),
-            priorityLevelSelect: document.getElementById('priority-level'),
-            resourcesArea: document.getElementById('resources'),
-            obstaclesArea: document.getElementById('obstacles'),
-            generateGoalsButton: document.getElementById('generate-goals-button'),
-            
-            outputSection: document.getElementById('output-section'),
-            goalsOutput: document.getElementById('goals-output'),
-            copyPlanButton: document.getElementById('copy-plan-button')
+            chatContainer: document.getElementById('chat-container'),
+            userInput: document.getElementById('user-input'),
+            sendButton: document.getElementById('send-button'),
+            clearChatButton: document.getElementById('clear-chat-button')
         };
-
-        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
         
         function toggleLoading(isLoading) {
-            const btnText = dom.generateGoalsButton.querySelector('.btn-text');
-            const loader = dom.generateGoalsButton.querySelector('.loader');
-            dom.generateGoalsButton.disabled = isLoading;
+            const btnText = dom.sendButton.querySelector('.btn-text');
+            const loader = dom.sendButton.querySelector('.loader');
+            dom.sendButton.disabled = isLoading;
             if(isLoading) {
                 btnText.classList.add('hidden');
                 loader.classList.remove('hidden');
@@ -231,68 +195,59 @@
         
         function basicMarkdownToHtml(md) {
             let html = md;
-            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
             html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
             html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
             html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
             html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
             if (html.includes('<li>')) {
-                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
+                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul class="list-disc list-inside ml-4">${match}</ul>`);
             }
-            html = html.split(/\n\s*\n/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
-            html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
-            html = html.replace(/<h3><br>/g, '<h3>').replace(/<br><\/h3>/g, '</h3>');
+            html = html.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').filter(p => p).join('');
+            html = html.replace(/<\/p><p>/g, '</p><p class="mt-2">');
             return html;
         }
 
-        async function handleGenerateGoals() {
+        function appendChatMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-bubble', sender === 'user' ? 'user-bubble' : 'ai-bubble');
+            if (sender === 'ai') {
+                messageDiv.innerHTML = basicMarkdownToHtml(text);
+            } else {
+                messageDiv.textContent = text;
+            }
+            dom.chatContainer.appendChild(messageDiv);
+            dom.chatContainer.scrollTop = dom.chatContainer.scrollHeight; 
+        }
+
+        async function handleSendMessage() {
             if (!apiKey) {
                 alert("Por favor, configure a sua chave API do Gemini primeiro.");
                 if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
                 return;
             }
 
-            const mainGoal = dom.mainGoalInput.value.trim();
-            const deadline = dom.deadlineInput.value.trim();
-            const priority = dom.priorityLevelSelect.options[dom.priorityLevelSelect.selectedIndex].text;
-            const resources = dom.resourcesArea.value.trim();
-            const obstacles = dom.obstaclesArea.value.trim();
+            const userText = dom.userInput.value.trim();
+            if (!userText) return;
 
-            if (!mainGoal) {
-                alert("Por favor, defina o seu objetivo principal.");
-                return;
-            }
-
+            appendChatMessage(userText, 'user');
+            chatHistory.push({ role: "user", parts: [{ text: userText }] });
+            dom.userInput.value = '';
             toggleLoading(true);
-            dom.outputSection.classList.add('hidden');
-            dom.goalsOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-Estratega está a definir as tuas metas...</p>';
-
-            const prompt = `
-                Aja como CapyMetas, um coach de produtividade e definição de objetivos.
-                Um utilizador deseja alcançar o seguinte objetivo:
-
-                - Objetivo Principal: "${mainGoal}"
-                - Prazo Desejado: ${deadline || "Não especificado"}
-                - Nível de Prioridade: ${priority}
-                - Recursos Disponíveis (opcional): ${resources || "Não especificados"}
-                - Possíveis Obstáculos/Desafios (opcional): ${obstacles || "Não especificados"}
-
-                Com base nestas informações:
-                1. Decomponha o objetivo principal em 2-4 metas SMART (Específicas, Mensuráveis, Atingíveis, Relevantes, Temporais).
-                2. Sugira um plano de ação conciso com os principais marcos ou etapas para atingir estas metas.
-                3. Ofereça 2-3 dicas de motivação ou para superar os obstáculos mencionados (ou obstáculos comuns para este tipo de objetivo).
-
-                Formate a resposta usando Markdown simples (títulos para secções, listas para metas e dicas).
-                Responda APENAS com o plano de metas e as dicas.
-            `;
             
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({ 
+                        contents: chatHistory,
+                        safetySettings: [ // Configurações de segurança mais permissivas para um chat geral
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
+                        ]
+                    })
                 });
 
                 if (!response.ok) {
@@ -301,21 +256,36 @@
                 }
                 
                 const data = await response.json();
+
                 if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-                    const planText = data.candidates[0].content.parts[0].text.trim();
-                    dom.goalsOutput.innerHTML = basicMarkdownToHtml(planText);
-                    dom.copyPlanButton.classList.remove('hidden');
+                    const aiText = data.candidates[0].content.parts[0].text.trim();
+                    appendChatMessage(aiText, 'ai');
+                    chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+                } else if (data.candidates && data.candidates[0].finishReason) {
+                     let blockMessage = "Peço desculpa, mas não posso responder a isso. ";
+                    if (data.candidates[0].finishReason === "SAFETY") {
+                        blockMessage += "A tua mensagem pode ter acionado os meus filtros de segurança. Podes tentar reformular?";
+                    } else {
+                        blockMessage += `A resposta foi interrompida por: ${data.candidates[0].finishReason}.`;
+                    }
+                    appendChatMessage(blockMessage, 'ai');
+                    chatHistory.push({ role: "model", parts: [{ text: blockMessage }] }); // Adiciona a mensagem de bloqueio ao histórico
                 } else {
-                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
+                    throw new Error("Resposta da API inválida ou vazia.");
                 }
 
             } catch (error) {
-                console.error("Erro ao gerar metas:", error);
-                dom.goalsOutput.innerHTML = `<p class="text-center text-red-400">Erro ao gerar metas: ${error.message}</p>`;
+                console.error("Erro ao enviar mensagem:", error);
+                appendChatMessage(`Desculpa, ocorreu um erro ao processar a tua mensagem: ${error.message}`, 'ai');
             } finally {
-                dom.outputSection.classList.remove('hidden');
                 toggleLoading(false);
+                dom.userInput.focus();
             }
+        }
+
+        function handleClearChat() {
+            dom.chatContainer.innerHTML = '<div class="ai-bubble">Olá! Sou o CapyChat. Como posso ajudar hoje?</div>';
+            chatHistory = [];
         }
         
         async function renderSidebar() {
@@ -385,27 +355,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); 
+            renderSidebar(); // Corrigido para chamar a função correta
             loadApiKey();
             
-            if(dom.generateGoalsButton) dom.generateGoalsButton.addEventListener('click', handleGenerateGoals);
-            if(dom.copyPlanButton) dom.copyPlanButton.addEventListener('click', () => {
-                const planHtml = dom.goalsOutput.innerHTML;
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = planHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
-                const planText = tempDiv.textContent || tempDiv.innerText || "";
-
-                if(planText && !planText.includes("As tuas metas e plano de ação aparecerão aqui...") && !planText.includes("Erro ao gerar metas:")) {
-                    navigator.clipboard.writeText(planText.trim()).then(() => {
-                        alert('Plano de metas copiado para a área de transferência!');
-                    }).catch(err => {
-                        alert('Falha ao copiar. Tente manually.');
-                        console.error('Erro ao copiar: ', err);
-                    });
-                } else {
-                     alert('Não há plano válido para copiar.');
+            if(dom.sendButton) dom.sendButton.addEventListener('click', handleSendMessage);
+            if(dom.userInput) dom.userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
                 }
             });
+            if(dom.clearChatButton) dom.clearChatButton.addEventListener('click', handleClearChat);
+
 
             if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
                 dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });

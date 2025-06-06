@@ -1,838 +1,449 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapyDebate - Simulador de Debates IA</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyDebate - Simulador de Debates com IA</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
     <style>
+        html { background: #121217; }
         body {
             font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
         }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
         }
-        ::-webkit-scrollbar-track {
-            background: #111827; /* gray-900 */
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
         }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
-        }
+
+
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
+
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
+        
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #8b5cf6; /* Cor violet-500 para CapyDebate */
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
-            display: inline-block;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .chat-bubble-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; 
+            padding: 0.5rem; 
         }
-        .category-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .category-content.expanded {
-            max-height: 1000px; /* Padronizado */
-        }
-        .sidebar-link.active {
-            background-color: #4f46e5; /* indigo-600 */
-            color: white;
-            font-weight: 600;
-        }
-        /* Estilos para o conteúdo renderizado do Markdown e Chat */
-        .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
-            font-weight: 600;
-            margin-top: 0.75em;
-            margin-bottom: 0.25em;
-            color: #e5e7eb; 
-        }
-        .markdown-content h1 { font-size: 1.8em; border-bottom: 1px solid #4b5563; padding-bottom: 0.2em; }
-        .markdown-content h2 { font-size: 1.5em; }
-        .markdown-content h3 { font-size: 1.25em; }
-        .markdown-content h4 { font-size: 1.1em; color: #9ca3af; }
-        .markdown-content p { margin-bottom: 0.6em; line-height: 1.65; color: #d1d5db; }
-        .markdown-content ul, .markdown-content ol {
-            margin-left: 1.75em;
-            margin-bottom: 0.6em;
-            list-style-position: outside;
-            color: #d1d5db; 
-        }
-        .markdown-content ul { list-style-type: disc; }
-        .markdown-content ol { list-style-type: decimal; }
-        .markdown-content li { margin-bottom: 0.3em; }
-        .markdown-content strong { font-weight: 700; color: #f9fafb; }
-        .markdown-content em { font-style: italic; }
-        .markdown-content code {
-            background-color: #1f2937; 
-            padding: 0.1em 0.3em;
-            border-radius: 0.25em;
-            font-family: monospace;
-            color: #f3f4f6; 
-        }
-        .markdown-content pre {
-            background-color: #1f2937; 
-            padding: 0.75em;
-            border-radius: 0.375em;
-            overflow-x: auto;
-            margin-bottom: 0.75em;
-        }
-        .markdown-content pre code {
-            padding: 0;
-            background-color: transparent;
-        }
-        .markdown-content blockquote {
-            border-left: 4px solid #4b5563; 
-            padding-left: 1em;
-            margin-left: 0;
-            font-style: italic;
-            color: #9ca3af; 
-        }
-        .markdown-content a {
-            color: #818cf8; 
-            text-decoration: underline;
-        }
-        .markdown-content a:hover {
-            color: #6366f1; 
-        }
-        .markdown-content table {
-            width: auto;
-            border-collapse: collapse;
-            margin-bottom: 1em;
-            border: 1px solid #4b5563;
-        }
-        .markdown-content th, .markdown-content td {
-            border: 1px solid #4b5563;
-            padding: 0.5em 0.75em;
-            text-align: left;
-        }
-        .markdown-content th {
-            background-color: #374151; /* gray-700 */
-            font-weight: 600;
-        }
-        .markdown-content tr:nth-child(even) {
-            background-color: #1f2937; /* gray-800 mais escuro */
-        }
-        .chat-message {
-            padding: 10px 14px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            max-width: 85%;
+        .chat-bubble {
+            padding: 0.75rem 1rem; 
+            border-radius: 1rem; 
+            max-width: 80%;
             word-wrap: break-word;
-            line-height: 1.5;
+            line-height: 1.6;
         }
-        .user-message {
+        .user-bubble {
             background-color: #4338ca; /* indigo-700 */
             color: white;
             align-self: flex-end;
-            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
         }
-        .ia-message {
+        .ai-bubble {
             background-color: #374151; /* gray-700 */
-            color: white;
+            color: #e5e7eb; 
             align-self: flex-start;
+            border-bottom-left-radius: 0.25rem; 
+        }
+         .markdown-output strong, .markdown-output b { font-weight: bold; }
+        .markdown-output em, .markdown-output i { font-style: italic; }
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .markdown-output ol { list-style-type: decimal; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .markdown-output li { margin-bottom: 0.25rem; }
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-output p:last-child { margin-bottom: 0; }
+         select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
-    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
         <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
             </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
         </div>
         <div class="flex items-center">
-            <button id="homeButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white mr-2">Inicio</button>
-
-            <button id="openApiKeysModalButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white">Chaves API IA's</button>
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
         </div>
     </header>
 
-    <div id="notificationArea" class="fixed top-20 right-4 z-[60] space-y-2 w-full max-w-xs sm:max-w-sm">
-        </div>
+    <div id="notificationArea"></div>
 
-    <div class="flex flex-1 pt-16">
-        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-2 p-4 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-20 lg:pt-4">
-            </aside>
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <div class="space-y-6 bg-gray-800 p-6 rounded-xl shadow-2xl max-w-4xl mx-auto flex flex-col h-full">
-                <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-violet-400 mb-2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path></svg>
-                    <h2 class="text-3xl font-bold text-violet-400">CapyDebate</h2>
-                    <p class="text-md text-gray-400 mt-1">Simule debates e aprimore sua argumentação.</p>
-                </div>
-                
-                <div>
-                    <label for="debateTopico" class="block text-sm font-medium text-gray-300 mb-1">1. Tópico do Debate</label>
-                    <input type="text" id="debateTopico" placeholder="Ex: Inteligência Artificial vai superar a inteligência humana?, Redes sociais são mais benéficas ou prejudiciais?" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 shadow-sm">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyDebate 🗣️</h1>
+                    <p class="text-zinc-300 mt-1">Afie os seus argumentos com o nosso debatedor IA!</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="debateLadoUsuario" class="block text-sm font-medium text-gray-300 mb-1">2. Seu Lado no Debate</label>
-                        <select id="debateLadoUsuario" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 shadow-sm">
-                            <option value="aleatorio">Deixe a IA escolher meu lado</option>
-                            <option value="favor">A Favor do Tópico</option>
-                            <option value="contra">Contra o Tópico</option>
-                        </select>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-1 space-y-4">
+                        <h2 class="text-xl font-syne text-zinc-100 mb-2">Configurar Debate</h2>
+                        <div>
+                            <label for="debate-topic" class="block text-sm font-semibold mb-1 text-zinc-200">Tópico do Debate:</label>
+                            <input type="text" id="debate-topic" placeholder="Ex: Redes sociais são benéficas para a sociedade?" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500">
+                        </div>
+                        <div>
+                            <label for="user-stance" class="block text-sm font-semibold mb-1 text-zinc-200">A Tua Posição:</label>
+                            <select id="user-stance" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500">
+                                <option value="pro">A Favor</option>
+                                <option value="contra">Contra</option>
+                                <option value="neutro">Neutro/Moderador (IA debate ambos os lados)</option>
+                            </select>
+                        </div>
+                        <button id="start-debate-button" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                            <span class="btn-text">Iniciar Debate</span>
+                            <div class="loader hidden"></div>
+                        </button>
                     </div>
-                    <div>
-                        <label for="debateNivelDificuldade" class="block text-sm font-medium text-gray-300 mb-1">3. Nível do Oponente IA</label>
-                        <select id="debateNivelDificuldade" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 shadow-sm">
-                            <option value="iniciante">Iniciante (Argumentos mais simples)</option>
-                            <option value="intermediario">Intermediário (Argumentos bem fundamentados)</option>
-                            <option value="avancado">Avançado (Desafiador e com contra-argumentos fortes)</option>
-                        </select>
-                    </div>
-                </div>
-                <button id="iniciarDebateButton" class="w-full bg-violet-500 hover:bg-violet-600 disabled:opacity-75 disabled:cursor-not-allowed px-6 py-3 rounded-md text-lg font-semibold shadow-md transition-colors duration-150 flex items-center justify-center">
-                    <span class="btn-text">Iniciar Debate / Definir Tópico</span>
-                    <span class="loader hidden ml-2"></span>
-                </button>
-                
-                <div class="flex-grow flex flex-col bg-gray-700 rounded-md border border-gray-600 overflow-hidden min-h-[300px] max-h-[calc(100vh-26rem)]">
-                    <div id="chatBoxDebate" class="flex-grow p-4 space-y-3 overflow-y-auto flex flex-col markdown-content">
-                        <div class="ia-message chat-message">Defina o tópico e seu lado para começarmos o debate!</div>
-                    </div>
-                    <div class="p-2 border-t border-gray-600 bg-gray-700">
-                        <div class="flex">
-                            <textarea id="userInputDebate" placeholder="Seu argumento..." rows="2" class="flex-1 p-3 bg-gray-600 rounded-l-md border-0 focus:ring-2 focus:ring-violet-500 outline-none text-sm text-white placeholder-gray-400 resize-none"></textarea>
-                            <button id="sendDebateButton" class="bg-violet-500 hover:bg-violet-600 px-4 py-3 rounded-r-md text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center">
-                                <span class="btn-text">Enviar</span>
-                                <span class="loader hidden ml-2"></span>
-                            </button>
+
+                    <div class="lg:col-span-2 flex flex-col">
+                         <h2 id="chat-title" class="text-xl font-syne text-zinc-100 mb-2 text-center lg:text-left">Arena de Debate</h2>
+                        <div id="chat-interface" class="hidden flex-grow flex flex-col bg-zinc-900/50 border border-zinc-700 rounded-lg">
+                            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto scrollbar-thin min-h-[350px] chat-bubble-container">
+                                <!-- Mensagens do chat -->
+                            </div>
+                            <div class="p-4 border-t border-zinc-700 flex items-center gap-3">
+                                <textarea id="user-argument-input" placeholder="Apresente o seu argumento..." rows="2" class="flex-grow bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-violet-500 scrollbar-thin resize-none"></textarea>
+                                <button id="send-argument-button" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-5 rounded-lg flex items-center justify-center transition-colors">
+                                    <span class="btn-text"><i class="fas fa-paper-plane"></i></span>
+                                    <div class="loader hidden"></div>
+                                </button>
+                            </div>
+                        </div>
+                         <div id="chat-placeholder" class="flex-grow flex items-center justify-center bg-zinc-900/50 border border-zinc-700 rounded-lg p-4 min-h-[400px]">
+                            <p class="text-zinc-400 text-center">Defina o tópico e a sua posição para iniciar o debate.</p>
                         </div>
                     </div>
                 </div>
-                 <div class="mt-4 flex space-x-3">
-                    <button id="exportTxtButtonDebate" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors duration-150 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Exportar Debate (TXT)
-                    </button>
-                    <button id="exportPdfButtonDebate" class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors duration-150 flex items-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Exportar Debate (PDF)
-                    </button>
-                </div>
-            </div>
+            </section>
         </main>
     </div>
 
-    <footer class="bg-gray-800 text-center p-4 text-sm text-gray-500 mt-auto">
-        CapyUniverse IA &copy; 2025
-    </footer>
-
-    <!-- Modal de Chaves API -->
-    <div id="apiKeysModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-semibold text-purple-400">Gerenciar Chaves de API</h2>
-                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-3xl leading-none">&times;</button>
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-            <div class="space-y-4">
-                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
-                    <h3 class="text-lg font-medium text-sky-400 mb-2">Google Gemini</h3>
-                    <label for="geminiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Gemini:</label>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
                     <div class="flex">
-                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-sky-500 outline-none"/>
-                        <button data-provider="gemini" class="save-key-modal-button bg-sky-500 hover:bg-sky-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">Obtenha sua chave em <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.<br>O Gemini 1.5 Flash (usado aqui) possui um nível gratuito generoso.</p>
                 </div>
-                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
-                    <h3 class="text-lg font-medium text-emerald-400 mb-2">OpenAI (Modelos GPT)</h3>
-                    <label for="openaiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key OpenAI:</label>
-                    <div class="flex">
-                        <input id="openaiApiKeyInputModal" type="password" placeholder="Sua API Key OpenAI (sk-...)" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-emerald-500 outline-none"/>
-                        <button data-provider="openai" class="save-key-modal-button bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2">Para usar modelos como GPT-3.5-turbo, GPT-4, etc. Requer créditos na <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">plataforma OpenAI</a>.</p>
-                </div>
-                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
-                    <h3 class="text-lg font-medium text-orange-400 mb-2">Anthropic Claude</h3>
-                    <label for="claudeApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Claude:</label>
-                    <div class="flex">
-                        <input id="claudeApiKeyInputModal" type="password" placeholder="Sua API Key Claude" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-orange-500 outline-none"/>
-                        <button data-provider="claude" class="save-key-modal-button bg-orange-500 hover:bg-orange-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2">Para usar modelos Claude. Verifique a disponibilidade e chaves na <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" class="text-orange-400 hover:underline">Anthropic Console</a>.</p>
-                </div>
-                <div class="p-4 border border-gray-700 rounded-md bg-gray-850">
-                    <h3 class="text-lg font-medium text-violet-400 mb-2">Perplexity AI</h3>
-                    <label for="perplexityApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-1">API Key Perplexity (Opcional):</label>
-                    <div class="flex">
-                        <input id="perplexityApiKeyInputModal" type="password" placeholder="Sua API Key Perplexity" class="p-2 text-sm text-black flex-grow rounded-l-md focus:ring-2 focus:ring-violet-500 outline-none"/>
-                        <button data-provider="perplexity" class="save-key-modal-button bg-violet-500 hover:bg-violet-600 px-3 py-2 rounded-r-md text-sm">Salvar</button>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-2">Se disponível, para modelos Perplexity.</p>
-                </div>
-            </div>
-            <div class="mt-8 text-center">
-                <p class="text-sm text-gray-400 mb-3"><strong>Recomendamos usar uma chave API do Google Gemini (gratuita para começar) para a melhor experiência com as ferramentas CapyUniverse.</strong></p>
-                <button id="continueWithoutKeyButtonModal" class="bg-gray-600 hover:bg-gray-500 px-6 py-2.5 rounded-md text-sm font-semibold">Continuar sem Chave (Funcionalidade Limitada)</button>
             </div>
         </div>
     </div>
-    <!-- Fim do Modal de Chaves API -->
 
     <script>
-        let apiKeys = { gemini: '', openai: '', claude: '', perplexity: '' };
-        let apiKey = ''; // Chave Gemini ativa
-        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
-        const currentPageId = 'CapyDebate'; 
-        let rawMarkdownResponse = ''; // Para armazenar a resposta Markdown antes de ser parseada
-        let debateConversationHistory = []; // Para armazenar o histórico do debate
-        const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
+        const currentPageId = 'CapyDebate';
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let debateChatHistory = [];
+        let debateTopic = "";
+        let userStance = "";
 
-        const notificationArea = document.getElementById('notificationArea');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        const tools = [
-            // Análise e Compreensão de Texto
-            { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyresumo.html', color: 'blue' },
-            { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyexplica.html', color: 'yellow' },
-            { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capydetector.html', color: 'purple'},
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
             
-            // Criação e Edição de Conteúdo
-            { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição', pageUrl: 'capyemail.html', color: 'pink' },
-            { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição', pageUrl: 'capytone.html', color: 'lime' },
-            { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição', pageUrl: 'capyescritor.html', color: 'rose' },
-            { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
-            { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição', pageUrl: 'capyroteiro.html', color: 'orange' },
-            
-            // Ferramentas de Documentos
-            { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
-            { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
-            { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
-            { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
+            debateTopicInput: document.getElementById('debate-topic'),
+            userStanceSelect: document.getElementById('user-stance'),
+            startDebateButton: document.getElementById('start-debate-button'),
 
-            // Chatbots Especializados
-            { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
-            { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
-            { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
-
-            // Produtividade e Organização
-            { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
-            { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' }, 
-            { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
-            
-            // Aprendizagem e Educação
-            { id: 'CapyDidatica', title: 'Planos de Aula', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 14l6-3-6-3-6 3 6 3z"></path><path d="M12 14v7"></path><path d="M6 12.5L12 17l6-4.5"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydidatica.html', color: 'emerald' },
-            { id: 'CapyQuiz', title: 'Gerador de Quizzes', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 11.17L12 8"></path><path d="M12 15h.01"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyquiz.html', color: 'fuchsia' }, 
-            { id: 'CapyTradutor', title: 'Tradutor Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path><path d="M12 19l-7-7 7-7"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytradutor.html', color: 'red' },
-            { id: 'CapyDebate', title: 'Simulador de Debates', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydebate.html', color: 'violet' }, 
-            { id: 'CapySolucao', title: 'Professor de Matemática', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path><line x1="12" y1="22" x2="12" y2="17"></line><line x1="12" y1="12" x2="20" y2="8"></line><line x1="12" y1="12" x2="4" y2="8"></line></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capysolucao.html', color: 'red' },
-            { id: 'CapyTeste', title: 'Gerador de Avaliações', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="m9 14 2 2 4-4"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyteste.html', color: 'purple' },
-            { id: 'CapyTCC', title: 'Tutor de TCC', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 13L12 7"></path><path d="M9 10L15 10"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytcc.html', color: 'indigo' },
-            
-            // Análise de Dados
-            { id: 'CapyChart', title: 'Visualizador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>', category: 'Análise de Dados', pageUrl: 'capychart.html', color: 'teal' },
-            { id: 'CapyDados', title: 'Analisador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>', category: 'Análise de Dados', pageUrl: 'capydados.html', color: 'blue' },
-            { id: 'CapyFiscal', title: 'Assistente Fiscal', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>', category: 'Análise de Dados', pageUrl: 'capyfiscal.html', color: 'green' },
-            
-            // Bem-Estar e Mindfulness
-            { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
-
-            // Ferramentas de IA Avançadas
-            { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
-        ];
-
-        // --- Funções de Notificação ---
-        function addNotification(message, type = 'info') {
-            const notificationId = 'notif-' + Date.now();
-            const typeClasses = {
-                error: 'bg-red-600 text-white',
-                success: 'bg-green-600 text-white',
-                info: 'bg-blue-600 text-white',
-                warning: 'bg-yellow-500 text-black'
-            };
-            const notificationHTML = `
-                <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
-                    <span>${message}</span>
-                    <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
-                </div>`;
-            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
-            const newNotification = document.getElementById(notificationId);
-            requestAnimationFrame(() => {
-                newNotification.classList.remove('opacity-0', 'translate-x-full');
-                newNotification.classList.add('opacity-100', 'translate-x-0');
-            });
-            setTimeout(() => removeNotification(notificationId), 6000);
-        }
-        window.removeNotification = (id) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.add('opacity-0', 'translate-x-full');
-                setTimeout(() => el.remove(), 300);
-            }
+            chatTitle: document.getElementById('chat-title'),
+            chatInterface: document.getElementById('chat-interface'),
+            chatMessages: document.getElementById('chat-messages'),
+            userArgumentInput: document.getElementById('user-argument-input'),
+            sendArgumentButton: document.getElementById('send-argument-button'),
+            chatPlaceholder: document.getElementById('chat-placeholder')
         };
 
-        // --- Lógica da API Key com LocalStorage ---
-        function loadApiKeysFromStorage() {
-            Object.keys(apiKeys).forEach(provider => {
-                const storedKey = localStorage.getItem(API_KEY_STORAGE_PREFIX + provider);
-                if (storedKey) {
-                    apiKeys[provider] = storedKey;
-                    const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
-                    if (modalInput) modalInput.value = storedKey;
-                }
-            });
-            apiKey = apiKeys.gemini || '';
-        }
-
-        function saveApiKeyToStorage(provider, key) {
-            if (key) {
-                apiKeys[provider] = key;
-                localStorage.setItem(API_KEY_STORAGE_PREFIX + provider, key);
-                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} guardada!`, 'success');
-                if (provider === 'gemini') apiKey = key;
-            } else {
-                apiKeys[provider] = '';
-                localStorage.removeItem(API_KEY_STORAGE_PREFIX + provider);
-                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} removida.`, 'warning');
-                if (provider === 'gemini') apiKey = '';
-            }
-        }
-
-        // --- Lógica da Sidebar ---
-        function renderSidebar() {
-            const categories = {};
-            tools.forEach(tool => {
-                if (!categories[tool.category]) {
-                    categories[tool.category] = [];
-                }
-                categories[tool.category].push(tool);
-            });
-
-            sidebar.innerHTML = ''; 
-
-            for (const categoryName in categories) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'mb-2';
-
-                const categoryButton = document.createElement('button');
-                categoryButton.className = 'w-full flex justify-between items-center p-3 text-left text-gray-200 hover:bg-gray-700 rounded-md focus:outline-none';
-                categoryButton.innerHTML = `
-                    <span class="font-semibold">${categoryName}</span>
-                    <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                `;
-                
-                const categoryContent = document.createElement('div');
-                categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
-
-                categories[categoryName].forEach(tool => {
-                    const link = document.createElement('a');
-                    link.href = tool.pageUrl;
-                    link.className = `sidebar-link w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-gray-600 transition-colors duration-150 ${tool.id === currentPageId ? 'active' : ''}`;
-                    link.innerHTML = `${tool.icon.replace('currentColor', `text-${tool.color}-400`)} <span class="${tool.id === currentPageId ? 'text-white' : `text-gray-300`}">${tool.title}</span>`;
-                    categoryContent.appendChild(link);
-                });
-
-                categoryButton.addEventListener('click', () => {
-                    categoryContent.classList.toggle('expanded');
-                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                });
-                
-                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                    categoryContent.classList.add('expanded');
-                    categoryButton.querySelector('svg').classList.add('rotate-180');
-                }
-
-                categoryDiv.appendChild(categoryButton);
-                categoryDiv.appendChild(categoryContent);
-                sidebar.appendChild(categoryDiv);
-            }
-        }
-
-        sidebarToggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        });
-
-        // --- Lógica do Modal de API Keys ---
-        const homeButton = document.getElementById('homeButton');
-        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
-        const apiKeysModal = document.getElementById('apiKeysModal');
-        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
-        const continueWithoutKeyButtonModal = document.getElementById('continueWithoutKeyButtonModal');
-
-        if (openApiKeysModalButton) {
-            openApiKeysModalButton.addEventListener('click', () => {
-                if (apiKeysModal) {
-                    apiKeysModal.classList.remove('hidden');
-                    // Pre-fill modal inputs with currently stored keys
-                    Object.keys(apiKeys).forEach(provider => {
-                        const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
-                        if (modalInput) modalInput.value = apiKeys[provider] || '';
-                    });
-                }
-            });
-        }
-        if (closeApiKeysModalButton) closeApiKeysModalButton.addEventListener('click', () => apiKeysModal && apiKeysModal.classList.add('hidden'));
-        if (continueWithoutKeyButtonModal) {
-            continueWithoutKeyButtonModal.addEventListener('click', () => {
-                if (apiKeysModal) apiKeysModal.classList.add('hidden');
-                addNotification('Continuando sem chave de API. Funcionalidades podem ser limitadas ou indisponíveis.', 'info');
-            });
-        }
-        document.querySelectorAll('.save-key-modal-button').forEach(button => {
-            button.addEventListener('click', () => {
-                const provider = button.dataset.provider;
-                const inputElement = document.getElementById(provider + 'ApiKeyInputModal');
-                if (inputElement) saveApiKeyToStorage(provider, inputElement.value.trim());
-            });
-        });
-
-        if (homeButton) {
-            homeButton.addEventListener('click', () => {
-                window.location.href = 'index.html';
-            });
-        }
-
-        // --- Função de Loading para Botões ---
-        function showLoading(buttonElement, show = true) {
+        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
+        
+        function toggleButtonLoading(buttonElement, isLoading) {
             const btnText = buttonElement.querySelector('.btn-text');
             const loader = buttonElement.querySelector('.loader');
-            if (show) {
+            buttonElement.disabled = isLoading;
+            if(isLoading) {
                 if(btnText) btnText.classList.add('hidden');
                 if(loader) loader.classList.remove('hidden');
-                buttonElement.disabled = true;
             } else {
                 if(btnText) btnText.classList.remove('hidden');
                 if(loader) loader.classList.add('hidden');
-                buttonElement.disabled = false;
-            }
-        }
-
-        // --- Função para Chamar a API Gemini ---
-        async function callGeminiAPI(prompt, buttonElement, resultElementOrCb) {
-            rawMarkdownResponse = ''; 
-            if (!apiKey) {
-                addNotification("API Key Gemini não configurada. Por favor, adicione sua chave no menu 'Chaves API IA's' para usar esta ferramenta.", "error");
-                if(buttonElement) showLoading(buttonElement, false);
-                return;
-            }
-            if (!prompt || (typeof prompt === 'string' && !prompt.trim())) {
-                 addNotification("O prompt para análise não pode estar vazio.", "warning");
-                 if(buttonElement) showLoading(buttonElement, false);
-                return;
-            }
-
-            if(buttonElement) showLoading(buttonElement, true);
-            // Para callbacks (chat), não alteramos o resultElement diretamente com "Analisando..."
-            if (typeof resultElementOrCb !== 'function' && resultElementOrCb) {
-                 resultElementOrCb.innerHTML = `<div class="flex items-center justify-center p-4 text-gray-400"><span class="loader mr-2"></span>Analisando com a CapyIA...</div>`;
-            }
-
-            try {
-                const res = await fetch(GEMINI_API_URL_BASE + apiKey, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    let msg = `Erro ${res.status}: ${errorData?.error?.message || res.statusText}`;
-                    if (res.status === 400 && msg.toLowerCase().includes("api key not valid")) {
-                        msg = "Erro: API Key inválida ou mal formatada. Verifique a chave no cabeçalho.";
-                    }
-                    throw new Error(msg);
-                }
-                const data = await res.json();
-                if (data.promptFeedback?.blockReason) {
-                    throw new Error(`Conteúdo bloqueado pela API: ${data.promptFeedback.blockReason}`);
-                }
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                rawMarkdownResponse = textResponse || ''; 
-
-                if (textResponse === undefined) { 
-                    throw new Error("Resposta da IA vazia ou em formato inesperado.");
-                }
-                
-                if (typeof resultElementOrCb === 'function') {
-                    resultElementOrCb(textResponse); 
-                } else if (resultElementOrCb) {
-                    if (typeof marked !== 'undefined') {
-                        resultElementOrCb.innerHTML = marked.parse(textResponse);
-                    } else {
-                        resultElementOrCb.innerText = textResponse; 
-                        console.warn("Marked.js não está carregado. Exibindo como texto puro.");
-                    }
-                }
-                // Removido addNotification de sucesso daqui para ser tratado no callback do chat se necessário
-            } catch (err) {
-                console.error("Falha na chamada da API:", err);
-                const errorMsg = err.message || "Erro desconhecido ao contatar a API.";
-                if (typeof resultElementOrCb === 'function') {
-                    resultElementOrCb(`\n\n--- ERRO DA IA ---\n${errorMsg}\n------------------`);
-                } else if (resultElementOrCb) {
-                     resultElementOrCb.innerHTML = `<p class="text-red-400">Erro: ${errorMsg}</p>`;
-                }
-                addNotification(errorMsg, "error");
-            } finally {
-                if(buttonElement) showLoading(buttonElement, false);
             }
         }
         
-        // --- Funções de Exportação ---
-        function exportToTxt(filename, contentSourceElementOrText) {
-            let textToExport = "";
-            if (typeof contentSourceElementOrText === 'string') {
-                textToExport = contentSourceElementOrText;
-            } else { // Assume que é um ID de elemento
-                const contentElement = document.getElementById(contentSourceElementOrText);
-                if (!contentElement) {
-                    addNotification("Elemento de conteúdo não encontrado para exportação.", "error");
-                    return;
-                }
-                textToExport = (rawMarkdownResponse && rawMarkdownResponse.trim() !== "") ? rawMarkdownResponse : contentElement.innerText;
+        function basicMarkdownToHtml(md) {
+            let html = md;
+            html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
+            html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+            html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+            html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+            if (html.includes('<li>')) {
+                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
             }
-
-            if (!textToExport.trim()) {
-                addNotification("Nenhum conteúdo para exportar.", "warning");
-                return;
-            }
-            const blob = new Blob([textToExport], { type: 'text/plain;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            addNotification("Conteúdo exportado para TXT!", "success");
+            html = html.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').filter(p => p).join('');
+            html = html.replace(/<\/p><p>/g, '</p><p class="mt-2">');
+            return html;
         }
 
-        function exportToPdf(filename, contentSourceElementOrText) {
-             let textToExport = "";
-            if (typeof contentSourceElementOrText === 'string') {
-                textToExport = contentSourceElementOrText;
-            } else { // Assume que é um ID de elemento
-                const contentElement = document.getElementById(contentSourceElementOrText);
-                if (!contentElement) {
-                    addNotification("Elemento de conteúdo não encontrado para exportação.", "error");
-                    return;
-                }
-                // Para PDF, é melhor usar o innerText do conteúdo já renderizado para manter a estrutura visual
-                textToExport = contentElement.innerText;
-            }
-            
-            if (!textToExport.trim()) {
-                addNotification("Nenhum conteúdo para exportar.", "warning");
-                return;
-            }
-
-            if (typeof jspdf === 'undefined') {
-                addNotification("Biblioteca jsPDF não carregada. Não é possível exportar para PDF.", "error");
-                console.error("jsPDF não está definida. Verifique a inclusão da biblioteca.");
-                return;
-            }
-            const { jsPDF } = jspdf;
-            const doc = new jsPDF({ unit: 'pt', format: 'a4' }); 
-            
-            const margin = 40; 
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const usableWidth = pageWidth - 2 * margin;
-            let yPosition = margin;
-            const lineHeight = 12 * 1.15; 
-
-            doc.setFontSize(11);
-            doc.setTextColor(40, 40, 40); 
-
-            const lines = textToExport.split('\n');
-            let formattedLines = [];
-
-            lines.forEach(line => {
-                let prefix = "";
-                if (line.startsWith('### ')) { 
-                    prefix = "        "; 
-                    line = line.substring(4);
-                } else if (line.startsWith('## ')) { 
-                     prefix = "    "; 
-                    line = line.substring(3);
-                } else if (line.startsWith('# ')) { 
-                    line = line.substring(2);
-                } else if (line.startsWith('- ') || line.startsWith('* ')) {
-                    prefix = "  - ";
-                    line = line.substring(2);
-                } else if (line.match(/^\d+\.\s/)) {
-                    prefix = "  " + line.match(/^\d+\.\s/)[0];
-                    line = line.replace(/^\d+\.\s/, "");
-                }
-                
-                const wrappedLines = doc.splitTextToSize(prefix + line, usableWidth);
-                formattedLines = formattedLines.concat(wrappedLines);
-                if (line.trim() === '') formattedLines.push(''); 
-            });
-
-
-            formattedLines.forEach(line => {
-                if (yPosition + lineHeight > doc.internal.pageSize.getHeight() - margin) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                doc.text(line, margin, yPosition);
-                yPosition += lineHeight;
-            });
-
-            doc.save(filename);
-            addNotification("Conteúdo exportado para PDF!", "success");
-        }
-
-
-        // --- Lógica Específica do CapyDebate ---
-        const debateTopicoInput = document.getElementById('debateTopico');
-        const debateLadoUsuarioSelect = document.getElementById('debateLadoUsuario');
-        const debateNivelDificuldadeSelect = document.getElementById('debateNivelDificuldade');
-        const iniciarDebateButton = document.getElementById('iniciarDebateButton');
-        const chatBoxDebate = document.getElementById('chatBoxDebate');
-        const userInputDebate = document.getElementById('userInputDebate');
-        const sendDebateButton = document.getElementById('sendDebateButton');
-        const exportTxtButtonDebate = document.getElementById('exportTxtButtonDebate');
-        const exportPdfButtonDebate = document.getElementById('exportPdfButtonDebate');
-
-        let ladoUsuarioGlobal = ''; // Para armazenar o lado do usuário no debate
-
-        function addMessageToDebateChat(message, sender = 'ia', isMarkdown = false) {
+        function appendChatMessage(text, sender) {
             const messageDiv = document.createElement('div');
-            messageDiv.classList.add('chat-message', sender === 'user' ? 'user-message' : 'ia-message');
-            if (isMarkdown && typeof marked !== 'undefined') {
-                messageDiv.innerHTML = marked.parse(message);
+            messageDiv.classList.add('chat-bubble', sender === 'user' ? 'user-bubble' : 'ai-bubble');
+            if (sender === 'ai') {
+                messageDiv.innerHTML = basicMarkdownToHtml(text);
             } else {
-                messageDiv.textContent = message; 
+                messageDiv.textContent = text;
             }
-            chatBoxDebate.appendChild(messageDiv);
-            chatBoxDebate.scrollTop = chatBoxDebate.scrollHeight; 
-            // Atualiza rawMarkdownResponse para exportação
-            rawMarkdownResponse = Array.from(chatBoxDebate.querySelectorAll('.chat-message')).map(el => el.innerText).join('\n\n');
+            dom.chatMessages.appendChild(messageDiv);
+            dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
         }
 
-        iniciarDebateButton.addEventListener('click', () => {
-            const topico = debateTopicoInput.value.trim();
-            ladoUsuarioGlobal = debateLadoUsuarioSelect.value;
-            const nivelIA = debateNivelDificuldadeSelect.value;
+        function handleStartDebate() {
+            debateTopic = dom.debateTopicInput.value.trim();
+            userStance = dom.userStanceSelect.value;
+            const userStanceText = dom.userStanceSelect.options[dom.userStanceSelect.selectedIndex].text;
 
-            if (!topico) {
-                addNotification("Por favor, defina o tópico do debate.", "warning");
+            if (!debateTopic) {
+                alert("Por favor, defina o tópico do debate.");
                 return;
             }
 
-            debateConversationHistory = []; // Reseta o histórico para um novo debate
-            chatBoxDebate.innerHTML = ''; // Limpa o chat
-            rawMarkdownResponse = ''; // Limpa a resposta crua
-
-            let instrucaoInicial = `Ok, vamos debater sobre: **"${topico}"**.`;
-            if (ladoUsuarioGlobal === 'aleatorio') {
-                // Simples atribuição aleatória
-                ladoUsuarioGlobal = Math.random() < 0.5 ? 'favor' : 'contra';
-                instrucaoInicial += `\nVocê defenderá o lado **${ladoUsuarioGlobal === 'favor' ? 'A FAVOR' : 'CONTRA'}**. Eu defenderei o lado oposto.`;
+            currentPersonaSystemPrompt = `Aja como CapyDebate, um debatedor IA inteligente e articulado. O tópico do debate é: "${debateTopic}".`;
+            if (userStance === "neutro") {
+                currentPersonaSystemPrompt += " Você irá apresentar argumentos para ambos os lados (a favor e contra) de forma equilibrada, ou moderar o debate se o utilizador apresentar um argumento.";
             } else {
-                instrucaoInicial += `\nVocê defenderá o lado **${ladoUsuarioGlobal === 'favor' ? 'A FAVOR' : 'CONTRA'}**. Eu serei seu oponente.`;
+                currentPersonaSystemPrompt += ` O utilizador está ${userStanceText}. Você irá defender a posição oposta ou apresentar contra-argumentos robustos.`;
             }
-            instrucaoInicial += `\nO nível do oponente IA será: **${nivelIA}**.`;
-            instrucaoInicial += `\n\nPor favor, apresente seu primeiro argumento.`;
+             currentPersonaSystemPrompt += " Mantenha os argumentos lógicos, baseados em factos (mesmo que simulados para o debate) e respeitosos. O objetivo é um debate construtivo.";
+
+
+            debateChatHistory = [{ role: "user", parts: [{ text: currentPersonaSystemPrompt }] }, {role: "model", parts: [{text: `Entendido! Sou o CapyDebate. O tópico é "${debateTopic}". A tua posição é ${userStanceText}. Estou pronto para começar. Qual o teu argumento inicial?`}]}];
+
+            dom.chatTitle.textContent = `Debate: ${debateTopic}`;
+            dom.chatInterface.classList.remove('hidden');
+            dom.chatPlaceholder.classList.add('hidden');
+            dom.chatMessages.innerHTML = ''; 
+            appendChatMessage(`Debate iniciado sobre "${debateTopic}". A tua posição: ${userStanceText}. Apresenta o teu primeiro argumento.`, 'ai');
+            dom.userArgumentInput.value = '';
+            dom.userArgumentInput.focus();
+        }
+
+        async function handleSendArgument() {
+            if (!apiKey) {
+                alert("Por favor, configure a sua chave API do Gemini primeiro.");
+                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
+                return;
+            }
+            if (!currentPersonaSystemPrompt) { // Garante que o debate foi iniciado
+                alert("Por favor, inicie o debate primeiro definindo o tópico e a sua posição.");
+                return;
+            }
+
+            const userArgument = dom.userArgumentInput.value.trim();
+            if (!userArgument) return;
+
+            appendChatMessage(userArgument, 'user');
+            debateChatHistory.push({ role: "user", parts: [{ text: userArgument }] });
+            dom.userArgumentInput.value = '';
+            toggleButtonLoading(dom.sendArgumentButton, true);
             
-            addMessageToDebateChat(instrucaoInicial, 'ia', true);
-            debateConversationHistory.push({role: "model", parts: [{text: instrucaoInicial}] });
-            addNotification("Debate configurado! Apresente seu primeiro argumento.", "info");
-        });
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: debateChatHistory }) 
+                });
 
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
+                }
+                
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                    const aiResponse = data.candidates[0].content.parts[0].text.trim();
+                    appendChatMessage(aiResponse, 'ai');
+                    debateChatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                } else if (data.candidates && data.candidates[0].finishReason) {
+                     let blockMessage = "Peço desculpa, mas não posso responder a isso. ";
+                    if (data.candidates[0].finishReason === "SAFETY") {
+                        blockMessage += "A tua mensagem pode ter acionado os meus filtros de segurança. Podes tentar reformular?";
+                    } else {
+                        blockMessage += `A resposta foi interrompida por: ${data.candidates[0].finishReason}.`;
+                    }
+                    appendChatMessage(blockMessage, 'ai');
+                    debateChatHistory.push({ role: "model", parts: [{ text: blockMessage }] });
+                } else {
+                    throw new Error("Resposta da API inválida ou vazia.");
+                }
 
-        sendDebateButton.addEventListener('click', () => {
-            const argumentoUsuario = userInputDebate.value.trim();
-            const topico = debateTopicoInput.value.trim(); // Pega o tópico novamente para o prompt
-            const nivelIA = debateNivelDificuldadeSelect.value;
-
-
-            if (!topico) {
-                addNotification("Defina o tópico do debate primeiro usando o botão 'Iniciar Debate'.", "warning");
-                return;
+            } catch (error) {
+                console.error("Erro ao enviar argumento:", error);
+                appendChatMessage(`Desculpa, ocorreu um erro: ${error.message}`, 'ai');
+            } finally {
+                toggleButtonLoading(dom.sendArgumentButton, false);
+                dom.userArgumentInput.focus();
             }
-            if (!argumentoUsuario) {
-                addNotification("Digite seu argumento.", "warning");
-                return;
-            }
-
-            addMessageToDebateChat(argumentoUsuario, 'user');
-            userInputDebate.value = '';
-            debateConversationHistory.push({role: "user", parts: [{text: argumentoUsuario}] });
-
-            // Monta o histórico para a IA
-            let promptContext = `Você é CapyDebate, uma IA que atua como oponente num debate.
-O tópico do debate é: "${topico}".
-O usuário está defendendo o lado: ${ladoUsuarioGlobal === 'favor' ? 'A FAVOR' : 'CONTRA'}.
-Você está defendendo o lado oposto.
-Seu nível de argumentação deve ser: ${nivelIA}.
-
-Responda ao último argumento do usuário com um contra-argumento forte e bem fundamentado, mantendo sua posição.
-Seja respeitoso, mas assertivo. Use lógica, evidências (mesmo que hipotéticas, se o nível permitir) e retórica.
-Formate sua resposta usando Markdown (ex: **negrito**, *itálico*, listas).
-
-Histórico da conversa até agora (últimas mensagens):
-`;
-            // Adiciona as últimas N mensagens ao prompt
-            debateConversationHistory.slice(-6).forEach(entry => {
-                promptContext += `${entry.role === 'user' ? 'Usuário' : 'IA (Oponente)'}: ${entry.parts[0].text}\n`;
-            });
-            // Não precisa adicionar o argumento atual do usuário de novo, pois já está no histórico.
-
-            callGeminiAPI(promptContext, sendDebateButton, (iaResponse) => {
-                addMessageToDebateChat(iaResponse, 'ia', true);
-                debateConversationHistory.push({role: "model", parts: [{text: iaResponse}] });
-            });
-        });
+        }
         
-        userInputDebate.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !sendDebateButton.disabled) { // Envia com Enter, permite Shift+Enter para nova linha
-                e.preventDefault(); 
-                sendDebateButton.click();
+        async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
             }
-        });
+        }
 
-        exportTxtButtonDebate.addEventListener('click', () => {
-            // Para o chat, é melhor pegar o conteúdo diretamente do chatBox
-            const debateContent = Array.from(chatBoxDebate.querySelectorAll('.chat-message'))
-                                     .map(el => `${el.classList.contains('user-message') ? 'Usuário' : 'CapyDebate'}: ${el.innerText}`)
-                                     .join('\n\n');
-            exportToTxt(`debate_capydebate.txt`, debateContent);
-        });
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+            }
+        }
 
-        exportPdfButtonDebate.addEventListener('click', () => {
-            const debateContent = Array.from(chatBoxDebate.querySelectorAll('.chat-message'))
-                                     .map(el => `${el.classList.contains('user-message') ? 'Usuário' : 'CapyDebate'}: ${el.innerText}`)
-                                     .join('\n\n');
-            exportToPdf(`debate_capydebate.pdf`, debateContent);
-        });
+         document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); // Corrigido para chamar a função correta
+            loadApiKey();
+            
+            if(dom.startDebateButton) dom.startDebateButton.addEventListener('click', handleStartDebate);
+            if(dom.sendArgumentButton) dom.sendArgumentButton.addEventListener('click', handleSendArgument);
+            if(dom.userArgumentInput) dom.userArgumentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendArgument();
+                }
+            });
 
-
-        // --- Inicialização da Página ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadApiKeysFromStorage(); 
-            renderSidebar();
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                const key = dom.geminiApiKeyInput.value.trim();
+                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+                else { alert("Por favor, insira uma chave API.");}
+            });
         });
     </script>
 </body>

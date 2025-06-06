@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapySimulador Estrutural - CapyUniverse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; } /* zinc-700 */
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); } /* zinc-900 with opacity */
+        
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; } /* indigo-500 */
+
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .input-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #a1a1aa; font-size: 0.875rem;} /* zinc-400 */
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
+            background-color: #27272a; /* zinc-800 */
+            border: 1px solid #3f3f46; /* zinc-700 */
+            border-radius: 0.375rem; /* rounded-md */
+            color: #e4e4e7; /* zinc-200 */
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); /* indigo-500 with opacity */
+        }
+        .error-message { color: #f87171; margin-top: 0.25rem; font-size: 0.75rem; min-height: 1.125rem; } /* red-400, added min-height */
+        .radio-group { display: flex; gap: 1rem; align-items: center; }
+        .radio-group label { margin-bottom: 0; color: #d4d4d8; } /* zinc-300 */
+        input[type="radio"] {
+            accent-color: #6366f1; /* indigo-500 */
+        }
+
+        .sim-button, .ai-button {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .sim-button:hover, .ai-button:hover { background-color: #4338ca; } /* indigo-700 */
+        .sim-button:disabled, .ai-button:disabled { background-color: #3730a3; opacity: 0.7; cursor: not-allowed; } /* indigo-800 */
+        .ai-button { background-color: #8b5cf6; } /* violet-500 */
+        .ai-button:hover { background-color: #7c3aed; } /* violet-600 */
+
+
+        #reportContent { display: none; } 
+        .chart-container-wrapper {
+            background-color: #27272a; /* zinc-800 */
+            border: 1px solid #3f3f46; /* zinc-700 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1rem;
+        }
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6;}
+        .markdown-output strong { font-weight: bold; color: #a5b4fc; } /* indigo-300 */
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+        .markdown-output li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-sky-400">CapySimulador Estrutural 🏗️</h1>
+                    <p class="text-zinc-300 mt-1">Simule o comportamento de elementos estruturais de forma simplificada e educativa.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <section class="lg:col-span-1 bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
+                        <h2 class="text-xl font-syne font-semibold mb-4 text-zinc-100">Dados de Entrada</h2>
+
+                        <div class="input-group">
+                            <label for="tipoEstrutura">Tipo de Estrutura:</label>
+                            <select id="tipoEstrutura">
+                                <option value="Viga">Viga Biapoiada</option>
+                                <option value="Pilar">Pilar (Compressão Axial)</option>
+                                <option value="Laje">Laje Simplesmente Apoiada (Análise por Faixa)</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="material">Material:</label>
+                            <select id="material">
+                                <option value="Concreto">Concreto (fck 25MPa)</option>
+                                <option value="Aco">Aço (MR250)</option>
+                                <option value="Madeira">Madeira (C20 - Pinho)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                             <div class="input-group">
+                                <label for="moduloElasticidade">Módulo de Young (GPa):</label>
+                                <input type="number" id="moduloElasticidade" step="0.1" value="25">
+                                <p id="moduloElasticidade-error" class="error-message"></p>
+                            </div>
+                            <div class="input-group">
+                                <label for="tensaoAdmissivel">Tensão Admissível (MPa):</label>
+                                <input type="number" id="tensaoAdmissivel" step="0.1" value="15">
+                                <p id="tensaoAdmissivel-error" class="error-message"></p>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="comprimento">Comprimento (L) (metros):</label>
+                            <input type="number" id="comprimento" step="0.01" min="0.1" value="5">
+                            <p id="comprimento-error" class="error-message"></p>
+                        </div>
+                        
+                        <div id="secao-retangular-group">
+                            <div class="input-group">
+                                <label for="largura">Largura da Seção (b) (metros):</label>
+                                <input type="number" id="largura" step="0.01" min="0.01" value="0.2">
+                                <p id="largura-error" class="error-message"></p>
+                            </div>
+                            <div class="input-group">
+                                <label for="altura">Altura da Seção (h) / Espessura (t) (metros):</label>
+                                <input type="number" id="altura" step="0.01" min="0.01" value="0.4">
+                                <p id="altura-error" class="error-message"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Tipo de Carregamento:</label>
+                            <div class="radio-group">
+                                <div>
+                                    <input type="radio" id="uniforme" name="tipoCarregamento" value="Uniforme" checked>
+                                    <label for="uniforme">Distribuído (q)</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="pontual" name="tipoCarregamento" value="Pontual">
+                                    <label for="pontual">Pontual (P)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="magnitude">Magnitude do Carregamento (<span id="unidadeCarregamento">kN/m</span>):</label>
+                            <input type="number" id="magnitude" step="0.01" min="0.1" value="10">
+                            <p id="magnitude-error" class="error-message"></p>
+                        </div>
+
+                        <button id="btnSimular" class="sim-button font-bold py-2.5 px-4 rounded-lg w-full text-sm flex items-center justify-center">
+                            <span class="btn-text">Simular Estrutura</span>
+                            <div class="loader hidden ml-2"></div>
+                        </button>
+                    </section>
+
+                    <section class="lg:col-span-2 bg-zinc-800/50 p-5 rounded-lg border border-zinc-700 flex flex-col">
+                        <h2 class="text-xl font-syne font-semibold mb-4 text-zinc-100">Visualização e Resultados</h2>
+                        
+                        <div class="mb-6 text-center">
+                            <img id="simulacao-img" src="https://placehold.co/600x200/27272a/a1a1aa?text=Diagrama+da+Estrutura" alt="Diagrama da Estrutura Simulada" class="w-full max-w-md mx-auto rounded-md mb-2">
+                            <p id="statusSimulacao" class="text-sm text-zinc-400">Aguardando dados para simulação...</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-zinc-700/50 p-3 rounded-md text-center">
+                                <p class="text-xs text-sky-400 font-semibold uppercase">Tensão Máxima</p>
+                                <p id="tensaoMaxima" class="text-2xl font-bold text-white">0.00 <span class="text-sm font-normal text-zinc-400">MPa</span></p>
+                            </div>
+                            <div class="bg-zinc-700/50 p-3 rounded-md text-center">
+                                <p class="text-xs text-amber-400 font-semibold uppercase">Deformação Máx.</p>
+                                <p id="deformacaoMaxima" class="text-2xl font-bold text-white">0.00 <span class="text-sm font-normal text-zinc-400">mm</span></p>
+                            </div>
+                            <div class="bg-zinc-700/50 p-3 rounded-md text-center">
+                                <p class="text-xs text-emerald-400 font-semibold uppercase">Fator de Segurança</p>
+                                <p id="fatorSeguranca" class="text-2xl font-bold text-white">0.00</p>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-container-wrapper flex-grow mb-6">
+                            <canvas id="distribuicaoTensaoChart"></canvas>
+                        </div>
+
+                        <div id="aiAnalysisSection" class="hidden mt-6 bg-zinc-700/30 p-4 rounded-lg">
+                            <h3 class="text-lg font-syne font-semibold text-violet-300 mb-2">✨ Análise e Recomendações da CapyEngenheiro IA</h3>
+                            <div id="aiAnalysisOutput" class="markdown-output text-sm text-zinc-300 max-h-60 overflow-y-auto scrollbar-thin">
+                                <p class="text-center text-zinc-400">Clique em "Analisar Resultados com IA" para obter insights.</p>
+                            </div>
+                            <div id="aiAnalysisLoader" class="hidden text-center py-4">
+                                <div class="loader inline-block"></div>
+                                <p class="text-sm text-violet-300 mt-2">CapyEngenheiro está pensando...</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                            <button id="btnAnalyzeIA" class="ai-button font-bold py-2.5 px-4 rounded-lg w-full sm:w-auto text-sm flex items-center justify-center hidden">
+                                <span class="btn-text-ai">✨ Analisar Resultados com IA</span>
+                                <div class="loader-ai hidden ml-2"></div>
+                            </button>
+                            <button id="btnRelatorio" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg w-full sm:w-auto text-sm flex items-center justify-center">
+                                 <i class="fas fa-file-pdf mr-2"></i>Gerar Relatório PDF
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="reportContent"></div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentPageId = 'CapySimulador'; 
+        let apiKey = ''; 
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let distribuicaoTensaoChart = null;
+        let lastSimulationData = null;
+
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            
+            tipoEstruturaSelect: document.getElementById('tipoEstrutura'),
+            materialSelect: document.getElementById('material'),
+            moduloElasticidadeInput: document.getElementById('moduloElasticidade'),
+            tensaoAdmissivelInput: document.getElementById('tensaoAdmissivel'),
+            comprimentoInput: document.getElementById('comprimento'),
+            larguraInput: document.getElementById('largura'),
+            alturaInput: document.getElementById('altura'),
+            unidadeCarregamentoSpan: document.getElementById('unidadeCarregamento'),
+            magnitudeLabel: document.querySelector('label[for="magnitude"]'),
+            magnitudeInput: document.getElementById('magnitude'),
+            btnSimular: document.getElementById('btnSimular'),
+            btnRelatorio: document.getElementById('btnRelatorio'),
+            tensaoMaximaElement: document.getElementById('tensaoMaxima'),
+            deformacaoMaximaElement: document.getElementById('deformacaoMaxima'),
+            fatorSegurancaElement: document.getElementById('fatorSeguranca'),
+            statusSimulacao: document.getElementById('statusSimulacao'),
+            simulacaoImg: document.getElementById('simulacao-img'),
+            reportContentDiv: document.getElementById('reportContent'),
+            btnAnalyzeIA: document.getElementById('btnAnalyzeIA'),
+            aiAnalysisSection: document.getElementById('aiAnalysisSection'),
+            aiAnalysisOutput: document.getElementById('aiAnalysisOutput'),
+            aiAnalysisLoader: document.getElementById('aiAnalysisLoader')
+        };
+        
+        const materialPresets = {
+            Concreto: { E: 25, sigma: 15 },
+            Aco: { E: 200, sigma: 235 }, 
+            Madeira: { E: 10, sigma: 8 }
+        };
+
+        function updateMaterialProperties() {
+            const selectedMaterial = dom.materialSelect.value;
+            if (materialPresets[selectedMaterial]) {
+                dom.moduloElasticidadeInput.value = materialPresets[selectedMaterial].E;
+                dom.tensaoAdmissivelInput.value = materialPresets[selectedMaterial].sigma;
+            }
+        }
+        dom.materialSelect.addEventListener('change', updateMaterialProperties);
+        
+        function validateNumberField(field, errorElementId, allowZero = false) {
+            const errorEl = document.getElementById(errorElementId);
+            if (!errorEl) {
+                console.warn("Elemento de erro não encontrado para: " + errorElementId);
+                const valueCheck = parseFloat(field.value);
+                 if (isNaN(valueCheck) || (!allowZero && valueCheck <= 0)) {
+                    field.classList.add('border-red-500');
+                    return false;
+                }
+                field.classList.remove('border-red-500');
+                return true;
+            }
+            errorEl.textContent = "";
+            const value = parseFloat(field.value);
+            if (isNaN(value) || (!allowZero && value <= 0)) {
+                errorEl.textContent = "Valor inválido. Insira um número positivo.";
+                field.classList.add('border-red-500');
+                return false;
+            }
+            field.classList.remove('border-red-500');
+            return true;
+        }
+
+        function toggleLoading(buttonElement, isLoading, buttonTextContent = "Ação") {
+            const btnText = buttonElement.querySelector('.btn-text') || buttonElement.querySelector('.btn-text-ai');
+            const loader = buttonElement.querySelector('.loader') || buttonElement.querySelector('.loader-ai');
+            buttonElement.disabled = isLoading;
+            if(isLoading) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+            } else {
+                if(btnText) {
+                    btnText.classList.remove('hidden');
+                    if (buttonTextContent !== "Ação") btnText.textContent = buttonTextContent;
+                }
+                if(loader) loader.classList.add('hidden');
+            }
+        }
+
+        function basicMarkdownToHtml(md) {
+            let html = md;
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/^\s*-\s+(.*)/gm, '<li class="ml-4 mb-1">_ $1</li>');
+            html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+            html = html.replace(/<\/ul>\s*<ul>/g, '');
+            html = html.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+            return html;
+        }
+
+
+        function updateChart(labels, dataTensao, dataFlecha) {
+            const ctx = document.getElementById('distribuicaoTensaoChart').getContext('2d');
+            if (distribuicaoTensaoChart) {
+                distribuicaoTensaoChart.destroy();
+            }
+            distribuicaoTensaoChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Tensão (MPa)',
+                            data: dataTensao,
+                            borderColor: '#38bdf8', 
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            tension: 0.1,
+                            yAxisID: 'yTensao',
+                            fill: true,
+                        },
+                        {
+                            label: 'Flecha (mm)',
+                            data: dataFlecha,
+                            borderColor: '#fbbf24', 
+                            backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                            tension: 0.1,
+                            yAxisID: 'yFlecha',
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'Posição (m)', color: '#a1a1aa' },
+                            ticks: { color: '#a1a1aa' },
+                            grid: { color: 'rgba(161, 161, 170, 0.2)'}
+                        },
+                        yTensao: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Tensão (MPa)', color: '#38bdf8' },
+                            ticks: { color: '#38bdf8' },
+                            grid: { color: 'rgba(161, 161, 170, 0.1)'}
+                        },
+                        yFlecha: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Flecha (mm)', color: '#fbbf24' },
+                            ticks: { color: '#fbbf24' },
+                            grid: { drawOnChartArea: false } 
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#d4d4d8' } }, 
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    }
+                                    return `Posição: ${label} m`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function simularEstrutura() {
+            toggleLoading(dom.btnSimular, true, "Simular Estrutura");
+            dom.statusSimulacao.textContent = "Calculando...";
+            dom.statusSimulacao.className = 'text-sm text-sky-400'; 
+            dom.aiAnalysisSection.classList.add('hidden');
+            dom.btnAnalyzeIA.classList.add('hidden');
+            lastSimulationData = null;
+
+            try {
+                let isValid = true;
+                isValid = validateNumberField(dom.comprimentoInput, 'comprimento-error') && isValid;
+                isValid = validateNumberField(dom.larguraInput, 'largura-error') && isValid;
+                isValid = validateNumberField(dom.alturaInput, 'altura-error') && isValid;
+                isValid = validateNumberField(dom.magnitudeInput, 'magnitude-error') && isValid;
+                isValid = validateNumberField(dom.moduloElasticidadeInput, 'moduloElasticidade-error', false) && isValid;
+                isValid = validateNumberField(dom.tensaoAdmissivelInput, 'tensaoAdmissivel-error', false) && isValid;
+
+                if (!isValid) {
+                    dom.statusSimulacao.textContent = "Erro nos dados de entrada. Verifique os campos.";
+                    dom.statusSimulacao.classList.replace('text-sky-400', 'text-red-400');
+                    throw new Error("Validation failed");
+                }
+
+                const tipoEstrutura = dom.tipoEstruturaSelect.value;
+                const E_GPa = parseFloat(dom.moduloElasticidadeInput.value); 
+                if (E_GPa <=0) {
+                    document.getElementById('moduloElasticidade-error').textContent = "Módulo de Young deve ser positivo.";
+                    throw new Error("Módulo de Young inválido.");
+                }
+                const E_Pa = E_GPa * 1e9; 
+                const sigma_adm_MPa = parseFloat(dom.tensaoAdmissivelInput.value); 
+                 if (sigma_adm_MPa <=0) {
+                    document.getElementById('tensaoAdmissivel-error').textContent = "Tensão Admissível deve ser positiva.";
+                    throw new Error("Tensão Admissível inválida.");
+                }
+                const sigma_adm_Pa = sigma_adm_MPa * 1e6; 
+
+                const L = parseFloat(dom.comprimentoInput.value); 
+                const b = parseFloat(dom.larguraInput.value); 
+                const h = parseFloat(dom.alturaInput.value); 
+                
+                const tipoCarregamento = document.querySelector('input[name="tipoCarregamento"]:checked').value;
+                const q_kN_m_ou_P_kN = parseFloat(dom.magnitudeInput.value); 
+                const carga_N_m_ou_N = q_kN_m_ou_P_kN * 1000; 
+
+                let M_max = 0, V_max = 0, sigma_max_Pa = 0, delta_max_m = 0;
+                let I = 0, W = 0, A = 0;
+                const chartLabels = [], chartDataTensao = [], chartDataFlecha = [];
+                const numPontos = 21; 
+
+                dom.simulacaoImg.src = `https://placehold.co/600x200/27272a/6366f1?text=Simulando+${tipoEstrutura}...`;
+
+                if (tipoEstrutura === 'Viga') {
+                    A = b * h;
+                    I = (b * Math.pow(h, 3)) / 12;
+                    W = (b * Math.pow(h, 2)) / 6;
+                    if (I === 0 || W === 0) throw new Error("Dimensões da viga resultam em Inércia/Módulo de Resistência zero.");
+
+
+                    if (tipoCarregamento === 'Uniforme') { 
+                        M_max = (carga_N_m_ou_N * Math.pow(L, 2)) / 8;
+                        V_max = (carga_N_m_ou_N * L) / 2;
+                        delta_max_m = (5 * carga_N_m_ou_N * Math.pow(L, 4)) / (384 * E_Pa * I);
+                        for (let i = 0; i < numPontos; i++) {
+                            const x = (L / (numPontos - 1)) * i;
+                            chartLabels.push(x.toFixed(2));
+                            const Mx = (carga_N_m_ou_N * x / 2) * (L - x);
+                            chartDataTensao.push((Mx / W / 1e6).toFixed(2)); 
+                            const delta_x = (carga_N_m_ou_N * x / (24 * E_Pa * I)) * (Math.pow(L,3) - 2 * L * Math.pow(x,2) + Math.pow(x,3));
+                            chartDataFlecha.push((delta_x * 1000).toFixed(2)); 
+                        }
+                    } else { 
+                        M_max = (carga_N_m_ou_N * L) / 4;
+                        V_max = carga_N_m_ou_N / 2;
+                        delta_max_m = (carga_N_m_ou_N * Math.pow(L, 3)) / (48 * E_Pa * I);
+                        for (let i = 0; i < numPontos; i++) {
+                            const x = (L / (numPontos - 1)) * i;
+                            chartLabels.push(x.toFixed(2));
+                            let Mx = 0;
+                            if (x <= L/2) Mx = (carga_N_m_ou_N * x) / 2;
+                            else Mx = (carga_N_m_ou_N * (L-x)) / 2;
+                            chartDataTensao.push((Mx / W / 1e6).toFixed(2)); 
+                            
+                            let delta_x = 0;
+                            if (x <= L/2) delta_x = (carga_N_m_ou_N * x / (48 * E_Pa * I)) * (3*Math.pow(L,2) - 4*Math.pow(x,2));
+                            else delta_x = (carga_N_m_ou_N * (L-x) / (48 * E_Pa * I)) * (3*Math.pow(L,2) - 4*Math.pow((L-x),2)); 
+                            chartDataFlecha.push((delta_x * 1000).toFixed(2)); 
+                        }
+                    }
+                    sigma_max_Pa = M_max / W;
+                } else if (tipoEstrutura === 'Pilar') { 
+                    A = b * h;
+                    if (A === 0) throw new Error("Área do pilar não pode ser zero.");
+                    I = Math.min((b * Math.pow(h,3))/12, (h*Math.pow(b,3))/12); 
+                    if (I === 0) throw new Error("Momento de Inércia do pilar não pode ser zero.");
+                    sigma_max_Pa = carga_N_m_ou_N / A; 
+                    delta_max_m = (carga_N_m_ou_N * L) / (A * E_Pa); 
+                    
+                    const P_critico_euler = (Math.PI**2 * E_Pa * I) / (L**2); 
+
+                    let statusSimulacaoPilar = "";
+                    if (P_critico_euler < carga_N_m_ou_N) {
+                        statusSimulacaoPilar = " ATENÇÃO: Risco de flambagem (Pcrít < P)!";
+                    }
+                    dom.statusSimulacao.textContent = "Simulação concluída." + statusSimulacaoPilar;
+
+
+                    for (let i = 0; i < numPontos; i++) {
+                        chartLabels.push(((L / (numPontos - 1)) * i).toFixed(2));
+                        chartDataTensao.push((sigma_max_Pa / 1e6).toFixed(2)); 
+                        chartDataFlecha.push(0); 
+                    }
+
+                } else if (tipoEstrutura === 'Laje') { 
+                    const largura_faixa = 1; 
+                    A = largura_faixa * h; 
+                    I = (largura_faixa * Math.pow(h, 3)) / 12;
+                    W = (largura_faixa * Math.pow(h, 2)) / 6;
+                    if (I === 0 || W === 0) throw new Error("Dimensões da laje resultam em Inércia/Módulo de Resistência zero.");
+
+                    const q_linear_N_m = carga_N_m_ou_N * largura_faixa; 
+
+                    if (tipoCarregamento === 'Uniforme') {
+                        M_max = (q_linear_N_m * Math.pow(L, 2)) / 8; 
+                        delta_max_m = (5 * q_linear_N_m * Math.pow(L, 4)) / (384 * E_Pa * I);
+                    } else { 
+                        M_max = (carga_N_m_ou_N * L) / 4; 
+                        delta_max_m = (carga_N_m_ou_N * Math.pow(L, 3)) / (48 * E_Pa * I);
+                    }
+                    sigma_max_Pa = M_max / W;
+                    for (let i = 0; i < numPontos; i++) {
+                        const x = (L / (numPontos - 1)) * i;
+                        chartLabels.push(x.toFixed(2));
+                        let Mx_laje = 0;
+                         if (tipoCarregamento === 'Uniforme') {
+                            Mx_laje = (q_linear_N_m * x / 2) * (L - x);
+                         } else {
+                            if (x <= L/2) Mx_laje = (carga_N_m_ou_N * x) / 2;
+                            else Mx_laje = (carga_N_m_ou_N * (L-x)) / 2;
+                         }
+                        chartDataTensao.push((Mx_laje / W / 1e6).toFixed(2));
+                        
+                        let delta_x_laje = 0;
+                        if (tipoCarregamento === 'Uniforme') {
+                            delta_x_laje = (q_linear_N_m * x / (24 * E_Pa * I)) * (Math.pow(L,3) - 2 * L * Math.pow(x,2) + Math.pow(x,3));
+                        } else {
+                            if (x <= L/2) delta_x_laje = (carga_N_m_ou_N * x / (48 * E_Pa * I)) * (3*Math.pow(L,2) - 4*Math.pow(x,2));
+                            else delta_x_laje = (carga_N_m_ou_N * (L-x) / (48 * E_Pa * I)) * (3*Math.pow(L,2) - 4*Math.pow((L-x),2));
+                        }
+                        chartDataFlecha.push((delta_x_laje * 1000).toFixed(2));
+                    }
+                }
+
+                const sigma_max_MPa = sigma_max_Pa / 1e6;
+                const delta_max_mm = delta_max_m * 1000;
+                const FS = sigma_max_Pa > 0 ? sigma_adm_Pa / sigma_max_Pa : Infinity; // Evita divisão por zero se sigma_max_Pa for 0
+
+                lastSimulationData = {
+                    tipoEstrutura, E_GPa, sigma_adm_MPa, L, b, h, tipoCarregamento, q_kN_m_ou_P_kN,
+                    sigma_max_MPa, delta_max_mm, FS
+                };
+
+                dom.tensaoMaximaElement.textContent = sigma_max_MPa.toFixed(2);
+                dom.deformacaoMaximaElement.textContent = delta_max_mm.toFixed(2);
+                dom.fatorSegurancaElement.textContent = isFinite(FS) ? FS.toFixed(2) : "∞";
+
+
+                dom.statusSimulacao.classList.remove('text-sky-400', 'text-red-400', 'text-amber-400');
+                let baseStatusText = dom.statusSimulacao.textContent.includes("ATENÇÃO: Risco de flambagem") ? dom.statusSimulacao.textContent : "Simulação concluída.";
+
+                if (FS < 1.0) {
+                    dom.fatorSegurancaElement.parentElement.className = 'bg-zinc-700/50 p-3 rounded-md text-center text-red-400';
+                    dom.statusSimulacao.textContent = baseStatusText + " Atenção: Fator de Segurança BAIXO!";
+                    dom.statusSimulacao.classList.add('text-red-400');
+                } else if (FS < 1.5) {
+                    dom.fatorSegurancaElement.parentElement.className = 'bg-zinc-700/50 p-3 rounded-md text-center text-amber-400';
+                    dom.statusSimulacao.textContent = baseStatusText + " Fator de Segurança aceitável, mas requer atenção.";
+                    dom.statusSimulacao.classList.add('text-amber-400');
+                } else {
+                    dom.fatorSegurancaElement.parentElement.className = 'bg-zinc-700/50 p-3 rounded-md text-center text-emerald-400';
+                    dom.statusSimulacao.textContent = baseStatusText;
+                     if (!baseStatusText.includes("ATENÇÃO: Risco de flambagem")) {
+                        dom.statusSimulacao.textContent = baseStatusText + " Fator de Segurança adequado.";
+                        dom.statusSimulacao.classList.add('text-emerald-400');
+                    }
+                }
+                
+                updateChart(chartLabels, chartDataTensao, chartDataFlecha);
+                dom.btnAnalyzeIA.classList.remove('hidden');
+
+
+            } catch (e) {
+                 dom.statusSimulacao.textContent = "Erro na simulação: " + e.message;
+                 dom.statusSimulacao.classList.replace('text-sky-400', 'text-red-400');
+                 console.error("Erro na simulação:", e);
+            } finally {
+                toggleLoading(dom.btnSimular, false, "Simular Estrutura");
+            }
+        }
+
+        async function handleGetAIAnalysis() {
+            if (!apiKey) {
+                alert("Por favor, configure sua chave API do Gemini no modal 'Chaves API' (canto superior direito) para usar esta funcionalidade.");
+                return;
+            }
+            if (!lastSimulationData) {
+                alert("Por favor, realize uma simulação primeiro.");
+                return;
+            }
+
+            toggleLoading(dom.btnAnalyzeIA, true, "Analisar Resultados com IA");
+            dom.aiAnalysisSection.classList.remove('hidden');
+            dom.aiAnalysisLoader.classList.remove('hidden');
+            dom.aiAnalysisOutput.innerHTML = '';
+
+            const { tipoEstrutura, E_GPa, sigma_adm_MPa, L, b, h, tipoCarregamento, q_kN_m_ou_P_kN, sigma_max_MPa, delta_max_mm, FS } = lastSimulationData;
+            const unidadeCarga = (tipoCarregamento === 'Uniforme') ? 'kN/m' : 'kN';
+
+            const promptParaIA = `
+                Você é CapyEngenheiro, um assistente de engenharia estrutural experiente e didático.
+                Analise os seguintes resultados de uma simulação estrutural simplificada e forneça uma interpretação qualitativa e sugestões de otimização.
+
+                Dados de Entrada da Simulação:
+                - Tipo de Estrutura: ${tipoEstrutura}
+                - Material (características): Módulo de Young = ${E_GPa} GPa, Tensão Admissível = ${sigma_adm_MPa} MPa
+                - Comprimento (L): ${L} m
+                - Largura da Seção (b): ${b} m
+                - Altura/Espessura (h/t): ${h} m
+                - Tipo de Carregamento: ${tipoCarregamento}
+                - Magnitude do Carregamento: ${q_kN_m_ou_P_kN} ${unidadeCarga}
+
+                Resultados da Simulação:
+                - Tensão Máxima Calculada (σ_max): ${sigma_max_MPa.toFixed(2)} MPa
+                - Deformação Máxima Calculada (δ_max): ${delta_max_mm.toFixed(2)} mm
+                - Fator de Segurança Calculado (FS): ${isFinite(FS) ? FS.toFixed(2) : "Considerado Infinito (tensão nula ou muito baixa)"}
+
+                Por favor, forneça:
+                1.  **Interpretação do Fator de Segurança (FS):** O que este valor de FS significa para a segurança da estrutura? (Ex: "Muito seguro", "Seguro, mas otimizável", "Próximo ao limite", "Inseguro").
+                2.  **Análise da Tensão Máxima:** A tensão calculada está próxima da tensão admissível do material? Isso é preocupante?
+                3.  **Análise da Deformação Máxima:** A deformação é significativa para o tipo de estrutura e seu comprimento? Poderia causar problemas de usabilidade ou estéticos?
+                4.  **Sugestões de Otimização (se aplicável):**
+                    * Se o FS for baixo (ex: < 1.5, especialmente < 1.0), sugira 2-3 ações concretas para aumentar a segurança (ex: aumentar dimensões da seção, usar material mais resistente, reduzir vão, verificar cargas).
+                    * Se o FS for muito alto (ex: > 3.0 ou 4.0), sugira 2-3 formas de otimizar o uso de material, se economicamente viável (ex: reduzir dimensões da seção com cautela, explorar um material com menor resistência se ainda atender ao FS mínimo).
+                    * Se o FS estiver adequado, mencione que o dimensionamento parece razoável, mas que verificações adicionais são sempre recomendadas para projetos reais.
+                5.  **Considerações Gerais:** Alguma observação adicional sobre os resultados ou próximos passos para uma análise mais detalhada?
+
+                Responda em português brasileiro, usando Markdown simples para formatação (negrito, listas). Seja claro e didático.
+                Lembre ao usuário que esta é uma simulação simplificada e educacional.
+            `;
+            
+            try {
+                const payload = { contents: [{ parts: [{ text: promptParaIA }] }] };
+                const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(geminiApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                    const aiResponseText = result.candidates[0].content.parts[0].text;
+                    dom.aiAnalysisOutput.innerHTML = basicMarkdownToHtml(aiResponseText);
+                } else {
+                    throw new Error(result.promptFeedback?.blockReason ? `Conteúdo bloqueado pela API: ${result.promptFeedback.blockReason}` : "Resposta da API inválida ou vazia.");
+                }
+            } catch (error) {
+                console.error('Erro ao obter análise da IA:', error);
+                dom.aiAnalysisOutput.innerHTML = `<p class="text-red-500">Erro ao comunicar com a IA: ${error.message}</p>`;
+            } finally {
+                toggleLoading(dom.btnAnalyzeIA, false, "✨ Analisar Resultados com IA");
+                dom.aiAnalysisLoader.classList.add('hidden');
+            }
+        }
+
+
+        function generatePDFReport() {
+            const tipoEstrutura = dom.tipoEstruturaSelect.value;
+            const material = dom.materialSelect.options[dom.materialSelect.selectedIndex].text;
+            const E_GPa = parseFloat(dom.moduloElasticidadeInput.value);
+            const sigma_adm_MPa = parseFloat(dom.tensaoAdmissivelInput.value);
+            const L = parseFloat(dom.comprimentoInput.value);
+            const b = parseFloat(dom.larguraInput.value);
+            const h = parseFloat(dom.alturaInput.value);
+            const tipoCarregamento = document.querySelector('input[name="tipoCarregamento"]:checked').value;
+            const q_kN_m_ou_P_kN = parseFloat(dom.magnitudeInput.value);
+            const unidadeCarga = (tipoCarregamento === 'Uniforme') ? 'kN/m' : 'kN';
+
+            const tensaoMax = dom.tensaoMaximaElement.textContent;
+            const deformacaoMax = dom.deformacaoMaximaElement.textContent;
+            const fs = dom.fatorSegurancaElement.textContent;
+            const aiAnalysisHTML = dom.aiAnalysisSection.classList.contains('hidden') ? '<p>Nenhuma análise da IA foi solicitada para este relatório.</p>' : dom.aiAnalysisOutput.innerHTML;
+
+
+            const reportHTML = `
+                <div style="font-family: Arial, sans-serif; margin: 20px; color: #333; font-size: 11pt;">
+                    <div style="text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 10px; margin-bottom: 20px;">
+                        <h1 style="font-size: 22px; color: #4f46e5; margin: 0;">CapySimulador Estrutural</h1>
+                        <p style="font-size: 13px; color: #555;">Relatório de Análise Simplificada</p>
+                    </div>
+
+                    <h2 style="font-size: 16px; color: #4f46e5; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; margin-bottom:10px;">Dados de Entrada</h2>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 20px;">
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Tipo de Estrutura:</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${tipoEstrutura}</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Material:</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${material}</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Módulo de Young (E):</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${E_GPa} GPa</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Tensão Admissível (σ_adm):</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${sigma_adm_MPa} MPa</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Comprimento (L):</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${L} m</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Largura da Seção (b):</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${b} m</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Altura/Espessura (h/t):</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${h} m</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Tipo de Carregamento:</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${tipoCarregamento}</td></tr>
+                        <tr><td style="padding: 4px 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Magnitude do Carregamento:</td><td style="padding: 4px 6px; border: 1px solid #ddd;">${q_kN_m_ou_P_kN} ${unidadeCarga}</td></tr>
+                    </table>
+
+                    <h2 style="font-size: 16px; color: #4f46e5; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; margin-bottom:10px;">Resultados da Simulação</h2>
+                     <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 20px;">
+                        <tr><td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Tensão Máxima (σ_max):</td><td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${tensaoMax} MPa</td></tr>
+                        <tr><td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Deformação Máxima (δ_max):</td><td style="padding: 6px; border: 1px solid #ddd; text-align: right;">${deformacaoMax} mm</td></tr>
+                        <tr><td style="padding: 6px; border: 1px solid #ddd; font-weight: bold; background-color: #f3f4f6;">Fator de Segurança (FS):</td><td style="padding: 6px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: ${parseFloat(fs) < 1.5 ? (parseFloat(fs) < 1.0 ? '#ef4444' : '#f59e0b') : '#10b981'};">${fs}</td></tr>
+                    </table>
+
+                    <h2 style="font-size: 16px; color: #4f46e5; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 25px; margin-bottom:10px;">✨ Análise e Recomendações da CapyEngenheiro IA</h2>
+                    <div style="font-size: 10px; line-height: 1.5; background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 10px; border-radius: 4px;">
+                        ${aiAnalysisHTML.replace(/<p>/g, '<p style="margin-bottom: 8px;">').replace(/<strong>/g, '<strong style="color: #4f46e5;">')}
+                    </div>
+                    
+                    <p style="font-size: 9px; color: #777; margin-top: 30px; text-align: center; border-top: 1px dashed #ccc; padding-top: 10px;">
+                        <strong>Aviso Legal:</strong> Este relatório é gerado com base em cálculos simplificados para fins educacionais e ilustrativos.
+                        Não substitui uma análise estrutural detalhada realizada por um engenheiro qualificado.
+                        Os resultados devem ser usados com cautela e não para projetos reais sem validação profissional.
+                        CapyUniverse IA © ${new Date().getFullYear()}
+                    </p>
+                </div>
+            `;
+            dom.reportContentDiv.innerHTML = reportHTML;
+
+            const element = dom.reportContentDiv;
+            const opt = {
+                margin:       [10, 10, 15, 10], 
+                filename:     `CapySimulador_Relatorio_${tipoEstrutura}_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, logging: false, dpi: 192, letterRendering: true, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            dom.btnRelatorio.disabled = true;
+            dom.btnRelatorio.innerHTML = '<div class="loader inline-block"></div> <span class="ml-2">Gerando PDF...</span>';
+
+            html2pdf().from(element).set(opt).save().then(() => {
+                dom.btnRelatorio.disabled = false;
+                dom.btnRelatorio.innerHTML = '<i class="fas fa-file-pdf mr-2"></i>Gerar Relatório PDF';
+            }).catch(err => {
+                console.error("Erro ao gerar PDF:", err);
+                alert("Erro ao gerar PDF. Veja o console para detalhes.");
+                dom.btnRelatorio.disabled = false;
+                dom.btnRelatorio.innerHTML = '<i class="fas fa-file-pdf mr-2"></i>Gerar Relatório PDF';
+            });
+        }
+        
+        dom.btnSimular.addEventListener('click', simularEstrutura);
+        dom.btnRelatorio.addEventListener('click', generatePDFReport);
+        dom.btnAnalyzeIA.addEventListener('click', handleGetAIAnalysis);
+
+
+        dom.tipoEstruturaSelect.addEventListener('change', function () {
+            const selected = this.value;
+            dom.simulacaoImg.src = `https://placehold.co/600x200/27272a/a1a1aa?text=Diagrama+${selected}`;
+            if (selected === 'Laje') {
+                dom.alturaInput.previousElementSibling.textContent = 'Espessura (t) (metros):';
+            } else {
+                 dom.alturaInput.previousElementSibling.textContent = 'Altura da Seção (h) (metros):';
+            }
+        });
+        document.querySelectorAll('input[name="tipoCarregamento"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                const unidade = this.value === 'Uniforme' ? 'kN/m' : 'kN';
+                dom.unidadeCarregamentoSpan.textContent = unidade;
+                dom.magnitudeLabel.textContent = `Magnitude do Carregamento (${unidade}):`;
+            });
+        });
+
+        async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+            } else {
+                // Optionally alert or guide user if API key is essential for core functionality
+                // For now, CapySimulador's core calculations don't need Gemini, only the new AI analysis button.
+                console.log("Chave API Gemini não configurada. Funcionalidades de IA estarão desabilitadas.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); 
+            loadApiKey();
+            updateMaterialProperties(); 
+            
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                const key = dom.geminiApiKeyInput.value.trim();
+                if(key) { 
+                    localStorage.setItem(API_KEY_STORAGE_KEY, key); 
+                    apiKey = key; 
+                    alert("Chave API do Gemini salva!"); 
+                    dom.apiKeysModal.classList.add('hidden'); 
+                } else { 
+                    alert("Por favor, insira uma chave API.");
+                }
+            });
+            updateChart([], [], []); 
+        });
+    </script>
+</body>
+</html>

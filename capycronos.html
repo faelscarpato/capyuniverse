@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyCronos Legal - Gerenciador de Prazos IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; } /* zinc-700 */
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); } /* zinc-900 with opacity */
+        
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; } /* indigo-500 */
+
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .input-field, .input-select {
+             background-color: #27272a; /* zinc-800 */
+            border: 1px solid #3f3f46; /* zinc-700 */
+            color: #e4e4e7; /* zinc-200 */
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
+        }
+        .input-field:focus, .input-select:focus {
+            outline: none;
+            border-color: #818cf8; /* indigo-400 */
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5); /* indigo-400 with opacity */
+        }
+         .input-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); /* zinc-400 for arrow */
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        }
+
+        .action-button {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover { background-color: #4338ca; } /* indigo-700 */
+        .action-button:disabled { background-color: #3730a3; opacity: 0.7; cursor: not-allowed; } /* indigo-800 */
+        
+        .download-button {
+            background-color: #059669; /* emerald-600 */
+        }
+        .download-button:hover {
+             background-color: #047857; /* emerald-700 */
+        }
+        .calendar-button {
+            background-color: #fb923c; /* orange-400 */
+        }
+        .calendar-button:hover {
+            background-color: #f97316; /* orange-500 */
+        }
+
+        .output-section {
+            background-color: #1f2937; /* gray-800 */
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .output-section h3 {
+            color: #93c5fd; /* blue-300 */
+        }
+        #pdfReportContentDetails { display: none; }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-amber-400">CapyCronos Legal ⏱️</h1>
+                    <p class="text-zinc-300 mt-1">Sua IA para gestão inteligente de prazos jurídicos.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="flex flex-col space-y-4">
+                        <div>
+                            <label for="documentInput" class="block text-sm font-medium text-zinc-400 mb-1">Documento Jurídico (Texto Completo):</label>
+                            <textarea id="documentInput" class="input-field w-full p-3 h-48 rounded-md shadow-sm focus:ring focus:ring-amber-300/50 focus:border-amber-400" placeholder="Cole aqui o texto do documento (despacho, intimação, contrato, etc.)..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="deadlineType" class="block text-sm font-medium text-zinc-400 mb-1">Tipo de Prazo Principal:</label>
+                                <input type="text" id="deadlineType" class="input-field w-full" placeholder="Ex: Recurso, Contestação, Pagamento">
+                            </div>
+                            <div>
+                                <label for="referenceDate" class="block text-sm font-medium text-zinc-400 mb-1">Data de Referência (Intimação/Publicação):</label>
+                                <input type="date" id="referenceDate" class="input-field w-full">
+                            </div>
+                        </div>
+                        <button id="analyzeDeadlinesButton" class="action-button bg-amber-500 hover:bg-amber-600 font-bold py-2.5 px-4 rounded-md focus:outline-none focus:shadow-outline w-full flex items-center justify-center">
+                            <span class="btn-text">Analisar Prazos com IA</span>
+                            <div class="loader hidden ml-2"></div>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                         <h2 class="text-xl font-syne font-semibold text-zinc-100 mb-2">Análise de Prazos</h2>
+                        <div id="deadlineOutput" class="p-4 bg-zinc-800/50 rounded-md shadow-inner border border-zinc-700 min-h-[260px] space-y-3">
+                            <div class="output-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-amber-300 mb-1">Prazo Identificado:</h3>
+                                <p id="identifiedDeadlineOutput" class="text-sm text-zinc-300">Aguardando análise...</p>
+                            </div>
+                            <div class="output-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-amber-300 mb-1">Data Limite Calculada:</h3>
+                                <p id="calculatedDueDateOutput" class="text-sm text-zinc-300">-</p>
+                            </div>
+                            <div class="output-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-amber-300 mb-1">Contagem Regressiva:</h3>
+                                <p id="countdownOutput" class="text-sm text-zinc-300">-</p>
+                            </div>
+                            <div class="output-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-amber-300 mb-1">Base / Trecho Relevante:</h3>
+                                <p id="relevantTextOutput" class="text-xs text-zinc-400 italic max-h-20 overflow-y-auto scrollbar-thin">-</p>
+                            </div>
+                            <div class="output-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-amber-300 mb-1">Sugestões de Ação (IA):</h3>
+                                <ul id="actionSuggestionsOutput" class="text-sm text-zinc-300 list-disc pl-5"><li>Aguardando análise...</li></ul>
+                            </div>
+                        </div>
+                         <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                            <button id="downloadAnalysisTxtButton" class="download-button text-white font-bold py-2 px-3 rounded-md focus:outline-none focus:shadow-outline text-xs w-full sm:w-auto flex items-center justify-center">
+                                <i class="fas fa-file-alt mr-1.5"></i>TXT
+                            </button>
+                            <button id="downloadAnalysisPdfButton" class="download-button text-white font-bold py-2 px-3 rounded-md focus:outline-none focus:shadow-outline text-xs w-full sm:w-auto flex items-center justify-center">
+                                <i class="fas fa-file-pdf mr-1.5"></i>PDF
+                            </button>
+                            <button id="exportToCalendarButton" class="calendar-button text-white font-bold py-2 px-3 rounded-md focus:outline-none focus:shadow-outline text-xs w-full sm:w-auto flex items-center justify-center">
+                                <i class="fas fa-calendar-plus mr-1.5"></i>Calendário (ICS)
+                            </button>
+                        </div>
+                         <div id="loaderAi" class="text-center py-4 hidden">
+                            <div class="loader inline-block"></div>
+                            <p class="text-sm text-amber-300 mt-2">CapyCronos IA está calculando os prazos...</p>
+                        </div>
+                        <p id="errorMsg" class="text-red-400 text-sm mt-2 text-center"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="pdfReportContentDetails" class="hidden">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+            .capy-header { text-align: center; border-bottom: 2px solid #8B5CF6; padding-bottom: 10px; margin-bottom: 20px;}
+            .capy-header h1 { font-size: 24px; color: #7C3AED; margin: 0; }
+            .capy-header p { font-size: 14px; color: #555; }
+            .section-title { font-size: 18px; color: #7C3AED; margin-top: 25px; margin-bottom: 8px; border-bottom: 1px solid #D1D5DB; padding-bottom: 4px;}
+            .data-item { margin-bottom: 10px; }
+            .data-label { font-weight: bold; color: #4B5563; }
+            .data-value { color: #1F2937; }
+            .text-snippet { font-style: italic; color: #6B7280; background-color:#F3F4F6; border:1px dashed #E5E7EB; padding: 5px; margin-top:5px; }
+            ul { padding-left: 20px; } li { margin-bottom: 5px; }
+            .capy-footer { font-size:10px; color: #7f8c8d; text-align:center; margin-top:30px; border-top:1px solid #bdc3c7; padding-top:10px; }
+        </style>
+        <div class="capy-header">
+            <h1>CapyCronos Legal - Análise de Prazos</h1>
+            <p>Documento Analisado em: <span id="pdfReportDate"></span></p>
+        </div>
+        <div>
+            <h2 class="section-title">Informações do Documento e Prazo</h2>
+            <p class="data-item"><span class="data-label">Tipo de Prazo Buscado:</span> <span id="pdfDeadlineType" class="data-value"></span></p>
+            <p class="data-item"><span class="data-label">Data de Referência Informada:</span> <span id="pdfReferenceDate" class="data-value"></span></p>
+        </div>
+        <div>
+            <h2 class="section-title">Prazo Identificado pela IA</h2>
+            <p class="data-item"><span class="data-label">Descrição do Prazo:</span> <span id="pdfIdentifiedDeadline" class="data-value"></span></p>
+            <p class="data-item"><span class="data-label">Data Limite Calculada:</span> <span id="pdfCalculatedDueDate" class="data-value"></span></p>
+            <p class="data-item"><span class="data-label">Contagem Regressiva (no momento da geração):</span> <span id="pdfCountdown" class="data-value"></span></p>
+            <div class="data-item">
+                <span class="data-label">Base/Trecho Relevante do Documento:</span>
+                <div id="pdfRelevantText" class="text-snippet data-value"></div>
+            </div>
+        </div>
+        <div>
+            <h2 class="section-title">Sugestões de Ação (IA)</h2>
+            <ul id="pdfActionSuggestions" class="data-value"></ul>
+        </div>
+        <p class="capy-footer">Gerado por CapyCronos Legal - CapyUniverse IA. Esta é uma análise automatizada e deve ser verificada por um profissional.</p>
+    </div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentPageId = 'CapyCronosLegal'; 
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let lastDeadlineAnalysis = null;
+
+        const domElements = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            
+            documentInput: document.getElementById('documentInput'),
+            deadlineTypeInput: document.getElementById('deadlineType'),
+            referenceDateInput: document.getElementById('referenceDate'),
+            analyzeDeadlinesButton: document.getElementById('analyzeDeadlinesButton'),
+            
+            identifiedDeadlineOutput: document.getElementById('identifiedDeadlineOutput'),
+            calculatedDueDateOutput: document.getElementById('calculatedDueDateOutput'),
+            countdownOutput: document.getElementById('countdownOutput'),
+            relevantTextOutput: document.getElementById('relevantTextOutput'),
+            actionSuggestionsOutput: document.getElementById('actionSuggestionsOutput'),
+            
+            downloadTxtButton: document.getElementById('downloadAnalysisTxtButton'),
+            downloadPdfButton: document.getElementById('downloadAnalysisPdfButton'),
+            exportToCalendarButton: document.getElementById('exportToCalendarButton'),
+
+            pdfReportContentDetails: document.getElementById('pdfReportContentDetails'),
+            pdfReportDate: document.getElementById('pdfReportDate'),
+            pdfDeadlineType: document.getElementById('pdfDeadlineType'),
+            pdfReferenceDate: document.getElementById('pdfReferenceDate'),
+            pdfIdentifiedDeadline: document.getElementById('pdfIdentifiedDeadline'),
+            pdfCalculatedDueDate: document.getElementById('pdfCalculatedDueDate'),
+            pdfCountdown: document.getElementById('pdfCountdown'),
+            pdfRelevantText: document.getElementById('pdfRelevantText'),
+            pdfActionSuggestions: document.getElementById('pdfActionSuggestions'),
+            loaderAi: document.getElementById('loaderAi'),
+            errorMsg: document.getElementById('errorMsg')
+        };
+        
+        function toggleLoadingUI(buttonElement, isLoading) {
+            const btnText = buttonElement.querySelector('.btn-text');
+            const loaderIcon = buttonElement.querySelector('.loader');
+            buttonElement.disabled = isLoading;
+            domElements.loaderAi.classList.toggle('hidden', !isLoading);
+
+            if(isLoading) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loaderIcon) loaderIcon.classList.remove('hidden');
+            } else {
+                if(btnText) btnText.classList.remove('hidden');
+                if(loaderIcon) loaderIcon.classList.add('hidden');
+            }
+        }
+
+        async function handleAnalyzeDeadlines() {
+            if (!apiKey) {
+                domElements.errorMsg.textContent = "Chave API Gemini não configurada. Por favor, configure-a no menu 'Chaves API'.";
+                return;
+            }
+            domElements.errorMsg.textContent = "";
+
+            const docText = domElements.documentInput.value.trim();
+            const deadlineType = domElements.deadlineTypeInput.value.trim();
+            const referenceDateStr = domElements.referenceDateInput.value;
+
+            if (!docText) {
+                domElements.errorMsg.textContent = "Por favor, cole o texto do documento jurídico.";
+                return;
+            }
+            if (!deadlineType) {
+                domElements.errorMsg.textContent = "Por favor, especifique o tipo de prazo a ser buscado.";
+                return;
+            }
+            if (!referenceDateStr) {
+                domElements.errorMsg.textContent = "Por favor, informe a data de referência para contagem do prazo.";
+                return;
+            }
+            
+            const referenceDate = new Date(referenceDateStr + "T00:00:00"); // Consider local timezone for date input
+            if (isNaN(referenceDate.getTime())) {
+                 domElements.errorMsg.textContent = "Data de referência inválida.";
+                return;
+            }
+
+            toggleLoadingUI(domElements.analyzeDeadlinesButton, true);
+            ["identifiedDeadlineOutput", "calculatedDueDateOutput", "countdownOutput", "relevantTextOutput"].forEach(id => domElements[id].textContent = "Analisando...");
+            domElements.actionSuggestionsOutput.innerHTML = '<li>Analisando...</li>';
+            lastDeadlineAnalysis = null;
+
+
+            const promptToGemini = `
+                Você é CapyCronos, um assistente jurídico especializado em identificar e calcular prazos processuais e contratuais em documentos.
+                Analise o seguinte texto de um documento jurídico:
+                """
+                ${docText}
+                """
+
+                O usuário está interessado em prazos relacionados a: "${deadlineType}".
+                A data de referência para contagem (ex: data da intimação, publicação ou assinatura), fornecida pelo usuário, é: ${referenceDate.toLocaleDateString('pt-BR')}.
+
+                Com base no texto e na data de referência, identifique:
+                1.  "prazoMencionado": Descreva o prazo legal/contratual específico encontrado no texto relacionado a "${deadlineType}" (ex: "15 dias para apresentar contestação", "pagamento em 30 dias corridos"). Se não encontrar um prazo explícito para "${deadlineType}", indique "Nenhum prazo específico encontrado para '${deadlineType}' no texto.".
+                2.  "baseCalculo": O evento ou data que inicia a contagem do prazo, conforme o texto (ex: "a partir da data da publicação desta intimação", "contados da assinatura deste instrumento"). Se não explícito, indique "Data de referência informada pelo usuário".
+                3.  "duracaoPrazoDias": O número de dias CORRIDOS para o prazo. Se o prazo for em dias úteis, converta para uma estimativa de dias corridos (multiplique por 7/5 aproximadamente). Se for uma data específica, retorne 0. Se não houver duração em dias, retorne 0.
+                4.  "dataLimiteTexto": Se o texto mencionar uma data limite explícita para o prazo (formato DD/MM/AAAA), extraia-a. Caso contrário, deixe em branco.
+                5.  "trechoRelevante": O trecho exato do texto (máximo 200 caracteres) onde o prazo é mencionado ou pode ser inferido.
+                6.  "sugestoesAcao": Uma lista de 2-3 sugestões de ações que o usuário deveria considerar em relação a este prazo (ex: "Preparar a petição de apelação.", "Realizar o pagamento até a data.", "Agendar lembrete para o dia anterior ao vencimento.").
+
+                Se não encontrar informações claras para algum campo, retorne uma string vazia "" para esse campo ou uma indicação como "Não identificado".
+
+                Responda APENAS com um objeto JSON contendo estas chaves.
+            `;
+            
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: promptToGemini }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                
+                                "baseCalculo": { "type": "STRING" },
+                                "duracaoPrazoDias": { "type": "NUMBER" },
+                                "dataLimiteTexto": { "type": "STRING" },
+                                "trechoRelevante": { "type": "STRING" },
+                                "sugestoesAcao": { "type": "ARRAY", "items": { "type": "STRING" } }
+                            },
+                            required: [ "baseCalculo", "duracaoPrazoDias", "dataLimiteTexto", "trechoRelevante", "sugestoesAcao"]
+                        }
+                    }
+                };
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData?.error?.message || `Erro na API: ${response.status}`);
+                }
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0].text) {
+                    const aiData = JSON.parse(result.candidates[0].content.parts[0].text);
+                    lastDeadlineAnalysis = { ...aiData, referenceDate }; // Store for export
+
+                    domElements.identifiedDeadlineOutput.textContent = aiData.prazoMencionado || "Não identificado";
+                    domElements.relevantTextOutput.textContent = aiData.trechoRelevante || "Nenhum trecho específico destacado.";
+                    domElements.actionSuggestionsOutput.innerHTML = aiData.sugestoesAcao && aiData.sugestoesAcao.length > 0 
+                        ? aiData.sugestoesAcao.map(s => `<li>${s}</li>`).join('') 
+                        : '<li>Nenhuma sugestão de ação específica.</li>';
+
+                    let calculatedDueDate = null;
+                    if (aiData.dataLimiteTexto) {
+                        const parts = aiData.dataLimiteTexto.split('/');
+                        if (parts.length === 3) {
+                            calculatedDueDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                        }
+                    } else if (aiData.duracaoPrazoDias && aiData.duracaoPrazoDias > 0) {
+                        calculatedDueDate = new Date(referenceDate.getTime());
+                        calculatedDueDate.setDate(referenceDate.getDate() + aiData.duracaoPrazoDias);
+                    }
+
+                    if (calculatedDueDate && !isNaN(calculatedDueDate.getTime())) {
+                        lastDeadlineAnalysis.calculatedDueDate = calculatedDueDate;
+                        domElements.calculatedDueDateOutput.textContent = calculatedDueDate.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                        
+                        const now = new Date();
+                        const diffTime = calculatedDueDate.getTime() - now.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays < 0) {
+                            domElements.countdownOutput.textContent = `Expirado há ${Math.abs(diffDays)} dia(s).`;
+                            domElements.countdownOutput.classList.add('text-red-400');
+                            domElements.countdownOutput.classList.remove('text-yellow-400', 'text-emerald-400');
+                        } else if (diffDays === 0) {
+                            domElements.countdownOutput.textContent = "Termina Hoje!";
+                            domElements.countdownOutput.classList.add('text-red-500','font-bold');
+                            domElements.countdownOutput.classList.remove('text-yellow-400', 'text-emerald-400');
+                        } else if (diffDays <= 7) {
+                            domElements.countdownOutput.textContent = `${diffDays} dia(s) restante(s).`;
+                            domElements.countdownOutput.classList.add('text-yellow-400');
+                             domElements.countdownOutput.classList.remove('text-red-400', 'text-emerald-400');
+                        } else {
+                            domElements.countdownOutput.textContent = `${diffDays} dia(s) restante(s).`;
+                            domElements.countdownOutput.classList.add('text-emerald-400');
+                            domElements.countdownOutput.classList.remove('text-red-400', 'text-yellow-400');
+                        }
+                    } else {
+                        domElements.calculatedDueDateOutput.textContent = "Não foi possível calcular.";
+                        domElements.countdownOutput.textContent = "-";
+                         domElements.countdownOutput.classList.remove('text-red-400', 'text-yellow-400', 'text-emerald-400');
+                    }
+
+                } else {
+                    throw new Error(result.promptFeedback?.blockReason ? `Conteúdo bloqueado pela API: ${result.promptFeedback.blockReason}` : "Resposta da API inválida ou vazia.");
+                }
+
+            } catch (error) {
+                console.error("Erro ao analisar prazos:", error);
+                domElements.errorMsg.textContent = `Erro: ${error.message}`;
+                ["identifiedDeadlineOutput", "calculatedDueDateOutput", "countdownOutput", "relevantTextOutput"].forEach(id => domElements[id].textContent = "Erro na análise.");
+                domElements.actionSuggestionsOutput.innerHTML = '<li>Erro na análise.</li>';
+            } finally {
+                toggleLoadingUI(domElements.analyzeDeadlinesButton, false);
+            }
+        }
+        
+        function formatICSDate(date) {
+            if (!date || isNaN(date.getTime())) return '';
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        function exportToCalendar() {
+            if (!lastDeadlineAnalysis || !lastDeadlineAnalysis.calculatedDueDate) {
+                alert("Nenhum prazo calculado para exportar. Por favor, analise um documento primeiro.");
+                return;
+            }
+            const { prazoMencionado, trechoRelevante, sugestoesAcao, calculatedDueDate } = lastDeadlineAnalysis;
+
+            const startDate = formatICSDate(calculatedDueDate);
+            const endDate = formatICSDate(new Date(calculatedDueDate.getTime() + (24*60*60*1000))); // Evento de dia inteiro, termina no dia seguinte
+
+            const summary = `Prazo CapyCronos: ${prazoMencionado || 'Prazo Jurídico'}`;
+            let description = `Detalhes do Prazo:\nReferência no Documento: ${trechoRelevante || 'Não especificado'}\n\n`;
+            if (sugestoesAcao && sugestoesAcao.length > 0) {
+                description += "Sugestões de Ação:\n" + sugestoesAcao.map(s => `- ${s}`).join('\n');
+            }
+            description = description.replace(/\n/g, '\\n'); // Escape newlines for ICS
+
+            const uid = `capycronos-${Date.now()}@capyuniverse.com`;
+            const dtstamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15) + 'Z';
+
+            const icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//CapyCronosLegal//CapyUniverse IA//PT',
+                'BEGIN:VEVENT',
+                `UID:${uid}`,
+                `DTSTAMP:${dtstamp}`,
+                `DTSTART;VALUE=DATE:${startDate}`,
+                `DTEND;VALUE=DATE:${endDate}`,
+                `SUMMARY:${summary}`,
+                `DESCRIPTION:${description}`,
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `prazo_${(prazoMencionado || 'capycronos').replace(/\s+/g, '_')}.ics`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadAnalysis(format) {
+            if (!lastDeadlineAnalysis) {
+                alert("Nenhuma análise para exportar. Realize uma análise primeiro.");
+                return;
+            }
+            const { prazoMencionado, calculatedDueDate, referenceDate, trechoRelevante, sugestoesAcao, countdownOutputText } = lastDeadlineAnalysis;
+            const reportDate = new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const deadlineTypeUser = domElements.deadlineTypeInput.value.trim();
+
+            const countdownText = domElements.countdownOutput.textContent;
+
+
+            if (format === 'txt') {
+                let content = `Relatório de Análise de Prazos - CapyCronos Legal\n`;
+                content += `Gerado em: ${reportDate}\n\n`;
+                content += `Tipo de Prazo Buscado: ${deadlineTypeUser}\n`;
+                content += `Data de Referência Informada: ${referenceDate.toLocaleDateString('pt-BR')}\n\n`;
+                content += `PRAZO IDENTIFICADO PELA IA:\n`;
+                content += `  Descrição: ${prazoMencionado || "Não identificado"}\n`;
+                content += `  Data Limite Calculada: ${calculatedDueDate ? calculatedDueDate.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Não foi possível calcular"}\n`;
+                content += `  Contagem Regressiva: ${countdownText}\n`;
+                content += `  Base/Trecho Relevante: ${trechoRelevante || "N/A"}\n\n`;
+                content += `SUGESTÕES DE AÇÃO (IA):\n`;
+                content += sugestoesAcao && sugestoesAcao.length > 0 ? sugestoesAcao.map(s => `  - ${s}`).join('\n') : "  Nenhuma sugestão específica.";
+                
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `analise_prazo_capycronos.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+            } else if (format === 'pdf') {
+                domElements.pdfReportDate.textContent = reportDate;
+                domElements.pdfDeadlineType.textContent = deadlineTypeUser;
+                domElements.pdfReferenceDate.textContent = referenceDate.toLocaleDateString('pt-BR');
+                domElements.pdfIdentifiedDeadline.textContent = prazoMencionado || "Não identificado";
+                domElements.pdfCalculatedDueDate.textContent = calculatedDueDate ? calculatedDueDate.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Não foi possível calcular";
+                domElements.pdfCountdown.textContent = countdownText;
+                domElements.pdfRelevantText.textContent = trechoRelevante || "N/A";
+                domElements.pdfActionSuggestions.innerHTML = sugestoesAcao && sugestoesAcao.length > 0 
+                    ? sugestoesAcao.map(s => `<li>${s}</li>`).join('') 
+                    : '<li>Nenhuma sugestão específica.</li>';
+
+                const element = domElements.pdfReportContentDetails;
+                const opt = {
+                    margin: [15, 12, 15, 12],
+                    filename: `analise_prazo_capycronos_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true, windowWidth: element.scrollWidth, windowHeight: element.scrollHeight },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                html2pdf().from(element).set(opt).save();
+            }
+        }
+        
+        async function renderSidebar() {
+            if (!domElements.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                domElements.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                domElements.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    domElements.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(domElements.sidebar) domElements.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(domElements.geminiApiKeyInput) domElements.geminiApiKeyInput.value = savedKey; 
+                domElements.errorMsg.textContent = "";
+            } else {
+                 console.log("Chave API Gemini não configurada. Funcionalidades de IA estarão desabilitadas.");
+                 domElements.errorMsg.textContent = "Atenção: Chave API Gemini não configurada. A análise de IA não funcionará. Configure-a no menu 'Chaves API'.";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); 
+            loadApiKey();
+            domElements.referenceDateInput.valueAsDate = new Date();
+            
+            if(domElements.analyzeDeadlinesButton) domElements.analyzeDeadlinesButton.addEventListener('click', handleAnalyzeDeadlines);
+            if(domElements.downloadTxtButton) domElements.downloadTxtButton.addEventListener('click', () => downloadAnalysis('txt'));
+            if(domElements.downloadPdfButton) domElements.downloadPdfButton.addEventListener('click', () => downloadAnalysis('pdf'));
+            if(domElements.exportToCalendarButton) domElements.exportToCalendarButton.addEventListener('click', exportToCalendar);
+
+
+            if(domElements.sidebarToggleBtn && domElements.sidebar && domElements.sidebarOverlay){
+                domElements.sidebarToggleBtn.addEventListener('click', () => { domElements.sidebar.classList.toggle('-translate-x-full'); domElements.sidebarOverlay.classList.toggle('hidden'); });
+                if(domElements.sidebarOverlay) domElements.sidebarOverlay.addEventListener('click', () => { domElements.sidebar.classList.add('-translate-x-full'); domElements.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (domElements.openApiKeysModalButton && domElements.apiKeysModal) domElements.openApiKeysModalButton.addEventListener('click', () => domElements.apiKeysModal.classList.remove('hidden'));
+            if (domElements.closeApiKeysModalButton && domElements.apiKeysModal) domElements.closeApiKeysModalButton.addEventListener('click', () => domElements.apiKeysModal.classList.add('hidden'));
+            if (domElements.saveGeminiKeyBtn && domElements.geminiApiKeyInput && domElements.apiKeysModal) {
+                domElements.saveGeminiKeyBtn.addEventListener('click', () => {
+                    const key = domElements.geminiApiKeyInput.value.trim();
+                    if(key) { 
+                        localStorage.setItem(API_KEY_STORAGE_KEY, key); 
+                        apiKey = key; 
+                        alert("Chave API do Gemini salva!"); 
+                        domElements.apiKeysModal.classList.add('hidden'); 
+                        domElements.errorMsg.textContent = ""; 
+                    } else { 
+                        alert("Por favor, insira uma chave API.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

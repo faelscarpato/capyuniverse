@@ -1,1029 +1,519 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapyCV - Otimize seu Currículo com IA</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyCurriculo - Otimizador de Currículo com IA</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* ESTILOS GLOBAIS E DO TEMA (BASEADOS NO CAPYCHAT.HTML) */
-        body { 
-            font-family: 'Inter', sans-serif;
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #111827; } /* gray-900 */
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; } /* gray-600 */
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; } /* gray-500 */
-        
-        .loader { /* Loader genérico para botões, etc. */
-            border: 4px solid rgba(243, 244, 246, 0.3); /* gray-100 com alpha */
-            border-top: 4px solid #fbbf24; /* --color-amber */
-            border-radius: 50%; width: 24px; height: 24px;
-            animation: spin 1s linear infinite; display: inline-block;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
 
-        /* Sidebar */
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
+
         .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .category-content.expanded { max-height: 1500px; }
-        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; } /* indigo-600 */
+        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
         
-        /* Modal de Chave API */
-        .modal-overlay { /* Para o modal de API Keys */
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000; /* Abaixo do modal de mensagem do CapyCV */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
         }
-        .modal-content-apikeys {
-            background-color: #1f2937; /* gray-800 */
-            padding: 1.5rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            width: 90%; max-width: 550px; max-h-[90vh]; overflow-y: auto;
-        }
-        .modal-content-apikeys h3 { color: #93c5fd; }
-        .modal-content-apikeys label { color: #d1d5db; }
-        .modal-content-apikeys input[type="password"], .modal-content-apikeys input[type="text"] {
-            background-color: #374151; color: #e5e7eb; border-color: #4b5563;
-            padding: 0.5rem; border-radius: 0.25rem; width: 100%;
-        }
-        .modal-content-apikeys .save-key-modal-button {
-             color: white; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Variáveis de Cor do CapyCV (ajustadas para tema escuro onde necessário) */
-        :root {
-            --color-amber: #fbbf24; 
-            --color-deep-purple-text: #d8b4fe; /* Roxo mais claro para texto em fundo escuro */
-            --color-deep-purple-bg: #250b36; /* Roxo Escuro original para alguns fundos se necessário */
-            --color-cyan-teal: #0edbe1; 
-            --color-pink: #ec4899; 
-            --color-white: #ffffff;
-            --color-black: #000000;
-            
-            /* Cores base do tema escuro (para referência e consistência) */
-            --dark-bg: #111827;          /* gray-900 (body) */
-            --dark-surface: #1f2937;     /* gray-800 (header, sidebar, modal API) */
-            --dark-card: #2d3748;       /* cinza um pouco mais claro para os cards do CapyCV */
-            --dark-text-primary: #f3f4f6; /* gray-100 */
-            --dark-text-secondary: #cbd5e1; /* gray-300 */
-            --dark-border: #4b5563;     /* gray-600 */
+        textarea {
+            min-height: 200px;
         }
-        
-        /* Page Loader do CapyCV */
-        #page-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--dark-bg); /* Usa o fundo escuro principal */
-            z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        .report-card {
+            background-color: rgba(30, 30, 40, 0.6);
+            border: 1px solid rgba(80, 80, 100, 0.6);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
         }
-        #page-loader.loaded { opacity: 0; visibility: hidden; }
-        .loader-spinner { /* Spinner do loader do CapyCV */
-            border: 6px solid rgba(251, 191, 36, 0.3); 
-            border-top: 6px solid var(--color-amber); 
-            border-radius: 50%; width: 80px; height: 80px;
-            animation: spin 1.5s linear infinite; margin-bottom: 20px;
+         .report-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.125rem; /* text-lg */
         }
-        .loader-text { font-size: 1.5rem; font-weight: 600; color: var(--dark-text-primary); }
-        .loader-subtext { font-size: 1rem; color: var(--color-cyan-teal); }
-
-        /* Botões do CapyCV (cores ajustadas para contraste) */
-        .btn { padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border: none; cursor: pointer; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.3); }
-        .btn-primary-capy { background-image: linear-gradient(to right, var(--color-amber), #f59e0b); color: #1a202c; /* Texto escuro para boa leitura */ }
-        .btn-primary-capy:hover { background-image: linear-gradient(to right, #f59e0b, #d97706); }
-        .btn-secondary-capy { background-image: linear-gradient(to right, var(--color-cyan-teal), #06b6d4); color: var(--color-white); }
-        .btn-secondary-capy:hover { background-image: linear-gradient(to right, #06b6d4, #0891b2); }
-        .btn-pink-capy { background-image: linear-gradient(to right, var(--color-pink), #db2777); color: var(--color-white); }
-        .btn-pink-capy:hover { background-image: linear-gradient(to right, #db2777, #be185d); }
-
-        /* Cards do CapyCV */
-        .card-capy {
-            background-color: var(--dark-card); 
-            color: var(--dark-text-primary);
-            border-radius: 0.75rem; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.15);
-            padding: 1.5rem; /* Reduzido um pouco para telas menores */
-            margin-bottom: 1.5rem; /* Reduzido um pouco */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 5px solid var(--color-amber);
+        .markdown-output strong, .markdown-output b { font-weight: bold; }
+        .markdown-output em, .markdown-output i { font-style: italic; }
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .markdown-output li { margin-bottom: 0.25rem; }
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-output p:last-child { margin-bottom: 0; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px; /* Limita a largura máxima do gráfico */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Altura base */
+            max-height: 350px;
         }
-        .card-capy:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.25), 0 5px 10px rgba(0,0,0,0.2); }
-        .card-capy h2 { /* Título principal do card */
-            color: var(--color-amber); 
-            font-weight: 700; border-bottom: 2px solid var(--color-amber);
-            padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.5rem; /* text-2xl */
-        }
-         .card-capy h3 { /* Subtítulos dentro dos cards */
-            color: var(--dark-text-secondary); 
-            font-weight: 600; border-bottom: 1px solid var(--dark-border);
-            padding-bottom: 0.3rem; margin-bottom: 0.75rem; font-size: 1.125rem; /* text-lg */
-        }
-        .card-capy label { color: var(--dark-text-secondary); font-weight: 500; font-size: 0.875rem; /* text-sm */ }
-        .card-capy input[type="text"], 
-        .card-capy textarea,
-        .card-capy input[type="file"] {
-            border: 1px solid var(--dark-border); 
-            background-color: #1a202c; /* Fundo mais escuro para inputs */
-            color: var(--dark-text-primary);
-            border-radius: 0.375rem; padding: 0.6rem; /* Um pouco menor */
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            width: 100%; font-size: 0.875rem;
-        }
-        .card-capy input[type="text"]:focus, .card-capy textarea:focus {
-            border-color: var(--color-amber);
-            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
-            outline: none;
-        }
-         .card-capy input[type="file"] { padding: 0.25rem; } /* Ajuste específico para input file */
-        .card-capy input[type="file"]::file-selector-button {
-            background-color: var(--color-cyan-teal); color: var(--color-white);
-            border: none; padding: 0.5rem 1rem; border-radius: 0.25rem;
-            font-weight: 500; cursor: pointer; transition: background-color 0.3s ease;
-            font-size: 0.875rem;
-        }
-        .card-capy input[type="file"]::file-selector-button:hover { background-color: #06b6d4; }
-
-        /* Progress Bar do CapyCV */
-        .progress-bar-container-capy { width: 100%; background-color: var(--dark-border); border-radius: 0.5rem; overflow: hidden; height: 2rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-        .progress-bar-capy { height: 100%; background-image: linear-gradient(to right, var(--color-cyan-teal), var(--color-pink)); color: var(--color-white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; text-shadow: 1px 1px 1px rgba(0,0,0,0.2); transition: width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1); }
-
-        /* Modal de Mensagem do CapyCV */
-        .modal-capy { /* Já definido acima, aqui apenas ajustes específicos se necessário */
-            z-index: 1050; /* Acima do modal de API keys */
-        }
-        .modal-content-capy {
-            background-color: var(--dark-surface); color: var(--dark-text-primary);
-            padding: 1.5rem; border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            width: 90%; max-width: 480px; text-align: center;
-            border-top: 6px solid var(--color-amber);
-            transform: scale(0.95); transition: transform 0.5s ease;
-        }
-        .modal-capy.active .modal-content-capy { transform: scale(1); }
-        .modal-content-capy h3 { color: var(--color-amber); font-weight: 700; font-size: 1.25rem; margin-bottom: 0.75rem; } /* text-xl */
-        .modal-content-capy p { color: var(--dark-text-secondary); margin-bottom: 1rem; line-height: 1.6; font-size: 0.875rem; } /* text-sm */
-
-        /* Chart Container do CapyCV */
-        .chart-container-capy {
-            position: relative; margin: auto; height: 280px; /* Um pouco menor */
-            width: 100%; max-width: 380px; padding: 0.75rem;
-            background-color: #e0f2f7; /* Fundo claro para gráficos destacarem, ou var(--dark-card) se preferir integrado */
-            border-radius: 0.5rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .chart-container-capy canvas { max-height: 100%; }
-
-        /* List styles do CapyCV */
-        .list-capy li { padding: 0.2rem 0; transition: color 0.3s ease; color: var(--dark-text-secondary); font-size: 0.875rem; }
-        .list-capy li::before { margin-right: 0.5rem; color: var(--color-amber); }
-        .list-capy li.strength-item::before { content: "👍"; color: #10b981; }
-        .list-capy li.weakness-item::before { content: "👎"; color: #ef4444; }
-        .list-capy li.tip-item::before { content: "💡"; color: var(--color-cyan-teal); }
-        .list-capy li::before { content: "🐾"; /* Default paw */ }
-        
-        /* Course recommendations cards do CapyCV */
-        .course-card {
-            background-color: var(--dark-card); border-left: 4px solid var(--color-pink); 
-            padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease-out;
-        }
-        .course-card:hover { transform: translateX(5px); }
-        .course-card .course-name { color: #fbcfe8; font-weight: 600; }
-        .course-card .course-platform { font-size: 0.875rem; color: #f0abfc; }
-        .course-card .course-reason { font-size: 0.875rem; color: var(--dark-text-secondary); }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 flex flex-col min-h-screen">
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
-    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
         <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
             </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
         </div>
         <div class="flex items-center">
-            <button id="homeButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
             <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
         </div>
     </header>
 
-    <div id="notificationArea" class="fixed top-20 right-4 z-[1100] space-y-2 w-full max-w-xs sm:max-w-sm"></div>
+    <div id="notificationArea"></div>
 
     <div class="flex flex-1 pt-16"> 
-        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4">
-            </aside>
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
-            <div id="page-loader">
-                <div class="loader-spinner"></div>
-                <p class="loader-text">CapyCV Carregando...</p>
-                <p class="loader-subtext">Sua jornada de otimização começa agora!</p>
-            </div>
-
-            <div class="container mx-auto max-w-7xl"> <div id="app" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <section id="input-section">
-                        <div class="card-capy">
-                            <h2 class="text-xl md:text-2xl">1. Seu Currículo</h2>
-                            <div class="mb-4">
-                                <label for="resume-file" class="block text-sm font-medium mb-1">Upload de arquivo (.txt recomendado):</label>
-                                <input type="file" id="resume-file" accept=".txt,.doc,.docx,.pdf" class="w-full">
-                                <p class="text-xs text-gray-400 mt-1">Apenas arquivos .txt são processados. Para outros, copie e cole abaixo.</p>
-                            </div>
-                            <div>
-                                <label for="resume-text" class="block text-sm font-medium mb-1">Ou cole o texto do currículo aqui:</label>
-                                <textarea id="resume-text" rows="10" class="w-full" placeholder="Cole o conteúdo do seu currículo..."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="card-capy">
-                            <h2 class="text-xl md:text-2xl">2. Detalhes da Vaga</h2>
-                            <div class="grid grid-cols-1 gap-y-4">
-                                <div>
-                                    <label for="job-title" class="block text-sm font-medium">Nome da Vaga*:</label>
-                                    <input type="text" id="job-title" class="mt-1 block w-full" placeholder="Ex: Desenvolvedor Full Stack Sênior">
-                                </div>
-                                <div>
-                                    <label for="job-requirements" class="block text-sm font-medium">Requisitos da Vaga* (habilidades, experiência):</label>
-                                    <textarea id="job-requirements" rows="5" class="mt-1 block w-full" placeholder="Ex: JavaScript, React, Node.js, 5 anos..."></textarea>
-                                </div>
-                                <div>
-                                    <label for="job-description" class="block text-sm font-medium">Descrição da Vaga (opcional):</label>
-                                    <textarea id="job-description" rows="5" class="mt-1 block w-full" placeholder="Cole a descrição completa da vaga..."></textarea>
-                                </div>
-                                <div>
-                                    <label for="company-name" class="block text-sm font-medium">Nome da Empresa (opcional):</label>
-                                    <input type="text" id="company-name" class="mt-1 block w-full" placeholder="Ex: CapyTech Solutions">
-                                </div>
-                                <div>
-                                    <label for="job-salary" class="block text-sm font-medium">Salário Divulgado (opcional):</label>
-                                    <input type="text" id="job-salary" class="mt-1 block w-full" placeholder="Ex: R$ 8.000 - R$ 12.000">
-                                </div>
-                            </div>
-                        </div>
-                        <button id="analyze-button" class="w-full btn btn-primary-capy py-3 text-md sm:text-lg">
-                            Analisar Currículo e Vaga com IA
-                        </button>
-                    </section>
-
-                    <section id="report-section" class="hidden">
-                        <div class="card-capy">
-                            <h2 class="text-2xl md:text-3xl mb-6">Relatório Detalhado CapyCV</h2>
-                            
-                            <div id="loading-indicator" class="hidden text-center py-6">
-                                <div class="loader-spinner mx-auto !w-12 !h-12 !border-4 !border-t-amber-400"></div>
-                                <p class="text-md font-semibold mt-3" style="color: var(--color-amber);">Analisando... Capivaras trabalhando!</p>
-                            </div>
-
-                            <div id="report-content">
-                                <div class="mb-8">
-                                    <h3 class="text-lg">Compatibilidade Geral:</h3>
-                                    <div class="progress-bar-container-capy">
-                                        <div id="match-percentage-bar" class="progress-bar-capy" style="width: 0%;">0%</div>
-                                    </div>
-                                    <p id="match-percentage-text" class="text-sm text-center mt-2"></p>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <div class="border-l-4 border-cyan-500 p-3 rounded-lg shadow-md bg-gray-700"> 
-                                        <h3 class="text-md font-semibold text-center mb-2 text-cyan-300">Compatibilidade por Habilidade</h3>
-                                        <div class="chart-container-capy">
-                                            <canvas id="skillsRadarChart"></canvas>
-                                        </div>
-                                    </div>
-                                    <div class="border-l-4 border-pink-500 p-3 rounded-lg shadow-md bg-gray-700">
-                                        <h3 class="text-md font-semibold text-center mb-2 text-pink-300">Distribuição do Match</h3>
-                                        <div class="chart-container-capy">
-                                            <canvas id="matchPieChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    <div>
-                                        <h3 class="text-lg">Pontos Fortes:</h3>
-                                        <ul id="strengths-list" class="list-capy space-y-1"></ul>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg">Pontos a Melhorar:</h3>
-                                        <ul id="weaknesses-list" class="list-capy space-y-1"></ul>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-8">
-                                    <h3 class="text-lg">Sugestões para o Currículo:</h3>
-                                    <ul id="suggestions-list" class="list-capy space-y-1"></ul>
-                                </div>
-                                
-                                <div class="mb-8 p-4 rounded-lg bg-amber-600 bg-opacity-20 border-l-4 border-amber-400 text-amber-100">
-                                    <h3 class="text-lg font-semibold mb-2">Sobre a Vaga:</h3>
-                                    <p id="job-summary-text" class="whitespace-pre-wrap mb-2 text-sm"></p>
-                                    <p id="average-salary-text" class="mt-2 font-medium text-sm"></p>
-                                </div>
-
-                                <div class="mb-8">
-                                    <h3 class="text-lg">Habilidades Faltantes ou a Desenvolver:</h3>
-                                    <ul id="missing-skills-list" class="list-capy space-y-1"></ul>
-                                </div>
-
-                                <div class="mb-8">
-                                    <h3 class="text-lg">Recomendações de Cursos:</h3>
-                                    <div id="course-recommendations-list" class="space-y-3"></div>
-                                </div>
-
-                                <div class="mb-8">
-                                    <h3 class="text-lg">Dicas da Capy-IA:</h3>
-                                    <ul id="general-tips-list" class="list-capy space-y-1 tip-item"></ul>
-                                </div>
-
-                                <div id="market-research-section" class="mb-8 hidden p-4 rounded-lg bg-purple-600 bg-opacity-20 border-l-4 border-purple-400 text-purple-100">
-                                    <h3 class="text-lg font-semibold mb-2">Pesquisa de Mercado (Empresa: <span id="market-research-company-name"></span>):</h3>
-                                    <div id="market-research-content" class="space-y-2 whitespace-pre-wrap text-sm"></div>
-                                    <p id="market-research-sources" class="text-xs mt-2 opacity-80"></p>
-                                </div>
-                                
-                                <div class="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-                                    <button id="adapt-resume-button" class="btn btn-primary-capy hidden text-sm py-2">Adequar Currículo</button>
-                                    <button id="export-pdf-button" class="btn btn-secondary-capy text-sm py-2">Exportar (PDF)</button>
-                                    <button id="export-txt-button" class="btn btn-pink-capy text-sm py-2">Exportar (TXT)</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="adapted-resume-section" class="card-capy hidden mt-6 border-l-4" style="border-color: var(--color-cyan-teal);">
-                            <h3 class="text-xl mb-3">Currículo Adaptado pela IA:</h3>
-                            <textarea id="adapted-resume-text" rows="15" class="w-full p-2.5" readonly></textarea>
-                            <button id="copy-adapted-resume-button" class="mt-3 btn btn-primary-capy w-full sm:w-auto text-sm py-2">Copiar Currículo Adaptado</button>
-                        </div>
-                    </section>
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-sky-400">CapyCurriculo 📄✨</h1>
+                    <p class="text-zinc-300 mt-1">Otimize o seu currículo e carta de apresentação com a inteligência de uma capivara recrutadora!</p>
                 </div>
-            </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                    <div>
+                        <label for="cv-text" class="block text-sm font-semibold mb-1 text-zinc-200">Cole o seu Currículo (CV):</label>
+                        <textarea id="cv-text" rows="15" placeholder="Cole aqui o texto completo do seu currículo..." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-sky-500 scrollbar-thin"></textarea>
+                    </div>
+                    <div>
+                        <label for="job-description" class="block text-sm font-semibold mb-1 text-zinc-200">Cole a Descrição da Vaga:</label>
+                        <textarea id="job-description" rows="15" placeholder="Cole aqui a descrição completa da vaga desejada..." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-sky-500 scrollbar-thin"></textarea>
+                    </div>
+                </div>
+
+                <button id="analyze-button" class="w-full md:w-1/2 mx-auto bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                    <span class="btn-text">Analisar e Otimizar</span>
+                    <div class="loader hidden"></div>
+                </button>
+
+                <div id="output-section" class="mt-8 space-y-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1 report-card text-center">
+                            <h3 class="text-sky-300">Pontuação de Compatibilidade</h3>
+                            <p id="match-score" class="text-6xl font-bold font-syne text-white">-</p>
+                            <p id="match-rationale" class="text-xs text-zinc-400 mt-2">-</p>
+                        </div>
+                        <div class="md:col-span-2 report-card">
+                            <h3 class="text-sky-300">Alinhamento de Competências Chave</h3>
+                            <div class="chart-container">
+                                <canvas id="skills-radar-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card">
+                        <h3 class="text-green-300">Pontos Fortes do CV para esta Vaga:</h3>
+                        <ul id="cv-strengths" class="markdown-output list-disc list-inside pl-2 space-y-1"><li>-</li></ul>
+                    </div>
+                    <div class="report-card">
+                        <h3 class="text-yellow-300">Sugestões de Melhoria para o CV:</h3>
+                        <ul id="cv-improvements" class="markdown-output list-disc list-inside pl-2 space-y-1"><li>-</li></ul>
+                    </div>
+                    <div class="report-card">
+                        <h3 class="text-orange-300">Palavras-Chave da Vaga Ausentes no CV:</h3>
+                        <ul id="missing-keywords" class="markdown-output list-disc list-inside pl-2 space-y-1"><li>-</li></ul>
+                    </div>
+                    <div class="report-card">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-indigo-300">Rascunho de Carta de Apresentação:</h3>
+                            <button id="copy-letter-button" title="Copiar Carta" class="text-zinc-400 hover:text-indigo-300 transition-colors p-1">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <textarea id="cover-letter-output" rows="10" readonly class="w-full bg-zinc-800/30 border border-zinc-700 text-zinc-200 font-jetbrains rounded-lg p-3 mt-2 scrollbar-thin"></textarea>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
-    <footer class="bg-gray-800 text-center p-4 text-xs text-gray-500 mt-auto">
-        CapyUniverse IA &copy; <span id="current-year-footer"></span>. Feito com <span class="text-pink-500 animate-pulse">❤</span> e IA no Brasil.
-    </footer>
-
-    <div id="apiKeysModal" class="modal-overlay hidden">
-        <div class="modal-content-apikeys">
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-purple-400">Gerenciar Chaves de API</h2>
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
                 <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
             <div class="space-y-3">
-                <div class="p-3 border border-gray-700 rounded-md bg-gray-900">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
                     <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                    <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
                     <div class="flex">
-                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none"/>
-                        <button data-provider="gemini" class="save-key-modal-button bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs">Salvar</button>
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1.5">Obtenha em <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>. (Nível gratuito disponível)</p>
                 </div>
-                </div>
-            <div class="mt-6 text-center">
-                <p class="text-xs text-gray-400 mb-2">Recomendamos usar Gemini para as ferramentas CapyUniverse.</p>
-                <button id="continueWithoutKeyButtonModal" class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-md text-xs font-semibold">Continuar sem Chave</button>
             </div>
         </div>
     </div>
-    
-    <div id="message-modal" class="modal-capy hidden">
-        <div class="modal-content-capy">
-            <h3 id="modal-title"></h3>
-            <p id="modal-message"></p>
-            <button id="modal-close-button" class="btn btn-primary-capy modal-close-btn">Entendido</button>
-        </div>
-    </div>
-
 
     <script>
-        // --- VARIÁVEIS GLOBAIS E CONSTANTES ---
-let apiKeys = { gemini: '', openai: '', claude: '', perplexity: '' };
-let apiKey = ''; // Chave Gemini ativa para funções globais e CapyCV
-const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
-const currentPageId = 'CapyCurriculo'; 
-const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
-        
-        // --- ELEMENTOS DA UI (Comuns e Específicos) ---
-        const notificationArea = document.getElementById('notificationArea');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const homeButton = document.getElementById('homeButton');
-
-        const apiKeysModal = document.getElementById('apiKeysModal');
-        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
-        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
-        const continueWithoutKeyButtonModal = document.getElementById('continueWithoutKeyButtonModal');
-        
-        // CapyCV DOM Elements
-        const resumeFileElement = document.getElementById('resume-file');
-        const resumeTextElement = document.getElementById('resume-text');
-        const jobTitleElement = document.getElementById('job-title');
-        const jobRequirementsElement = document.getElementById('job-requirements');
-        const jobDescriptionElement = document.getElementById('job-description');
-        const companyNameElement = document.getElementById('company-name');
-        const jobSalaryElement = document.getElementById('job-salary');
-        const analyzeButton = document.getElementById('analyze-button');
-        const reportSection = document.getElementById('report-section');
-        const loadingIndicator = document.getElementById('loading-indicator'); // Loader dentro do card de relatório
-        const pageLoader = document.getElementById('page-loader'); // Loader da página inteira
-        const reportContent = document.getElementById('report-content');
-        const matchPercentageBar = document.getElementById('match-percentage-bar');
-        const matchPercentageText = document.getElementById('match-percentage-text');
-        const strengthsList = document.getElementById('strengths-list');
-        const weaknessesList = document.getElementById('weaknesses-list');
-        const suggestionsList = document.getElementById('suggestions-list');
-        const jobSummaryText = document.getElementById('job-summary-text');
-        const averageSalaryText = document.getElementById('average-salary-text');
-        const missingSkillsList = document.getElementById('missing-skills-list');
-        const courseRecommendationsList = document.getElementById('course-recommendations-list');
-        const generalTipsList = document.getElementById('general-tips-list');
-        const marketResearchSection = document.getElementById('market-research-section');
-        const marketResearchCompanyName = document.getElementById('market-research-company-name');
-        const marketResearchContentEl = document.getElementById('market-research-content');
-        const marketResearchSources = document.getElementById('market-research-sources');
-        const adaptResumeButton = document.getElementById('adapt-resume-button');
-        const exportPdfButton = document.getElementById('export-pdf-button');
-        const exportTxtButton = document.getElementById('export-txt-button');
-        const adaptedResumeSection = document.getElementById('adapted-resume-section');
-        const adaptedResumeTextElement = document.getElementById('adapted-resume-text');
-        const copyAdaptedResumeButton = document.getElementById('copy-adapted-resume-button');
-        
-        const messageModalCapyCV = document.getElementById('message-modal'); // Renomeado para evitar conflito
-        const modalTitleCapyCV = document.getElementById('modal-title');
-        const modalMessageCapyCV = document.getElementById('modal-message');
-        const modalCloseButtonCapyCV = document.getElementById('modal-close-button');
-
+        const currentPageId = 'CapyCurriculo';
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
         let skillsRadarChartInstance = null;
-        let matchPieChartInstance = null;
-        let dataForExport = null; 
 
-        // --- LISTA DE FERRAMENTAS (SIDEBAR) ---
-        const tools = [
-    // Análise e Compreensão de Texto
-    { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão de Texto', pageUrl: 'capyresumo.html', color: 'blue' },
-    { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão de Texto', pageUrl: 'capyexplica.html', color: 'yellow' },
-    { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão de Texto', pageUrl: 'capydetector.html', color: 'purple'},
-    { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capyemail.html', color: 'pink' },
-    { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capytone.html', color: 'lime' },
-    { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capyescritor.html', color: 'rose' },
-    { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capyroteiro.html', color: 'orange' },
-    { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
-    { id: 'CapyImg', title: 'Gerador de Imagens', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>', category: 'Criação e Edição de Conteúdo', pageUrl: 'capyimg.html', color: 'cyan' },
-    { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
-    { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
-    { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
-    { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
-    { id: 'CapyContrato', title: 'Gerador de Contratos IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 12h8"></path><path d="M8 16h8"></path><path d="M10 19H8"></path><path d="M16 19h-2"></path></svg>', category: 'Documentos e PDFs', pageUrl: 'capycontrato.html', color: 'violet' },
-    { id: 'CapyCurriculo', title: 'Otimizador de Currículo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="10" x2="22" y2="10"/><line x1="19.5" y1="7.5" x2="19.5" y2="12.5"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capycurriculo.html', color: 'sky' },
-    { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
-    { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
-    { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
-    { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
-    { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' },
-    { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
-    { id: 'CapyValor', title: 'Precificador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"></path><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyvalor.html', color: 'lime' },
-    { id: 'CapyDidatica', title: 'Planos de Aula', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 14l6-3-6-3-6 3 6 3z"></path><path d="M12 14v7"></path><path d="M6 12.5L12 17l6-4.5"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydidatica.html', color: 'emerald' },
-    { id: 'CapyQuiz', title: 'Gerador de Quizzes', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 11.17L12 8"></path><path d="M12 15h.01"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyquiz.html', color: 'fuchsia' },
-    { id: 'CapyTradutor', title: 'Tradutor Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path><path d="M12 19l-7-7 7-7"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytradutor.html', color: 'red' },
-    { id: 'CapyDebate', title: 'Simulador de Debates', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydebate.html', color: 'violet' },
-    { id: 'CapySolucao', title: 'Professor de Matemática', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path><line x1="12" y1="22" x2="12" y2="17"></line><line x1="12" y1="12" x2="20" y2="8"></line><line x1="12" y1="12" x2="4" y2="8"></line></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capysolucao.html', color: 'red' },
-    { id: 'CapyTeste', title: 'Gerador de Avaliações', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="m9 14 2 2 4-4"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyteste.html', color: 'purple' },
-    { id: 'CapyTCC', title: 'Tutor de TCC', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 13L12 7"></path><path d="M9 10L15 10"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytcc.html', color: 'indigo' },
-    { id: 'CapyFlashcards', title: 'Gerador de Flashcards', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyflashcards.html', color: 'yellow' },
-    { id: 'CapyExcel', title: 'Tutor de Excel IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyexcel.html', color: 'emerald' },
-    { id: 'CapyChart', title: 'Visualizador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>', category: 'Análise de Dados', pageUrl: 'capychart.html', color: 'teal' },
-    { id: 'CapyDados', title: 'Analisador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>', category: 'Análise de Dados', pageUrl: 'capydados.html', color: 'blue' },
-    { id: 'CapyFiscal', title: 'Assistente Fiscal', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>', category: 'Análise de Dados', pageUrl: 'capyfiscal.html', color: 'green' },
-    { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
-    { id: 'CapyTI', title: 'Assistente de Suporte TI', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line><path d="M6 11h.01M10 11h.01M14 11h.01"></path></svg>', category: 'Suporte Técnico', pageUrl: 'capyti.html', color: 'indigo' },
-    { id: 'CapyByte', title: 'Oráculo Tecnológico', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1Z"/><path d="M12 13V9"/><path d="M10.5 9.5 9 11"/><path d="m13.5 9.5 1.5 1.5"/><path d="M8 16H7a1 1 0 0 1-1-1v-2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5V15a1 1 0 0 1-1 1Z"/><path d="M16 16h1a1 1 0 0 0 1-1v-2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5V15a1 1 0 0 0 1 1Z"/><path d="M5 11h.01"/><path d="M19 11h.01"/><path d="M12 18a4 4 0 0 0 4-4h-2a2 2 0 0 1-4 0H8a4 4 0 0 0 4 4Z"/><path d="M20 13V9.5A2.5 2.5 0 0 0 17.5 7h-11A2.5 2.5 0 0 0 4 9.5V13a4 4 0 0 0 2.74 3.77"/><path d="M4 13A4 4 0 0 0 8 18h8a4 4 0 0 0 4-4"/></svg>', category: 'Diagnóstico e Suporte Avançado', pageUrl: 'capybyte.html', color: 'orange' },
-    { id: 'CapyGrana', title: 'Gestor Financeiro Pessoal', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="1" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>', category: 'Finanças Pessoais', pageUrl: 'CapyGrana.html', color: 'green' },
-    { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
-    { id: 'CapyGens', title: 'CapyGens (Personalizar IA)', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16s.5-1 2-1 2 1 2 1"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capygem.html', color: 'teal' }
-];
-        // ***** FIM DA LISTA DE FERRAMENTAS *****
-
-
-       // ***** FIM DA LISTA DE FERRAMENTAS *****
-
-        // --- FUNÇÕES UTILITÁRIAS (Notificação, Chaves API, Sidebar, Loading) ---
-        function addNotification(message, type = 'info', duration = 5000) {
-            if(!notificationArea) return;
-            const notificationId = 'notif-' + Date.now();
-            const typeClasses = {
-                error: 'bg-red-500 text-white',
-                success: 'bg-green-500 text-white',
-                info: 'bg-blue-500 text-white',
-                warning: 'bg-yellow-500 text-black'
-            };
-            const notificationHTML = `
-                <div id="${notificationId}" class="p-3 rounded-md shadow-lg text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
-                    <span>${message}</span>
-                    <button onclick="window.removeNotification('${notificationId}')" class="ml-2 font-bold text-lg leading-none">&times;</button>
-                </div>`;
-            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
-            const newNotification = document.getElementById(notificationId);
-            requestAnimationFrame(() => {
-                newNotification.classList.remove('opacity-0', 'translate-x-full');
-                newNotification.classList.add('opacity-100', 'translate-x-0');
-            });
-            if (duration > 0) setTimeout(() => window.removeNotification(notificationId), duration);
-        }
-        window.removeNotification = (id) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.add('opacity-0');
-                setTimeout(() => el.remove(), 300);
-            }
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            
+            cvTextArea: document.getElementById('cv-text'),
+            jobDescriptionArea: document.getElementById('job-description'),
+            analyzeButton: document.getElementById('analyze-button'),
+            
+            outputSection: document.getElementById('output-section'),
+            matchScore: document.getElementById('match-score'),
+            matchRationale: document.getElementById('match-rationale'),
+            skillsRadarChartCanvas: document.getElementById('skills-radar-chart'),
+            cvStrengthsList: document.getElementById('cv-strengths'),
+            cvImprovementsList: document.getElementById('cv-improvements'),
+            missingKeywordsList: document.getElementById('missing-keywords'),
+            coverLetterOutputArea: document.getElementById('cover-letter-output'),
+            copyLetterButton: document.getElementById('copy-letter-button')
         };
         
-        function loadApiKeysFromStorage() {
-            Object.keys(apiKeys).forEach(provider => {
-                const storedKey = localStorage.getItem(API_KEY_STORAGE_PREFIX + provider);
-                if (storedKey) {
-                    apiKeys[provider] = storedKey;
-                    const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
-                    if (modalInput) modalInput.value = storedKey;
-                }
-            });
-            apiKey = apiKeys.gemini || '';
-        }
-
-        function saveApiKeyToStorage(provider, key) {
-            if (key) {
-                apiKeys[provider] = key;
-                localStorage.setItem(API_KEY_STORAGE_PREFIX + provider, key);
-                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} guardada!`, 'success');
-                if (provider === 'gemini') apiKey = key; 
+        function toggleLoading(isLoading) {
+            const btnText = dom.analyzeButton.querySelector('.btn-text');
+            const loader = dom.analyzeButton.querySelector('.loader');
+            dom.analyzeButton.disabled = isLoading;
+            if(isLoading) {
+                btnText.classList.add('hidden');
+                loader.classList.remove('hidden');
             } else {
-                apiKeys[provider] = '';
-                localStorage.removeItem(API_KEY_STORAGE_PREFIX + provider);
-                addNotification(`API Key ${provider.charAt(0).toUpperCase() + provider.slice(1)} removida.`, 'warning');
-                if (provider === 'gemini') apiKey = '';
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
             }
         }
 
-        function renderSidebar() {
-            const categories = {};
-            tools.forEach(tool => {
-                if (!categories[tool.category]) categories[tool.category] = [];
-                categories[tool.category].push(tool);
-            });
-            if(!sidebar) return;
-            sidebar.innerHTML = ''; 
-            
-            const homeLinkSidebar = document.createElement('a');
-            homeLinkSidebar.href = 'index.html';
-            homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 ${currentPageId === 'Index' ? 'active bg-purple-600 text-white font-medium' : 'text-gray-300'}`;
-            homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-            sidebar.appendChild(homeLinkSidebar);
-
-            for (const categoryName in categories) {
-                const categoryDiv = document.createElement('div'); categoryDiv.className = 'mb-1';
-                const categoryButton = document.createElement('button');
-                categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                const categoryContent = document.createElement('div'); categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-                categories[categoryName].forEach(tool => {
-                    const link = document.createElement('a'); link.href = tool.pageUrl;
-                    link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active bg-purple-600 text-white font-medium' : 'text-gray-400'}`;
-                    link.innerHTML = `${tool.icon.replace('width="20"', 'width="16"').replace('height="20"', 'height="16"').replace('currentColor', `text-${tool.color}-400`)} <span class="${tool.id === currentPageId ? '' : ''}">${tool.title}</span>`;
-                    categoryContent.appendChild(link);
-                });
-                categoryButton.addEventListener('click', () => { categoryContent.classList.toggle('expanded'); categoryButton.querySelector('svg').classList.toggle('rotate-180'); });
-                if (categories[categoryName].some(tool => tool.id === currentPageId)) { categoryContent.classList.add('expanded'); categoryButton.querySelector('svg').classList.add('rotate-180'); }
-                categoryDiv.appendChild(categoryButton); categoryDiv.appendChild(categoryContent);
-                sidebar.appendChild(categoryDiv);
+        function renderSkillsRadar(skillsData) {
+            if (skillsRadarChartInstance) {
+                skillsRadarChartInstance.destroy();
             }
-        }
-        
-        function showLoadingGlobal(buttonElement, show = true, defaultText = null) {
-            const btnText = buttonElement.querySelector('.btn-text');
-            const loader = buttonElement.querySelector('.loader');
-            if (show) {
-                if (btnText) btnText.classList.add('hidden');
-                if (loader) loader.classList.remove('hidden');
-                buttonElement.disabled = true;
-            } else {
-                if (btnText) {
-                     btnText.classList.remove('hidden');
-                     if(defaultText) btnText.textContent = defaultText;
-                }
-                if (loader) loader.classList.add('hidden');
-                buttonElement.disabled = false;
+            if (!skillsData || !skillsData.jobSkills || !skillsData.cvSkillsMatchScore || skillsData.jobSkills.length === 0) {
+                dom.skillsRadarChartCanvas.parentElement.innerHTML = '<p class="text-center text-sm text-zinc-400">Dados de competências insuficientes para gerar gráfico.</p>';
+                return;
             }
-        }
 
-        // --- LÓGICA ESPECÍFICA DO CAPYCURRICULO.HTML ---
-        function showModalCapyCV(title, message) {
-            if(modalTitleCapyCV) modalTitleCapyCV.textContent = title;
-            if(modalMessageCapyCV) modalMessageCapyCV.textContent = message;
-            if(messageModalCapyCV) messageModalCapyCV.classList.add('active');
-        }
+            // Garante que o canvas exista caso tenha sido substituído por mensagem
+            if (!document.getElementById('skills-radar-chart')) {
+                 const chartContainer = dom.skillsRadarChartCanvas.parentElement;
+                 chartContainer.innerHTML = ''; // Limpa a mensagem
+                 const newCanvas = document.createElement('canvas');
+                 newCanvas.id = 'skills-radar-chart';
+                 chartContainer.appendChild(newCanvas);
+                 dom.skillsRadarChartCanvas = newCanvas; // Atualiza a referência no DOM object
+            }
 
-        function closeModalCapyCV() {
-            if(messageModalCapyCV) messageModalCapyCV.classList.remove('active');
-        }
-        if(modalCloseButtonCapyCV) modalCloseButtonCapyCV.addEventListener('click', closeModalCapyCV);
-        if(messageModalCapyCV) messageModalCapyCV.addEventListener('click', (event) => { if (event.target === messageModalCapyCV) closeModalCapyCV(); });
 
-        if(resumeFileElement && resumeTextElement) {
-            resumeFileElement.addEventListener('change', (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    if (file.type === "text/plain") {
-                        const reader = new FileReader();
-                        reader.onload = (e) => { resumeTextElement.value = e.target.result; };
-                        reader.readAsText(file);
-                    } else {
-                        showModalCapyCV("Formato de Arquivo Inválido", "Por favor, use um arquivo .txt ou cole o texto. Arquivos .doc, .docx e .pdf não são lidos diretamente por esta função de upload, cole o texto manualmente.");
-                        resumeFileElement.value = ""; // Limpa o input de arquivo
+            const ctx = dom.skillsRadarChartCanvas.getContext('2d');
+            skillsRadarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: skillsData.jobSkills,
+                    datasets: [{
+                        label: 'Alinhamento CV vs Vaga',
+                        data: skillsData.cvSkillsMatchScore,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(54, 162, 235)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            pointLabels: { color: '#e5e7eb', font: { size: 10 } },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#9ca3af',
+                                stepSize: 20,
+                                font: {size: 9}
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
             });
         }
-
-        async function callGeminiAPI_CapyCV(prompt, jsonSchema = null) {
-            if (!apiKey) { 
-                showModalCapyCV("Chave API Não Configurada", "Por favor, configure sua API Key do Google Gemini no menu 'Chaves API' no cabeçalho.");
-                return null;
+        
+        function populateList(listElement, items) {
+            listElement.innerHTML = '';
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    listElement.appendChild(li);
+                });
+            } else {
+                listElement.innerHTML = '<li>Nenhum item a reportar.</li>';
             }
-            const apiUrl = `${GEMINI_API_URL_BASE}${apiKey}`;
-            
-            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            if (jsonSchema) {
-                payload.generationConfig = {
-                    responseMimeType: "application/json",
-                    responseSchema: jsonSchema
-                };
-            }
-            
-            console.log("[CapyCV] Enviando para Gemini:", JSON.stringify(payload, null, 2).substring(0,500) + "...");
-            if(loadingIndicatorReport) loadingIndicatorReport.classList.remove('hidden');
+        }
 
+        function displayAnalysis(data) {
+            dom.matchScore.textContent = `${data.matchScore || 0}%`;
+            dom.matchRationale.textContent = data.matchRationale || "Análise de compatibilidade não disponível.";
+            
+            renderSkillsRadar(data.suggestedSkillsForRadar);
+            
+            populateList(dom.cvStrengthsList, data.cvStrengths);
+            populateList(dom.cvImprovementsList, data.cvImprovements);
+            populateList(dom.missingKeywordsList, data.missingKeywordsFromJob);
+            
+            dom.coverLetterOutputArea.value = data.coverLetterDraft || "Não foi possível gerar um rascunho de carta de apresentação.";
+            
+            dom.outputSection.classList.remove('hidden');
+        }
+
+        async function handleAnalyze() {
+            if (!apiKey) {
+                alert("Por favor, configure a sua chave API do Gemini primeiro.");
+                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
+                return;
+            }
+
+            const cvText = dom.cvTextArea.value.trim();
+            const jobDescription = dom.jobDescriptionArea.value.trim();
+
+            if (!cvText || !jobDescription) {
+                alert("Por favor, cole o texto do seu CV e da descrição da vaga.");
+                return;
+            }
+
+            toggleLoading(true);
+            dom.outputSection.classList.add('hidden');
+            // Limpar outputs anteriores
+            dom.matchScore.textContent = "-";
+            dom.matchRationale.textContent = "A Capy-Recrutadora está a analisar os teus documentos...";
+            if (skillsRadarChartInstance) skillsRadarChartInstance.destroy();
+            dom.cvStrengthsList.innerHTML = '<li>-</li>';
+            dom.cvImprovementsList.innerHTML = '<li>-</li>';
+            dom.missingKeywordsList.innerHTML = '<li>-</li>';
+            dom.coverLetterOutputArea.value = "";
+
+
+            const prompt = `
+                Aja como CapyCurriculo, um especialista em recrutamento e otimização de currículos.
+                Analise o seguinte Currículo (CV) em relação à Descrição da Vaga fornecida.
+
+                CV do Candidato:
+                """
+                ${cvText}
+                """
+
+                Descrição da Vaga:
+                """
+                ${jobDescription}
+                """
+
+                Forneça uma análise detalhada em formato JSON com as seguintes chaves:
+                - "matchScore": Um número inteiro de 0 a 100 representando a compatibilidade geral do CV com a vaga.
+                - "matchRationale": Uma breve explicação (1-2 frases) para a pontuação de compatibilidade.
+                - "cvStrengths": Um array de 3-5 strings destacando os pontos fortes do CV em relação aos requisitos da vaga.
+                - "cvImprovements": Um array de 3-5 strings com sugestões específicas e acionáveis para melhorar o CV para esta vaga.
+                - "missingKeywordsFromJob": Um array de 3-5 palavras-chave ou termos importantes da descrição da vaga que parecem ausentes ou pouco destacados no CV.
+                - "suggestedSkillsForRadar": Um objeto com duas chaves: 
+                    - "jobSkills": um array com os nomes de 5-6 competências mais importantes para a vaga.
+                    - "cvSkillsMatchScore": um array de números (0-100) correspondendo a cada uma das "jobSkills", representando o quão bem o CV demonstra cada uma dessas competências.
+                - "coverLetterDraft": Uma string contendo um rascunho conciso (2-3 parágrafos) de uma carta de apresentação do candidato para esta vaga, destacando a sua adequação.
+
+                Responda APENAS com o objeto JSON.
+            `;
+            
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-                const responseTextForError = await response.text();
-                if (!response.ok) {
-                    console.error("[CapyCV] Erro API Gemini - Status:", response.status, "Corpo:", responseTextForError);
-                    let errorMsg = `Erro API: ${response.status}.`;
-                     try { const errorBody = JSON.parse(responseTextForError); errorMsg += ` Detalhes: ${errorBody?.error?.message || responseTextForError}`; } 
-                     catch (e) { errorMsg += ` Detalhes: ${responseTextForError}`; }
-                    throw new Error(errorMsg);
-                }
-                const result = JSON.parse(responseTextForError);
-                console.log("[CapyCV] Recebido da Gemini:", result);
 
-                if (result.candidates?.[0]?.content?.parts?.[0]) {
-                    let textResponse = result.candidates[0].content.parts[0].text;
-                    if (jsonSchema) {
-                        try { return JSON.parse(textResponse); }
-                        catch (e) {
-                            console.error("[CapyCV] Erro ao parsear JSON:", e, "\nResposta crua:", textResponse);
-                            showModalCapyCV("Erro de Formato da IA", "A IA retornou dados em formato inesperado. Tente novamente ou verifique o console para detalhes.");
-                            return null;
-                        }
-                    }
-                    return textResponse;
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
+                }
+                
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                    const jsonString = data.candidates[0].content.parts[0].text.replace(/^```json\s*|```$/g, '').trim();
+                    const result = JSON.parse(jsonString);
+                    displayAnalysis(result);
                 } else {
-                    let blockReason = result.promptFeedback?.blockReason || result.candidates?.[0]?.finishReason;
-                    let safetyRatingsInfo = result.promptFeedback?.safetyRatings?.map(r => `${r.category}: ${r.probability}`).join(', ') || 'N/A';
-                    console.warn(`[CapyCV] Resposta da API Gemini vazia ou bloqueada. Motivo: ${blockReason || 'Desconhecido'}. Safety: ${safetyRatingsInfo}`);
-                    if (blockReason) throw new Error(`Conteúdo bloqueado pela API. Motivo: ${blockReason}.`);
-                    throw new Error("Resposta da API não contém conteúdo esperado ou foi bloqueada.");
+                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
+                }
+
+            } catch (error) {
+                console.error("Erro ao analisar CV/Vaga:", error);
+                dom.matchRationale.textContent = `Erro na análise: ${error.message}`;
+                dom.outputSection.classList.remove('hidden'); // Mostra a seção para exibir o erro
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        async function renderSidebar() { // Tornada async para carregar o JSON
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); // Certifique-se que 'tools.json' está acessível
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
+                }
+                const toolsData = await response.json(); // Usa os dados do JSON
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) {
+                        categories[tool.category] = [];
+                    }
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        // Ajusta o ícone para o tamanho da sidebar, usando o SVG string do JSON
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>'; // Fallback
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
                 }
             } catch (error) {
-                console.error("[CapyCV] Falha ao chamar API Gemini:", error);
-                showModalCapyCV("Erro de Comunicação com IA", `Falha: ${error.message}. Tente novamente mais tarde.`);
-                return null;
-            } finally {
-                 if(loadingIndicatorReport) loadingIndicatorReport.classList.add('hidden');
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique se o ficheiro "tools.json" está acessível.</p>';
             }
         }
 
-        if(analyzeButton) {
-            analyzeButton.addEventListener('click', async () => {
-                const resume = resumeTextElement.value.trim();
-                const jobTitle = jobTitleElement.value.trim();
-                const jobRequirements = jobRequirementsElement.value.trim();
-                const jobDescription = jobDescriptionElement.value.trim();
-                const companyName = companyNameElement.value.trim();
-                const jobSalary = jobSalaryElement.value.trim();
-
-                if (!resume || !jobTitle || !jobRequirements) {
-                    showModalCapyCV("Campos Obrigatórios", "Preencha currículo, nome da vaga e requisitos para prosseguir.");
-                    return;
-                }
-                showLoadingGlobal(analyzeButton, true, "Analisar Currículo e Vaga com IA");
-                if(reportSection) reportSection.classList.remove('hidden');
-                if(loadingIndicatorReport) loadingIndicatorReport.classList.remove('hidden'); // Mostra o loader específico do relatório
-                if(reportContent) reportContent.classList.add('hidden');
-                if(adaptedResumeSection) adaptedResumeSection.classList.add('hidden');
-                dataForExport = null; 
-
-                localStorage.setItem('capycv_resume', resume);
-                localStorage.setItem('capycv_jobTitle', jobTitle);
-                localStorage.setItem('capycv_jobRequirements', jobRequirements);
-                localStorage.setItem('capycv_jobDescription', jobDescription);
-                localStorage.setItem('capycv_companyName', companyName); // Salva nome da empresa para pesquisa de mercado
-                localStorage.setItem('capycv_jobSalary', jobSalary); // Salva salário
-
-                const analysisPrompt = `Você é um especialista em RH e recrutamento do CapyUniverse, analisando um currículo para uma vaga. Currículo: --- ${resume} --- Vaga: Nome: ${jobTitle} Requisitos: ${jobRequirements} Descrição: ${jobDescription || 'Não fornecida'} Salário: ${jobSalary || 'Não fornecido'}. Forneça uma análise JSON detalhada com o schema providenciado.`;
-                const analysisSchema = { type: "OBJECT",properties: {matchPercentage: { type: "NUMBER" }, strengths: { type: "ARRAY", items: { type: "STRING" } }, weaknesses: { type: "ARRAY", items: { type: "STRING" } }, improvementSuggestions: { type: "ARRAY", items: { type: "STRING" } }, jobSummary: { type: "STRING" }, averageSalaryBrazil: { type: "OBJECT", properties: { min: { type: "NUMBER" }, max: { type: "NUMBER" }, currency: { type: "STRING" }, source: { type: "STRING" } } }, skillsBreakdown: { type: "OBJECT", properties: { labels: { type: "ARRAY", items: { type: "STRING" } }, scores: { type: "ARRAY", items: { type: "NUMBER" } } } }, matchDistribution: { type: "OBJECT", properties: { labels: { type: "ARRAY", items: { type: "STRING" } }, values: { type: "ARRAY", items: { type: "NUMBER" } } } }, missingSkills: { type: "ARRAY", items: { type: "STRING" } }, courseRecommendations: { type: "ARRAY", items: { type: "OBJECT", properties: { courseName: { type: "STRING" }, platform: { type: "STRING" }, reason: { type: "STRING"} } } }, generalTips: { type: "ARRAY", items: { type: "STRING" } }},required: ["matchPercentage", "strengths", "weaknesses", "improvementSuggestions", "jobSummary", "averageSalaryBrazil", "skillsBreakdown", "matchDistribution", "missingSkills", "courseRecommendations", "generalTips"]};
-                
-                let analysisResult = await callGeminiAPI_CapyCV(analysisPrompt, analysisSchema);
-
-                if (analysisResult) {
-                    dataForExport = analysisResult; 
-                    displayReport(analysisResult); 
-                    if(adaptResumeButton) adaptResumeButton.classList.remove('hidden');
-
-                    if (companyName && marketResearchSection && marketResearchCompanyName && marketResearchContentEl) {
-                        marketResearchSection.classList.remove('hidden');
-                        marketResearchCompanyName.textContent = companyName;
-                        marketResearchContentEl.innerHTML = '<div class="loader-spinner !w-6 !h-6 !border-2 !border-t-amber-400 mx-auto my-1"></div> <p class="text-xs text-center" style="color: var(--dark-text-secondary);">Pesquisando...</p>';
-                        
-                        const marketResearchPrompt = `Pesquisa de mercado concisa (simulada) para "${companyName}" focada em vagas como "${jobTitle}". Inclua: 1. Vagas similares (título, empresa, link simulado). 2. Benefícios comuns (empresa/setor). 3. Faixas salariais (empresa/setor). 4. Fontes simuladas. Formato JSON:`;
-                        const marketResearchSchema = { type: "OBJECT", properties: { similarOpenings: { type: "ARRAY", items: { type: "OBJECT", properties: { title: { type: "STRING" }, company: { type: "STRING" }, details: { type: "STRING"} } } }, companyBenefitsInfo: { type: "STRING" }, companySalaryInfo: { type: "STRING" }, sources: { type: "ARRAY", items: { type: "STRING" }} }, required: ["similarOpenings", "companyBenefitsInfo", "companySalaryInfo", "sources"]};
-                        let marketData = await callGeminiAPI_CapyCV(marketResearchPrompt, marketResearchSchema);
-                        if (marketData && marketResearchContentEl) displayMarketResearch(marketData);
-                        else if (marketResearchContentEl) marketResearchContentEl.innerHTML = '<p class="text-xs text-center text-red-400">Pesquisa de mercado indisponível.</p>';
-                    } else if (marketResearchSection) {
-                        marketResearchSection.classList.add('hidden');
-                    }
-                }
-                if(loadingIndicatorReport) loadingIndicatorReport.classList.add('hidden');
-                if(reportContent) reportContent.classList.remove('hidden');
-                showLoadingGlobal(analyzeButton, false, "Analisar Currículo e Vaga com IA");
-            });
-        }
-        
-        function displayReport(data) {
-            if (skillsRadarChartInstance) skillsRadarChartInstance.destroy();
-            if (matchPieChartInstance) matchPieChartInstance.destroy();
-
-            const percentage = data.matchPercentage || 0;
-            if(matchPercentageBar) {
-                matchPercentageBar.style.width = `${percentage}%`;
-                matchPercentageBar.textContent = `${percentage}%`;
-                if (percentage < 40) matchPercentageBar.style.backgroundImage = 'linear-gradient(to right, #f87171, #ef4444)'; // Vermelho
-                else if (percentage < 70) matchPercentageBar.style.backgroundImage = 'linear-gradient(to right, #fbbf24, #f59e0b)'; // Ambar
-                else matchPercentageBar.style.backgroundImage = 'linear-gradient(to right, #34d399, #10b981)'; // Verde
-            }
-            if(matchPercentageText) matchPercentageText.textContent = `Sua compatibilidade com a vaga é de ${percentage}%.`;
-
-            if(strengthsList) strengthsList.innerHTML = data.strengths?.map(s => `<li class="strength-item">${s}</li>`).join('') || '<li>Nenhum ponto forte específico identificado.</li>';
-            if(weaknessesList) weaknessesList.innerHTML = data.weaknesses?.map(w => `<li class="weakness-item">${w}</li>`).join('') || '<li>Nenhum ponto fraco específico identificado.</li>';
-            if(suggestionsList) suggestionsList.innerHTML = data.improvementSuggestions?.map(s => `<li>${s}</li>`).join('') || '<li>Nenhuma sugestão de melhoria específica.</li>';
-            if(jobSummaryText) jobSummaryText.textContent = data.jobSummary || 'Resumo da vaga não disponível.';
-            
-            const jobTitleForSalary = jobTitleElement ? jobTitleElement.value.trim() : "este cargo";
-            if (averageSalaryText && data.averageSalaryBrazil?.min && data.averageSalaryBrazil?.max) {
-                averageSalaryText.textContent = `Faixa salarial média estimada no Brasil para ${jobTitleForSalary}: ${data.averageSalaryBrazil.currency} ${data.averageSalaryBrazil.min.toLocaleString('pt-BR')} - ${data.averageSalaryBrazil.currency} ${data.averageSalaryBrazil.max.toLocaleString('pt-BR')}. (Fonte: ${data.averageSalaryBrazil.source || 'Estimativa IA'})`;
-            } else if(averageSalaryText) {
-                averageSalaryText.textContent = `Estimativa salarial para ${jobTitleForSalary} não disponível.`;
-            }
-
-            if(missingSkillsList) missingSkillsList.innerHTML = data.missingSkills?.map(s => `<li>${s}</li>`).join('') || '<li>Nenhuma habilidade crítica faltante identificada.</li>';
-            if(generalTipsList) generalTipsList.innerHTML = data.generalTips?.map(s => `<li class="tip-item">${s}</li>`).join('') || '<li>Sem dicas gerais no momento.</li>';
-            
-            if(courseRecommendationsList) {
-                courseRecommendationsList.innerHTML = data.courseRecommendations?.map(rec => 
-                    `<div class="course-card">
-                        <p class="course-name">${rec.courseName}</p>
-                        <p class="course-platform">Plataforma: ${rec.platform || 'N/A'}</p>
-                        <p class="course-reason"><em>${rec.reason || 'Recomendado para desenvolvimento.'}</em></p>
-                    </div>`
-                ).join('') || '<p class="text-gray-400 text-sm">Nenhuma recomendação de curso.</p>';
-            }
-
-            const radarCanvasEl = document.getElementById('skillsRadarChart');
-            if (radarCanvasEl && data.skillsBreakdown?.labels?.length && data.skillsBreakdown.scores?.length) {
-                const radarCtx = radarCanvasEl.getContext('2d');
-                skillsRadarChartInstance = new Chart(radarCtx, { type: 'radar', data: { labels: data.skillsBreakdown.labels, datasets: [{ label: 'Compatibilidade', data: data.skillsBreakdown.scores, fill: true, backgroundColor: 'rgba(251, 191, 36, 0.3)', borderColor: 'rgb(251, 191, 36)', pointBackgroundColor: 'rgb(251, 191, 36)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(251, 191, 36)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { display: true, color: 'rgba(203, 213, 225, 0.2)' }, suggestedMin: 0, suggestedMax: 100, grid: { color: 'rgba(203, 213, 225, 0.1)'}, pointLabels: { font: { size: 9, family: 'Inter' }, color: '#cbd5e1' }, ticks: { backdropColor: 'transparent', stepSize: 20, color: '#cbd5e1', font: {size: 8} } } }, plugins: { legend: { display: false } } } });
-            } else if (radarCanvasEl?.parentNode) {
-                 radarCanvasEl.parentNode.innerHTML = '<p class="text-center text-gray-400 text-xs p-3">Dados para gráfico radar indisponíveis.</p>';
-            }
-
-            const pieCanvasEl = document.getElementById('matchPieChart');
-            if (pieCanvasEl && data.matchDistribution?.labels?.length && data.matchDistribution.values?.length) {
-                const pieCtx = pieCanvasEl.getContext('2d');
-                matchPieChartInstance = new Chart(pieCtx, { type: 'pie', data: { labels: data.matchDistribution.labels, datasets: [{ label: 'Distribuição', data: data.matchDistribution.values, backgroundColor: ['#10b981', '#fbbf24', '#ef4444', '#ec4899', '#0edbe1'], borderColor: '#1f2937', borderWidth: 1, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: {size: 9, family: 'Inter'}, color: '#cbd5e1', padding:10, boxWidth:12 } } } } });
-            } else if(pieCanvasEl?.parentNode) {
-                pieCanvasEl.parentNode.innerHTML = '<p class="text-center text-gray-400 text-xs p-3">Dados para gráfico de pizza indisponíveis.</p>';
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
             }
         }
 
-        function displayMarketResearch(data) {
-            if(!marketResearchContentEl || !marketResearchSources) return;
-            let contentHTML = data.similarOpenings?.length > 0 ? 
-                '<p class="font-semibold mb-1.5 text-sm" style="color: var(--dark-text-secondary);">Vagas Semelhantes (simulado):</p><ul class="list-disc pl-4 space-y-1.5">' + 
-                data.similarOpenings.map(op => `<li class="text-xs"><strong>${op.title}</strong> (${op.company}): ${op.details}</li>`).join('') + '</ul>' :
-                '<p class="text-xs text-gray-400">Nenhuma vaga similar encontrada na pesquisa simulada.</p>';
-            
-            contentHTML += `<p class="mt-3"><strong class="font-semibold text-sm" style="color: var(--dark-text-secondary);">Benefícios (geral):</strong> <span class="text-xs">${data.companyBenefitsInfo || 'Não informado.'}</span></p>`;
-            contentHTML += `<p class="mt-1.5"><strong class="font-semibold text-sm" style="color: var(--dark-text-secondary);">Salários (geral):</strong> <span class="text-xs">${data.companySalaryInfo || 'Não informado.'}</span></p>`;
-            marketResearchContentEl.innerHTML = contentHTML; 
-            marketResearchSources.textContent = data.sources?.length > 0 ? `Fontes (simuladas): ${data.sources.join(', ')}.` : 'Nenhuma fonte simulada citada.';
-        }
-        
-        function getReportAsText() {
-            let text = "🌟 Relatório CapyCV 🌟\n=======================\n\n";
-            if(matchPercentageBar && matchPercentageText) text += `🎯 Compatibilidade Geral: ${matchPercentageBar.textContent} (${matchPercentageText.textContent.trim()})\n\n`;
-
-            if (dataForExport?.skillsBreakdown?.labels?.length) {
-                text += "📊 Compatibilidade por Habilidade (Radar):\n";
-                dataForExport.skillsBreakdown.labels.forEach((label, index) => {
-                    text += `  - ${label}: ${dataForExport.skillsBreakdown.scores[index]}%\n`;
-                });
-                text += "\n";
-            }
-            if (dataForExport?.matchDistribution?.labels?.length) {
-                text += "📊 Distribuição do Match (Pizza):\n";
-                dataForExport.matchDistribution.labels.forEach((label, index) => {
-                    text += `  - ${label}: ${dataForExport.matchDistribution.values[index]}${dataForExport.matchDistribution.values.reduce((a,b) => a+b, 0) === 100 ? '%' : ''}\n`; 
-                });
-                text += "\n";
-            }
-
-            if(strengthsList) text += "👍 Pontos Fortes:\n" + (Array.from(strengthsList.children).map(li => `  - ${li.textContent.replace(/^👍\s*/, '')}`).join('\n') || "  - N/A") + "\n\n";
-            if(weaknessesList) text += "👎 Pontos a Melhorar:\n" + (Array.from(weaknessesList.children).map(li => `  - ${li.textContent.replace(/^👎\s*/, '')}`).join('\n') || "  - N/A") + "\n\n";
-            if(suggestionsList) text += "🛠️ Sugestões de Melhoria:\n" + (Array.from(suggestionsList.children).map(li => `  - ${li.textContent.replace(/^🐾\s*/, '')}`).join('\n') || "  - N/A") + "\n\n";
-            if(jobSummaryText && jobTitleElement && averageSalaryText) text += `📝 Sobre a Vaga (${jobTitleElement.value.trim()}):\n  ${jobSummaryText.textContent.replace(/\n/g, '\n  ')}\n  ${averageSalaryText.textContent}\n\n`;
-            
-            if(missingSkillsList) text += "🧩 Habilidades Faltantes ou a Desenvolver:\n" + (Array.from(missingSkillsList.children).map(li => `  - ${li.textContent.replace(/^🐾\s*/, '')}`).join('\n') || "  - N/A") + "\n\n";
-            
-            if(courseRecommendationsList) {
-                text += "🎓 Recomendações de Cursos:\n";
-                const courses = Array.from(courseRecommendationsList.children).map(div => {
-                    const name = div.querySelector('.course-name')?.textContent || "Curso Desconhecido";
-                    const platform = div.querySelector('.course-platform')?.textContent || "Plataforma: N/A";
-                    const reason = div.querySelector('.course-reason em')?.textContent || "Motivo: N/A";
-                    return `  - ${name} (${platform}) - ${reason}`;
-                }).join('\n');
-                text += (courses.trim() || "  - N/A") + "\n\n";
-            }
-
-            if(generalTipsList) text += "💡 Dicas da Capy-IA:\n" + (Array.from(generalTipsList.children).map(li => `  - ${li.textContent.replace(/^💡\s*/, '')}`).join('\n') || "  - N/A") + "\n\n";
-
-            if (marketResearchSection && !marketResearchSection.classList.contains('hidden') && marketResearchContentEl && marketResearchContentEl.innerHTML.trim() !== '') {
-                text += `🏢 Pesquisa de Mercado (${companyNameElement ? companyNameElement.value.trim() : 'Empresa'}):\n`;
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = marketResearchContentEl.innerHTML; 
-                const loaderElement = tempDiv.querySelector('.loader-spinner');
-                if (loaderElement && loaderElement.parentElement) loaderElement.parentElement.remove();
-                
-                tempDiv.querySelectorAll('p, li, strong').forEach(el => {
-                    let prefix = "  ";
-                    if (el.tagName === 'LI') prefix = "    - ";
-                    else if (el.tagName === 'STRONG' && el.parentElement.tagName === 'P') { /* No extra prefix */ }
-                    else if (el.textContent.trim() !== "") text += `${prefix}${el.textContent.trim()}\n`;
-                });
-                if (marketResearchSources && marketResearchSources.textContent.trim() !== '' && marketResearchSources.textContent.trim() !== 'Nenhuma fonte simulada citada.') {
-                     text += `\n  Fontes: ${marketResearchSources.textContent.replace('Fontes (simuladas): ','')}\n`;
-                }
-                text += "\n";
-            }
-            return text;
-        }
-        
-        if(adaptResumeButton) {
-            adaptResumeButton.addEventListener('click', async () => {
-                const originalResume = localStorage.getItem('capycv_resume');
-                const jobTitle = localStorage.getItem('capycv_jobTitle');
-                const jobRequirements = localStorage.getItem('capycv_jobRequirements');
-                const jobDescription = localStorage.getItem('capycv_jobDescription');
-
-                if (!originalResume || !jobTitle || !jobRequirements) {
-                    showModalCapyCV("Dados Insuficientes", "Realize uma nova análise para adaptar o currículo."); return;
-                }
-                
-                if(adaptedResumeSection) adaptedResumeSection.classList.remove('hidden');
-                if(adaptedResumeTextElement) adaptedResumeTextElement.value = "Capivara escritora está adaptando seu currículo...";
-                showLoadingGlobal(adaptResumeButton, true, "Adequar Currículo");
-
-                const adaptPrompt = `Você é um especialista em redação de currículos. Baseado no currículo original e detalhes da vaga, gere uma nova versão do currículo otimizada. Mantenha tom profissional, destaque experiências e habilidades relevantes. Formato claro e bem estruturado. APENAS o texto do currículo adaptado. Currículo Original: --- ${originalResume} --- Detalhes da Vaga: Nome: ${jobTitle} Requisitos: ${jobRequirements} Descrição: ${jobDescription || 'N/A'} --- Currículo Adaptado:`;
-                const adaptedResume = await callGeminiAPI_CapyCV(adaptPrompt); 
-                
-                if(adaptedResumeTextElement) adaptedResumeTextElement.value = adaptedResume || "Não foi possível gerar o currículo adaptado.";
-                showLoadingGlobal(adaptResumeButton, false, "Adequar Currículo");
-            });
-        }
-        
-        if(copyAdaptedResumeButton && adaptedResumeTextElement) {
-            copyAdaptedResumeButton.addEventListener('click', () => {
-                adaptedResumeTextElement.select();
-                adaptedResumeTextElement.setSelectionRange(0, 99999); 
-                try {
-                    navigator.clipboard.writeText(adaptedResumeTextElement.value)
-                        .then(() => showModalCapyCV("Sucesso!", "Currículo adaptado copiado!"))
-                        .catch(err => {
-                            console.warn('Falha ao copiar com navigator.clipboard: ', err);
-                            if (document.execCommand('copy')) showModalCapyCV("Sucesso!", "Currículo adaptado copiado!");
-                            else showModalCapyCV("Erro", "Não foi possível copiar. Tente manualmente.");
-                        });
-                } catch (err) { 
-                     console.warn('Navigator.clipboard não disponível, tentando execCommand: ', err);
-                     if (document.execCommand('copy')) showModalCapyCV("Sucesso!", "Currículo adaptado copiado!");
-                     else showModalCapyCV("Erro", "Seu navegador não suporta cópia automática. Copie manualmente.");
-                }
-            });
-        }
-
-        if(exportPdfButton && reportContent) {
-            exportPdfButton.addEventListener('click', () => {
-                if (reportContent.classList.contains('hidden') || !dataForExport) {
-                    showModalCapyCV("Relatório Inexistente", "Gere um relatório antes de exportar."); return;
-                }
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-                const reportText = getReportAsText(); 
-                
-                doc.setFont('Inter', 'normal');
-                doc.setFontSize(10); 
-                
-                const margin = 40;
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const usableWidth = pageWidth - (2 * margin);
-                const lines = doc.splitTextToSize(reportText, usableWidth);
-                doc.text(lines, margin, margin); 
-                
-                doc.save('Relatorio_CapyCV_Detalhado.pdf');
-                showModalCapyCV("Exportação Concluída", "Seu relatório PDF foi baixado!");
-            });
-        }
-
-        if(exportTxtButton && reportContent) {
-            exportTxtButton.addEventListener('click', () => {
-                if (reportContent.classList.contains('hidden') || !dataForExport) {
-                    showModalCapyCV("Relatório Inexistente", "Gere um relatório antes de exportar."); return;
-                }
-                const reportText = getReportAsText(); 
-                const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
-                saveAs(blob, 'Relatorio_CapyCV_Detalhado.txt'); // FileSaver.js
-                showModalCapyCV("Exportação Concluída", "Seu relatório TXT foi baixado!");
-            });
-        }
-
-
-        // --- INICIALIZAÇÃO DA PÁGINA (Mesclada) ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadApiKeysFromStorage(); 
-            renderSidebar();
-            
-            if(pageLoader) {
-                 setTimeout(() => { pageLoader.classList.add('loaded'); }, 500);
-            }
-
-            if (currentYearFooterSpan) currentYearFooterSpan.textContent = new Date().getFullYear();
-            
-            if(sidebarToggleBtn && sidebar && sidebarOverlay){
-                sidebarToggleBtn.addEventListener('click', () => { sidebar.classList.toggle('-translate-x-full'); sidebarOverlay.classList.toggle('hidden'); });
-                sidebarOverlay.addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); });
-            }
-            if (openApiKeysModalButton && apiKeysModalGlobal) {
-                openApiKeysModalButton.addEventListener('click', () => {
-                    apiKeysModalGlobal.classList.remove('hidden');
-                    Object.keys(apiKeys).forEach(provider => {
-                        const modalInput = document.getElementById(provider + 'ApiKeyInputModal');
-                        if (modalInput) modalInput.value = apiKeys[provider] || '';
+            renderSidebar(); // Corrigido para chamar a função correta
+            loadApiKey();
+             
+            if(dom.analyzeButton) dom.analyzeButton.addEventListener('click', handleAnalyze);
+            if(dom.copyLetterButton) dom.copyLetterButton.addEventListener('click', () => {
+                const letterText = dom.coverLetterOutputArea.value;
+                if(letterText && !letterText.startsWith("Erro")) {
+                    navigator.clipboard.writeText(letterText).then(() => {
+                        alert('Carta de apresentação copiada!');
+                    }).catch(err => {
+                        alert('Falha ao copiar. Tente manualmente.');
+                        console.error('Erro ao copiar: ', err);
                     });
-                });
-            }
-            if (closeApiKeysModalButton && apiKeysModalGlobal) { 
-                 closeApiKeysModalButton.addEventListener('click', () => apiKeysModalGlobal.classList.add('hidden'));
-            }
-            if(continueWithoutKeyButtonModal && apiKeysModalGlobal) { 
-                 continueWithoutKeyButtonModal.addEventListener('click', () => {
-                    apiKeysModalGlobal.classList.add('hidden');
-                    addNotification('Continuando sem chave API. Funcionalidades podem ser limitadas.', 'info');
-                });
-            }
-            document.querySelectorAll('.save-key-modal-button').forEach(button => { 
-                button.addEventListener('click', (e) => {
-                    const provider = e.target.dataset.provider;
-                    const inputElement = document.getElementById(provider + 'ApiKeyInputModal');
-                    if (inputElement) saveApiKeyToStorage(provider, inputElement.value.trim());
-                });
+                } else {
+                     alert('Não há carta válida para copiar.');
+                }
             });
-            if(homeButton) { 
-                homeButton.addEventListener('click', () => window.location.href = 'index.html');
+
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
             }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                const key = dom.geminiApiKeyInput.value.trim();
+                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+                else { alert("Por favor, insira uma chave API.");}
+            });
         });
     </script>
 </body>

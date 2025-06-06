@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyAudiências - Analisador de Atas com IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; } /* zinc-700 */
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); } /* zinc-900 with opacity */
+        
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; } /* indigo-500 */
+
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .input-textarea {
+            min-height: 200px; /* Equivalente a h-64 (16rem) se a fonte base for 16px */
+            height: auto;
+             background-color: #27272a; /* zinc-800 */
+            border: 1px solid #3f3f46; /* zinc-700 */
+            color: #e4e4e7; /* zinc-200 */
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .input-textarea:focus {
+            outline: none;
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); /* indigo-500 with opacity */
+        }
+        .action-button {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .action-button:hover { background-color: #4338ca; } /* indigo-700 */
+        .action-button:disabled { background-color: #3730a3; opacity: 0.7; cursor: not-allowed; } /* indigo-800 */
+        
+        .download-button {
+            background-color: #059669; /* emerald-600 */
+        }
+        .download-button:hover {
+             background-color: #047857; /* emerald-700 */
+        }
+
+        .summary-section {
+            background-color: #1f2937; /* gray-800 (um pouco mais claro que zinc-800) */
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .summary-section h2 {
+            color: #93c5fd; /* blue-300 */
+        }
+        #pdfReportContent { display: none; }
+    </style>
+</head>
+
+<body class="dark min-h-screen flex flex-col text-[15px]">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+    
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-indigo-400">CapyAudiências ⚖️</h1>
+                    <p class="text-zinc-300 mt-1">Analise e resuma atas de audiência com precisão jurídica de IA.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flex flex-col space-y-4">
+                        <div>
+                            <label for="ataInput" class="block text-sm font-medium text-zinc-400 mb-1">Ata da Audiência:</label>
+                            <textarea id="ataInput" class="input-textarea w-full p-4 border rounded-md shadow-sm focus:ring focus:ring-indigo-300/50 focus:border-indigo-400" placeholder="Cole ou digite aqui o texto da ata da audiência..."></textarea>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="analyzeButton" class="action-button font-bold py-2.5 px-4 rounded-md focus:outline-none focus:shadow-outline w-full sm:flex-1 flex items-center justify-center">
+                                <span class="btn-text">Analisar Ata</span>
+                                <div class="loader hidden ml-2"></div>
+                            </button>
+                            <button id="summarizeButton" class="action-button font-bold py-2.5 px-4 rounded-md focus:outline-none focus:shadow-outline w-full sm:flex-1 flex items-center justify-center">
+                                <span class="btn-text">Gerar Resumo</span>
+                                <div class="loader hidden ml-2"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                         <h2 class="text-xl font-syne font-semibold text-zinc-100 mb-2">Resumo da Audiência</h2>
+                        <div id="summaryOutput" class="p-4 bg-zinc-800/50 rounded-md shadow-inner border border-zinc-700 min-h-[200px] space-y-3">
+                            <div class="summary-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-blue-300 mb-1">Principais Decisões:</h3>
+                                <p id="decisionsOutput" class="text-sm text-zinc-300">Nenhuma decisão encontrada ainda.</p>
+                            </div>
+                            <div class="summary-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-blue-300 mb-1">Próximos Passos:</h3>
+                                <p id="nextStepsOutput" class="text-sm text-zinc-300">Nenhum próximo passo definido ainda.</p>
+                            </div>
+                            <div class="summary-section p-3 rounded-md">
+                                <h3 class="text-lg font-semibold text-blue-300 mb-1">Partes Envolvidas:</h3>
+                                <p id="partiesOutput" class="text-sm text-zinc-300">Nenhuma parte envolvida identificada ainda.</p>
+                            </div>
+                        </div>
+                         <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                            <button id="downloadTxtButton" class="download-button text-white font-bold py-2.5 px-4 rounded-md focus:outline-none focus:shadow-outline w-full sm:w-auto flex items-center justify-center">
+                                <i class="fas fa-file-alt mr-2"></i>Download .TXT
+                            </button>
+                            <button id="downloadPdfButton" class="download-button text-white font-bold py-2.5 px-4 rounded-md focus:outline-none focus:shadow-outline w-full sm:w-auto flex items-center justify-center">
+                                <i class="fas fa-file-pdf mr-2"></i>Download .PDF
+                            </button>
+                        </div>
+                         <div id="loaderAiAnalysis" class="text-center py-4 hidden">
+                            <div class="loader inline-block"></div>
+                            <p class="text-sm text-indigo-300 mt-2">CapyAdvogado IA está processando a ata...</p>
+                        </div>
+                        <p id="errorMessage" class="text-red-400 text-sm mt-2 text-center"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="pdfReportContent" class="hidden">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+            h1 { font-size: 22px; color: #2c3e50; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 10px;}
+            h2 { font-size: 18px; color: #3498db; margin-top: 25px; margin-bottom: 8px; border-bottom: 1px solid #bdc3c7; padding-bottom: 4px;}
+            p, li { font-size: 12px; line-height: 1.6; margin-bottom: 8px; }
+            ul { padding-left: 20px; margin-bottom: 15px; }
+            .section-block { margin-bottom: 20px; padding: 10px; border: 1px solid #ecf0f1; border-radius: 5px; background-color: #f9f9f9;}
+        </style>
+        <h1>Resumo da Ata de Audiência - CapyAudiências</h1>
+        <div class="section-block">
+            <h2>Principais Decisões</h2>
+            <div id="pdfDecisions"></div>
+        </div>
+        <div class="section-block">
+            <h2>Próximos Passos</h2>
+            <div id="pdfNextSteps"></div>
+        </div>
+        <div class="section-block">
+            <h2>Partes Envolvidas</h2>
+            <div id="pdfParties"></div>
+        </div>
+        <p style="font-size:10px; color: #7f8c8d; text-align:center; margin-top:30px; border-top:1px solid #bdc3c7; padding-top:10px;">Gerado por CapyAudiências - CapyUniverse IA</p>
+    </div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentPageId = 'CapyAudiencias'; 
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            
+            ataInput: document.getElementById('ataInput'),
+            analyzeButton: document.getElementById('analyzeButton'),
+            summarizeButton: document.getElementById('summarizeButton'),
+            downloadTxtButton: document.getElementById('downloadTxtButton'),
+            downloadPdfButton: document.getElementById('downloadPdfButton'),
+            summaryOutput: document.getElementById('summaryOutput'),
+            decisionsOutput: document.getElementById('decisionsOutput'),
+            nextStepsOutput: document.getElementById('nextStepsOutput'),
+            partiesOutput: document.getElementById('partiesOutput'),
+            pdfReportContent: document.getElementById('pdfReportContent'),
+            pdfDecisions: document.getElementById('pdfDecisions'),
+            pdfNextSteps: document.getElementById('pdfNextSteps'),
+            pdfParties: document.getElementById('pdfParties'),
+            loaderAiAnalysis: document.getElementById('loaderAiAnalysis'),
+            errorMessage: document.getElementById('errorMessage')
+        };
+        
+        function toggleLoading(buttonElement, isLoading) {
+            const btnText = buttonElement.querySelector('.btn-text');
+            const loader = buttonElement.querySelector('.loader');
+            buttonElement.disabled = isLoading;
+            dom.loaderAiAnalysis.classList.toggle('hidden', !isLoading);
+
+            if(isLoading) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+            } else {
+                if(btnText) btnText.classList.remove('hidden');
+                if(loader) loader.classList.add('hidden');
+            }
+        }
+        
+        function basicMarkdownToHtml(md) {
+            let html = md;
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            html = html.replace(/^\s*-\s+(.*)/gm, (match, content) => `<li class="ml-4 mb-1 text-sm text-zinc-300">${content.trim()}</li>`);
+            html = html.replace(/^\s*\*\s+(.*)/gm, (match, content) => `<li class="ml-4 mb-1 text-sm text-zinc-300">${content.trim()}</li>`);
+            
+            // Envolve todos os LIs soltos com ULs
+            let inList = false;
+            html = html.split('\n').map(line => {
+                if (line.startsWith('<li>')) {
+                    if (!inList) {
+                        inList = true;
+                        return '<ul class="list-disc">' + line;
+                    }
+                    return line;
+                } else {
+                    if (inList) {
+                        inList = false;
+                        return '</ul>' + (line.trim() ? `<p class="text-sm text-zinc-300">${line}</p>` : '');
+                    }
+                    return line.trim() ? `<p class="text-sm text-zinc-300">${line}</p>` : '';
+                }
+            }).join('');
+            if (inList) html += '</ul>'; // Fecha a lista se terminar com um item de lista
+
+            // Substitui múltiplas quebras de linha por parágrafos
+            html = html.replace(/\n\s*\n/g, '</p><p class="text-sm text-zinc-300">');
+            html = html.replace(/\n/g, '<br>'); // Quebras de linha simples dentro de parágrafos
+            // Remove <br>s desnecessários dentro de <li> ou após <h3> etc.
+            html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
+
+            return html;
+        }
+
+
+        async function analyzeAta(triggerButton) {
+            if (!apiKey) {
+                dom.errorMessage.textContent = "Chave API Gemini não configurada. Por favor, configure-a no menu 'Chaves API'.";
+                return;
+            }
+            dom.errorMessage.textContent = "";
+
+            const ataText = dom.ataInput.value.trim();
+            if (!ataText) {
+                dom.errorMessage.textContent = "Por favor, insira o texto da ata da audiência.";
+                return;
+            }
+
+            toggleLoading(triggerButton, true);
+            dom.decisionsOutput.textContent = "Analisando...";
+            dom.nextStepsOutput.textContent = "Analisando...";
+            dom.partiesOutput.textContent = "Analisando...";
+
+            const prompt = `
+                Analise a seguinte ata de audiência e extraia as informações solicitadas. Responda em formato JSON com as chaves "decisoes", "proximosPassos" e "partesEnvolvidas".
+                Para "decisoes" e "proximosPassos", retorne uma lista de strings. Para "partesEnvolvidas", retorne uma lista de strings com os nomes das partes.
+                Se alguma informação não for encontrada, retorne uma lista vazia para a respectiva chave.
+
+                Texto da Ata:
+                """
+                ${ataText}
+                """
+            `;
+
+            try {
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "decisoes": { 
+                                    type: "ARRAY",
+                                    items: { type: "STRING" }
+                                },
+                                "proximosPassos": { 
+                                    type: "ARRAY",
+                                    items: { type: "STRING" }
+                                },
+                                "partesEnvolvidas": {
+                                    type: "ARRAY",
+                                    items: { type: "STRING" }
+                                }
+                            },
+                            required: ["decisoes", "proximosPassos", "partesEnvolvidas"]
+                        }
+                    }
+                };
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData?.error?.message || `Erro na API: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0].text) {
+                    const parsedResult = JSON.parse(result.candidates[0].content.parts[0].text);
+                    
+                    dom.decisionsOutput.innerHTML = parsedResult.decisoes && parsedResult.decisoes.length > 0 ? basicMarkdownToHtml(parsedResult.decisoes.map(d => `- ${d}`).join('\n')) : '<p class="text-sm text-zinc-400">Nenhuma decisão principal identificada.</p>';
+                    dom.nextStepsOutput.innerHTML = parsedResult.proximosPassos && parsedResult.proximosPassos.length > 0 ? basicMarkdownToHtml(parsedResult.proximosPassos.map(s => `- ${s}`).join('\n')) : '<p class="text-sm text-zinc-400">Nenhum próximo passo identificado.</p>';
+                    dom.partiesOutput.innerHTML = parsedResult.partesEnvolvidas && parsedResult.partesEnvolvidas.length > 0 ? basicMarkdownToHtml(parsedResult.partesEnvolvidas.map(p => `- ${p}`).join('\n')) : '<p class="text-sm text-zinc-400">Nenhuma parte envolvida identificada claramente.</p>';
+
+                } else {
+                     throw new Error(result.promptFeedback?.blockReason ? `Conteúdo bloqueado pela API: ${result.promptFeedback.blockReason}` : "Resposta da API inválida ou vazia.");
+                }
+
+            } catch (error) {
+                console.error("Erro ao analisar ata:", error);
+                dom.errorMessage.textContent = `Erro: ${error.message}`;
+                dom.decisionsOutput.textContent = "Erro ao analisar.";
+                dom.nextStepsOutput.textContent = "Erro ao analisar.";
+                dom.partiesOutput.textContent = "Erro ao analisar.";
+            } finally {
+                toggleLoading(triggerButton, false);
+            }
+        }
+
+        function downloadSummary(format) {
+            const decisionsText = Array.from(dom.decisionsOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhuma decisão principal identificada.").join('\n  - ');
+            const nextStepsText = Array.from(dom.nextStepsOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhum próximo passo identificado.").join('\n  - ');
+            const partiesText = Array.from(dom.partiesOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhuma parte envolvida identificada claramente.").join('\n  - ');
+
+            const title = "Resumo da Ata de Audiência - CapyAudiências";
+            let content = `${title}\n\n`;
+            content += "PRINCIPAIS DECISÕES:\n";
+            content += decisionsText ? `  - ${decisionsText}\n\n` : "  Nenhuma decisão principal identificada.\n\n";
+            content += "PRÓXIMOS PASSOS:\n";
+            content += nextStepsText ? `  - ${nextStepsText}\n\n` : "  Nenhum próximo passo identificado.\n\n";
+            content += "PARTES ENVOLVIDAS:\n";
+            content += partiesText ? `  - ${partiesText}\n` : "  Nenhuma parte envolvida identificada claramente.\n";
+
+            if (format === 'txt') {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resumo_audiencia.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else if (format === 'pdf') {
+                dom.pdfDecisions.innerHTML = decisionsText ? `<ul>${decisionsText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhuma decisão principal identificada.</p>';
+                dom.pdfNextSteps.innerHTML = nextStepsText ? `<ul>${nextStepsText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhum próximo passo identificado.</p>';
+                dom.pdfParties.innerHTML = partiesText ? `<ul>${partiesText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhuma parte envolvida identificada claramente.</p>';
+
+                const element = dom.pdfReportContent;
+                const opt = {
+                    margin:       [15, 15, 15, 15],
+                    filename:     'resumo_audiencia_capyaudiencias.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true, logging: true },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                html2pdf().from(element).set(opt).save();
+            }
+        }
+        
+        async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+            } else {
+                 console.log("Chave API Gemini não configurada. Algumas funcionalidades podem não operar corretamente.");
+                 dom.errorMessage.textContent = "Atenção: Chave API Gemini não configurada. A análise de IA não funcionará. Configure-a no menu 'Chaves API'.";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); 
+            loadApiKey();
+            
+            if(dom.analyzeButton) dom.analyzeButton.addEventListener('click', () => analyzeAta(dom.analyzeButton));
+            if(dom.summarizeButton) dom.summarizeButton.addEventListener('click', () => analyzeAta(dom.summarizeButton)); // Pode usar a mesma função ou criar uma específica se o prompt for diferente
+            if(dom.downloadTxtButton) dom.downloadTxtButton.addEventListener('click', () => downloadSummary('txt'));
+            if(dom.downloadPdfButton) dom.downloadPdfButton.addEventListener('click', () => downloadSummary('pdf'));
+
+
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) {
+                dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                    const key = dom.geminiApiKeyInput.value.trim();
+                    if(key) { 
+                        localStorage.setItem(API_KEY_STORAGE_KEY, key); 
+                        apiKey = key; 
+                        alert("Chave API do Gemini salva!"); 
+                        dom.apiKeysModal.classList.add('hidden'); 
+                        dom.errorMessage.textContent = ""; // Limpa a mensagem de erro da API key
+                    } else { 
+                        alert("Por favor, insira uma chave API.");
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

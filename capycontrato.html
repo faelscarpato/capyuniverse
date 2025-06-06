@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyContrato - Gerador de Contratos IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/html-to-docx@1.8.0/dist/html-to-docx.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #8b5cf6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .form-section { background-color: #1f2937; padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem; border: 1px solid #374151; }
+        .form-section h4 { color: #a78bfa; font-weight: 600; margin-bottom: 0.75rem; font-size: 1.125rem; }
+        #generatedContractHtml { background-color: #ffffff; color: #111827; padding: 20mm; border: 1px solid #d1d5db; min-height: 297mm; width: 210mm; margin: 1rem auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; overflow-y: auto; max-height: 80vh; }
+        #generatedContractHtml h1, #generatedContractHtml h2, #generatedContractHtml h3 { color: #111827; font-family: 'Times New Roman', Times, serif; }
+        #generatedContractHtml h1 { font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 20px; }
+        #generatedContractHtml h2 { font-size: 14pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+        #generatedContractHtml h3 { font-size: 12pt; font-weight: bold; margin-top: 15px; margin-bottom: 5px; }
+        #generatedContractHtml p { margin-bottom: 10px; text-align: justify; }
+        #generatedContractHtml ul { list-style-position: inside; margin-left: 20px; }
+        #generatedContractHtml strong { font-weight: bold; }
+        .export-button { background-color: #7c3aed; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; transition: background-color 0.2s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .export-button:hover { background-color: #6d28d9; }
+        .export-button svg, .export-button i { width: 1rem; height: 1rem; }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        }
+         /* Notification Styles */
+        #notificationArea { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 1050; display: flex; flex-direction: column; gap: 0.5rem; width: 100%; max-width: 24rem; }
+        .notification { padding: 1rem; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); font-size: 0.875rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease-in-out; opacity: 0; transform: translateX(100%); }
+        .notification.show { opacity: 1; transform: translateX(0); }
+        .notification-success { background-color: #10b981; color: white; }
+        .notification-error { background-color: #ef4444; color: white; }
+        .notification-info { background-color: #3b82f6; color: white; }
+        .notification-warning { background-color: #f59e0b; color: #1f2937; }
+        .notification button { margin-left: 0.75rem; font-weight: bold; font-size: 1.125rem; line-height: 1; background: none; border: none; color: inherit; cursor: pointer; }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-violet-400 mb-2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M8 12h8"></path><path d="M8 16h8"></path></svg>
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyContrato</h1>
+                    <p class="text-md text-gray-300 mt-1">Seu assistente IA para geração de modelos de contrato.</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="contractTypeSelect" class="block text-sm font-medium text-gray-300 mb-1">1. Tipo de Contrato</label>
+                    <select id="contractTypeSelect" class="w-full p-3 bg-gray-700/80 rounded-md border border-gray-600 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 shadow-sm text-gray-200">
+                        <option value="">-- Selecione o Tipo --</option>
+                        <option value="prestacao_servicos_geral">Prestação de Serviços (Geral)</option>
+                        <option value="prestacao_servicos_dev_software">Prestação de Serviços (Desenvolvimento de Software)</option>
+                        <option value="prestacao_servicos_consultoria">Prestação de Serviços (Consultoria)</option>
+                        <option value="aluguel_residencial">Aluguel de Imóvel Residencial</option>
+                        <option value="aluguel_comercial">Aluguel de Imóvel Comercial</option>
+                        <option value="compra_venda_imovel">Compra e Venda de Imóvel</option>
+                        <option value="nda">Acordo de Confidencialidade (NDA)</option>
+                        <option value="contrato_social_me_ltda">Contrato Social (ME/LTDA - Simplificado)</option>
+                        </select>
+                </div>
+
+                <div id="dynamicFormContainer" class="space-y-4 mb-6">
+                    </div>
+                
+                <button id="generateContractButton" class="w-full bg-violet-500 hover:bg-violet-600 disabled:opacity-75 disabled:cursor-not-allowed px-6 py-3 rounded-md text-lg font-semibold text-white shadow-md transition-colors duration-150 flex items-center justify-center">
+                    <span class="btn-text">Gerar Contrato</span>
+                    <span class="loader hidden ml-2"></span>
+                </button>
+                
+                <div id="contractResultArea" class="mt-6 space-y-2 hidden">
+                    <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                        <h3 class="text-xl font-semibold text-gray-200">Modelo de Contrato Gerado</h3>
+                        <div id="exportButtonsContainer" class="flex flex-wrap gap-2">
+                            <button id="copyContractButton" class="export-button bg-sky-500 hover:bg-sky-600">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                            <button id="exportToPdfButton" class="export-button">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <button id="exportToTxtButton" class="export-button">
+                                <i class="fas fa-file-alt"></i> TXT
+                            </button>
+                            <button id="exportToDocxButton" class="export-button">
+                                <i class="fas fa-file-word"></i> DOCX
+                            </button>
+                        </div>
+                    </div>
+                    <div id="generatedContractHtmlContainer" class="bg-gray-700/30 p-1 rounded-md">
+                        <div id="generatedContractHtml" class="p-4 rounded-md">
+                            <p class="text-center text-gray-400">O modelo de contrato gerado pela IA aparecerá aqui...</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-yellow-400 mt-2 text-center bg-yellow-900/30 p-2 rounded">
+                        <strong>Atenção:</strong> Este é um modelo de contrato gerado por IA e serve como um ponto de partida. 
+                        Recomenda-se fortemente a revisão por um profissional do direito para garantir sua validade legal e adequação às suas necessidades específicas.
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" data-provider="gemini" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                     <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse que requerem Gemini.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentPageId = 'CapyContrato'; 
+        let geminiApiKey = ''; // Chave API específica para esta ferramenta, carregada do localStorage
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini'; // Chave global
+        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
+
+
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInputModal: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            
+            contractTypeSelect: document.getElementById('contractTypeSelect'),
+            dynamicFormContainer: document.getElementById('dynamicFormContainer'),
+            generateContractButton: document.getElementById('generateContractButton'),
+            contractResultArea: document.getElementById('contractResultArea'),
+            generatedContractHtml: document.getElementById('generatedContractHtml'),
+            copyContractButton: document.getElementById('copyContractButton'),
+            exportToPdfButton: document.getElementById('exportToPdfButton'),
+            exportToTxtButton: document.getElementById('exportToTxtButton'),
+            exportToDocxButton: document.getElementById('exportToDocxButton'),
+            notificationArea: document.getElementById('notificationArea')
+        };
+        
+        const contractFieldDefinitions = {
+            common_top: `
+                <div class="form-section">
+                    <h4>Informações das Partes</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="parte1Nome" class="block text-xs font-medium text-gray-400 mb-1">Parte 1 (Contratante/Vendedor/Locador): Nome Completo/Razão Social</label>
+                            <input type="text" id="parte1Nome" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Nome Completo ou Razão Social">
+                        </div>
+                        <div>
+                            <label for="parte1Doc" class="block text-xs font-medium text-gray-400 mb-1">CPF/CNPJ</label>
+                            <input type="text" id="parte1Doc" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="parte1Endereco" class="block text-xs font-medium text-gray-400 mb-1">Endereço Completo</label>
+                            <input type="text" id="parte1Endereco" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Rua, Número, Bairro, Cidade - UF, CEP">
+                        </div>
+                         <div>
+                            <label for="parte1Email" class="block text-xs font-medium text-gray-400 mb-1">E-mail</label>
+                            <input type="email" id="parte1Email" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="email@exemplo.com">
+                        </div>
+                        <div>
+                            <label for="parte1Telefone" class="block text-xs font-medium text-gray-400 mb-1">Telefone</label>
+                            <input type="tel" id="parte1Telefone" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="(00) 90000-0000">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="parte2Nome" class="block text-xs font-medium text-gray-400 mb-1">Parte 2 (Contratado/Comprador/Locatário): Nome Completo/Razão Social</label>
+                            <input type="text" id="parte2Nome" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Nome Completo ou Razão Social">
+                        </div>
+                        <div>
+                            <label for="parte2Doc" class="block text-xs font-medium text-gray-400 mb-1">CPF/CNPJ</label>
+                            <input type="text" id="parte2Doc" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="parte2Endereco" class="block text-xs font-medium text-gray-400 mb-1">Endereço Completo</label>
+                            <input type="text" id="parte2Endereco" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Rua, Número, Bairro, Cidade - UF, CEP">
+                        </div>
+                         <div>
+                            <label for="parte2Email" class="block text-xs font-medium text-gray-400 mb-1">E-mail</label>
+                            <input type="email" id="parte2Email" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="email@exemplo.com">
+                        </div>
+                        <div>
+                            <label for="parte2Telefone" class="block text-xs font-medium text-gray-400 mb-1">Telefone</label>
+                            <input type="tel" id="parte2Telefone" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="(00) 90000-0000">
+                        </div>
+                    </div>
+                </div>`,
+            prestacao_servicos: `
+                <div class="form-section">
+                    <h4>Detalhes do Serviço</h4>
+                    <div>
+                        <label for="servicoDescricao" class="block text-xs font-medium text-gray-400 mb-1">Descrição Detalhada dos Serviços</label>
+                        <textarea id="servicoDescricao" rows="3" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Descreva os serviços a serem prestados..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label for="servicoPrazo" class="block text-xs font-medium text-gray-400 mb-1">Prazo de Execução/Vigência</label>
+                            <input type="text" id="servicoPrazo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 30 dias, Indeterminado">
+                        </div>
+                        <div>
+                            <label for="servicoValor" class="block text-xs font-medium text-gray-400 mb-1">Valor Total dos Serviços (R$)</label>
+                            <input type="number" id="servicoValor" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 1500.00">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label for="servicoPagamento" class="block text-xs font-medium text-gray-400 mb-1">Forma de Pagamento</label>
+                        <input type="text" id="servicoPagamento" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 50% adiantado, 50% na entrega; Mensal">
+                    </div>
+                </div>`,
+            imovel: `
+                <div class="form-section">
+                    <h4>Detalhes do Imóvel</h4>
+                     <div class="mb-4">
+                        <label for="imovelTipoTransacaoEspecifica" class="block text-xs font-medium text-gray-400 mb-1">Tipo Específico de Transação Imobiliária</label>
+                        <select id="imovelTipoTransacaoEspecifica" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm">
+                            <option value="venda">Venda de Imóvel</option>
+                            <option value="aluguel_residencial">Aluguel Residencial</option>
+                            <option value="aluguel_comercial">Aluguel Comercial</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="imovelEndereco" class="block text-xs font-medium text-gray-400 mb-1">Endereço Completo do Imóvel</label>
+                        <input type="text" id="imovelEndereco" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Rua, Número, Bairro, Cidade - UF, CEP">
+                    </div>
+                    <div class="mt-4">
+                        <label for="imovelDescricao" class="block text-xs font-medium text-gray-400 mb-1">Descrição do Imóvel (Matrícula, área, características)</label>
+                        <textarea id="imovelDescricao" rows="3" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: Matrícula nº 000, área de 100m², 2 quartos..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label for="imovelValor" class="block text-xs font-medium text-gray-400 mb-1">Valor da Transação/Aluguel Mensal (R$)</label>
+                            <input type="number" id="imovelValor" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 300000.00 ou 1500.00">
+                        </div>
+                        <div>
+                            <label for="imovelCondicoes" class="block text-xs font-medium text-gray-400 mb-1">Condições Pagamento/Prazo Aluguel</label>
+                            <input type="text" id="imovelCondicoes" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: À vista; 30 meses">
+                        </div>
+                    </div>
+                     <div id="aluguelFieldsContainer" class="mt-4 space-y-4 hidden"> 
+                        <div>
+                            <label for="imovelReajuste" class="block text-xs font-medium text-gray-400 mb-1">Índice de Reajuste (Aluguel)</label>
+                            <input type="text" id="imovelReajuste" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: IGP-M anual">
+                        </div>
+                        <div>
+                            <label for="imovelGarantia" class="block text-xs font-medium text-gray-400 mb-1">Tipo de Garantia (Aluguel)</label>
+                            <input type="text" id="imovelGarantia" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: Fiador, Seguro Fiança, Caução">
+                        </div>
+                    </div>
+                </div>`,
+            nda: `
+                <div class="form-section">
+                    <h4>Detalhes do Acordo de Confidencialidade</h4>
+                    <div>
+                        <label for="ndaInfoConfidencial" class="block text-xs font-medium text-gray-400 mb-1">Descrição das Informações Confidenciais</label>
+                        <textarea id="ndaInfoConfidencial" rows="3" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: Planos de negócios, segredos industriais, dados de clientes..."></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label for="ndaPrazo" class="block text-xs font-medium text-gray-400 mb-1">Prazo de Confidencialidade</label>
+                        <input type="text" id="ndaPrazo" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 5 anos após o término da relação, Indeterminado">
+                    </div>
+                </div>`,
+            contrato_social_me_ltda: `
+                <div class="form-section">
+                    <h4>Detalhes da Sociedade (ME/LTDA Simplificado)</h4>
+                     <div>
+                        <label for="socialNomeEmpresa" class="block text-xs font-medium text-gray-400 mb-1">Nome da Empresa</label>
+                        <input type="text" id="socialNomeEmpresa" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: Capy Soluções Criativas LTDA ME">
+                    </div>
+                    <div class="mt-4">
+                        <label for="socialObjeto" class="block text-xs font-medium text-gray-400 mb-1">Objeto Social</label>
+                        <textarea id="socialObjeto" rows="2" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Descreva as atividades principais da empresa"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label for="socialCapital" class="block text-xs font-medium text-gray-400 mb-1">Capital Social (R$)</label>
+                            <input type="number" id="socialCapital" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: 10000.00">
+                        </div>
+                        <div>
+                            <label for="socialSede" class="block text-xs font-medium text-gray-400 mb-1">Endereço da Sede</label>
+                            <input type="text" id="socialSede" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Endereço completo da empresa">
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Nota: Este é um modelo simplificado. Para sociedades mais complexas, consulte um contador ou advogado.</p>
+                </div>`,
+            common_bottom: `
+                <div class="form-section">
+                    <h4>Cláusulas Adicionais e Foro</h4>
+                    <div>
+                        <label for="clausulasAdicionais" class="block text-xs font-medium text-gray-400 mb-1">Cláusulas Adicionais (Opcional)</label>
+                        <textarea id="clausulasAdicionais" rows="3" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Insira aqui quaisquer cláusulas específicas ou observações..."></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label for="foroContrato" class="block text-xs font-medium text-gray-400 mb-1">Foro (Cidade/UF)</label>
+                        <input type="text" id="foroContrato" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm" placeholder="Ex: São Paulo/SP">
+                    </div>
+                </div>
+                 <div class="form-section">
+                    <h4>Testemunhas (Opcional)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="testemunha1Nome" class="block text-xs font-medium text-gray-400 mb-1">Testemunha 1: Nome Completo</label>
+                            <input type="text" id="testemunha1Nome" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label for="testemunha1Doc" class="block text-xs font-medium text-gray-400 mb-1">CPF</label>
+                            <input type="text" id="testemunha1Doc" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm">
+                        </div>
+                         <div>
+                            <label for="testemunha2Nome" class="block text-xs font-medium text-gray-400 mb-1">Testemunha 2: Nome Completo</label>
+                            <input type="text" id="testemunha2Nome" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm">
+                        </div>
+                        <div>
+                            <label for="testemunha2Doc" class="block text-xs font-medium text-gray-400 mb-1">CPF</label>
+                            <input type="text" id="testemunha2Doc" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md text-sm">
+                        </div>
+                    </div>
+                </div>`
+        };
+
+        function updateDynamicForm() {
+            const selectedType = dom.contractTypeSelect.value;
+            dom.dynamicFormContainer.innerHTML = ''; 
+            let formHtml = contractFieldDefinitions.common_top;
+
+            if (selectedType.startsWith('prestacao_servicos')) {
+                formHtml += contractFieldDefinitions.prestacao_servicos;
+            } else if (selectedType.includes('aluguel') || selectedType.includes('compra_venda_imovel')) {
+                formHtml += contractFieldDefinitions.imovel;
+            } else if (selectedType === 'nda') {
+                formHtml += contractFieldDefinitions.nda;
+            } else if (selectedType === 'contrato_social_me_ltda') {
+                 formHtml += contractFieldDefinitions.contrato_social_me_ltda;
+            }
+            formHtml += contractFieldDefinitions.common_bottom;
+            dom.dynamicFormContainer.innerHTML = formHtml;
+
+            const imovelTipoSelect = document.getElementById('imovelTipoTransacaoEspecifica');
+            if (imovelTipoSelect) {
+                 imovelTipoSelect.value = selectedType; // Sincroniza com a seleção principal se for de imóvel
+                 imovelTipoSelect.addEventListener('change', toggleAluguelFields);
+                 toggleAluguelFields();
+            }
+        }
+
+        function toggleAluguelFields() {
+            const imovelTipoTransacaoSelect = document.getElementById('imovelTipoTransacaoEspecifica');
+            const aluguelFieldsDiv = document.getElementById('aluguelFieldsContainer');
+            if (imovelTipoTransacaoSelect && aluguelFieldsDiv) {
+                if (imovelTipoTransacaoSelect.value.includes('aluguel')) {
+                    aluguelFieldsDiv.classList.remove('hidden');
+                } else {
+                    aluguelFieldsDiv.classList.add('hidden');
+                }
+            }
+        }
+        
+        dom.contractTypeSelect.addEventListener('change', updateDynamicForm);
+        
+        function addNotification(message, type = 'info') { /* ... (como nas outras CapyTools) */ }
+        window.removeNotification = (id) => { /* ... (como nas outras CapyTools) */ };
+
+        async function callGeminiAPI_generateContract(promptData) {
+            if (!geminiApiKey) { 
+                addNotification("Chave API Gemini não configurada.", "error");
+                return;
+            }
+            
+            showLoading(dom.generateContractButton, true, "Gerar Contrato");
+            dom.generatedContractHtml.innerHTML = `<div class="flex items-center justify-center p-8 text-gray-400"><span class="loader mr-3"></span>Gerando modelo de contrato... Por favor, aguarde.</div>`;
+            dom.contractResultArea.classList.remove('hidden');
+            
+            let promptString = `Você é CapyContrato, um assistente de IA especialista em redação de documentos jurídicos e contratos em português do Brasil. Sua tarefa é gerar um modelo de contrato completo e bem formatado em HTML, com base nas informações fornecidas. O contrato deve ser claro, objetivo e seguir as melhores práticas de redação contratual.\n\n**Tipo de Contrato Solicitado:** ${promptData.tipoContratoTexto}\n\n**Informações Fornecidas:**\n`;
+            for (const key in promptData.detalhes) {
+                if (promptData.detalhes[key] && promptData.detalhes[key].value) {
+                    promptString += `* **${promptData.detalhes[key].label}:** ${promptData.detalhes[key].value}\n`;
+                }
+            }
+            promptString += `\n**Instruções Adicionais para a IA:** (Conforme definido anteriormente, sobre estrutura, linguagem, campos não preenchidos, etc.). Gere o contrato completo abaixo em HTML (apenas o corpo interno, sem html/head/body tags):\n`;
+
+            try {
+                const response = await fetch(`${GEMINI_API_URL_BASE}${geminiApiKey}`, { 
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptString }] }] })
+                });
+                const data = await response.json(); 
+
+                if (!response.ok) {
+                    let msg = `Erro ${response.status}: ${data?.error?.message || response.statusText}`;
+                    if (response.status === 400 && msg.toLowerCase().includes("api key not valid")) msg = "Erro: API Key Gemini inválida ou mal formatada.";
+                    else if (response.status === 403 ) msg = "Erro 403: Acesso negado. Verifique sua API Key e configurações.";
+                    throw new Error(msg);
+                }
+                if (data.promptFeedback?.blockReason) throw new Error(`Conteúdo bloqueado: ${data.promptFeedback.blockReason}.`);
+                const contractHTML = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!contractHTML) throw new Error("Resposta da IA vazia ou em formato inesperado.");
+                
+                dom.generatedContractHtml.innerHTML = contractHTML.replace(/```html\n|<\/code>\n```|```/g, '').trim(); // Limpa markdown de bloco de código se houver
+                addNotification("Modelo de contrato gerado!", "success");
+            } catch (err) {
+                console.error("Falha na API:", err);
+                dom.generatedContractHtml.innerHTML = `<p class="text-red-400 text-center py-8">Erro ao gerar contrato: ${err.message}</p>`;
+                addNotification(err.message, "error");
+            } finally {
+                showLoading(dom.generateContractButton, false, "Gerar Contrato");
+            }
+        }
+        
+        dom.generateContractButton.addEventListener('click', () => {
+            const tipoContrato = dom.contractTypeSelect.value;
+            const tipoContratoTexto = dom.contractTypeSelect.options[dom.contractTypeSelect.selectedIndex].text;
+            if (!tipoContrato) { addNotification("Selecione um tipo de contrato.", "warning"); return; }
+
+            const formData = { tipoContratoTexto: tipoContratoTexto, detalhes: {} };
+            const inputs = dom.dynamicFormContainer.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                const labelElement = document.querySelector(`label[for="${input.id}"]`);
+                const label = labelElement ? labelElement.textContent.replace(/:$/, '').trim() : input.id;
+                if (input.value.trim() !== "" || input.type === 'select-one') { // Inclui selects mesmo que a opção default
+                    formData.detalhes[input.id] = { label: label, value: input.value.trim() };
+                }
+            });
+            
+            let hasRequiredFields = formData.detalhes.parte1Nome && formData.detalhes.parte1Doc && formData.detalhes.parte2Nome && formData.detalhes.parte2Doc;
+            if (tipoContrato.startsWith('prestacao_servicos') && (!formData.detalhes.servicoDescricao || !formData.detalhes.servicoValor)) hasRequiredFields = false;
+            // Adicionar mais validações conforme necessário
+            
+            if (!hasRequiredFields) { addNotification("Preencha os campos obrigatórios das partes e detalhes específicos do contrato.", "warning"); return; }
+            callGeminiAPI_generateContract(formData);
+        });
+        
+          async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); // Corrigido para chamar a função correta
+            loadApiKey();
+            
+            if(dom.analyzeDocButton) dom.analyzeDocButton.addEventListener('click', handleAnalyzeDocument);
+            if(dom.copyOutputButton) dom.copyOutputButton.addEventListener('click', () => {
+                const outputHtml = dom.docOutput.innerHTML;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = outputHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
+                const outputText = tempDiv.textContent || tempDiv.innerText || "";
+
+                if(outputText && !outputText.includes("O resultado da análise do documento aparecerá aqui...") && !outputText.includes("Erro ao analisar:")) {
+                    navigator.clipboard.writeText(outputText.trim()).then(() => {
+                        alert('Análise copiada para a área de transferência!');
+                    }).catch(err => {
+                        alert('Falha ao copiar. Tente manualmente.');
+                        console.error('Erro ao copiar: ', err);
+                    });
+                } else {
+                     alert('Não há análise válida para copiar.');
+                }
+            });
+
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                const key = dom.geminiApiKeyInput.value.trim();
+                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+                else { alert("Por favor, insira uma chave API.");}
+            });
+        });
+    </script>
+</body>
+</html>

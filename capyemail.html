@@ -1,439 +1,378 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapyEmail - CapyUniverse IA</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyEmail - Assistente de Redação de E-mails com IA</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
     <style>
+        html { background: #121217; }
         body {
             font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
         }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
         }
-        ::-webkit-scrollbar-track {
-            background: #111827; /* gray-900 */
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
         }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
-        }
+
+
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
+
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
+        
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ec4899; /* Cor rosa para CapyEmail */
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
-            display: inline-block;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        textarea {
+            min-height: 120px;
         }
-        .category-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+         select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
-        .category-content.expanded {
-            max-height: 500px; /* Ajuste conforme necessário */
+        .output-card {
+            background-color: rgba(30, 30, 40, 0.5);
+            border: 1px solid rgba(80, 80, 100, 0.5);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 1.5rem;
         }
-        .sidebar-link.active {
-            background-color: #4f46e5; /* indigo-600 */
-            color: white;
-            font-weight: 600;
+         .output-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.25rem; /* text-xl */
         }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
-    <header class="bg-gray-800 p-3 shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16">
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
         <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500">
-                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
             </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold hover:text-purple-400 transition-colors">CapyUniverse IA</a>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
         </div>
         <div class="flex items-center">
-            <button id="homeButton" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-md text-sm font-semibold text-white mr-2">Inicio</button>
-
-            <input id="apiKeyInput" type="password" placeholder="Sua API Key Gemini" class="p-2 text-sm text-black w-48 sm:w-72 rounded-l-md focus:ring-2 focus:ring-purple-500 outline-none"/>
-            <button id="saveApiKeyButton" class="bg-purple-500 hover:bg-purple-600 px-3 py-2 rounded-r-md text-sm">Salvar Key</button>
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
         </div>
     </header>
+    <div id="notificationArea"></div>
 
-    <div id="notificationArea" class="fixed top-20 right-4 z-50 space-y-2 w-full max-w-xs sm:max-w-sm">
-        </div>
-
-    <div class="flex flex-1 pt-16">
-        <aside id="sidebar" class="bg-gray-800 text-gray-300 w-64 space-y-2 p-4 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-20 lg:pt-4">
-            </aside>
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-pink-400">CapyEmail 📧</h1>
+                    <p class="text-zinc-300 mt-1">Crie e-mails perfeitos para qualquer ocasião com a ajuda da Capy-IA!</p>
+                </div>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-            <div class="space-y-6 bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl mx-auto">
-                <div class="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto h-12 w-12 text-pink-400 mb-2"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
-                    <h2 class="text-3xl font-bold text-pink-400">CapyEmail</h2>
-                    <p class="text-md text-gray-400 mt-1">Gere e-mails profissionais com IA.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="recipient-type" class="block text-sm font-semibold mb-1 text-zinc-200">Destinatário/Relação:</label>
+                            <input type="text" id="recipient-type" placeholder="Ex: Cliente Potencial, Colega de Trabalho, Amigo" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <div>
+                            <label for="email-objective" class="block text-sm font-semibold mb-1 text-zinc-200">Objetivo do E-mail:</label>
+                            <input type="text" id="email-objective" placeholder="Ex: Pedir um orçamento, Marcar uma reunião, Agradecer" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-pink-500">
+                        </div>
+                        <div>
+                            <label for="email-tone" class="block text-sm font-semibold mb-1 text-zinc-200">Tom Desejado:</label>
+                            <select id="email-tone" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-pink-500">
+                                <option value="formal" selected>Formal</option>
+                                <option value="amigavel">Amigável</option>
+                                <option value="persuasivo">Persuasivo</option>
+                                <option value="informativo">Informativo</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="key-points" class="block text-sm font-semibold mb-1 text-zinc-200">Pontos Chave a Incluir (um por linha):</label>
+                            <textarea id="key-points" rows="4" placeholder="Ex: Mencionar o projeto X\nConfirmar data da entrega\nPerguntar sobre próximos passos" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-pink-500 scrollbar-thin"></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="generated-email" class="block text-sm font-semibold mb-1 text-zinc-200">Rascunho do E-mail Gerado:</label>
+                        <textarea id="generated-email" rows="15" placeholder="O rascunho do e-mail gerado pela Capy-IA aparecerá aqui..." readonly class="w-full h-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-pink-500 scrollbar-thin"></textarea>
+                    </div>
                 </div>
-                <div>
-                    <label for="objetivoEmail" class="block text-sm font-medium text-gray-300 mb-1">1. Qual é o objetivo do e-mail?</label>
-                    <input type="text" id="objetivoEmail" placeholder="Ex: Solicitar orçamento, marcar reunião, agradecer..." class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
-                </div>
-                <div>
-                    <label for="destinatarioEmail" class="block text-sm font-medium text-gray-300 mb-1">2. Nome ou empresa do destinatário (opcional)</label>
-                    <input type="text" id="destinatarioEmail" placeholder="Ex: João da Silva, Empresa CapyTech" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
-                </div>
-                 <div>
-                    <label for="remetenteEmail" class="block text-sm font-medium text-gray-300 mb-1">3. Seu nome/empresa (opcional, para assinatura)</label>
-                    <input type="text" id="remetenteEmail" placeholder="Ex: Maria Oliveira, Gerente de Vendas" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
-                </div>
-                <div>
-                    <label for="tomEmail" class="block text-sm font-medium text-gray-300 mb-1">4. Escolha o tom do e-mail</label>
-                    <select id="tomEmail" class="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 shadow-sm">
-                        <option value="formal">Formal e Educado</option>
-                        <option value="semiformal">Semiformal</option>
-                        <option value="informal">Informal e Amigável</option>
-                        <option value="direto">Direto ao Ponto</option>
-                        <option value="persuasivo">Persuasivo</option>
-                        <option value="urgente">Urgente e Conciso</option>
-                        <option value="agradecimento">Agradecimento Sincero</option>
-                    </select>
-                </div>
-                <button id="gerarEmailButton" class="w-full bg-pink-500 hover:bg-pink-600 disabled:opacity-75 disabled:cursor-not-allowed px-6 py-3 rounded-md text-lg font-semibold shadow-md transition-colors duration-150 flex items-center justify-center">
-                    <span class="btn-text">Gerar E-mail</span>
-                    <span class="loader hidden ml-2"></span>
-                </button>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-300 mb-1">5. E-mail Gerado</h3>
-                    <div id="resultadoEmail" class="p-4 bg-gray-700 rounded-md border border-gray-600 text-sm whitespace-pre-wrap min-h-[200px] shadow-sm">O e-mail gerado aparecerá aqui...</div>
-                </div>
-            </div>
+                
+                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <button id="generate-email-button" class="w-full sm:w-auto bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                        <span class="btn-text">Gerar E-mail</span>
+                        <div class="loader hidden"></div>
+                    </button>
+                    <button id="copy-email-button" title="Copiar E-mail Gerado" class="text-zinc-400 hover:text-pink-400 transition-colors p-2">
+                        <i class="fas fa-copy fa-lg"></i>
+                    </button>
+                 </div>
+            </section>
         </main>
     </div>
 
-    <footer class="bg-gray-800 text-center p-4 text-sm text-gray-500 mt-auto">
-        CapyUniverse IA &copy; 2025
-    </footer>
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                     <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        const currentPageId = 'CapyEmail';
         let apiKey = '';
-        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
-        const currentPageId = 'CapyEmail'; // ID da página atual para destacar na sidebar
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
 
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const saveApiKeyButton = document.getElementById('saveApiKeyButton');
-        const notificationArea = document.getElementById('notificationArea');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const homeButton = document.getElementById('homeButton');
-
-
-        const tools = [
-            // Análise e Compreensão de Texto
-            { id: 'CapyResumo', title: 'Resumir Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyresumo.html', color: 'blue' },
-            { id: 'CapyExplica', title: 'Explicar Textos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capyexplica.html', color: 'yellow' },
-            { id: 'CapyDetector', title: 'Detector de IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>', category: 'Análise e Compreensão', pageUrl: 'capydetector.html', color: 'purple'},
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
             
-            // Criação e Edição de Conteúdo
-            { id: 'CapyEmail', title: 'Gerar E-mails', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>', category: 'Criação e Edição', pageUrl: 'capyemail.html', color: 'pink' },
-            { id: 'CapyTone', title: 'Humanizar Texto', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9Z"/><path d="M18 13a6 6 0 0 0-9-9"/><path d="m6 21 6-6"/><path d="m3 3 3 3"/><path d="M15 6l3.4-3.4"/><path d="M10.2 3.8 12 2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>', category: 'Criação e Edição', pageUrl: 'capytone.html', color: 'lime' },
-            { id: 'CapyEscritor', title: 'Assistente de Escrita', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>', category: 'Criação e Edição', pageUrl: 'capyescritor.html', color: 'rose' },
-            { id: 'CapyDiscurso', title: 'Gerador de Discursos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', category: 'Criação e Edição', pageUrl: 'capydiscurso.html', color: 'fuchsia' },
-            { id: 'CapyRoteiro', title: 'Gerador de Roteiros', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>', category: 'Criação e Edição', pageUrl: 'capyroteiro.html', color: 'orange' },
-            
-            // Ferramentas de Documentos
-            { id: 'CapyDoc', title: 'Analisar Documentos', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v3"/><path d="M14 2v6h6"/><circle cx="12.5" cy="15.5" r="2.5"/><path d="m14.5 17.5 2 2"/></svg>', category: 'Documentos e PDFs', pageUrl: 'capydoc.html', color: 'indigo' },
-            { id: 'CapyVagaMatch', title: 'Match Currículo-Vaga', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capyvagamatch.html', color: 'green' },
-            { id: 'CapyPDF', title: 'Chat com PDF', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2z" /><polyline points="14 2 14 8 20 8" /><path d="m10 13-2 2 2 2" /><path d="m14 13 2 2-2 2" /></svg>', category: 'Documentos e PDFs', pageUrl: 'capypdf.html', color: 'teal' },
-            { id: 'CapyMinuta', title: 'Gerador de Atas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>', category: 'Documentos e PDFs', pageUrl: 'capyminuta.html', color: 'slate' },
-
-            // Chatbots Especializados
-            { id: 'CapyChat', title: 'Chat Geral', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capychat.html', color: 'sky' },
-            { id: 'CapyPsico', title: 'Chat Psicólogo IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M9 12h.01"></path><path d="M15 12h.01"></path><path d="M10 16s.5-1 2-1 2 1 2 1"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capypsico.html', color: 'emerald' },
-            { id: 'CapyHistoriador', title: 'Chat Historiador IA', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>', category: 'Chatbots Especializados', pageUrl: 'capyhistoriador.html', color: 'amber' },
-
-            // Produtividade e Organização
-            { id: 'CapyPlanner', title: 'Planejador Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', category: 'Produtividade e Organização', pageUrl: 'capyplanner.html', color: 'cyan' },
-            { id: 'CapyMetas', title: 'Definidor de Metas', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>', category: 'Produtividade e Organização', pageUrl: 'capymetas.html', color: 'orange' }, 
-            { id: 'CapyDiario', title: 'Diário Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>', category: 'Produtividade e Organização', pageUrl: 'capydiario.html', color: 'blue' },
-            
-            // Aprendizagem e Educação
-            { id: 'CapyDidatica', title: 'Planos de Aula', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 14l6-3-6-3-6 3 6 3z"></path><path d="M12 14v7"></path><path d="M6 12.5L12 17l6-4.5"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydidatica.html', color: 'emerald' },
-            { id: 'CapyQuiz', title: 'Gerador de Quizzes', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 11.17L12 8"></path><path d="M12 15h.01"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyquiz.html', color: 'fuchsia' }, 
-            { id: 'CapyTradutor', title: 'Tradutor Inteligente', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path><path d="M12 19l-7-7 7-7"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytradutor.html', color: 'red' },
-            { id: 'CapyDebate', title: 'Simulador de Debates', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capydebate.html', color: 'violet' }, 
-            { id: 'CapySolucao', title: 'Professor de Matemática', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path><line x1="12" y1="22" x2="12" y2="17"></line><line x1="12" y1="12" x2="20" y2="8"></line><line x1="12" y1="12" x2="4" y2="8"></line></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capysolucao.html', color: 'red' },
-            { id: 'CapyTeste', title: 'Gerador de Avaliações', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="m9 14 2 2 4-4"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capyteste.html', color: 'purple' },
-            { id: 'CapyTCC', title: 'Tutor de TCC', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><path d="M12 13L12 7"></path><path d="M9 10L15 10"></path></svg>', category: 'Aprendizagem e Educação', pageUrl: 'capytcc.html', color: 'indigo' },
-            
-            // Análise de Dados
-            { id: 'CapyChart', title: 'Visualizador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>', category: 'Análise de Dados', pageUrl: 'capychart.html', color: 'teal' },
-            { id: 'CapyDados', title: 'Analisador de Dados', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>', category: 'Análise de Dados', pageUrl: 'capydados.html', color: 'blue' },
-            { id: 'CapyFiscal', title: 'Assistente Fiscal', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>', category: 'Análise de Dados', pageUrl: 'capyfiscal.html', color: 'green' },
-            
-            // Bem-Estar e Mindfulness
-            { id: 'CapyMeditacao', title: 'Guia de Meditação', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12c0-1.18.42-2.24 1.12-3.05a4.29 4.29 0 0 1 6.76 0A4.208 4.208 0 0 1 17 12"/><path d="M9.5 15a5.14 5.14 0 0 0 5 0"/></svg>', category: 'Bem-Estar e Mindfulness', pageUrl: 'capymeditacao.html', color: 'cyan' },
-
-            // Ferramentas de IA Avançadas
-            { id: 'CapyPrompt', title: 'Engenheiro de Prompt', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 00-7.071 17.071A9.957 9.957 0 0012 22a10 10 0 007.071-2.929A9.957 9.957 0 0012 2z"/><path d="M12 6v1m0 2v1m0 2v1m0 2v1m0 2v1"/><path d="M12 10a2 2 0 100-4 2 2 0 000 4z"/><path d="M12 18a2 2 0 100-4 2 2 0 000 4z" opacity="0.6"/></svg>', category: 'Ferramentas IA Avançadas', pageUrl: 'capyprompt.html', color: 'purple' },
-        ];
-
-
-        // --- Funções de Notificação ---
-        function addNotification(message, type = 'info') {
-            const notificationId = 'notif-' + Date.now();
-            const typeClasses = {
-                error: 'bg-red-600 text-white',
-                success: 'bg-green-600 text-white',
-                info: 'bg-blue-600 text-white',
-                warning: 'bg-yellow-500 text-black'
-            };
-            const notificationHTML = `
-                <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
-                    <span>${message}</span>
-                    <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
-                </div>`;
-            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
-            const newNotification = document.getElementById(notificationId);
-            requestAnimationFrame(() => {
-                newNotification.classList.remove('opacity-0', 'translate-x-full');
-                newNotification.classList.add('opacity-100', 'translate-x-0');
-            });
-            setTimeout(() => removeNotification(notificationId), 6000);
-        }
-        window.removeNotification = (id) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.add('opacity-0', 'translate-x-full');
-                setTimeout(() => el.remove(), 300);
-            }
+            recipientTypeInput: document.getElementById('recipient-type'),
+            emailObjectiveInput: document.getElementById('email-objective'),
+            emailToneSelect: document.getElementById('email-tone'),
+            keyPointsArea: document.getElementById('key-points'),
+            generateEmailButton: document.getElementById('generate-email-button'),
+            generatedEmailArea: document.getElementById('generated-email'),
+            copyEmailButton: document.getElementById('copy-email-button')
         };
 
-        // --- Lógica da API Key com LocalStorage ---
-        const API_KEY_STORAGE_ITEM = 'geminiApiKeyCapyUniverse';
-        saveApiKeyButton.addEventListener('click', () => {
-            const keyFromInput = apiKeyInput.value.trim();
-            if (keyFromInput) {
-                apiKey = keyFromInput;
-                localStorage.setItem(API_KEY_STORAGE_ITEM, apiKey);
-                addNotification('API Key guardada com sucesso!', 'success');
+        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
+        
+        function toggleLoading(isLoading) {
+            const btnText = dom.generateEmailButton.querySelector('.btn-text');
+            const loader = dom.generateEmailButton.querySelector('.loader');
+            dom.generateEmailButton.disabled = isLoading;
+            if(isLoading) {
+                btnText.classList.add('hidden');
+                loader.classList.remove('hidden');
             } else {
-                localStorage.removeItem(API_KEY_STORAGE_ITEM);
-                apiKey = '';
-                addNotification('API Key removida. Por favor, insira uma API Key válida.', 'warning');
-            }
-        });
-
-        if (homeButton) {
-            homeButton.addEventListener('click', () => {
-                window.location.href = 'index.html';
-            });
-        }
-
-
-        function loadApiKeyFromStorage() {
-            const storedKey = localStorage.getItem(API_KEY_STORAGE_ITEM);
-            if (storedKey) {
-                apiKey = storedKey;
-                apiKeyInput.value = apiKey;
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
             }
         }
 
-        // --- Lógica da Sidebar ---
-        function renderSidebar() {
-            const categories = {};
-            tools.forEach(tool => {
-                if (!categories[tool.category]) {
-                    categories[tool.category] = [];
-                }
-                categories[tool.category].push(tool);
-            });
-
-            sidebar.innerHTML = ''; 
-
-            for (const categoryName in categories) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'mb-2';
-
-                const categoryButton = document.createElement('button');
-                categoryButton.className = 'w-full flex justify-between items-center p-3 text-left text-gray-200 hover:bg-gray-700 rounded-md focus:outline-none';
-                categoryButton.innerHTML = `
-                    <span class="font-semibold">${categoryName}</span>
-                    <svg class="w-5 h-5 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                `;
-                
-                const categoryContent = document.createElement('div');
-                categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
-
-                categories[categoryName].forEach(tool => {
-                    const link = document.createElement('a');
-                    link.href = tool.pageUrl;
-                    link.className = `sidebar-link w-full flex items-center space-x-3 p-2.5 rounded-md text-sm hover:bg-gray-600 transition-colors duration-150 ${tool.id === currentPageId ? 'active' : ''}`;
-                    link.innerHTML = `${tool.icon.replace('currentColor', `text-${tool.color}-400`)} <span class="${tool.id === currentPageId ? 'text-white' : `text-gray-300`}">${tool.title}</span>`;
-                    categoryContent.appendChild(link);
-                });
-
-                categoryButton.addEventListener('click', () => {
-                    categoryContent.classList.toggle('expanded');
-                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                });
-                
-                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                    categoryContent.classList.add('expanded');
-                    categoryButton.querySelector('svg').classList.add('rotate-180');
-                }
-
-                categoryDiv.appendChild(categoryButton);
-                categoryDiv.appendChild(categoryContent);
-                sidebar.appendChild(categoryDiv);
-            }
-        }
-
-        sidebarToggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebarOverlay.classList.toggle('hidden');
-        });
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        });
-
-
-        // --- Função de Loading para Botões ---
-        function showLoading(buttonElement, show = true) {
-            const btnText = buttonElement.querySelector('.btn-text');
-            const loader = buttonElement.querySelector('.loader');
-            if (show) {
-                if(btnText) btnText.classList.add('hidden');
-                if(loader) loader.classList.remove('hidden');
-                buttonElement.disabled = true;
-            } else {
-                if(btnText) btnText.classList.remove('hidden');
-                if(loader) loader.classList.add('hidden');
-                buttonElement.disabled = false;
-            }
-        }
-
-        // --- Função para Chamar a API Gemini ---
-        async function callGeminiAPI(prompt, buttonElement, resultElement) {
+        async function handleGenerateEmail() {
             if (!apiKey) {
-                addNotification("API Key não informada. Verifique o cabeçalho.", "error");
-                if(buttonElement) showLoading(buttonElement, false);
-                return;
-            }
-            if (!prompt || (typeof prompt === 'string' && !prompt.trim())) {
-                 addNotification("O prompt para análise não pode estar vazio.", "warning");
-                 if(buttonElement) showLoading(buttonElement, false);
+                alert("Por favor, configure a sua chave API do Gemini primeiro.");
+                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
                 return;
             }
 
-            if(buttonElement) showLoading(buttonElement, true);
-            if (resultElement) {
-                 resultElement.innerHTML = `<div class="flex items-center justify-center p-4 text-gray-400"><span class="loader mr-2"></span>Analisando com a CapyIA...</div>`;
+            const recipient = dom.recipientTypeInput.value.trim();
+            const objective = dom.emailObjectiveInput.value.trim();
+            const tone = dom.emailToneSelect.options[dom.emailToneSelect.selectedIndex].text;
+            const keyPoints = dom.keyPointsArea.value.trim();
+
+            if (!recipient || !objective || !keyPoints) {
+                alert("Por favor, preencha os campos: Destinatário, Objetivo e Pontos Chave.");
+                return;
             }
 
+            toggleLoading(true);
+            dom.generatedEmailArea.value = "A Capy-IA está a redigir o teu e-mail...";
+
+            const prompt = `
+                Aja como CapyEmail, um assistente especialista em redação de e-mails.
+                O utilizador precisa de um e-mail com as seguintes características:
+
+                - Destinatário/Relação: "${recipient}"
+                - Objetivo do E-mail: "${objective}"
+                - Tom Desejado: ${tone}
+                - Pontos Chave a Incluir (um por linha):
+                ${keyPoints}
+
+                Por favor, gere um rascunho de e-mail completo, incluindo uma saudação apropriada, o corpo do e-mail desenvolvendo os pontos chave de forma coerente com o objetivo e o tom, e uma despedida profissional.
+                Responda APENAS com o texto do e-mail.
+            `;
+            
             try {
-                const res = await fetch(GEMINI_API_URL_BASE + apiKey, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    let msg = `Erro ${res.status}: ${errorData?.error?.message || res.statusText}`;
-                    if (res.status === 400 && msg.toLowerCase().includes("api key not valid")) {
-                        msg = "Erro: API Key inválida ou mal formatada. Verifique a chave no cabeçalho.";
-                    }
-                    throw new Error(msg);
+
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
                 }
-                const data = await res.json();
-                if (data.promptFeedback?.blockReason) {
-                    throw new Error(`Conteúdo bloqueado pela API: ${data.promptFeedback.blockReason}`);
+                
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                    dom.generatedEmailArea.value = data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
                 }
-                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (textResponse === undefined) { 
-                    throw new Error("Resposta da IA vazia ou em formato inesperado.");
-                }
-                if (resultElement) {
-                    resultElement.innerText = textResponse;
-                }
-                addNotification("Análise concluída!", "success");
-            } catch (err) {
-                console.error("Falha na chamada da API:", err);
-                const errorMsg = err.message || "Erro desconhecido ao contatar a API.";
-                if (resultElement) {
-                    resultElement.innerText = `Erro: ${errorMsg}`;
-                }
-                addNotification(errorMsg, "error");
+
+            } catch (error) {
+                console.error("Erro ao gerar e-mail:", error);
+                dom.generatedEmailArea.value = `Erro ao gerar e-mail: ${error.message}`;
             } finally {
-                if(buttonElement) showLoading(buttonElement, false);
+                toggleLoading(false);
+            }
+        }
+        
+        async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
             }
         }
 
-        // --- Lógica Específica do CapyEmail ---
-        const objetivoEmailInput = document.getElementById('objetivoEmail');
-        const destinatarioEmailInput = document.getElementById('destinatarioEmail');
-        const remetenteEmailInput = document.getElementById('remetenteEmail');
-        const tomEmailSelect = document.getElementById('tomEmail');
-        const gerarEmailButton = document.getElementById('gerarEmailButton');
-        const resultadoEmailDiv = document.getElementById('resultadoEmail');
-
-        gerarEmailButton.addEventListener('click', () => {
-            const objetivo = objetivoEmailInput.value.trim();
-            const destinatario = destinatarioEmailInput.value.trim();
-            const remetente = remetenteEmailInput.value.trim();
-            const tom = tomEmailSelect.value;
-
-            if (!objetivo) { 
-                addNotification("Por favor, informe o objetivo do e-mail.", "warning"); 
-                return; 
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
             }
-            
-            let prompt = `Você é um assistente especialista em redação de e-mails.
-Gere um e-mail claro, conciso e eficaz, com o tom "${tom}".
+        }
 
-**Objetivo do e-mail:** ${objetivo}
-`;
-
-            if (destinatario) {
-                prompt += `**Destinatário (pessoa ou empresa):** ${destinatario}\n`;
-            }
-            if (remetente) {
-                prompt += `**Informações do Remetente (para assinatura):** ${remetente}\n`;
-            } else {
-                prompt += `**Assinatura:** Use uma assinatura genérica como "Atenciosamente," ou "Grato(a)," seguida de um espaço para o nome, a menos que o tom sugira algo diferente.\n`;
-            }
-
-            prompt += `
-**Instruções Adicionais:**
-- Comece com uma saudação apropriada ao tom e ao destinatário (se informado).
-- Desenvolva o corpo do e-mail de forma lógica e direta, focando no objetivo principal. Use parágrafos curtos para facilitar a leitura.
-- Conclua com um encerramento adequado e a assinatura.
-- Evite jargões desnecessários e seja o mais claro possível.
-- Não inclua um campo de "Assunto:" no corpo do e-mail, apenas o conteúdo do e-mail em si.
-- Vá direto ao e-mail, sem frases introdutórias como "Aqui está o e-mail:"
----
-`;
-            callGeminiAPI(prompt, gerarEmailButton, resultadoEmailDiv);
-        });
-
-        // --- Inicialização da Página ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadApiKeyFromStorage(); 
-            renderSidebar();
+            renderSidebar(); // Corrigido para chamar a função correta
+            loadApiKey();
+            
+            if(dom.generateEmailButton) dom.generateEmailButton.addEventListener('click', handleGenerateEmail);
+            if(dom.copyEmailButton) dom.copyEmailButton.addEventListener('click', () => {
+                const emailText = dom.generatedEmailArea.value;
+                if(emailText && !emailText.startsWith("A Capy-IA está a redigir...") && !emailText.startsWith("Erro ao gerar e-mail:")) {
+                    navigator.clipboard.writeText(emailText).then(() => {
+                        alert('E-mail copiado!');
+                    }).catch(err => {
+                        alert('Falha ao copiar. Tente manualmente.');
+                        console.error('Erro ao copiar: ', err);
+                    });
+                } else {
+                     alert('Não há e-mail válido para copiar.');
+                }
+            });
+
+            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+            }
+            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                const key = dom.geminiApiKeyInput.value.trim();
+                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+                else { alert("Por favor, insira uma chave API.");}
+            });
         });
     </script>
 </body>

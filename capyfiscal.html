@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CapyMetas - Definidor de Metas com IA</title>
+    <title>CapyFiscal - Assistente Fiscal com IA</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,6 @@
         }
 
 
-
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
@@ -58,7 +57,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         textarea {
-            min-height: 100px;
+            min-height: 120px;
         }
         .output-card {
             background-color: rgba(30, 30, 40, 0.5);
@@ -86,6 +85,16 @@
         .markdown-output h1 { font-size: 1.5rem; } 
         .markdown-output h2 { font-size: 1.25rem; }   
         .markdown-output h3 { font-size: 1.125rem; } 
+         select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
@@ -111,57 +120,47 @@
         </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-
         <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
             <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-3xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-orange-400">CapyMetas 🎯</h1>
-                    <p class="text-zinc-300 mt-1">Defina e alcance os seus objetivos com a ajuda da Capy-IA!</p>
+                    <h1 class="text-3xl font-bold font-syne text-green-300">CapyFiscal 🧾</h1>
+                    <p class="text-zinc-300 mt-1">O teu consultor fiscal IA para desvendar o mundo dos impostos!</p>
                 </div>
 
                 <div class="space-y-4 mb-6">
                     <div>
-                        <label for="main-goal" class="block text-sm font-semibold mb-1 text-zinc-200">Qual é o teu Grande Objetivo?</label>
-                        <input type="text" id="main-goal" placeholder="Ex: Correr uma maratona, Lançar um negócio online, Aprender um novo idioma" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
+                        <label for="fiscal-query" class="block text-sm font-semibold mb-1 text-zinc-200">A Tua Dúvida ou Questão Fiscal:</label>
+                        <textarea id="fiscal-query" rows="5" placeholder="Ex: Como declarar rendimentos de freelancer no IRS? Quais são os impostos sobre heranças em Portugal?" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-green-500 scrollbar-thin"></textarea>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="deadline" class="block text-sm font-semibold mb-1 text-zinc-200">Prazo Desejado (opcional):</label>
-                            <input type="text" id="deadline" placeholder="Ex: 6 meses, Final do ano, 3 semanas" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
+                            <label for="jurisdiction" class="block text-sm font-semibold mb-1 text-zinc-200">Jurisdição (País/Região):</label>
+                            <input type="text" id="jurisdiction" placeholder="Ex: Brasil, Portugal, União Europeia, Geral" value="Geral" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
                         </div>
                         <div>
-                             <label for="priority-level" class="block text-sm font-semibold mb-1 text-zinc-200">Nível de Prioridade:</label>
-                            <select id="priority-level" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
-                                <option value="alta">Alta</option>
-                                <option value="media" selected>Média</option>
-                                <option value="baixa">Baixa</option>
+                             <label for="complexity-level" class="block text-sm font-semibold mb-1 text-zinc-200">Nível de Complexidade da Resposta:</label>
+                            <select id="complexity-level" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="simples" selected>Simples e Direta</option>
+                                <option value="intermediaria">Intermediária (com algum detalhe)</option>
+                                <option value="detalhada">Detalhada (com exemplos, se possível)</option>
                             </select>
                         </div>
                     </div>
-
-                    <div>
-                        <label for="resources" class="block text-sm font-semibold mb-1 text-zinc-200">Recursos Disponíveis (opcional):</label>
-                        <textarea id="resources" rows="3" placeholder="Ex: Acesso a ginásio, 1 hora livre por dia, Orçamento de X para cursos" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 scrollbar-thin"></textarea>
-                    </div>
-                     <div>
-                        <label for="obstacles" class="block text-sm font-semibold mb-1 text-zinc-200">Possíveis Obstáculos ou Desafios (opcional):</label>
-                        <textarea id="obstacles" rows="3" placeholder="Ex: Falta de tempo, Procrastinação, Dificuldade em manter a motivação" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 scrollbar-thin"></textarea>
-                    </div>
                 </div>
 
-                <button id="generate-goals-button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
-                    <span class="btn-text">Definir Metas com IA</span>
+                <button id="get-advice-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                    <span class="btn-text">Pedir Orientação Fiscal à IA</span>
                     <div class="loader hidden"></div>
                 </button>
 
                 <div id="output-section" class="output-card hidden">
-                    <h3 class="text-orange-300">Plano de Metas Sugerido:</h3>
-                    <div id="goals-output" class="markdown-output font-jetbrains text-zinc-300">
-                        <p class="text-center text-zinc-400">As tuas metas e plano de ação aparecerão aqui...</p>
+                    <h3 class="text-green-200">Informação Fiscal da Capy-IA:</h3>
+                    <div id="advice-output" class="markdown-output font-jetbrains text-zinc-300 max-h-[400px] overflow-y-auto scrollbar-thin pr-2">
+                        <p class="text-center text-zinc-400">A orientação fiscal da Capy-IA aparecerá aqui...</p>
                     </div>
-                    <button id="copy-plan-button" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm hidden">
-                        Copiar Plano de Metas
+                    <button id="copy-advice-button" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm hidden">
+                        Copiar Informação
                     </button>
                 </div>
             </section>
@@ -188,7 +187,7 @@
     </div>
 
     <script>
-        const currentPageId = 'CapyMetas';
+        const currentPageId = 'CapyFiscal';
         let apiKey = '';
         const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
 
@@ -202,24 +201,20 @@
             geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
             saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
             
-            mainGoalInput: document.getElementById('main-goal'),
-            deadlineInput: document.getElementById('deadline'),
-            priorityLevelSelect: document.getElementById('priority-level'),
-            resourcesArea: document.getElementById('resources'),
-            obstaclesArea: document.getElementById('obstacles'),
-            generateGoalsButton: document.getElementById('generate-goals-button'),
+            fiscalQueryArea: document.getElementById('fiscal-query'),
+            jurisdictionInput: document.getElementById('jurisdiction'),
+            complexityLevelSelect: document.getElementById('complexity-level'),
+            getAdviceButton: document.getElementById('get-advice-button'),
             
             outputSection: document.getElementById('output-section'),
-            goalsOutput: document.getElementById('goals-output'),
-            copyPlanButton: document.getElementById('copy-plan-button')
+            adviceOutput: document.getElementById('advice-output'),
+            copyAdviceButton: document.getElementById('copy-advice-button')
         };
-
-        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
         
         function toggleLoading(isLoading) {
-            const btnText = dom.generateGoalsButton.querySelector('.btn-text');
-            const loader = dom.generateGoalsButton.querySelector('.loader');
-            dom.generateGoalsButton.disabled = isLoading;
+            const btnText = dom.getAdviceButton.querySelector('.btn-text');
+            const loader = dom.getAdviceButton.querySelector('.loader');
+            dom.getAdviceButton.disabled = isLoading;
             if(isLoading) {
                 btnText.classList.add('hidden');
                 loader.classList.remove('hidden');
@@ -231,15 +226,19 @@
         
         function basicMarkdownToHtml(md) {
             let html = md;
-            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            html = html.replace(/^###\s+(.+)$/gm, '<h3 class="text-lg font-semibold mt-3 mb-1 text-green-200">$1</h3>');
+            html = html.replace(/^##\s+(.+)$/gm, '<h2 class="text-xl font-semibold mt-4 mb-2 text-green-100">$1</h2>');
+            html = html.replace(/^#\s+(.+)$/gm, '<h1 class="text-2xl font-bold mt-5 mb-3 text-white">$1</h1>');
             html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
             html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
             html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
             html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
             if (html.includes('<li>')) {
-                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
+                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul class="list-disc list-inside ml-4">${match}</ul>`);
+            }
+             html = html.replace(/^\s*\d+\.\s+(.*)/gm, '<li>$1</li>');
+            if (html.match(/<li>.*\d+\./)) { 
+                 html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ol class="list-decimal list-inside ml-4">${match}</ol>`);
             }
             html = html.split(/\n\s*\n/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
             html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
@@ -247,45 +246,39 @@
             return html;
         }
 
-        async function handleGenerateGoals() {
+        async function handleGetFiscalAdvice() {
             if (!apiKey) {
                 alert("Por favor, configure a sua chave API do Gemini primeiro.");
                 if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
                 return;
             }
 
-            const mainGoal = dom.mainGoalInput.value.trim();
-            const deadline = dom.deadlineInput.value.trim();
-            const priority = dom.priorityLevelSelect.options[dom.priorityLevelSelect.selectedIndex].text;
-            const resources = dom.resourcesArea.value.trim();
-            const obstacles = dom.obstaclesArea.value.trim();
+            const query = dom.fiscalQueryArea.value.trim();
+            const jurisdiction = dom.jurisdictionInput.value.trim() || "Geral";
+            const complexity = dom.complexityLevelSelect.options[dom.complexityLevelSelect.selectedIndex].text;
 
-            if (!mainGoal) {
-                alert("Por favor, defina o seu objetivo principal.");
+            if (!query) {
+                alert("Por favor, descreva a sua dúvida ou questão fiscal.");
                 return;
             }
 
             toggleLoading(true);
             dom.outputSection.classList.add('hidden');
-            dom.goalsOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-Estratega está a definir as tuas metas...</p>';
+            dom.adviceOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-Fiscal está a consultar a legislação...</p>';
 
             const prompt = `
-                Aja como CapyMetas, um coach de produtividade e definição de objetivos.
-                Um utilizador deseja alcançar o seguinte objetivo:
+                Aja como CapyFiscal, um assistente IA especializado em questões fiscais e tributárias.
+                Um utilizador tem a seguinte dúvida:
 
-                - Objetivo Principal: "${mainGoal}"
-                - Prazo Desejado: ${deadline || "Não especificado"}
-                - Nível de Prioridade: ${priority}
-                - Recursos Disponíveis (opcional): ${resources || "Não especificados"}
-                - Possíveis Obstáculos/Desafios (opcional): ${obstacles || "Não especificados"}
+                - Dúvida/Questão: "${query}"
+                - Jurisdição (País/Região) de Interesse: "${jurisdiction}"
+                - Nível de Complexidade da Resposta Desejado: "${complexity}"
 
-                Com base nestas informações:
-                1. Decomponha o objetivo principal em 2-4 metas SMART (Específicas, Mensuráveis, Atingíveis, Relevantes, Temporais).
-                2. Sugira um plano de ação conciso com os principais marcos ou etapas para atingir estas metas.
-                3. Ofereça 2-3 dicas de motivação ou para superar os obstáculos mencionados (ou obstáculos comuns para este tipo de objetivo).
-
-                Formate a resposta usando Markdown simples (títulos para secções, listas para metas e dicas).
-                Responda APENAS com o plano de metas e as dicas.
+                Forneça uma resposta informativa, clara e, tanto quanto possível, precisa, considerando a jurisdição e a complexidade solicitadas.
+                Se a questão for muito específica ou requerer aconselhamento legal/contabilístico profissional, indique isso claramente, mas tente ainda assim fornecer informação geral útil.
+                Se a jurisdição for "Geral", forneça uma perspetiva mais ampla ou princípios comuns.
+                Use Markdown simples para formatação (títulos, listas, negrito).
+                Responda APENAS com a informação fiscal solicitada. Não inclua avisos sobre não ser um conselheiro real, assuma o papel de assistente informativo.
             `;
             
             try {
@@ -302,16 +295,16 @@
                 
                 const data = await response.json();
                 if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-                    const planText = data.candidates[0].content.parts[0].text.trim();
-                    dom.goalsOutput.innerHTML = basicMarkdownToHtml(planText);
-                    dom.copyPlanButton.classList.remove('hidden');
+                    const adviceText = data.candidates[0].content.parts[0].text.trim();
+                    dom.adviceOutput.innerHTML = basicMarkdownToHtml(adviceText);
+                    dom.copyAdviceButton.classList.remove('hidden');
                 } else {
                     throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
                 }
 
             } catch (error) {
-                console.error("Erro ao gerar metas:", error);
-                dom.goalsOutput.innerHTML = `<p class="text-center text-red-400">Erro ao gerar metas: ${error.message}</p>`;
+                console.error("Erro ao obter orientação fiscal:", error);
+                dom.adviceOutput.innerHTML = `<p class="text-center text-red-400">Erro ao obter orientação: ${error.message}</p>`;
             } finally {
                 dom.outputSection.classList.remove('hidden');
                 toggleLoading(false);
@@ -384,26 +377,26 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); 
+         document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); // Corrigido para chamar a função correta
             loadApiKey();
             
-            if(dom.generateGoalsButton) dom.generateGoalsButton.addEventListener('click', handleGenerateGoals);
-            if(dom.copyPlanButton) dom.copyPlanButton.addEventListener('click', () => {
-                const planHtml = dom.goalsOutput.innerHTML;
+            if(dom.getAdviceButton) dom.getAdviceButton.addEventListener('click', handleGetFiscalAdvice);
+            if(dom.copyAdviceButton) dom.copyAdviceButton.addEventListener('click', () => {
+                const adviceHtml = dom.adviceOutput.innerHTML;
                 const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = planHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
-                const planText = tempDiv.textContent || tempDiv.innerText || "";
+                tempDiv.innerHTML = adviceHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
+                const adviceText = tempDiv.textContent || tempDiv.innerText || "";
 
-                if(planText && !planText.includes("As tuas metas e plano de ação aparecerão aqui...") && !planText.includes("Erro ao gerar metas:")) {
-                    navigator.clipboard.writeText(planText.trim()).then(() => {
-                        alert('Plano de metas copiado para a área de transferência!');
+                if(adviceText && !adviceText.includes("A orientação fiscal da Capy-IA aparecerá aqui...") && !adviceText.includes("Erro ao obter orientação:")) {
+                    navigator.clipboard.writeText(adviceText.trim()).then(() => {
+                        alert('Informação copiada para a área de transferência!');
                     }).catch(err => {
-                        alert('Falha ao copiar. Tente manually.');
+                        alert('Falha ao copiar. Tente manualmente.');
                         console.error('Erro ao copiar: ', err);
                     });
                 } else {
-                     alert('Não há plano válido para copiar.');
+                     alert('Não há informação válida para copiar.');
                 }
             });
 

@@ -3,210 +3,248 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CapyIDE Dinâmico</title>
+  <title>CapyIDE Dinâmico com Sidebar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#9333ea">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
 
   <style>
     html { background: #121217; }
     body {
-      font-family: 'Inter', sans-serif;
-     
-      color: #e5e7eb;
- background-image: url('patter4.png');
-  background-repeat: repeat;
-   background-size: 300px; /* ajuste o tamanho se quiser mais ou menos zoom */
-  background-color: #18181b; /* cor base escura para combinar */
+        font-family: 'Inter', sans-serif;
+        color: #e5e7eb; /* zinc-200 */
+        background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+        background-repeat: repeat;
+        background-size: 300px;
+        background-color: #18181b; /* zinc-900 */
     }
-    /*.font-syne { font-family: 'Syne', sans-serif; }*/
+    .font-syne { font-family: 'Syne', sans-serif; }
     .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
     .glass {
-      background: rgba(0, 0, 0, 0.041);
-      backdrop-filter: blur(6px);
-      border-radius: 1.2rem;
-      box-shadow: 0 4px 40px 0 rgba(0, 0, 0, 0.116);
-      border: 1px solid rgba(63,63,70,0.28);
+        background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+        backdrop-filter: blur(12px);
+        border-radius: 1.2rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
     }
+    .sidebar-glass { 
+         background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+         backdrop-filter: blur(15px);
+         border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+    }
+
+
     .shadow-glass { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.137); }
     .scrollbar-thin::-webkit-scrollbar { width: 6px; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
     .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
-    .chat-bubble {
-      background: rgba(39,39,42,0.9);
-      border: 1px solid #32323a;
-      border-radius: 10px;
-      padding: 8px 14px;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #d4d4d8;
-      max-width: 90%;
-      word-break: break-word;
-    }
-    .chat-bubble.user {
-      background: linear-gradient(90deg, #ede13a 60%, #f6cd5c 100%);
-      color: #fff;
-      border: 1px solid #fadc8ba2;
-      align-self: flex-end;
-    }
-    .chat-bubble.error {
-      background: #e11d48; color: #fff;
-      border: 1px solid #be123c;
-    }
+    
+    /* Estilos da Sidebar Global CapyUniverse */
+    .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .category-content.expanded { max-height: 1500px; }
+    .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; } /* Cor de destaque da sidebar global */
+
+    .chat-bubble { background: rgba(39,39,42,0.9); border: 1px solid #32323a; border-radius: 10px; padding: 8px 14px; margin-bottom: 8px; font-size: 14px; color: #d4d4d8; max-width: 90%; word-break: break-word; }
+    .chat-bubble.user { background: linear-gradient(90deg, #ede13a 60%, #f6cd5c 100%); color: #fff; border: 1px solid #fadc8ba2; align-self: flex-end; }
+    .chat-bubble.error { background: #e11d48; color: #fff; border: 1px solid #be123c; }
     .api-status-indicator { width: 10px; height: 10px; border-radius: 50%; margin-left:6px; margin-right:3px; }
     .api-status-ok { background: #22c55e; }
     .api-status-unset { background: #f59e0b; }
     .api-status-error { background: #ef4444; }
-    .btn-main {
-      background: linear-gradient(180deg, #00000098 0%, #6666664f 100%);
-      border: 2px solid #ffffff3d; border-radius: 1.2rem;
-      color: #ffffff; font-weight: 500; font-family: 'Syne', sans-serif;
-      font-size: 15px;  padding: 5px 0;
-      margin-top: 7px; box-shadow: 0 2px 20px 0 #00000042;
-    }
+    .btn-main { background: linear-gradient(180deg, #00000098 0%, #6666664f 100%); border: 2px solid #ffffff3d; border-radius: 1.2rem; color: #ffffff; font-weight: 500; font-family: 'Syne', sans-serif; font-size: 15px;  padding: 5px 0; margin-top: 7px; box-shadow: 0 2px 20px 0 #00000042; }
     .btn-main:hover { background: linear-gradient(90deg, #ffffff33 0%, #ffffff05 100%); box-shadow: 0 2px 20px #1b1b1b90; color: #000; border: #000 solid 3px; }
-    .btn-link-style {
-      background: none; color: #ffffff; border: none;
-      font-weight: 500; font-size: 0.93rem; cursor: pointer; padding: 0 6px;
-    }
+    .btn-link-style { background: none; color: #ffffff; border: none; font-weight: 500; font-size: 0.93rem; cursor: pointer; padding: 0 6px; }
     .btn-link-style:hover { color: #a5b4fc; text-decoration: underline; }
-    .tab-btn {
-      background: none; border: none; color: #a1a1aa; font-weight: 600;
-      padding: 10px 22px; border-bottom: 3px solid transparent; font-family: 'Syne',sans-serif;
-      font-size: 1.09rem; letter-spacing: -1px; border-radius: 0; transition: color .17s, border .2s;
-    }
+    .tab-btn { background: none; border: none; color: #a1a1aa; font-weight: 600; padding: 10px 22px; border-bottom: 3px solid transparent; font-family: 'Syne',sans-serif; font-size: 1.09rem; letter-spacing: -1px; border-radius: 0; transition: color .17s, border .2s; }
     .tab-btn.active, .tab-btn:hover { color: #fff; border-bottom: 3px solid #ffffff; background: none; }
-    .editor-action-btn {
-      background: #00000038; border-radius: 0.7rem; color: #ffffff;
-      border: 3px solid #ffffffbe;
-      padding: 4px 10px; font-weight: 200; 
-      margin-left: 6px; border: none; transition: background .15s, color .14s;
-      font-size: 10px;
-    }
+    .editor-action-btn { background: #00000038; border-radius: 0.7rem; color: #ffffff; padding: 4px 10px; font-weight: 200; margin-left: 6px; border: none; transition: background .15s, color .14s; font-size: 10px; }
     .editor-action-btn:hover { background: linear-gradient(180deg, #ffffff33 0%, #ffffff05 100%); color: #fff; }
-    /* Footer */
     .footer-logo { height: 42px; width: 42px; object-fit: contain; display: inline-block; vertical-align: middle; }
     .footer-title { font-family: sans-serif; font-weight: 800; font-size: 1.15rem; letter-spacing: -1px; color: #fff; display: inline-block; }
     .footer-desc { color: #a1a1aa; font-size: 0.97rem; }
     .footer-link { color: #c7d2fe; margin: 0 10px; font-size: 0.93rem; }
     .footer-link:hover { color: #fff; text-decoration: underline; }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+     /* Estilos do Header Global CapyUniverse (adaptado para manter o tom do CapyIDE) */
+    .global-header {
+        background-color: #1f2937; /* Cor de fundo original do header CapyIDE: bg-zinc-950/90 backdrop-blur-lg */
+        border-bottom: 1px solid #374151; /* Cor da borda original: border-zinc-900 */
+    }
+    .global-header-title {
+        color: #e5e7eb; /* Cor do texto original do CapyIDE */
+    }
+    .global-header-button { /* Botões Início e Chaves API */
+        background-color: #4f46e5; /* Roxo da sidebar para destaque */
+        color: white;
+    }
+    .global-header-button:hover {
+        background-color: #4338ca; /* Roxo mais escuro */
+    }
+    /* Sidebar global */
+    .global-sidebar {
+        background-color: #1f2937; /* Cor escura para a sidebar, ex: gray-800 */
+        color: #d1d5db; /* Cor de texto para a sidebar, ex: gray-300 */
+    }
   </style>
 </head>
 <body class="dark min-h-screen flex flex-col text-[15px]">
-  <!-- Header -->
-  <header class="w-full fixed top-0 left-0 right-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-900 shadow-glass py-1 px-0">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
-      <div class="flex items-center gap-3">
-        <img src="icons/logo-capyide3.png" alt="Logo" class="h-8 w-8 footer-logo"/>
-        <span class="font-syne text-2xl font-extrabold tracking-tight align-middle">CapyIDE</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-zinc-400 font-semibold">API Gemini:</span>
-        <div id="apiStatusIndicator" class="api-status-indicator api-status-unset"></div>
-        <button id="showApiKeyModalBtn" class="text-zinc-400 hover:text-fuchsia-400 transition-colors" title="Configurar API Key"><i class="fas fa-key"></i></button>
-      </div>
-    </div>
-  </header>
-  <main class="flex-grow max-w-7xl mx-auto pt-24 pb-8 px-2 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-    <!-- Chat e Prompt -->
-    <section class="md:col-span-1 flex flex-col gap-6">
-      <div class="glass shadow-glass border-zinc-800 px-5 pt-5 pb-3 mb-0 flex flex-col min-h-[370px] max-h-[500px]">
-        <div class="flex justify-between items-center mb-2">
-          <h2 class="text-base font-bold text-zinc-200">Chat Interativo</h2>
-          <button id="clearChatBtn" class="btn-link-style" style="font-size:0.96rem;">Limpar</button>
-        </div>
-        <div id="chatMessages" class="flex-grow overflow-y-auto scrollbar-thin font-jetbrains text-[0.95rem] min-h-[200px] max-h-[250px] px-1"></div>
-        <div id="chatStatus" class="text-xs text-zinc-500 font-jetbrains mt-2">Pronto.</div>
-      
-      
-        <textarea id="promptInput" placeholder="Descreva o que você quer criar, modernizar ou entender..." class="bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg px-3 py-2 resize-none min-h-[96px] mb-3 outline-none focus:ring-2 focus:ring-fuchsia-700"></textarea>
-        <div class="flex gap-2 mb-2">
-          <button id="suggestPromptBtn" class="btn-link-style">Sugerir</button>
-          <button id="improvePromptBtn" class="btn-link-style">Melhorar</button>
-        </div>
-        <button id="generateCodeBtn" class="btn-main">Gerar Código com IA</button>
-      </div>
-    </section>
-    <!-- Editor e Preview -->
-    <section class="md:col-span-2 glass shadow-glass border-zinc-800 p-6 flex flex-col">
-      <div class="flex items-center border-b border-zinc-700 mb-2">
-        <button id="tabBtnCode" class="tab-btn active">Código</button>
-        <button id="tabBtnPreview" class="tab-btn">Preview</button>
-        <button id="previewNewWindowBtn" class="ml-auto tab-btn !border-b-0 text-xs" style="padding: 0 12px;" title="Abrir preview em nova janela"><i class="fas fa-external-link-alt mr-1"></i>Nova Janela</button>
-      </div>
-      <!-- Editor Code -->
-      <div id="tabContentCode" class="flex-grow flex flex-col pt-2">
-        <div id="editor-wrapper" class="flex-grow flex flex-col bg-zinc-900/70 rounded-lg border border-zinc-700">
-          <div class="flex justify-between items-center p-2 border-b border-zinc-700">
-            
+    <!-- Header -->
+    <header class="w-full fixed top-0 left-0 right-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-900 shadow-glass py-1 px-0">
+        <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
             <div class="flex items-center">
-              <button id="modernizeProjectBtn" class="editor-action-btn"><i class="fas fa-code"></i> ModernIA</button>
-              <button id="explainCodeBtn" class="editor-action-btn"><i class="far fa-comment-dots"></i> Explicar</button>
-              <button id="generateDocsBtn" class="editor-action-btn"><i class="fas fa-clipboard-list"></i> Doc</button>
-              <button id="generateTestsBtn" class="editor-action-btn"><i class="fas fa-check-square"></i> Teste</button>
-              <button id="copyCodeBtn" class="editor-action-btn ml-2" title="Copiar código"><i class="fas fa-copy"></i>Copiar</button>
-              <button id="downloadEditorBtn" class="editor-action-btn ml-1" title="Download HTML"><i class="fas fa-download"></i>Down</button>
-              <button id="fullscreenBtn" class="editor-action-btn ml-1" title="Tela cheia editor"><i class="fas fa-expand"></i></button>
+                <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+                      </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-zinc-400 font-semibold">API Gemini:</span>
+            <div id="apiStatusIndicator" class="api-status-indicator api-status-unset"></div>
+            <button id="showApiKeyModalBtn" class="text-zinc-400 hover:text-fuchsia-400 transition-colors" title="Configurar API Key"><i class="fas fa-key"></i></button>
+          </div>
+        </div>
+      </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <!-- Conteúdo Principal do CapyIDE -->
+    <main class="flex-grow max-w-7xl mx-auto w-full pt-8 pb-8 px-2 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <section class="md:col-span-1 flex flex-col gap-6">
+          <div class="glass shadow-glass border-zinc-800 px-5 pt-5 pb-3 mb-0 flex flex-col min-h-[370px] max-h-[500px]">
+            <div class="flex justify-between items-center mb-2">
+              <h2 class="text-base font-bold text-zinc-200">Chat Interativo</h2>
+              <button id="clearChatBtn" class="btn-link-style" style="font-size:0.96rem;">Limpar</button>
+            </div>
+            <div id="chatMessages" class="flex-grow overflow-y-auto scrollbar-thin font-jetbrains text-[0.95rem] min-h-[200px] max-h-[250px] px-1"></div>
+            <div id="chatStatus" class="text-xs text-zinc-500 font-jetbrains mt-2">Pronto.</div>
+            <textarea id="promptInput" placeholder="Descreva o que você quer criar..." class="mt-4 w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg px-3 py-2 resize-none min-h-[100px] mb-3 outline-none focus:ring-2 focus:ring-purple-700 scrollbar-thin"></textarea>
+            <div class="flex gap-2 mb-2">
+              <button id="suggestPromptBtn" class="btn-link-style">Sugerir</button>
+              <button id="improvePromptBtn" class="btn-link-style">Melhorar</button>
+            </div>
+            <button id="generateCodeBtn" class="btn-main">
+                <span class="btn-text">Gerar Código com IA</span>
+                <div class="loader hidden"></div>
+            </button>
+          </div>
+        </section>
+        
+        <section class="md:col-span-2 glass shadow-glass border-zinc-800 p-6 flex flex-col">
+          <div class="flex items-center border-b border-zinc-700 mb-2">
+            <button id="tabBtnCode" class="tab-btn active">Código</button>
+            <button id="tabBtnPreview" class="tab-btn">Preview</button>
+            <button id="previewNewWindowBtn" class="ml-auto tab-btn !border-b-0 text-xs" style="padding: 0 12px;" title="Abrir preview em nova janela"><i class="fas fa-external-link-alt mr-1"></i>Nova Janela</button>
+          </div>
+          <div id="tabContentCode" class="flex-grow flex flex-col pt-2">
+            <div id="editor-wrapper" class="flex-grow flex flex-col bg-zinc-900/70 rounded-lg border border-zinc-700">
+              <div class="flex justify-between items-center p-2 border-b border-zinc-700 flex-wrap gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <button id="modernizeProjectBtn" class="editor-action-btn"><i class="fas fa-code"></i> ModernIA</button>
+                  <button id="explainCodeBtn" class="editor-action-btn"><i class="far fa-comment-dots"></i> Explicar</button>
+                  <button id="generateDocsBtn" class="editor-action-btn"><i class="fas fa-clipboard-list"></i> Doc</button>
+                  <button id="generateTestsBtn" class="editor-action-btn"><i class="fas fa-check-square"></i> Teste</button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button id="copyCodeBtn" title="Copiar código" class="text-zinc-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                  <button id="downloadEditorBtn" title="Download HTML" class="text-zinc-400 hover:text-white"><i class="fas fa-download"></i></button>
+                  <button id="fullscreenBtn" title="Tela cheia editor" class="text-zinc-400 hover:text-white"><i class="fas fa-expand"></i></button>
+                </div>
+              </div>
+              <textarea id="code-editor" class="flex-grow bg-transparent font-jetbrains text-sm p-3 outline-none border-0 resize-none min-h-[400px] scrollbar-thin" placeholder="Seu código aparecerá aqui..."></textarea>
             </div>
           </div>
-          <textarea id="code-editor" class="flex-grow bg-transparent font-jetbrains text-[0.97rem] px-2 py-2 outline-none border-0 resize-none min-h-[170px] max-h-[350px] scrollbar-thin" placeholder="Seu código aparecerá aqui..."></textarea>
-        </div>
-      </div>
-      <!-- Preview -->
-      <div id="tabContentPreview" class="hidden flex-grow flex flex-col pt-2">
-        <div class="flex-grow bg-zinc-900/80 rounded-lg overflow-hidden border border-zinc-700">
-          <iframe id="previewFrame" class="w-full h-full border-none" style="min-height:200px;"></iframe>
-        </div>
-        <p id="editorStatus" class="text-xs text-zinc-500 font-jetbrains text-center pt-2">Preview do código do editor.</p>
-      </div>
-    </section>
-  </main>
-  <!-- Modal API Key -->
-  <div id="apiKeyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+          <div id="tabContentPreview" class="hidden flex-grow flex flex-col pt-2">
+            <div class="flex-grow bg-white rounded-lg overflow-hidden border border-zinc-700">
+              <iframe id="previewFrame" class="w-full h-full border-none" style="min-height:450px;"></iframe>
+            </div>
+            <p id="editorStatus" class="text-xs text-zinc-500 font-jetbrains text-center pt-2">Preview do código do editor.</p>
+          </div>
+        </section>
+    </main>
+  </div>
+
+  <!-- Modal API Key Global (para o header CapyUniverse) -->
+  <div id="apiKeysModalGlobal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
     <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-      <h2 class="text-lg font-bold mb-4 text-fuchsia-400">Configurar API Key do Gemini</h2>
-      <input id="apiKeyInputModal" type="password" class="bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg px-4 py-3 mb-5 w-full outline-none focus:ring-2 focus:ring-fuchsia-700" placeholder="Cole sua API Key do Gemini aqui"/>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
+            <button id="closeApiKeysModalButtonGlobal" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        <div class="space-y-3">
+            <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                 <label for="geminiApiKeyInputModalGlobal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                <div class="flex">
+                    <input id="geminiApiKeyInputModalGlobal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                    <button id="saveGeminiKeyGlobal" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                </div>
+                 <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse que requerem Gemini.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Modal API Key Específico do CapyIDE (mantido do teu código original) -->
+  <div id="apiKeyModalLocal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+      <h2 class="text-lg font-bold mb-4 text-fuchsia-400 font-syne">Configurar API Key do Gemini (CapyIDE)</h2>
+      <input id="apiKeyInputModalLocalValue" type="password" class="bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg px-4 py-3 mb-5 w-full outline-none focus:ring-2 focus:ring-fuchsia-700" placeholder="Cole sua API Key do Gemini aqui"/>
       <div class="flex justify-end gap-3">
-        <button id="closeApiKeyModalBtn" type="button" class="editor-action-btn">Cancelar</button>
-        <button id="saveApiKeyBtnModal" type="button" class="btn-main py-2 px-5 !rounded-lg">Salvar Chave</button>
+        <button id="closeApiKeyModalBtnLocal" type="button" class="editor-action-btn !bg-zinc-700 !border-zinc-600 hover:!bg-zinc-600">Cancelar</button>
+        <button id="saveApiKeyBtnModalLocal" type="button" class="btn-main py-2 px-5 !rounded-lg">Salvar Chave</button>
       </div>
     </div>
   </div>
-  <!-- Footer -->
-  <footer class="w-full bg-zinc-950/95 border-t border-zinc-900 mt-3 pt-8 pb-7 px-4">
-    <div class="max-w-2xl mx-auto flex flex-col items-center text-center">
-      <div class="mb-2 flex flex-col items-center gap-2">
-        <img src="icons/logo-capyide3.png" alt="Logo CapyIDE" class="footer-logo"/>
-        <div class="footer-title">CapyIDE</div>
-      </div>
-      <div class="mb-2">
-        <span class="font-bold text-yellow-400">CapyIDE Dinâmico</span>: Seu ambiente para criar, modernizar e entender códigos com IA generativa.<br>
-        <span class="footer-desc">Design inspirado em Prompthancer, powered by Rafael Front Insano.</span>
-      </div>
-      <div class="flex gap-5 mb-1">
-        <a href="#" class="footer-link">Features</a>
-        <a href="#" class="footer-link">Sobre</a>
-        <a href="#" class="footer-link">GitHub</a>
-      </div>
-      <div class="w-full border-t border-zinc-800 mt-5 pt-2">
-        <span class="footer-desc">© 2025 CapyIDE | Todos os direitos reservados.</span>
-      </div>
-    </div>
-  </footer>
+
 
   <script>
-document.addEventListener("DOMContentLoaded", function() {
+    const currentPageId = 'CapyIDE'; // ID desta ferramenta
+    let geminiApiKeyGlobal = ''; // Para a chave global, se usada
+    let geminiApiKeyLocal = ''; // Para a chave local do CapyIDE
+    const API_KEY_STORAGE_KEY_GLOBAL = 'capyUniverseApiKey_gemini';
+    const API_KEY_STORAGE_KEY_LOCAL_IDE = 'capyide_geminiApiKey_v1'; // Chave específica para CapyIDE
+    let chatHistory = [];
+
+    // Unified DOM selectors object
     const domSelectors = {
-      apiKeyModal: document.getElementById('apiKeyModal'),
-      showApiKeyModalBtn: document.getElementById('showApiKeyModalBtn'),
-      closeApiKeyModalBtn: document.getElementById('closeApiKeyModalBtn'),
-      apiKeyInputModal: document.getElementById('apiKeyInputModal'), 
-      saveApiKeyBtnModal: document.getElementById('saveApiKeyBtnModal'), 
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModalGlobal: document.getElementById('apiKeysModalGlobal'),
+      openApiKeysModalGlobal: document.getElementById('openApiKeysModalGlobal'),
+      closeApiKeysModalGlobal: document.getElementById('closeApiKeysModalButtonGlobal'),
+      geminiApiKeyInputGlobal: document.getElementById('geminiApiKeyInputModalGlobal'),
+      saveGeminiKeyGlobal: document.getElementById('saveGeminiKeyGlobal'),
+      
+      // CapyIDE specific elements
+      apiKeyModalLocal: document.getElementById('apiKeyModalLocal'),
+      showApiKeyModalLocal: document.querySelector('header .flex.items-center.gap-2 button[title="Configurar API Key"]'),
+      closeApiKeyModalLocal: document.getElementById('closeApiKeyModalBtnLocal'),
+      apiKeyInputModalLocal: document.getElementById('apiKeyInputModalLocalValue'),
+      saveApiKeyBtnModalLocal: document.getElementById('saveApiKeyBtnModalLocal'),
       apiStatusIndicator: document.getElementById('apiStatusIndicator'),
       chatMessages: document.getElementById('chatMessages'),
       chatStatus: document.getElementById('chatStatus'),
@@ -223,8 +261,8 @@ document.addEventListener("DOMContentLoaded", function() {
       codeEditor: document.getElementById('code-editor'),
       modernizeProjectBtn: document.getElementById('modernizeProjectBtn'),
       explainCodeBtn: document.getElementById('explainCodeBtn'), 
-      generateDocsBtn: document.getElementById('generateDocsBtn'), // Novo
-      generateTestsBtn: document.getElementById('generateTestsBtn'), // Novo
+      generateDocsBtn: document.getElementById('generateDocsBtn'),
+      generateTestsBtn: document.getElementById('generateTestsBtn'),
       copyCodeBtn: document.getElementById('copyCodeBtn'),
       downloadEditorBtn: document.getElementById('downloadEditorBtn'),
       fullscreenBtn: document.getElementById('fullscreenBtn'),
@@ -233,36 +271,50 @@ document.addEventListener("DOMContentLoaded", function() {
       previewNewWindowBtn: document.getElementById('previewNewWindowBtn'), 
     };
 
-    const API_KEY_STORAGE_KEY = "capyide_geminiApiKey_v1";
-    let currentApiKey = '';
-    let chatHistory = [];
-
-    function updateApiStatusIndicator(status = 'unset') {
-        domSelectors.apiStatusIndicator.classList.remove('api-status-ok', 'api-status-unset', 'api-status-error');
+    function updateApiStatusIndicator(status = 'unset', isLocal = true) {
+        const indicator = isLocal ? domSelectors.apiStatusIndicator : null; // Adicionar um indicador global se necessário
+        if (!indicator) return;
+        indicator.classList.remove('api-status-ok', 'api-status-unset', 'api-status-error');
         switch (status) {
-            case 'ok':
-                domSelectors.apiStatusIndicator.classList.add('api-status-ok');
-                domSelectors.apiStatusIndicator.title = "API Key Configurada e Válida";
-                break;
-            case 'error':
-                domSelectors.apiStatusIndicator.classList.add('api-status-error');
-                domSelectors.apiStatusIndicator.title = "Erro na API Key ou Conexão";
-                break;
-            default: 
-                domSelectors.apiStatusIndicator.classList.add('api-status-unset');
-                domSelectors.apiStatusIndicator.title = "API Key Não Configurada";
+            case 'ok': indicator.classList.add('api-status-ok'); indicator.title = "API Key Configurada"; break;
+            case 'error': indicator.classList.add('api-status-error'); indicator.title = "Erro na API Key"; break;
+            default: indicator.classList.add('api-status-unset'); indicator.title = "API Key Não Configurada";
         }
     }
 
-    function openApiKeyModal() {
-        domSelectors.apiKeyInputModal.value = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
-        domSelectors.apiKeyModal.classList.remove('hidden');
+    function openApiKeyModalLocal() {
+        if (domSelectors.apiKeyInputModalLocal) domSelectors.apiKeyInputModalLocal.value = localStorage.getItem(API_KEY_STORAGE_KEY_LOCAL_IDE) || '';
+        if (domSelectors.apiKeyModalLocal) domSelectors.apiKeyModalLocal.classList.remove('hidden');
     }
-
-    function closeApiKeyModal() {
-        domSelectors.apiKeyModal.classList.add('hidden');
+    function closeApiKeyModalLocal() {
+        if (domSelectors.apiKeyModalLocal) domSelectors.apiKeyModalLocal.classList.add('hidden');
     }
-
+    function saveApiKeyLocal() {
+      const key = domSelectors.apiKeyInputModalLocal.value.trim(); 
+      if (!key) { 
+        addMessageToChat("CapyIDE", "Por favor, insira sua API Key do Gemini.", true); 
+        return; 
+      }
+      localStorage.setItem(API_KEY_STORAGE_KEY_LOCAL_IDE, key);
+      geminiApiKeyLocal = key;
+      updateApiStatusIndicator('ok', true);
+      addMessageToChat("CapyIDE", "API Key do Gemini (local) salva!");
+      closeApiKeyModalLocal(); 
+    }
+    function loadApiKeyLocal() {
+      const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY_LOCAL_IDE);
+      if (savedKey) {
+        geminiApiKeyLocal = savedKey;
+        updateApiStatusIndicator('ok', true);
+        addMessageToChat("CapyIDE", "API Key (local) carregada.");
+      } else {
+        updateApiStatusIndicator('unset', true);
+        addMessageToChat("CapyIDE", "Nenhuma API Key local encontrada. Configure-a no ícone de chave no header do CapyIDE.");
+        // openApiKeyModalLocal(); // Opcional: abrir automaticamente se não houver chave
+      }
+    }
+    
+    // Funções do CapyIDE (addMessageToChat, clearChat, etc. - mantidas do teu código original)
     function addMessageToChat(role, text, isError = false) {
       const msgDiv = document.createElement("div");
       const icon = role === "user" ? "👤" : (isError ? "⚠️" : "🐿️");
@@ -270,11 +322,9 @@ document.addEventListener("DOMContentLoaded", function() {
       
       let bubbleClasses = "chat-bubble";
       if (isError) {
-        bubbleClasses += " bg-red-700/80 border border-red-500 text-red-100 self-start mr-auto";
+        bubbleClasses += " error";
       } else if (role === "user") {
-        bubbleClasses += " bg-gray-900/20 border border-white text-white self-end ml-auto";
-      } else { 
-        bubbleClasses += " bg-black border border-gray-200 text-gray-500  self-start mr-auto";
+        bubbleClasses += " user";
       }
       msgDiv.className = bubbleClasses;
       msgDiv.innerHTML = `<strong class="font-semibold">${icon} ${senderPrefix}:</strong><div class="mt-1">${text.replace(/\n/g, '<br>')}</div>`;
@@ -288,13 +338,13 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     }
     
-    function clearChat() {
+
+function clearChat() {
         domSelectors.chatMessages.innerHTML = '';
         chatHistory = [];
         addMessageToChat("CapyIDE", "Conversa limpa. Pronto para um novo prompt!");
         domSelectors.chatStatus.textContent = "Conversa limpa.";
     }
-
     function typeTextToEditor(targetTextArea, text, speed = 10, callback) {
       targetTextArea.value = '';
       let i = 0;
@@ -315,102 +365,58 @@ document.addEventListener("DOMContentLoaded", function() {
       }, speed);
     }
 
-    function saveApiKey() {
-      const key = domSelectors.apiKeyInputModal.value.trim(); 
-      if (!key) { 
-        addMessageToChat("CapyIDE", "Por favor, insira sua API Key do Gemini.", true); 
-        return; 
-      }
-      localStorage.setItem(API_KEY_STORAGE_KEY, key);
-      currentApiKey = key;
-      updateApiStatusIndicator('ok');
-      addMessageToChat("CapyIDE", "API Key do Gemini salva localmente!");
-      closeApiKeyModal(); 
-    }
-
-    function loadApiKey() {
-      const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-      if (savedKey) {
-        currentApiKey = savedKey;
-        updateApiStatusIndicator('ok');
-        addMessageToChat("CapyIDE", "API Key carregada do armazenamento local.");
-      } else {
-        updateApiStatusIndicator('unset');
-        addMessageToChat("CapyIDE", "Nenhuma API Key encontrada. Por favor, configure-a no ícone de chave.");
-        openApiKeyModal();
-      }
-    }
-
     async function callGeminiAPI(promptText, buttonElement, processingMessage, isChatContext = false) {
-        if (!currentApiKey) {
-            addMessageToChat("CapyIDE", "API Key não configurada. Por favor, configure-a primeiro.", true);
-            openApiKeyModal();
+        const apiKeyToUse = geminiApiKeyLocal || geminiApiKeyGlobal; // Prioriza a local
+        if (!apiKeyToUse) {
+             addMessageToChat("CapyIDE", "API Key do Gemini não configurada. Por favor, configure-a.", true);
+             if (domSelectors.showApiKeyModalLocal) domSelectors.showApiKeyModalLocal.click(); // Abre o modal local
+             else if (domSelectors.openApiKeysModalGlobal) domSelectors.openApiKeysModalGlobal.click(); // Ou o global
             return null;
         }
-
-        const originalButtonHTML = buttonElement ? buttonElement.innerHTML : null;
-        if (buttonElement) {
-            buttonElement.disabled = true;
-            buttonElement.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-opacity="0.3"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="0.8"></path></svg> ${processingMessage}...`;
-        }
-        domSelectors.chatStatus.textContent = `${processingMessage}...`;
-
-        if (isChatContext) {
-            chatHistory.push({ role: "user", parts: [{ text: promptText }] });
-        }
         
-        const payload = {
-            contents: isChatContext ? chatHistory : [{ role: "user", parts: [{ text: promptText }] }],
+        if (buttonElement) toggleButtonLoading(buttonElement, true, processingMessage);
+        domSelectors.chatStatus.textContent = `${processingMessage}...`;
+        if (isChatContext) chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+        
+        const payload = { 
+            contents: isChatContext ? chatHistory : [{ role: "user", parts: [{ text: promptText }] }], 
             generationConfig: { temperature: 0.5, topP: 0.9, topK: 40 } 
         };
         
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`, {
-                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKeyToUse}`, {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" }, 
+                body: JSON.stringify(payload)
             });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: { message: response.statusText } }));
-                updateApiStatusIndicator('error');
-                throw new Error(`Erro HTTP ${response.status}: ${errorData.error?.message || 'Erro desconhecido da API.'}`);
-            }
+            
             const data = await response.json();
-
-            if (data.error) { 
-                updateApiStatusIndicator('error');
-                throw new Error(`Erro da API Gemini: ${data.error.message}`);
+            if (!response.ok) {
+                const errorMsg = data?.error?.message || response.statusText;
+                updateApiStatusIndicator('error', !!geminiApiKeyLocal);
+                throw new Error(`Erro HTTP ${response.status}: ${errorMsg}`);
             }
             
             const aiResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (!aiResponseText) {
-                if (data?.candidates?.[0]?.finishReason === "SAFETY") {
-                     throw new Error("A resposta foi bloqueada devido a configurações de segurança.");
-                } else if (data?.candidates?.[0]?.finishReason === "MAX_TOKENS") {
-                    throw new Error("A resposta excedeu o limite máximo de tokens.");
-                }
-                throw new Error("A IA não retornou conteúdo ou a resposta estava vazia.");
+                if (data?.candidates?.[0]?.finishReason === "SAFETY") throw new Error("A resposta foi bloqueada por segurança.");
+                else if (data?.candidates?.[0]?.finishReason === "MAX_TOKENS") throw new Error("Resposta excedeu limite de tokens.");
+                throw new Error("IA não retornou conteúdo.");
             }
             
-            updateApiStatusIndicator('ok'); 
+            updateApiStatusIndicator('ok', !!geminiApiKeyLocal); 
             return aiResponseText.trim();
-
         } catch (err) {
-            console.error('Erro na chamada da API Gemini:', err);
-            addMessageToChat('CapyIDE', `Falha na comunicação com a API: ${err.message}`, true);
-            updateApiStatusIndicator('error');
-            if (isChatContext && chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === "user") {
-                chatHistory.pop();
-            }
+            addMessageToChat('CapyIDE', `Falha na API: ${err.message}`, true);
+            updateApiStatusIndicator('error', !!geminiApiKeyLocal);
+            if (isChatContext && chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === "user") chatHistory.pop();
             return null;
         } finally {
-            if (buttonElement) {
-                buttonElement.disabled = false;
-                buttonElement.innerHTML = originalButtonHTML;
-            }
+            if (buttonElement) toggleButtonLoading(buttonElement, false, buttonElement.querySelector('.btn-text') ? buttonElement.querySelector('.btn-text').textContent : 'Ação');
             domSelectors.chatStatus.textContent = "Pronto.";
         }
     }
-    
+
     function cleanCodeResponse(rawCode) {
         let code = rawCode;
         if (code.startsWith("```html")) {
@@ -425,7 +431,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         return code;
     }
-
     async function handleGenerateCode() {
       const userPrompt = domSelectors.promptInput.value.trim();
       if (!userPrompt) { 
@@ -433,32 +438,31 @@ document.addEventListener("DOMContentLoaded", function() {
         domSelectors.promptInput.focus();
         return; 
       }
-      
       addMessageToChat("user", `Gerar código para: ${userPrompt}`);
       domSelectors.codeEditor.value = ""; 
       domSelectors.editorStatus.textContent = "Contactando IA para gerar código...";
-      
+
       const generationSpecificPrompt = `Gere o código HTML completo com Tailwind CSS e JavaScript para o seguinte pedido: "${userPrompt}". Para todos os designs que eu pedir, que sejam bonitos, não padronizados. Crie páginas web com todos os recursos e dignas de produção. Por padrão, este modelo suporta HTML com classes CSS do Tailwind, JS , Json (caso necessário) todos em um único arquivo. Não instale outros pacotes para temas de interface, ícones, etc., a menos que seja absolutamente necessário ou que eu solicite. Use fotos de stock do Unsplash quando apropriado, apenas URLs válidos que você saiba que existem. Não baixe as imagens, apenas crie links para elas nas tags de imagem. Responda APENAS com o bloco de código HTML, sem explicações adicionais fora do código.`;
 
-      const aiResponseText = await callGeminiAPI(
-          generationSpecificPrompt, 
-          domSelectors.generateCodeBtn, 
-          "Gerando Código"
-      );
+const aiResponseText = await callGeminiAPI(
+    generationSpecificPrompt, 
+    domSelectors.generateCodeBtn, 
+    "Gerando Código"
+);
 
-      if (aiResponseText) {
-          const cleanHtmlCode = cleanCodeResponse(aiResponseText);
-          typeTextToEditor(domSelectors.codeEditor, cleanHtmlCode, 5, () => { 
-            addMessageToChat('CapyIDE', 'Código gerado e inserido no editor. Confira a aba "Preview".');
-            switchToTab('preview'); 
-            renderPreview();
-          });
-      } else {
-         domSelectors.editorStatus.textContent = "Falha ao gerar código.";
-      }
-    }
+if (aiResponseText) {
+    const cleanHtmlCode = cleanCodeResponse(aiResponseText);
+    typeTextToEditor(domSelectors.codeEditor, cleanHtmlCode, 5, () => { 
+      addMessageToChat('CapyIDE', 'Código gerado e inserido no editor. Confira a aba "Preview".');
+      switchToTab('preview'); 
+      renderPreview();
+    });
+} else {
+   domSelectors.editorStatus.textContent = "Falha ao gerar código.";
+}
+}
 
-    async function handleModernizeProject() {
+async function handleModernizeProject() {
         const currentCode = domSelectors.codeEditor.value.trim();
         if (!currentCode) {
             addMessageToChat("CapyIDE", "Não há código no editor para modernizar.", true);
@@ -487,6 +491,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+
     async function handleExplainCode() {
         const currentCode = domSelectors.codeEditor.value.trim();
         if (!currentCode) {
@@ -508,6 +513,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
     
+
     async function handleSuggestPrompt() {
         addMessageToChat("user", "Me sugira um prompt criativo para um projeto web.");
         const suggestionInstruction = "Sugira um prompt criativo e detalhado para gerar um projeto de página web interessante usando HTML, Tailwind CSS e JavaScript. O prompt sugerido deve ser algo que eu possa usar diretamente no CapyIDE para gerar código.";
@@ -692,51 +698,173 @@ Esqueleto de Testes / Cenários de Teste:`;
             console.error("Erro ao abrir nova janela: ", e);
         }
     }
-
-    function initializeEventListeners() {
-      domSelectors.showApiKeyModalBtn.onclick = openApiKeyModal;
-      domSelectors.closeApiKeyModalBtn.onclick = closeApiKeyModal;
-      domSelectors.saveApiKeyBtnModal.onclick = saveApiKey; 
-      domSelectors.clearChatBtn.onclick = clearChat;
-      domSelectors.generateCodeBtn.onclick = handleGenerateCode;
-      domSelectors.suggestPromptBtn.onclick = handleSuggestPrompt;
-      domSelectors.improvePromptBtn.onclick = handleImprovePrompt; 
-      domSelectors.tabBtnCode.onclick = () => switchToTab('code');
-      domSelectors.tabBtnPreview.onclick = () => switchToTab('preview');
-      domSelectors.modernizeProjectBtn.onclick = handleModernizeProject; 
-      domSelectors.explainCodeBtn.onclick = handleExplainCode; 
-      domSelectors.generateDocsBtn.onclick = handleGenerateDocs; // Novo
-      domSelectors.generateTestsBtn.onclick = handleGenerateTests; // Novo
-      domSelectors.copyCodeBtn.onclick = copyCodeToClipboard;
-      domSelectors.downloadEditorBtn.onclick = () => downloadFile(domSelectors.codeEditor.value, "capyide-codigo.html", "text/html");
-      domSelectors.fullscreenBtn.onclick = toggleEditorFullscreen;
-      domSelectors.previewNewWindowBtn.onclick = openPreviewInNewWindow;
-
-      domSelectors.promptInput.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault(); 
-              if (domSelectors.promptInput.value.trim()) {
-                  handleGenerateCode(); 
-              }
-          }
-      });
+    
+    function toggleButtonLoading(buttonElement, isLoading, defaultText = "Ação") {
+        const btnTextEl = buttonElement.querySelector('.btn-text');
+        const loaderEl = buttonElement.querySelector('.loader');
+        buttonElement.disabled = isLoading;
+        if (isLoading) {
+            if (btnTextEl) btnTextEl.classList.add('hidden');
+            if (loaderEl) loaderEl.classList.remove('hidden');
+        } else {
+            if (btnTextEl) {
+                 btnTextEl.classList.remove('hidden');
+                 if(defaultText && btnTextEl.tagName.toLowerCase() !== 'i') btnTextEl.textContent = defaultText;
+            }
+            if (loaderEl) loaderEl.classList.add('hidden');
+        }
     }
 
-    function init() {
-      initializeEventListeners();
-      loadApiKey(); 
-      addMessageToChat("CapyIDE", "Bem-vindo ao CapyIDE Dinâmico! Configure sua API Key e comece a criar.");
+
+    async function renderGlobalSidebar() {
+        if (!domSelectors.sidebar) return;
+        try {
+            const response = await fetch('tools.json'); 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
+            }
+            const toolsData = await response.json();
+            
+            const categories = {};
+            toolsData.forEach(tool => {
+                if (!categories[tool.category]) categories[tool.category] = [];
+                categories[tool.category].push(tool);
+            });
+            domSelectors.sidebar.innerHTML = ''; 
+            
+            const homeLinkSidebar = document.createElement('a');
+            homeLinkSidebar.href = 'index.html';
+            homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+            homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 mr-2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+            domSelectors.sidebar.appendChild(homeLinkSidebar);
+
+            for (const categoryName in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'mb-1';
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                
+                categories[categoryName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    const sidebarIconHTML = tool.icon ? tool.icon.replace(/class="[^"]*"/g, `class="w-5 h-5 mr-2 text-${tool.color || 'gray-400'}"`) : '<span class="w-5 h-5 mr-2"></span>';
+                    link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                    link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                    categoryContent.appendChild(link);
+                });
+
+                categoryButton.addEventListener('click', () => {
+                    categoryContent.classList.toggle('expanded');
+                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                });
+                
+                // Expand category of current page
+                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                    categoryContent.classList.add('expanded');
+                    categoryButton.querySelector('svg').classList.add('rotate-180');
+                }
+
+                categoryDiv.appendChild(categoryButton);
+                categoryDiv.appendChild(categoryContent);
+                domSelectors.sidebar.appendChild(categoryDiv);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar ferramentas para a sidebar:", error);
+            if(domSelectors.sidebar) domSelectors.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+        }
+    }
+    
+    function loadApiKeyGlobal() {
+        geminiApiKeyGlobal = localStorage.getItem(API_KEY_STORAGE_KEY_GLOBAL) || '';
+        if(domSelectors.geminiApiKeyInputGlobal) domSelectors.geminiApiKeyInputGlobal.value = geminiApiKeyGlobal;
+    }
+
+    function initializeAppEventListeners() {
+        // CapyIDE event listeners
+        if(domSelectors.showApiKeyModalLocal) domSelectors.showApiKeyModalLocal.onclick = openApiKeyModalLocal;
+        if(domSelectors.closeApiKeyModalLocal) domSelectors.closeApiKeyModalLocal.onclick = closeApiKeyModalLocal;
+        if(domSelectors.saveApiKeyBtnModalLocal) domSelectors.saveApiKeyBtnModalLocal.onclick = saveApiKeyLocal; 
+        if(domSelectors.clearChatBtn) domSelectors.clearChatBtn.onclick = clearChat;
+        if(domSelectors.generateCodeBtn) domSelectors.generateCodeBtn.onclick = handleGenerateCode;
+        if(domSelectors.suggestPromptBtn) domSelectors.suggestPromptBtn.onclick = handleSuggestPrompt;
+        if(domSelectors.improvePromptBtn) domSelectors.improvePromptBtn.onclick = handleImprovePrompt; 
+        if(domSelectors.tabBtnCode) domSelectors.tabBtnCode.onclick = () => switchToTab('code');
+        if(domSelectors.tabBtnPreview) domSelectors.tabBtnPreview.onclick = () => switchToTab('preview');
+        if(domSelectors.modernizeProjectBtn) domSelectors.modernizeProjectBtn.onclick = handleModernizeProject; 
+        if(domSelectors.explainCodeBtn) domSelectors.explainCodeBtn.onclick = handleExplainCode; 
+        if(domSelectors.generateDocsBtn) domSelectors.generateDocsBtn.onclick = handleGenerateDocs; 
+        if(domSelectors.generateTestsBtn) domSelectors.generateTestsBtn.onclick = handleGenerateTests; 
+        if(domSelectors.copyCodeBtn) domSelectors.copyCodeBtn.onclick = copyCodeToClipboard;
+        if(domSelectors.downloadEditorBtn) domSelectors.downloadEditorBtn.onclick = () => downloadFile(domSelectors.codeEditor.value, "capyide-codigo.html", "text/html");
+        if(domSelectors.fullscreenBtn) domSelectors.fullscreenBtn.onclick = toggleEditorFullscreen;
+        if(domSelectors.previewNewWindowBtn) domSelectors.previewNewWindowBtn.onclick = openPreviewInNewWindow;
+        if(domSelectors.promptInput) domSelectors.promptInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); 
+                if (domSelectors.promptInput.value.trim()) handleGenerateCode(); 
+            }
+        });
+
+        // Global sidebar and API modal events
+        if(domSelectors.sidebarToggleBtn && domSelectors.sidebar && domSelectors.sidebarOverlay){
+            domSelectors.sidebarToggleBtn.addEventListener('click', () => { 
+                domSelectors.sidebar.classList.toggle('-translate-x-full'); 
+                domSelectors.sidebarOverlay.classList.toggle('hidden'); 
+            });
+            if(domSelectors.sidebarOverlay) domSelectors.sidebarOverlay.addEventListener('click', () => { 
+                domSelectors.sidebar.classList.add('-translate-x-full'); 
+                domSelectors.sidebarOverlay.classList.add('hidden'); 
+            });
+        }
+        
+        if (domSelectors.openApiKeysModalGlobal && domSelectors.apiKeysModalGlobal) {
+            domSelectors.openApiKeysModalGlobal.addEventListener('click', () => 
+                domSelectors.apiKeysModalGlobal.classList.remove('hidden')
+            );
+        }
+        
+        if (domSelectors.closeApiKeysModalGlobal && domSelectors.apiKeysModalGlobal) {
+            domSelectors.closeApiKeysModalGlobal.addEventListener('click', () => 
+                domSelectors.apiKeysModalGlobal.classList.add('hidden')
+            );
+        }
+        
+        if (domSelectors.saveGeminiKeyGlobal && domSelectors.geminiApiKeyInputGlobal && domSelectors.apiKeysModalGlobal) {
+            domSelectors.saveGeminiKeyGlobal.addEventListener('click', () => {
+                const key = domSelectors.geminiApiKeyInputGlobal.value.trim();
+                if(key) { 
+                    localStorage.setItem(API_KEY_STORAGE_KEY_GLOBAL, key); 
+                    geminiApiKeyGlobal = key; 
+                    addMessageToChat("CapyIDE", "Chave API Global do Gemini salva!");
+                    domSelectors.apiKeysModalGlobal.classList.add('hidden'); 
+                } else { 
+                    addMessageToChat("CapyIDE", "Por favor, insira uma chave API.", true);
+                }
+            });
+        }
+    }
+    
+    function initCapyIDE() {
+      initializeAppEventListeners(); // Configura todos os event listeners
+      loadApiKeyLocal(); // Carrega a chave API específica do CapyIDE
+      loadApiKeyGlobal(); // Carrega a chave API global (pode ser usada como fallback)
+      addMessageToChat("CapyIDE", "Bem-vindo ao CapyIDE! Configure a sua API Key local ou global e comece a criar.");
       switchToTab('code'); 
     }
 
-    init(); 
-  });
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registrado'))
-    .catch(err => console.error('Erro no SW', err));
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        renderGlobalSidebar(); // Carrega a sidebar principal do CapyUniverse
+        initCapyIDE(); // Inicializa as funcionalidades específicas do CapyIDE
+    });
 
-</script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.error('Erro no SW', err));
+    }
+  </script>
 </body>
 </html>

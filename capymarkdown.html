@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyMarkdown - Editor e Visualizador</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb; /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b; /* zinc-900 */
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+        }
+
+
+
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
+
+        /* ESTILIZAÇÃO DA SIDEBAR (CAPYCURRICULO.HTML) */
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
+        
+        /* ESTILIZAÇÃO DOS ELEMENTOS DO EDITOR MARKDOWN */
+        #preview-output {
+            background-color: #ffffff;
+            color: #121212;
+            height: 100%;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        #preview-output h1, #preview-output h2, #preview-output h3 {
+            border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 1rem;
+        }
+        #preview-output p { line-height: 1.6; margin-top: 0.5rem; }
+        #preview-output a { color: #007acc; text-decoration: underline; }
+        #preview-output blockquote {
+            border-left: 4px solid #ccc; padding-left: 15px; color: #666; margin-left: 0;
+        }
+        #preview-output code {
+            background-color: #f0f0f0; padding: 2px 5px; border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+        }
+        #preview-output pre {
+            background-color: #f0f0f0; padding: 15px; border-radius: 4px; overflow-x: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="md:col-span-2 glass border-zinc-800 p-6 flex flex-col h-full">
+                <h1 class="text-2xl font-bold text-center mb-4 font-syne">CapyMarkdown 📝</h1>
+                
+                <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col">
+                        <h3 class="text-lg font-semibold mb-2 font-syne text-center">Editor</h3>
+                        <div class="toolbar bg-zinc-900/70 border border-zinc-700 rounded-lg p-2 flex flex-wrap gap-2 mb-2">
+                            <button onclick="formatText('bold')" class="bg-zinc-700 hover:bg-purple-600 text-white font-bold py-1 px-3 rounded text-sm">B</button>
+                            <button onclick="formatText('italic')" class="bg-zinc-700 hover:bg-purple-600 text-white italic py-1 px-3 rounded text-sm">I</button>
+                            <button onclick="formatText('h1')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">H1</button>
+                            <button onclick="formatText('h2')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">H2</button>
+                            <button onclick="formatText('h3')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">H3</button>
+                            <button onclick="formatText('link')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">Link</button>
+                            <button onclick="formatText('ul')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">Lista</button>
+                            <button onclick="formatText('ol')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">Lista Num.</button>
+                            <button onclick="formatText('quote')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm">Citação</button>
+                            <button onclick="formatText('code')" class="bg-zinc-700 hover:bg-purple-600 text-white py-1 px-3 rounded text-sm font-mono">`Code`</button>
+                             <button onclick="convertToTxt()" class="bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded text-sm">MD para TXT</button>
+                        </div>
+                        <textarea id="input-text" placeholder="Digite ou cole seu texto aqui..." oninput="updatePreview()" class="flex-grow bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-purple-700 scrollbar-thin"></textarea>
+                    </div>
+
+                    <div class="flex flex-col">
+                         <h3 class="text-lg font-semibold mb-2 font-syne text-center">Preview</h3>
+                         <div id="preview-output" class="flex-grow scrollbar-thin"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-center gap-4">
+                     <button onclick="copyToClipboard('markdown')" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors">Copiar Markdown</button>
+                     <button class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors" onclick="clearText()">Limpar Tudo</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+            <p class="text-sm text-zinc-300 mb-4">Esta ferramenta não requer chave de API, mas você pode gerenciá-las para outras ferramentas do CapyUniverse aqui.</p>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+                        <button data-provider="gemini" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- CONSTANTES E VARIÁVEIS GLOBAIS ---
+        const currentPageId = 'CapyMarkdown'; // ID para destacar na sidebar
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const apiKeysModal = document.getElementById('apiKeysModal');
+        const openApiKeysModalButton = document.getElementById('openApiKeysModalButton');
+        const closeApiKeysModalButton = document.getElementById('closeApiKeysModalButton');
+        const textarea = document.getElementById('input-text');
+        const preview = document.getElementById('preview-output');
+
+       
+        // --- LÓGICA DO EDITOR MARKDOWN ---
+        function updatePreview() {
+            preview.innerHTML = marked.parse(textarea.value);
+        }
+
+        function formatText(command) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            let newText = '';
+
+            switch (command) {
+                case 'bold': newText = `**${selectedText}**`; break;
+                case 'italic': newText = `*${selectedText}*`; break;
+                case 'h1': newText = `# ${selectedText}`; break;
+                case 'h2': newText = `## ${selectedText}`; break;
+                case 'h3': newText = `### ${selectedText}`; break;
+                case 'link':
+                    const url = prompt("Digite a URL do link:");
+                    newText = url ? `[${selectedText}](${url})` : selectedText;
+                    break;
+                case 'ul': newText = `- ${selectedText}`; break;
+                case 'ol': newText = `1. ${selectedText}`; break;
+                case 'quote': newText = `> ${selectedText}`; break;
+                case 'code': newText = `\`${selectedText}\``; break;
+                default: newText = selectedText;
+            }
+            textarea.setRangeText(newText, start, end, 'select');
+            textarea.focus();
+            updatePreview();
+        }
+        
+        function convertToTxt() {
+            if (confirm("Isso removerá toda a formatação Markdown. Deseja continuar?")) {
+                let text = textarea.value.replace(/(\*\*|__)(.*?)\1/g, '$2').replace(/(\*|_)(.*?)\1/g, '$2').replace(/^#+\s/gm, '').replace(/!\[(.*?)\]\(.*?\)/g, '').replace(/\[(.*?)\]\(.*?\)/g, '$1').replace(/^>\s/gm, '').replace(/^(\s*(\*|-|\+)\s)/gm, '').replace(/^(\s*\d+\.\s)/gm, '').replace(/`{3}[\s\S]*?`{3}/g, m => m.replace(/`/g, '')).replace(/`/g, '');
+                textarea.value = text;
+                updatePreview();
+            }
+        }
+
+        function copyToClipboard(type) {
+            if (textarea.value.trim() === '') { alert('A caixa de texto está vazia!'); return; }
+            let contentToCopy = (type === 'markdown') ? textarea.value : marked.parse(textarea.value);
+            navigator.clipboard.writeText(contentToCopy).then(() => alert('Conteúdo copiado para a área de transferência!')).catch(err => console.error('Erro ao copiar: ', err));
+        }
+
+        function clearText() {
+            textarea.value = '';
+            updatePreview();
+        }
+
+        // --- LÓGICA DA SIDEBAR E NAVEGAÇÃO ---
+        async function renderSidebar() {
+            if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePreview(); // Renderiza o preview inicial (caso haja texto)
+
+            if(sidebarToggleBtn && sidebar && sidebarOverlay){
+                sidebarToggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full');
+                    sidebarOverlay.classList.toggle('hidden');
+                });
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.add('-translate-x-full');
+                    sidebarOverlay.classList.add('hidden');
+                });
+            }
+
+            if (openApiKeysModalButton) {
+                openApiKeysModalButton.addEventListener('click', () => apiKeysModal.classList.remove('hidden'));
+            }
+            if (closeApiKeysModalButton) {
+                closeApiKeysModalButton.addEventListener('click', () => apiKeysModal.classList.add('hidden'));
+            }
+        });
+
+</script>
+</body>
+</html>

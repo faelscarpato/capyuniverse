@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>CapyValor - Precificador Inteligente com IA</title>
+    <title>CapyGrana - Gestor Financeiro Pessoal com IA</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,6 +38,7 @@
         }
 
 
+
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
         .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
@@ -56,20 +57,36 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        textarea {
+            min-height: 100px;
+        }
         .output-card {
             background-color: rgba(30, 30, 40, 0.5);
             border: 1px solid rgba(80, 80, 100, 0.5);
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 0.75rem;
-            margin-bottom: 1rem;
+            margin-top: 1.5rem;
         }
-        .output-card h3 {
+         .output-card h3 {
             font-family: 'Syne', sans-serif;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            font-size: 1.125rem; /* text-lg */
+            margin-bottom: 1rem;
+            font-size: 1.25rem; /* text-xl */
         }
-        select {
+        .markdown-output strong, .markdown-output b { font-weight: bold; }
+        .markdown-output em, .markdown-output i { font-style: italic; }
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .markdown-output ol { list-style-type: decimal; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+        .markdown-output li { margin-bottom: 0.25rem; }
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .markdown-output p:last-child { margin-bottom: 0; }
+        .markdown-output h1, .markdown-output h2, .markdown-output h3, .markdown-output h4 {
+            font-family: 'Syne', sans-serif; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem;
+        }
+        .markdown-output h1 { font-size: 1.5rem; } 
+        .markdown-output h2 { font-size: 1.25rem; }   
+        .markdown-output h3 { font-size: 1.125rem; } 
+         select {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
@@ -105,78 +122,59 @@
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-3xl mx-auto">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-amber-400">CapyValor 💰</h1>
-                    <p class="text-zinc-300 mt-1">O seu consultor de precificação inteligente.</p>
+                    <h1 class="text-3xl font-bold font-syne text-green-400">CapyGrana 💸</h1>
+                    <p class="text-zinc-300 mt-1">O teu consultor financeiro pessoal com a sabedoria de uma capivara próspera!</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Coluna de Inputs -->
-                    <div class="space-y-4">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label for="financial-goal" class="block text-sm font-semibold mb-1 text-zinc-200">Qual o teu Principal Objetivo Financeiro?</label>
+                        <input type="text" id="financial-goal" placeholder="Ex: Poupar para uma viagem, Comprar uma casa, Sair das dívidas" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="product-name" class="block text-sm font-semibold mb-1 text-zinc-200">Nome do Produto/Serviço:</label>
-                            <input type="text" id="product-name" placeholder="Ex: Consultoria de Marketing Digital" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500">
-                        </div>
-                        <div>
-                            <label for="product-description" class="block text-sm font-semibold mb-1 text-zinc-200">Descrição Detalhada:</label>
-                            <textarea id="product-description" rows="4" placeholder="Descreva o que é, para que serve, diferenciais..." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500 scrollbar-thin"></textarea>
-                        </div>
-                        <div>
-                            <label for="product-features" class="block text-sm font-semibold mb-1 text-zinc-200">Principais Características (separadas por vírgula):</label>
-                            <textarea id="product-features" rows="3" placeholder="Ex: Análise SEO, Gestão de Redes Sociais, Campanhas Pagas" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500 scrollbar-thin"></textarea>
+                            <label for="income" class="block text-sm font-semibold mb-1 text-zinc-200">Rendimento Mensal (aprox.):</label>
+                            <input type="number" id="income" placeholder="Ex: 3500" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
                         </div>
                         <div>
-                            <label for="target-audience" class="block text-sm font-semibold mb-1 text-zinc-200">Público-Alvo:</label>
-                            <input type="text" id="target-audience" placeholder="Ex: Pequenas e médias empresas" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500">
+                             <label for="expenses" class="block text-sm font-semibold mb-1 text-zinc-200">Despesas Mensais Fixas (aprox.):</label>
+                            <input type="number" id="expenses" placeholder="Ex: 2000" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="direct-costs" class="block text-sm font-semibold mb-1 text-zinc-200">Custos Diretos (opcional):</label>
-                                <input type="number" id="direct-costs" placeholder="Ex: 150.00" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500">
-                            </div>
-                            <div>
-                                <label for="profit-margin" class="block text-sm font-semibold mb-1 text-zinc-200">Margem de Lucro Desejada % (opcional):</label>
-                                <input type="number" id="profit-margin" placeholder="Ex: 30" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="currency" class="block text-sm font-semibold mb-1 text-zinc-200">Moeda:</label>
-                            <select id="currency" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2 outline-none focus:ring-2 focus:ring-amber-500">
-                                <option value="BRL">BRL (Real Brasileiro)</option>
-                                <option value="USD">USD (Dólar Americano)</option>
-                                <option value="EUR">EUR (Euro)</option>
-                            </select>
-                        </div>
-                        <button id="calculate-price-button" class="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
-                            <span class="btn-text">Calcular Preço com IA</span>
-                            <div class="loader hidden"></div>
-                        </button>
                     </div>
 
-                    <!-- Coluna de Outputs -->
-                    <div id="output-section" class="space-y-4 hidden md:block">
-                        <div id="suggested-price-card" class="output-card">
-                            <h3 class="text-lg text-amber-300">🎯 Faixa de Preço Sugerida:</h3>
-                            <p id="suggested-price-output" class="font-jetbrains text-2xl font-bold text-white">-</p>
-                        </div>
-                        <div id="justification-card" class="output-card">
-                            <h3 class="text-lg text-sky-300">💡 Justificativa da IA:</h3>
-                            <p id="justification-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap">-</p>
-                        </div>
-                        <div id="value-prop-card" class="output-card">
-                            <h3 class="text-lg text-green-300">🌟 Proposta de Valor Destacada:</h3>
-                            <p id="value-prop-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap">-</p>
-                        </div>
-                        <div id="warnings-card" class="output-card">
-                            <h3 class="text-lg text-red-400">⚠️ Alertas e Considerações:</h3>
-                            <ul id="warnings-output" class="list-disc list-inside font-jetbrains text-zinc-300"><li>-</li></ul>
-                        </div>
+                    <div>
+                        <label for="financial-situation" class="block text-sm font-semibold mb-1 text-zinc-200">Descreve brevemente a tua situação financeira ou dúvidas (opcional):</label>
+                        <textarea id="financial-situation" rows="4" placeholder="Ex: Tenho algumas dívidas de cartão de crédito, não sei por onde começar a investir, quero criar um orçamento realista." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-green-500 scrollbar-thin"></textarea>
+                    </div>
+                     <div>
+                        <label for="advice-type" class="block text-sm font-semibold mb-1 text-zinc-200">Que tipo de conselho procuras?</label>
+                        <select id="advice-type" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="orcamento" selected>Criação/Otimização de Orçamento</option>
+                            <option value="poupanca_investimento">Estratégias de Poupança e Investimento (geral)</option>
+                            <option value="gestao_dividas">Gestão e Redução de Dívidas</option>
+                            <option value="planeamento_objetivo">Planeamento para o Objetivo Especificado</option>
+                            <option value="dicas_gerais">Dicas Gerais de Finanças Pessoais</option>
+                        </select>
                     </div>
                 </div>
-                <!-- Output para mobile, aparece abaixo dos inputs -->
-                 <div id="output-section-mobile" class="mt-6 space-y-4 md:hidden">
-                 </div>
+
+                <button id="get-advice-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                    <span class="btn-text">Pedir Conselho Financeiro à IA</span>
+                    <div class="loader hidden"></div>
+                </button>
+
+                <div id="output-section" class="output-card hidden">
+                    <h3 class="text-green-300">Conselho Financeiro da Capy-IA:</h3>
+                    <div id="advice-output" class="markdown-output font-jetbrains text-zinc-300 max-h-[400px] overflow-y-auto scrollbar-thin pr-2">
+                        <p class="text-center text-zinc-400">Os conselhos financeiros da Capy-IA aparecerão aqui...</p>
+                    </div>
+                    <button id="copy-advice-button" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg text-sm hidden">
+                        Copiar Conselho
+                    </button>
+                </div>
             </section>
         </main>
     </div>
@@ -201,7 +199,7 @@
     </div>
 
     <script>
-        const currentPageId = 'CapyValor';
+        const currentPageId = 'CapyGrana';
         let apiKey = '';
         const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
 
@@ -214,29 +212,26 @@
             closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
             geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
             saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
-
-            productNameInput: document.getElementById('product-name'),
-            productDescriptionInput: document.getElementById('product-description'),
-            productFeaturesInput: document.getElementById('product-features'),
-            targetAudienceInput: document.getElementById('target-audience'),
-            directCostsInput: document.getElementById('direct-costs'),
-            profitMarginInput: document.getElementById('profit-margin'),
-            currencySelect: document.getElementById('currency'),
-            calculatePriceButton: document.getElementById('calculate-price-button'),
+            
+            financialGoalInput: document.getElementById('financial-goal'),
+            incomeInput: document.getElementById('income'),
+            expensesInput: document.getElementById('expenses'),
+            financialSituationArea: document.getElementById('financial-situation'),
+            adviceTypeSelect: document.getElementById('advice-type'),
+            getAdviceButton: document.getElementById('get-advice-button'),
             
             outputSection: document.getElementById('output-section'),
-            outputSectionMobile: document.getElementById('output-section-mobile'),
-            suggestedPriceOutput: document.getElementById('suggested-price-output'),
-            justificationOutput: document.getElementById('justification-output'),
-            valuePropOutput: document.getElementById('value-prop-output'),
-            warningsOutput: document.getElementById('warnings-output')
+            adviceOutput: document.getElementById('advice-output'),
+            copyAdviceButton: document.getElementById('copy-advice-button')
         };
 
+        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
+        
         function toggleLoading(isLoading) {
-            const btnText = dom.calculatePriceButton.querySelector('.btn-text');
-            const loader = dom.calculatePriceButton.querySelector('.loader');
-            dom.calculatePriceButton.disabled = isLoading;
-            if (isLoading) {
+            const btnText = dom.getAdviceButton.querySelector('.btn-text');
+            const loader = dom.getAdviceButton.querySelector('.loader');
+            dom.getAdviceButton.disabled = isLoading;
+            if(isLoading) {
                 btnText.classList.add('hidden');
                 loader.classList.remove('hidden');
             } else {
@@ -244,88 +239,72 @@
                 loader.classList.add('hidden');
             }
         }
-
-        function displayResults(data) {
-            const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: dom.currencySelect.value });
-            
-            if (data.suggestedPriceRange && typeof data.suggestedPriceRange.min === 'number' && typeof data.suggestedPriceRange.max === 'number') {
-                dom.suggestedPriceOutput.textContent = `${currencyFormatter.format(data.suggestedPriceRange.min)} - ${currencyFormatter.format(data.suggestedPriceRange.max)}`;
-            } else {
-                dom.suggestedPriceOutput.textContent = "Faixa de preço não determinada.";
+        
+        function basicMarkdownToHtml(md) {
+            let html = md;
+            html = html.replace(/^###\s+(.+)$/gm, '<h3 class="text-lg font-semibold mt-3 mb-1 text-green-200">$1</h3>');
+            html = html.replace(/^##\s+(.+)$/gm, '<h2 class="text-xl font-semibold mt-4 mb-2 text-green-100">$1</h2>');
+            html = html.replace(/^#\s+(.+)$/gm, '<h1 class="text-2xl font-bold mt-5 mb-3 text-white">$1</h1>');
+            html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
+            html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+            html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+            html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+            if (html.includes('<li>')) {
+                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul class="list-disc list-inside ml-4">${match}</ul>`);
             }
-            dom.justificationOutput.textContent = data.justification || "Sem justificativa detalhada.";
-            dom.valuePropOutput.textContent = data.valueProposition || "Proposta de valor não elaborada.";
-            
-            dom.warningsOutput.innerHTML = ''; 
-            if (data.warnings && data.warnings.length > 0) {
-                data.warnings.forEach(warning => {
-                    const li = document.createElement('li');
-                    li.textContent = warning;
-                    dom.warningsOutput.appendChild(li);
-                });
-            } else {
-                dom.warningsOutput.innerHTML = '<li>Sem alertas específicos.</li>';
+             html = html.replace(/^\s*\d+\.\s+(.*)/gm, '<li>$1</li>');
+            if (html.match(/<li>.*\d+\./)) { 
+                 html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ol class="list-decimal list-inside ml-4">${match}</ol>`);
             }
-
-            if (!dom.outputSection.classList.contains('hidden')) {
-                dom.outputSectionMobile.innerHTML = dom.outputSection.innerHTML; // Copia o conteúdo já formatado
-                dom.outputSectionMobile.classList.remove('hidden');
-            }
+            html = html.split(/\n\s*\n/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
+            html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
+            html = html.replace(/<h3><br>/g, '<h3>').replace(/<br><\/h3>/g, '</h3>');
+            return html;
         }
 
-        async function handleCalculatePrice() {
+        async function handleGetFinancialAdvice() {
             if (!apiKey) {
                 alert("Por favor, configure a sua chave API do Gemini primeiro.");
                 if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
                 return;
             }
 
-            const productName = dom.productNameInput.value.trim();
-            const productDescription = dom.productDescriptionInput.value.trim();
-            const productFeatures = dom.productFeaturesInput.value.trim();
-            const targetAudience = dom.targetAudienceInput.value.trim();
-            const directCosts = dom.directCostsInput.value;
-            const profitMargin = dom.profitMarginInput.value;
-            const currency = dom.currencySelect.value;
+            const goal = dom.financialGoalInput.value.trim();
+            const income = dom.incomeInput.value.trim();
+            const expenses = dom.expensesInput.value.trim();
+            const situation = dom.financialSituationArea.value.trim();
+            const adviceType = dom.adviceTypeSelect.options[dom.adviceTypeSelect.selectedIndex].text;
 
-            if (!productName || !productDescription || !productFeatures || !targetAudience) {
-                alert("Por favor, preencha todos os campos obrigatórios sobre o produto/serviço.");
+            if (!goal) {
+                alert("Por favor, defina o seu principal objetivo financeiro.");
                 return;
             }
 
             toggleLoading(true);
-            dom.outputSection.classList.remove('hidden'); 
-            dom.outputSectionMobile.classList.add('hidden'); 
-
-            dom.suggestedPriceOutput.textContent = "A calcular...";
-            dom.justificationOutput.textContent = "A analisar...";
-            dom.valuePropOutput.textContent = "A definir...";
-            dom.warningsOutput.innerHTML = '<li>A verificar...</li>';
+            dom.outputSection.classList.add('hidden');
+            dom.adviceOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-Financeira está a analisar as tuas finanças...</p>';
 
             const prompt = `
-                Você é CapyValor, um especialista em precificação de produtos e serviços.
-                Baseado nas seguintes informações, sugira uma faixa de preço de venda (mínimo e máximo) e justifique sua sugestão.
-                Considere fatores como valor percebido, concorrência (simulada), e, se fornecido, custos e margem de lucro.
-                Destaque também a principal proposta de valor e quaisquer alertas importantes.
+                Aja como CapyGrana, um consultor financeiro pessoal experiente, empático e prático.
+                Um utilizador procura aconselhamento financeiro com as seguintes informações:
 
-                Informações do Produto/Serviço:
-                - Nome: ${productName}
-                - Descrição: ${productDescription}
-                - Características Principais: ${productFeatures}
-                - Público-Alvo: ${targetAudience}
-                - Custos Diretos (se informado): ${directCosts || "Não informado"}
-                - Margem de Lucro Desejada (se informada): ${profitMargin ? profitMargin + '%' : "Não informada"}
-                - Moeda para Precificação: ${currency}
+                - Principal Objetivo Financeiro: "${goal}"
+                - Rendimento Mensal Aproximado: ${income || "Não informado"}
+                - Despesas Mensais Fixas Aproximadas: ${expenses || "Não informado"}
+                - Situação Financeira/Dúvidas Adicionais: ${situation || "Nenhuma"}
+                - Tipo de Conselho Procurado: "${adviceType}"
 
-                Por favor, forneça a resposta em formato JSON com as seguintes chaves:
-                - "suggestedPriceRange": um objeto com "min" (número) e "max" (número) para a faixa de preço.
-                - "justification": uma string explicando a lógica por trás da sugestão de preço.
-                - "valueProposition": uma string destacando os principais pontos de valor do produto/serviço.
-                - "warnings": um array de strings contendo possíveis alertas ou considerações importantes (ex: "O preço pode ser percebido como alto para o público X sem uma estratégia de marketing robusta.", "Considerar custos indiretos não informados.").
+                Com base nestas informações, forneça conselhos claros, acionáveis e personalizados.
+                Se for sobre orçamento, sugira categorias e possíveis percentagens.
+                Se for sobre poupança/investimento, explique conceitos básicos e tipos de investimento adequados ao perfil (simulado, não dê conselhos de investimento reais).
+                Se for sobre dívidas, sugira estratégias para organização e quitação.
+                Se for sobre o objetivo específico, crie um mini-plano para o alcançar.
+                Inclua sempre dicas gerais de boas práticas financeiras.
 
-                Responda APENAS com o objeto JSON.
+                Use uma linguagem acessível e encorajadora. Formate a resposta usando Markdown simples (títulos, listas, negrito).
+                Responda APENAS com o conselho financeiro. Não inclua avisos sobre não ser um conselheiro real, assuma o papel.
             `;
-
+            
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
                     method: 'POST',
@@ -338,22 +317,20 @@
                     throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
                 }
                 
-                const responseData = await response.json();
-                if (responseData.candidates && responseData.candidates[0].content && responseData.candidates[0].content.parts && responseData.candidates[0].content.parts[0].text) {
-                    const jsonString = responseData.candidates[0].content.parts[0].text.replace(/^```json\s*|```$/g, '').trim();
-                    const result = JSON.parse(jsonString);
-                    displayResults(result);
+                const data = await response.json();
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                    const adviceText = data.candidates[0].content.parts[0].text.trim();
+                    dom.adviceOutput.innerHTML = basicMarkdownToHtml(adviceText);
+                    dom.copyAdviceButton.classList.remove('hidden');
                 } else {
-                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(responseData.promptFeedback || responseData.candidates?.[0]?.finishReason || "Desconhecido"));
+                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
                 }
 
             } catch (error) {
-                console.error("Erro ao calcular preço:", error);
-                dom.suggestedPriceOutput.textContent = "Erro";
-                dom.justificationOutput.textContent = `Falha ao obter sugestão: ${error.message}`;
-                dom.valuePropOutput.textContent = "-";
-                dom.warningsOutput.innerHTML = '<li>Erro na análise.</li>';
+                console.error("Erro ao obter conselho financeiro:", error);
+                dom.adviceOutput.innerHTML = `<p class="text-center text-red-400">Erro ao obter conselho: ${error.message}</p>`;
             } finally {
+                dom.outputSection.classList.remove('hidden');
                 toggleLoading(false);
             }
         }
@@ -362,16 +339,12 @@
             if (!dom.sidebar) return;
             try {
                 const response = await fetch('tools.json'); 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const toolsData = await response.json();
                 
                 const categories = {};
                 toolsData.forEach(tool => {
-                    if (!categories[tool.category]) {
-                        categories[tool.category] = [];
-                    }
+                    if (!categories[tool.category]) categories[tool.category] = [];
                     categories[tool.category].push(tool);
                 });
                 dom.sidebar.innerHTML = ''; 
@@ -416,19 +389,40 @@
                 }
             } catch (error) {
                 console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
             }
         }
 
         function loadApiKey() {
             const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) { apiKey = savedKey; if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; }
+            if(savedKey) { 
+                apiKey = savedKey; 
+                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); 
+         document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); // Corrigido para chamar a função correta
             loadApiKey();
-            if(dom.calculatePriceButton) dom.calculatePriceButton.addEventListener('click', handleCalculatePrice);
+            
+            if(dom.getAdviceButton) dom.getAdviceButton.addEventListener('click', handleGetFinancialAdvice);
+            if(dom.copyAdviceButton) dom.copyAdviceButton.addEventListener('click', () => {
+                const adviceHtml = dom.adviceOutput.innerHTML;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = adviceHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
+                const adviceText = tempDiv.textContent || tempDiv.innerText || "";
+
+                if(adviceText && !adviceText.includes("Os conselhos financeiros da Capy-IA aparecerão aqui...") && !adviceText.includes("Erro ao obter conselho:")) {
+                    navigator.clipboard.writeText(adviceText.trim()).then(() => {
+                        alert('Conselho copiado para a área de transferência!');
+                    }).catch(err => {
+                        alert('Falha ao copiar. Tente manualmente.');
+                        console.error('Erro ao copiar: ', err);
+                    });
+                } else {
+                     alert('Não há conselho válido para copiar.');
+                }
+            });
 
             if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
                 dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
