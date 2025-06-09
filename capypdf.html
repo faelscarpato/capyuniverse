@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CapyPDF - Interagir com Conteúdo de PDF com IA</title>
+    <title>CapyPDF - Interagir com ConteÃºdo de PDF com IA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +15,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
 
 
@@ -29,13 +30,26 @@
             /* zinc-200 */
             background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
             background-repeat: repeat;
-            background-size: 300px;
+            background-size: 400px;
             background-color: #18181b;
             /* zinc-900 */
         }
 
-        .font-syne {
-            font-family: 'Syne', sans-serif;
+        main {
+            background: rgba(24, 24, 27, 0.8);
+            /* zinc-900 with opacity */
+            backdrop-filter: blur(3px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4);
+            /* zinc-700 with opacity */
+
+
+        }
+
+
+        .font-inter {
+            font-family: 'Inter', sans-serif;
         }
 
         .font-jetbrains {
@@ -43,9 +57,9 @@
         }
 
         .glass {
-            background: rgba(24, 24, 27, 0.6);
+            background: rgba(24, 24, 27, 0.233);
             /* zinc-900 with opacity */
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(8px);
             border-radius: 1.2rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             border: 1px solid rgba(63, 63, 70, 0.4);
@@ -131,7 +145,7 @@
         }
 
         .output-card h3 {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-weight: 700;
             margin-bottom: 1rem;
             font-size: 1.25rem;
@@ -176,26 +190,20 @@
         }
     </style>
 </head>
-
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
-    <header
-        class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
         <div class="flex items-center">
-            <button id="sidebarToggleBtn"
-                class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+            <button id="sidebarToggleBtn" class="mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-            <a href="index.html"
-                class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse
-                IA</a>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-inter">CapyUniverse IA</a>
         </div>
         <div class="flex items-center">
             <button onclick="window.location.href='index.html'"
                 class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
             <button id="openApiKeysModalButton"
-                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves
-                API</button>
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
         </div>
     </header>
 
@@ -203,74 +211,94 @@
 
     <div class="flex flex-1 pt-16">
         <aside id="sidebar"
-            class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
             <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
         </aside>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden font-inter"></div>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
-                <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-red-500">CapyPDF 📄</h1>
-                    <p class="text-zinc-300 mt-1">Faça upload do PDF e converse com o conteúdo. A IA vai entrar no
-                        personagem!</p>
-                </div>
-                <div class="mb-6">
-                    <label for="fileInputPDF" class="block text-sm font-semibold mb-1 text-zinc-200">1. Envie seu
-                        PDF:</label>
-                    <input type="file" id="fileInputPDF" accept=".pdf"
-                        class="w-full text-zinc-200 bg-zinc-800 border border-zinc-600 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-red-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-900/40 file:text-sky-300" />
-                    <div id="fileStatusPDF" class="text-xs mt-2 text-zinc-400"></div>
-                </div>
-                <div id="pdfPreviewSection" class="hidden mb-4">
-                    <label class="block text-sm font-semibold mb-1 text-zinc-200">Conteúdo extraído
-                        (pré-visualização):</label>
-                    <textarea id="pdfTextExtracted" rows="8"
-                        class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-red-500 scrollbar-thin"
-                        readonly></textarea>
-                </div>
-                <button id="analisarPDFButton"
-                    class="w-full bg-red-600 hover:bg-red-700 disabled:opacity-75 disabled:cursor-not-allowed px-6 py-3 rounded-md text-lg font-semibold shadow-md transition-colors duration-150 flex items-center justify-center mt-2">
-                    <span class="btn-text">Analisar PDF & Definir Personalidade</span>
-                    <span class="loader hidden ml-2"></span>
-                </button>
-                <div id="outputSectionPDF" class="output-card hidden">
-                    <h3 class="text-red-300 mb-2">Resumo do Documento & Personalidade CapyIA</h3>
-                    <div id="resumoPDF" class="markdown-output font-jetbrains text-zinc-300"></div>
-                </div>
-                <div id="chatWithPDFSection" class="hidden mt-6 pt-6 border-t border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-300 mb-2">Converse com o PDF <span
-                            id="pdfPersonalitySpan"></span>🧠</h3>
-                    <div
-                        class="flex-grow flex flex-col bg-zinc-800 rounded-md border border-zinc-700 overflow-hidden min-h-[260px] max-h-[350px]">
+        <main class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br py-12 px-15 mx-auto w-full">
+            <h1 class="text-4xl font-extrabold font-inter text-red-500 mb-4 text-center tracking-tight drop-shadow">
+                CapyPDF 📄</h1>
+            <p class="text-md text-zinc-300 mb-10 text-center max-w-2xl">Transforme seu PDF em uma conversa fácil com IA! <br> Siga os passos abaixo e tire dúvidas sobre qualquer documento, sem dor de cabeça.</p>
+
+            <div class="flex flex-col lg:flex-row items-center justify-center gap-8 w-full max-w-6xl">
+
+                <!-- ETAPA 1: UPLOAD PDF -->
+                <section class="flex glass rounded-2xl p-8 flex flex-col items-center justify-center min-w-[420px] h-[auto]">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl font-bold font-inter text-white">1. Upload PDF</span>
+                        <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/mascotes/capypdf_upload.png"
+                            alt="CapyPDF Mascote" class="w-14 h-14" />
+                    </div>
+                    <label for="fileInputPDF"
+                        class="flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-red-500 rounded-xl p-6 bg-zinc-900/70 hover:bg-zinc-800 transition-all">
+                        <i class="fas fa-file-pdf text-4xl text-red-400 mb-2"></i>
+                        <span class="text-sm text-zinc-300">Arraste seu PDF ou clique para enviar</span>
+                        <input type="file" id="fileInputPDF" accept=".pdf" class="hidden" />
+                    </label>
+                    <div id="fileStatusPDF" class="text-xs mt-3 text-zinc-400 text-center"></div>
+                </section>
+
+                <!-- ETAPA 2: PREVIEW -->
+                <section class="flex-1 glass rounded-2xl p-8 flex flex-col items-center min-w-[420px] h-[auto]">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl font-bold font-inter text-white">2. Preview</span>
+                        <i class="fas fa-eye text-2xl text-red-400"></i>
+                    </div>
+                    <!-- Miniatura PDF (adapte com JS) -->
+                    <div id="pdfThumbnail"
+                        class="w-32 h-40 bg-zinc-800 rounded-lg mb-4 flex items-center justify-center border border-zinc-700 shadow">
+                        <i class="fas fa-file-pdf text-5xl text-red-500"></i>
+                    </div>
+                    <div id="pdfPreviewSection" class="w-full">
+                        <label class="block text-sm font-semibold mb-1 text-zinc-200">Conteúdo extraído:</label>
+                        <textarea id="pdfTextExtracted" rows="4"
+                            class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-md p-3 outline-none focus:ring-2 focus:ring-red-500 scrollbar-thin"
+                            readonly placeholder="O texto extraído do PDF vai aparecer aqui..."></textarea>
+                        <button id="showMorePDF"
+                            class="mt-2 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-sm font-bold text-white shadow">Ver
+                            Mais</button>
+                    </div>
+                </section>
+
+                <!-- ETAPA 3: CHAT -->
+                <section class="flex-1 glass rounded-2xl p-8 flex flex-col items-center min-w-[auto] max-w-md">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl font-bold font-inter text-white">3. Chat CapyPDF</span>
+                        <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/mascotes/capypdf_avatar.png"
+                            alt="CapyPDF Mascote Chat" class="w-12 h-12" />
+                    </div>
+                    <div class="w-full flex flex-col gap-2 mb-2">
                         <div id="chatBoxPDF"
-                            class="flex-grow p-4 space-y-3 overflow-y-auto flex flex-col markdown-output">
-                            <div class="ia-message chat-message">Faça perguntas para o PDF, a IA vai responder no papel
-                                do personagem extraído!</div>
+                            class="bg-zinc-800 rounded-lg min-h-[140px] max-h-[200px] p-4 overflow-y-auto text-zinc-200 text-sm shadow-inner">
+                            <div class="ia-message chat-message">Pronto para responder sobre seu PDF!<br>Ex: “Qual o resumo?”, “Quais os pontos importantes?”</div>
                         </div>
-                        <div class="p-2 border-t border-zinc-700 bg-zinc-800">
-                            <div class="flex">
-                                <input type="text" id="userInputPDFChat" placeholder="Pergunte ao PDF..."
-                                    class="flex-1 p-3 bg-zinc-700 rounded-l-md border-0 focus:ring-2 focus:ring-red-500 outline-none text-sm text-white placeholder-gray-400">
-                                <button id="sendPDFChatButton"
-                                    class="bg-red-600 hover:bg-red-700 px-4 py-3 rounded-r-md text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center">
-                                    <span class="btn-text">Enviar</span>
-                                    <span class="loader hidden ml-2"></span>
-                                </button>
-                            </div>
+                        <div class="flex w-full gap-2 mt-2">
+                            <input type="text" id="userInputPDFChat" placeholder="Pergunte ao PDF..."
+                                class="flex-1 p-3 bg-zinc-700 rounded-l-md border-0 focus:ring-2 focus:ring-red-500 outline-none text-sm text-white placeholder-gray-400">
+                            <button id="sendPDFChatButton"
+                                class="bg-red-600 hover:bg-red-700 px-4 py-3 rounded-r-md text-sm font-bold flex items-center justify-center">
+                                <span class="btn-text">Enviar</span>
+                                <span class="loader hidden ml-2"></span>
+                            </button>
                         </div>
                     </div>
-                </div>
-            </section>
-        </main>
+                    <button id="analisarPDFButton"
+                        class="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 px-6 py-3 mt-4 rounded-md text-sm font-extrabold shadow-md transition-colors flex items-center justify-center">
+                        <span class="btn-text">Analisar PDF & Gerar Persona</span>
+                        <span class="loader hidden ml-2"></span>
+                    </button>
+                </section>
 
+            </div>
+        </main>
     </div>
 
     <div id="apiKeysModal"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
         <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                <h2 class="text-lg font-bold text-purple-400 font-inter">Gerenciar Chaves de API</h2>
                 <button id="closeApiKeysModalButton"
                     class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
@@ -290,376 +318,454 @@
         </div>
     </div>
 
-       <script>
+    <script>
 
-    const currentPageId = 'capypdf';
-    let apiKey = '';
-    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
-    let extractedTextPDF = '';
-    let pdfPersonality = '';
-    let chatHistoryPDF = [];
+        const currentPageId = 'capypdf';
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let extractedTextPDF = '';
+        let pdfFile = null;
+        let pdfPersona = '';
+        let chatHistoryPDF = [];
 
-    const dom = {
-        sidebar: document.getElementById('sidebar'),
-        sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-        sidebarOverlay: document.getElementById('sidebarOverlay'),
-        apiKeysModal: document.getElementById('apiKeysModal'),
-        openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-        fileInputPDF: document.getElementById('fileInputPDF'), // Corrigido: Adicionado ':'
-        fileStatusPDF: document.getElementById('fileStatusPDF'),
-        pdfTextExtracted: document.getElementById('pdfTextExtracted'),
-        pdfPreviewSection: document.getElementById('pdfPreviewSection'),
-        analisarPDFButton: document.getElementById('analisarPDFButton'),
-        outputSectionPDF: document.getElementById('outputSectionPDF'),
-        resumoPDF: document.getElementById('resumoPDF'),
-        chatWithPDFSection: document.getElementById('chatWithPDFSection'),
-        chatBoxPDF: document.getElementById('chatBoxPDF'),
-        userInputPDFChat: document.getElementById('userInputPDFChat'),
-        sendPDFChatButton: document.getElementById('sendPDFChatButton'),
-        pdfPersonalitySpan: document.getElementById('pdfPersonalitySpan')
-    };
+        const maxPreviewChars = 700;
+        const maxContextChars = 12000;
 
-    // Loader visual
-    function showLoadingBtn(btn, show = true) {
-        const btnText = btn.querySelector('.btn-text');
-        const loader = btn.querySelector('.loader');
-        if (show) { btnText.classList.add('hidden'); loader.classList.remove('hidden'); btn.disabled = true; }
-        else { btnText.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; }
-    }
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+        };
 
-    // Extração de texto PDF
-async function extractTextFromPDF(file) {
-    dom.fileStatusPDF.innerHTML = '<span class="loader inline-block mr-2"></span>Processando PDF...';
-    dom.pdfPreviewSection.classList.add('hidden');
-    extractedTextPDF = '';
-    if (!file || !file.name.endsWith('.pdf')) {
-        dom.fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF válido.';
-        return;
-    }
-    const reader = new FileReader();
-    return new Promise((resolve, reject) => {
-        reader.onload = async (event) => {
-            try {
-                const typedarray = new Uint8Array(event.target.result);
-                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
-                let text = '';
-                for (let i = 1; i <= Math.min(pdf.numPages, 15); i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    text += content.items.map(item => item.str).join(' ') + '\n\n';
-                }
-                extractedTextPDF = text.trim();
-                dom.pdfTextExtracted.value = extractedTextPDF.substring(0, 3000) + (extractedTextPDF.length > 3000 ? '\n\n[Conteúdo truncado para preview]' : '');
-                dom.pdfPreviewSection.classList.remove('hidden');
-                dom.fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 15)}.`;
-                resolve(extractedTextPDF);
-            } catch (err) {
-                dom.fileStatusPDF.textContent = "Erro ao processar PDF.";
-                reject(err);
+        const fileInputPDF = document.getElementById('fileInputPDF');
+        const fileStatusPDF = document.getElementById('fileStatusPDF');
+        const pdfThumbnail = document.getElementById('pdfThumbnail');
+        const pdfPreviewSection = document.getElementById('pdfPreviewSection');
+        const pdfTextExtracted = document.getElementById('pdfTextExtracted');
+        const showMorePDF = document.getElementById('showMorePDF');
+        const analisarPDFButton = document.getElementById('analisarPDFButton');
+        const chatBoxPDF = document.getElementById('chatBoxPDF');
+        const userInputPDFChat = document.getElementById('userInputPDFChat');
+        const sendPDFChatButton = document.getElementById('sendPDFChatButton');
+
+
+        // Loader visual
+        function showLoadingBtn(btn, show = true) {
+            const btnText = btn.querySelector('.btn-text');
+            const loader = btn.querySelector('.loader');
+            if (show) { btnText.classList.add('hidden'); loader.classList.remove('hidden'); btn.disabled = true; }
+            else { btnText.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; }
+        }
+
+        // ExtraÃ§Ã£o de texto PDF
+        async function extractTextFromPDF(file) {
+            dom.fileStatusPDF.innerHTML = '<span class="loader inline-block mr-2"></span>Processando PDF...';
+            dom.pdfPreviewSection.classList.add('hidden');
+            extractedTextPDF = '';
+            if (!file || !file.name.endsWith('.pdf')) {
+                dom.fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF vÃ¡lido.';
+                return;
             }
-        };
-        reader.onerror = () => {
-            dom.fileStatusPDF.textContent = "Erro ao ler arquivo PDF.";
-            reject('Erro de leitura');
-        };
-        reader.readAsArrayBuffer(file);
-    });
-}
+            const reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onload = async (event) => {
+                    try {
+                        const typedarray = new Uint8Array(event.target.result);
+                        const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        let text = '';
+                        for (let i = 1; i <= Math.min(pdf.numPages, 15); i++) {
+                            const page = await pdf.getPage(i);
+                            const content = await page.getTextContent();
+                            text += content.items.map(item => item.str).join(' ') + '\n\n';
+                        }
+                        extractedTextPDF = text.trim();
+                        dom.pdfTextExtracted.value = extractedTextPDF.substring(0, 3000) + (extractedTextPDF.length > 3000 ? '\n\n[ConteÃºdo truncado para preview]' : '');
+                        dom.pdfPreviewSection.classList.remove('hidden');
+                        dom.fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 15)}.`;
+                        resolve(extractedTextPDF);
+                    } catch (err) {
+                        dom.fileStatusPDF.textContent = "Erro ao processar PDF.";
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => {
+                    dom.fileStatusPDF.textContent = "Erro ao ler arquivo PDF.";
+                    reject('Erro de leitura');
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
 
-    // --- Funções de Notificação ---
-    function addNotification(message, type = 'info') {
-        const notificationId = 'notif-' + Date.now();
-        const typeClasses = {
-            error: 'bg-red-600 text-white',
-            success: 'bg-green-600 text-white',
-            info: 'bg-blue-600 text-white',
-            warning: 'bg-yellow-500 text-black'
-        };
-        const notificationHTML = `
+        // --- FunÃ§Ãµes de NotificaÃ§Ã£o ---
+        function addNotification(message, type = 'info') {
+            const notificationId = 'notif-' + Date.now();
+            const typeClasses = {
+                error: 'bg-red-600 text-white',
+                success: 'bg-green-600 text-white',
+                info: 'bg-blue-600 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            const notificationHTML = `
             <div id="${notificationId}" class="p-4 rounded-lg shadow-xl text-sm ${typeClasses[type] || typeClasses.info} flex justify-between items-center transition-all duration-300 opacity-0 transform translate-x-full">
                 <span>${message}</span>
                 <button onclick="removeNotification('${notificationId}')" class="ml-3 font-bold text-lg leading-none">&times;</button>
             </div>`;
-        notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
-        const newNotification = document.getElementById(notificationId);
-        requestAnimationFrame(() => {
-            newNotification.classList.remove('opacity-0', 'translate-x-full');
-            newNotification.classList.add('opacity-100', 'translate-x-0');
-        });
-        setTimeout(() => removeNotification(notificationId), 6000);
-    }
-    window.removeNotification = (id) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('opacity-0', 'translate-x-full');
-            setTimeout(() => el.remove(), 300);
+            notificationArea.insertAdjacentHTML('beforeend', notificationHTML);
+            const newNotification = document.getElementById(notificationId);
+            requestAnimationFrame(() => {
+                newNotification.classList.remove('opacity-0', 'translate-x-full');
+                newNotification.classList.add('opacity-100', 'translate-x-0');
+            });
+            setTimeout(() => removeNotification(notificationId), 6000);
         }
-    };
+        window.removeNotification = (id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => el.remove(), 300);
+            }
+        };
 
 
-    // IA Gemini API
-    async function callGemini(prompt, chatHistoryArr = []) {
-        if (!apiKey) throw new Error("API Key não configurada.");
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + apiKey;
-        let contents = chatHistoryArr.length
-            ? chatHistoryArr.map(turn => ({ role: turn.role, parts: [{ text: turn.text }] }))
-            : [{ parts: [{ text: prompt }] }];
-        if (!chatHistoryArr.length) contents[0].role = "user";
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents })
-        });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err?.error?.message || res.statusText);
+        // IA Gemini API
+        async function callGemini(prompt, chatHistoryArr = []) {
+            if (!apiKey) throw new Error("API Key não configurada.");
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + apiKey;
+            let contents = chatHistoryArr.length
+                ? chatHistoryArr.map(turn => ({ role: turn.role, parts: [{ text: turn.text }] }))
+                : [{ parts: [{ text: prompt }], role: "user" }];
+            if (!chatHistoryArr.length) contents[0].role = "user";
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents })
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err?.error?.message || res.statusText);
+            }
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || "[Erro: resposta vazia da IA]";
         }
-        const data = await res.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || "[Erro: resposta vazia da IA]";
-    }
 
-    // Markdown simples
-    function md2html(md) {
-        let html = md;
-        html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-        html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
-        html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-        html = html.replace(/^\s*-\s+(.*)/gm, "<li>$1</li>");
-        html = html.replace(/(<li>.*<\/li>)/gs, m => `<ul>${m}</ul>`);
-        html = html.replace(/\n/g, "<br>");
-        return html;
-    }
+        // Markdown simples
+        function md2html(md) {
+            let html = md;
+            html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+            html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+            html = html.replace(/^\s*-\s+(.*)/gm, "<li>$1</li>");
+            html = html.replace(/(<li>.*<\/li>)/gs, m => `<ul>${m}</ul>`);
+            html = html.replace(/\n/g, "<br>");
+            return html;
+        }
+        function addMsgToPDFChat(msg, sender = 'ia') {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message rounded-md p-2 my-1 ' +
+                (sender === 'user' ? 'bg-red-800/40 self-end text-right' : 'bg-zinc-700/60 self-start');
+            msgDiv.innerHTML = md2html(msg);
+            chatBoxPDF.appendChild(msgDiv);
+            chatBoxPDF.scrollTop = chatBoxPDF.scrollHeight;
+        }
 
-    function addMsgToPDFChat(msg, sender = 'ia') {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'chat-message ' + (sender === 'user' ? 'user-message' : 'ia-message');
-        msgDiv.innerHTML = md2html(msg);
-        dom.chatBoxPDF.appendChild(msgDiv);
-        dom.chatBoxPDF.scrollTop = dom.chatBoxPDF.scrollHeight;
-    }
+        fileInputPDF.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file || !file.name.endsWith('.pdf')) {
+                fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF vÃ¡lido.';
+                pdfTextExtracted.value = '';
+                analisarPDFButton.disabled = true;
+                userInputPDFChat.disabled = true;
+                sendPDFChatButton.disabled = true;
+                return;
+            }
+            fileStatusPDF.innerHTML = '<span class="loader"></span> Processando PDF...';
+            pdfTextExtracted.value = '';
+            extractedTextPDF = '';
+            pdfFile = file;
+            analisarPDFButton.disabled = false;
 
-    // Eventos principais
-    dom.fileInputPDF.addEventListener('change', async (e) => {
-        await extractTextFromPDF(e.target.files[0]);
-        dom.outputSectionPDF.classList.add('hidden');
-        dom.chatWithPDFSection.classList.add('hidden');
-        dom.chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Faça perguntas para o PDF, a IA vai responder no papel do personagem extraído!</div>';
-        chatHistoryPDF = [];
-        pdfPersonality = '';
-        dom.pdfPersonalitySpan.textContent = '';
-    });
+            // Miniatura
+            pdfThumbnail.innerHTML = '<span class="loader"></span>';
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async function (event) {
+                    const typedarray = new Uint8Array(event.target.result);
+                    const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                    const page = await pdf.getPage(1);
+                    const viewport = page.getViewport({ scale: 0.4 });
+                    const canvas = document.createElement("canvas");
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext("2d");
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    pdfThumbnail.innerHTML = '';
+                    pdfThumbnail.appendChild(canvas);
 
-    dom.analisarPDFButton.addEventListener('click', async () => {
-        if (!extractedTextPDF) { dom.fileStatusPDF.textContent = "Primeiro envie um PDF!"; return; }
-        showLoadingBtn(dom.analisarPDFButton, true);
-        dom.resumoPDF.innerHTML = "Analisando e extraindo personalidade da IA...";
-        dom.outputSectionPDF.classList.remove('hidden');
-        dom.chatWithPDFSection.classList.add('hidden');
-        chatHistoryPDF = [];
-        const prompt = `Você é o CapyPDF. Analise o seguinte conteúdo extraído de um PDF.
-1. Faça um resumo objetivo dos temas, tom e intenções do documento.
-2. Imagine uma personalidade para a IA que irá responder às perguntas sobre este PDF: 
-   - Com base no texto, defina um "avatar", tom de voz, modo de falar e a atitude que você (IA) deve adotar nas respostas.
-3. Fale para o usuário como será sua personalidade. 
-Exemplo: "Vou responder como um advogado sério", "Vou agir como um manual técnico divertido", "Serei um poeta", etc.
-Conteúdo:
+                    // ExtraÃ§Ã£o simples de texto (atÃ© 10 Páginas)
+                    let text = '';
+                    for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
+                        const p = await pdf.getPage(i);
+                        const c = await p.getTextContent();
+                        text += c.items.map(it => it.str).join(' ') + '\n\n';
+                    }
+                    extractedTextPDF = text.trim();
+                    // Preview limitado
+                    pdfTextExtracted.value = extractedTextPDF.substring(0, maxPreviewChars) + (extractedTextPDF.length > maxPreviewChars ? "\n\n[ConteÃºdo truncado para preview]" : "");
+                    showMorePDF.classList.toggle('hidden', extractedTextPDF.length <= maxPreviewChars);
+                    fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 10)}.`;
+                    analisarPDFButton.disabled = false;
+                    userInputPDFChat.disabled = true;
+                    sendPDFChatButton.disabled = true;
+                    chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Pronto para analisar! Clique no botÃ£o abaixo para gerar a persona IA.</div>';
+                }
+                fileReader.readAsArrayBuffer(file);
+            } catch (e) {
+                pdfThumbnail.innerHTML = '<i class="fas fa-file-pdf text-5xl text-red-500"></i>';
+                fileStatusPDF.textContent = 'Erro ao processar PDF.';
+            }
+        });
+
+        showMorePDF.addEventListener('click', () => {
+            pdfTextExtracted.value = extractedTextPDF;
+            showMorePDF.classList.add('hidden');
+        });
+
+        // Análise com IA Gemini
+        analisarPDFButton.disabled = true;
+        userInputPDFChat.disabled = true;
+        sendPDFChatButton.disabled = true;
+
+        analisarPDFButton.addEventListener('click', async () => {
+            if (!extractedTextPDF) { fileStatusPDF.textContent = "Primeiro envie um PDF!"; return; }
+            showLoadingBtn(analisarPDFButton, true);
+            chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Analisando PDF e gerando persona IA... <span class="loader"></span></div>';
+            chatHistoryPDF = [];
+            pdfPersona = '';
+            try {
+                const prompt = `você Ã© o CapyPDF. Analise o conteÃºdo extraÃ­do de um PDF abaixo.
+1. FaÃ§a um resumo objetivo dos temas, tom e intenÃ§Ãµes do documento.
+2. Imagine uma personalidade para a IA que irÃ¡ responder perguntas sobre este PDF:
+   - Defina um "avatar", tom de voz, modo de falar e atitude com base no texto do documento.
+3. Explique ao usuÃ¡rio qual serÃ¡ sua personalidade. Ex: "Vou responder como advogado sÃ©rio", "Serei um professor paciente", etc.
+ConteÃºdo (atÃ© 10000 caracteres):
 ---
 ${extractedTextPDF.substring(0, 10000)}
 ---
-Responda em Markdown. Seja criativo e autêntico. Dê um nome para sua persona (ex: CapyAdvogado, CapyGuia, CapyProfessor) e explique como será o personagem.`
-        try {
-            const textoIA = await callGemini(prompt);
-            dom.resumoPDF.innerHTML = md2html(textoIA);
-            dom.outputSectionPDF.classList.remove('hidden');
-            const persona = textoIA.match(/(?:Nome|Persona|Personagem)[:：]?\s*(.+)$/mi);
-            pdfPersonality = persona ? persona[1] : '';
-            dom.pdfPersonalitySpan.textContent = pdfPersonality ? `(${pdfPersonality})` : '';
-            dom.chatWithPDFSection.classList.remove('hidden');
-            dom.chatBoxPDF.innerHTML = '';
-            addMsgToPDFChat('Estou pronto! Pergunte o que quiser sobre este PDF e responderei como prometido acima.', 'ia');
-            chatHistoryPDF = [
-                { role: "model", text: textoIA }
-            ];
-        } catch (err) {
-            dom.resumoPDF.innerHTML = `<span class="text-red-500">Erro ao chamar IA: ${err.message}</span>`;
-        }
-        showLoadingBtn(dom.analisarPDFButton, false);
-    });
+Responda em Markdown. DÃª um nome para sua persona (ex: CapyAdvogado, CapyGuia, CapyProfessor) e explique como serÃ¡ o personagem.`
+                const textoIA = await callGemini(prompt);
+                chatBoxPDF.innerHTML = md2html(textoIA);
+                // Pega nome da persona:
+                const persona = textoIA.match(/(?:Nome|Persona|Personagem)[:ï¼š]?\s*(.+)$/mi);
+                pdfPersona = persona ? persona[1] : '';
+                chatHistoryPDF = [
+                    { role: "model", text: textoIA }
+                ];
+                userInputPDFChat.disabled = false;
+                sendPDFChatButton.disabled = false;
+                showLoadingBtn(analisarPDFButton, false);
+                addMsgToPDFChat('Estou pronto! Pergunte o que quiser sobre este PDF e responderei como prometido acima.', 'ia');
+            } catch (err) {
+                chatBoxPDF.innerHTML = `<span class="text-red-500">Erro ao chamar IA: ${err.message}</span>`;
+                showLoadingBtn(analisarPDFButton, false);
+            }
+        });
 
-    dom.sendPDFChatButton.addEventListener('click', async () => {
-        const userMsg = dom.userInputPDFChat.value.trim();
-        if (!userMsg) return;
-        addMsgToPDFChat(userMsg, 'user');
-        dom.userInputPDFChat.value = '';
-        showLoadingBtn(dom.sendPDFChatButton, true);
-        chatHistoryPDF.push({ role: "user", text: userMsg });
-        const contextPrompt = `Lembre-se: você é o personagem/persona extraído deste PDF, definido na mensagem anterior.
-Responda mantendo a personalidade e o tom prometido. Fale baseado APENAS no conteúdo abaixo:
+        // Chat real com IA
+        sendPDFChatButton.addEventListener('click', async () => {
+            const userMsg = userInputPDFChat.value.trim();
+            if (!userMsg) return;
+            addMsgToPDFChat(userMsg, 'user');
+            userInputPDFChat.value = '';
+            showLoadingBtn(sendPDFChatButton, true);
+            chatHistoryPDF.push({ role: "user", text: userMsg });
+            const contextPrompt = `Lembre-se: você Ã© o personagem/persona extraÃ­do deste PDF, definido na Análise anterior.
+Responda mantendo a personalidade e o tom prometido. Fale baseado APENAS no conteÃºdo abaixo:
 ---
-${extractedTextPDF.substring(0, 12000)}
+${extractedTextPDF.substring(0, maxContextChars)}
 ---
-A pergunta é:
+A pergunta Ã©:
 ${userMsg}
-Responda de forma autêntica ao personagem, cite exemplos do texto quando útil.`;
-        try {
-            const respIA = await callGemini(contextPrompt, chatHistoryPDF);
-            addMsgToPDFChat(respIA, 'ia');
-            chatHistoryPDF.push({ role: "model", text: respIA });
-        } catch (err) {
-            addMsgToPDFChat("Erro ao chamar IA: " + err.message, 'ia');
-        }
-        showLoadingBtn(dom.sendPDFChatButton, false);
-    });
-
-    dom.userInputPDFChat.addEventListener('keypress', e => {
-        if (e.key === "Enter" && !e.shiftKey && !dom.sendPDFChatButton.disabled) {
-            e.preventDefault();
-            dom.sendPDFChatButton.click();
-        }
-    });
-
-    async function renderSidebar() {
-        if (!dom.sidebar) {
-            console.error("Sidebar element not found!");
-            return;
-        }
-        try {
-            const response = await fetch('tools.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
+Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãºtil.`;
+            try {
+                const respIA = await callGemini(contextPrompt, chatHistoryPDF);
+                addMsgToPDFChat(respIA, 'ia');
+                chatHistoryPDF.push({ role: "model", text: respIA });
+            } catch (err) {
+                addMsgToPDFChat("Erro ao chamar IA: " + err.message, 'ia');
             }
-            const toolsData = await response.json();
+            showLoadingBtn(sendPDFChatButton, false);
+        });
 
-            const categories = {};
-            toolsData.forEach(tool => {
-                if (!categories[tool.category]) {
-                    categories[tool.category] = [];
-                }
-                categories[tool.category].push(tool);
-            });
-            dom.sidebar.innerHTML = '';
-
-            const homeLinkSidebar = document.createElement('a');
-            homeLinkSidebar.href = 'index.html';
-            homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-            homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-            dom.sidebar.appendChild(homeLinkSidebar);
-
-            for (const categoryName in categories) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'mb-1';
-                const categoryButton = document.createElement('button');
-                categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                const categoryContent = document.createElement('div');
-                categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-
-                categories[categoryName].forEach(tool => {
-                    const link = document.createElement('a');
-                    link.href = tool.pageUrl;
-                    const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                    link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                    link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-                    categoryContent.appendChild(link);
-                });
-
-                categoryButton.addEventListener('click', () => {
-                    categoryContent.classList.toggle('expanded');
-                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                });
-
-                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                    categoryContent.classList.add('expanded');
-                    categoryButton.querySelector('svg').classList.add('rotate-180');
-                }
-
-                categoryDiv.appendChild(categoryButton);
-                categoryDiv.appendChild(categoryContent);
-                dom.sidebar.appendChild(categoryDiv);
+        userInputPDFChat.addEventListener('keypress', e => {
+            if (e.key === "Enter" && !e.shiftKey && !sendPDFChatButton.disabled) {
+                e.preventDefault();
+                sendPDFChatButton.click();
             }
-        } catch (error) {
-            console.error("Erro ao carregar ferramentas para a sidebar:", error);
-            if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
-        }
-    }
+        });
 
-    function loadApiKey() {
-        const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-        if (savedKey) {
-            apiKey = savedKey;
-            if (dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey;
-        }
-    }
+        async function renderSidebar() {
+            if (!dom.sidebar) {
+                console.error("Sidebar element not found!");
+                return;
+            }
+            try {
+                const response = await fetch('tools.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
+                }
+                const toolsData = await response.json();
 
-    function setupApiKeyModal() {
-        const modalHTML = `
-            <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
-                    <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-                </div>
-                <div class="space-y-3">
-                    <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                        <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                         <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
-                        <div class="flex">
-                            <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
-                            <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) {
+                        categories[tool.category] = [];
+                    }
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = '';
+
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+            }
+        }
+
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if (savedKey) {
+                apiKey = savedKey;
+                if (dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey;
+            }
+        }
+
+        function setupApiKeyModal() {
+            const modalHTML = `
+                <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-purple-400 font-inter">Gerenciar Chaves de API</h2>
+                        <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                            <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                             <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
+                            <div class="flex">
+                                <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
+                                <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-2">Sua chave Ã© salva localmente e usada para as funcionalidades de IA.</p>
                         </div>
-                        <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada para as funcionalidades de IA.</p>
                     </div>
                 </div>
-            </div>
-        `;
-        if (dom.apiKeysModal) dom.apiKeysModal.innerHTML = modalHTML;
+            `;
+            if (dom.apiKeysModal) dom.apiKeysModal.innerHTML = modalHTML;
 
-        const closeBtn = document.getElementById('closeApiKeysModalButton');
-        const saveBtn = document.getElementById('saveGeminiKey');
-        const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
+            const closeBtn = document.getElementById('closeApiKeysModalButton');
+            const saveBtn = document.getElementById('saveGeminiKey');
+            const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
 
-        if (dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-        if (closeBtn) closeBtn.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-        if (saveBtn && apiKeyInput) {
-            saveBtn.addEventListener('click', () => {
-                const key = apiKeyInput.value.trim();
-                if (key) {
-                    localStorage.setItem(API_KEY_STORAGE_KEY, key);
-                    apiKey = key;
-                    alert("Chave API do Gemini salva!");
-                    dom.apiKeysModal.classList.add('hidden');
-                    dom.errorMessage.textContent = "";
+            if (dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            if (closeBtn) closeBtn.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            if (saveBtn && apiKeyInput) {
+                saveBtn.addEventListener('click', () => {
+                    const key = apiKeyInput.value.trim();
+                    if (key) {
+                        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+                        apiKey = key;
+                        alert("Chave API do Gemini salva!");
+                        dom.apiKeysModal.classList.add('hidden');
+                        dom.errorMessage.textContent = "";
+                    } else {
+                        alert("Por favor, insira uma chave API.");
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar();
+            setupApiKeyModal();
+            loadApiKey();
+
+
+            // função para controlar o estado do sidebar
+            function toggleSidebar(show) {
+                if (show === undefined) {
+                    // Toggle
+                    dom.sidebar.classList.toggle('-translate-x-full');
+                    dom.sidebarOverlay.classList.toggle('hidden');
+                } else if (show) {
+                    // Mostrar
+                    dom.sidebar.classList.remove('-translate-x-full');
+                    dom.sidebarOverlay.classList.remove('hidden');
                 } else {
-                    alert("Por favor, insira uma chave API.");
+                    // Esconder
+                    dom.sidebar.classList.add('-translate-x-full');
+                    dom.sidebarOverlay.classList.add('hidden');
                 }
-            });
-        }
-    }
+            }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOMContentLoaded event fired."); // Adicionado log
-        renderSidebar();
-        setupApiKeyModal();
-        loadApiKey();
+            if (dom.sidebarToggleBtn) {
+                dom.sidebarToggleBtn.addEventListener('click', () => {
+                    toggleSidebar();
+                });
+            } else {
+                console.warn("dom.sidebarToggleBtn not found!");
+            }
 
-        if (dom.sidebarToggleBtn) {
-            dom.sidebarToggleBtn.addEventListener('click', () => {
-                dom.sidebar.classList.toggle('-translate-x-full');
-                dom.sidebarOverlay.classList.toggle('hidden');
-            });
-        } else {
-            console.warn("dom.sidebarToggleBtn not found!");
-        }
+            if (dom.sidebarOverlay) {
+                dom.sidebarOverlay.addEventListener('click', () => {
+                    toggleSidebar(false);
+                });
+            } else {
+                console.warn("dom.sidebarOverlay not found!");
+            }
 
-        if (dom.sidebarOverlay) {
-            dom.sidebarOverlay.addEventListener('click', () => {
-                dom.sidebar.classList.add('-translate-x-full');
-                dom.sidebarOverlay.classList.add('hidden');
-            });
-        } else {
-            console.warn("dom.sidebarOverlay not found!");
-        }
-    });
-</script>
+            // Inicializa o sidebar como fechado por padrÃ£o
+            toggleSidebar(false);
+        });
+    </script>
 </body>
 
 </html>
