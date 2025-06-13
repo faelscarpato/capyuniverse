@@ -85,8 +85,7 @@
         }
         #pdfReportContent { display: none; }
     </style>
-
-<!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -95,7 +94,6 @@
 
   gtag('config', 'G-3FFD7ZEBN1');
 </script>
-
 </head>
 
 <body class="dark min-h-screen flex flex-col text-[15px]">
@@ -227,6 +225,7 @@
         const currentPageId = 'CapyAudiencias'; 
         let apiKey = '';
         const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let parsedResultCache = null;
 
         const dom = {
             sidebar: document.getElementById('sidebar'),
@@ -377,6 +376,7 @@
                 
                 if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0].text) {
                     const parsedResult = JSON.parse(result.candidates[0].content.parts[0].text);
+                    parsedResultCache = parsedResult; // salva cache para downloadSummary()
                     
                     dom.decisionsOutput.innerHTML = parsedResult.decisoes && parsedResult.decisoes.length > 0 ? basicMarkdownToHtml(parsedResult.decisoes.map(d => `- ${d}`).join('\n')) : '<p class="text-sm text-zinc-400">Nenhuma decisão principal identificada.</p>';
                     dom.nextStepsOutput.innerHTML = parsedResult.proximosPassos && parsedResult.proximosPassos.length > 0 ? basicMarkdownToHtml(parsedResult.proximosPassos.map(s => `- ${s}`).join('\n')) : '<p class="text-sm text-zinc-400">Nenhum próximo passo identificado.</p>';
@@ -398,46 +398,64 @@
         }
 
         function downloadSummary(format) {
-            const decisionsText = Array.from(dom.decisionsOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhuma decisão principal identificada.").join('\n  - ');
-            const nextStepsText = Array.from(dom.nextStepsOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhum próximo passo identificado.").join('\n  - ');
-            const partiesText = Array.from(dom.partiesOutput.querySelectorAll('li, p')).map(el => el.textContent.replace(/^- /,'').trim()).filter(t => t && t !== "Nenhuma parte envolvida identificada claramente.").join('\n  - ');
+    if (!parsedResultCache) {
+        alert("Por favor, analise a ata primeiro antes de gerar o download.");
+        return;
+    }
 
-            const title = "Resumo da Ata de Audiência - CapyAudiências";
-            let content = `${title}\n\n`;
-            content += "PRINCIPAIS DECISÕES:\n";
-            content += decisionsText ? `  - ${decisionsText}\n\n` : "  Nenhuma decisão principal identificada.\n\n";
-            content += "PRÓXIMOS PASSOS:\n";
-            content += nextStepsText ? `  - ${nextStepsText}\n\n` : "  Nenhum próximo passo identificado.\n\n";
-            content += "PARTES ENVOLVIDAS:\n";
-            content += partiesText ? `  - ${partiesText}\n` : "  Nenhuma parte envolvida identificada claramente.\n";
+    const { decisoes, proximosPassos, partesEnvolvidas } = parsedResultCache;
 
-            if (format === 'txt') {
-                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'resumo_audiencia.txt';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } else if (format === 'pdf') {
-                dom.pdfDecisions.innerHTML = decisionsText ? `<ul>${decisionsText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhuma decisão principal identificada.</p>';
-                dom.pdfNextSteps.innerHTML = nextStepsText ? `<ul>${nextStepsText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhum próximo passo identificado.</p>';
-                dom.pdfParties.innerHTML = partiesText ? `<ul>${partiesText.split('\n').map(item => `<li>${item.replace(/^- /,'').trim()}</li>`).join('')}</ul>` : '<p>Nenhuma parte envolvida identificada claramente.</p>';
+    const title = "Resumo da Ata de Audiência - CapyAudiências";
 
-                const element = dom.pdfReportContent;
-                const opt = {
-                    margin:       [15, 15, 15, 15],
-                    filename:     'resumo_audiencia_capyaudiencias.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, logging: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                html2pdf().from(element).set(opt).save();
-            }
-        }
-        
+    if (format === 'txt') {
+        let content = `${title}\n\n`;
+        content += "PRINCIPAIS DECISÕES:\n";
+        content += (decisoes && decisoes.length > 0) ? decisoes.map(d => `  - ${d}`).join('\n') + '\n\n' : "  Nenhuma decisão principal identificada.\n\n";
+
+        content += "PRÓXIMOS PASSOS:\n";
+        content += (proximosPassos && proximosPassos.length > 0) ? proximosPassos.map(p => `  - ${p}`).join('\n') + '\n\n' : "  Nenhum próximo passo identificado.\n\n";
+
+        content += "PARTES ENVOLVIDAS:\n";
+        content += (partesEnvolvidas && partesEnvolvidas.length > 0) ? partesEnvolvidas.map(p => `  - ${p}`).join('\n') + '\n' : "  Nenhuma parte envolvida identificada claramente.\n";
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resumo_audiencia.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } else if (format === 'pdf') {
+        dom.pdfDecisions.innerHTML = (decisoes && decisoes.length > 0)
+            ? `<ul>${decisoes.map(item => `<li>${item}</li>`).join('')}</ul>`
+            : '<p>Nenhuma decisão principal identificada.</p>';
+
+        dom.pdfNextSteps.innerHTML = (proximosPassos && proximosPassos.length > 0)
+            ? `<ul>${proximosPassos.map(item => `<li>${item}</li>`).join('')}</ul>`
+            : '<p>Nenhum próximo passo identificado.</p>';
+
+        dom.pdfParties.innerHTML = (partesEnvolvidas && partesEnvolvidas.length > 0)
+            ? `<ul>${partesEnvolvidas.map(item => `<li>${item}</li>`).join('')}</ul>`
+            : '<p>Nenhuma parte envolvida identificada claramente.</p>';
+
+        dom.pdfReportContent.style.display = 'block';
+
+        const opt = {
+            margin:       [15, 15, 15, 15],
+            filename:     'resumo_audiencia_capyaudiencias.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().from(dom.pdfReportContent).set(opt).save().then(() => {
+            dom.pdfReportContent.style.display = 'none';
+        });
+    }
+}
+
         async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
