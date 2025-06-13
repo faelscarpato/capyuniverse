@@ -197,93 +197,105 @@
             }
         }
         
-        function displayResults(data) {
-            dom.diagnosisOutput.textContent = data.diagnosis || "Não foi possível determinar o diagnóstico.";
-            dom.causeOutput.textContent = data.rootCause || "Não foi possível determinar a causa raiz.";
-            dom.solutionOutput.innerHTML = data.stepByStepSolution ? data.stepByStepSolution.replace(/\n/g, '<br>') : "Nenhuma solução passo a passo pôde ser gerada.";
-            dom.componentsOutput.textContent = data.suggestedComponents || "N/A";
-            dom.outputSection.classList.remove('hidden');
+      function displayResults(data) {
+    dom.diagnosisOutput.textContent = data.diagnosis || "Não foi possível determinar o diagnóstico.";
+    dom.causeOutput.textContent = data.rootCause || "Não foi possível determinar a causa raiz.";
+    dom.solutionOutput.innerHTML = data.stepByStepSolution ? data.stepByStepSolution.replace(/\n/g, '<br>') : "Nenhuma solução passo a passo pôde ser gerada.";
+    dom.componentsOutput.textContent = data.suggestedComponents || "N/A";
+    dom.outputSection.classList.remove('hidden');
+}
+
+async function diagnoseProblem() {
+    const problemDescription = dom.problemInput.value.trim();
+    if (!problemDescription) {
+        alert("Por favor, descreva o problema antes de diagnosticar.");
+        return;
+    }
+    if (!apiKey) {
+        alert("Por favor, configure sua chave de API do Gemini primeiro.");
+        if (dom.apiKeysModal) dom.apiKeysModal.classList.remove('hidden');
+        return;
+    }
+
+    toggleLoading(true);
+    dom.outputSection.classList.remove('hidden');
+    dom.diagnosisOutput.textContent = "Analisando as entranhas do silício...";
+    dom.causeOutput.textContent = "Consultando os espíritos da máquina...";
+    dom.solutionOutput.innerHTML = "Traçando o caminho da cura..."; // Use innerHTML se for inserir <br>
+    dom.componentsOutput.textContent = "Forjando as ferramentas necessárias...";
+
+    const prompt = `
+        Você é o CapyByte, um Oráculo Tecnológico especialista em hardware e software.
+        Um usuário descreveu o seguinte problema: "${problemDescription}".
+        Sua tarefa é fornecer uma análise estruturada em formato JSON.
+
+        O JSON deve ter as seguintes chaves:
+        1. "diagnosis": Um diagnóstico preliminar, explicando o que provavelmente está acontecendo em linguagem clara.
+        2. "rootCause": A causa raiz mais provável do problema, sendo específico (ex: "Driver da GPU desatualizado", "Superaquecimento do processador por poeira no cooler").
+        3. "stepByStepSolution": Um guia passo a passo, fácil de seguir, para resolver o problema. Use \\n para quebras de linha que serão convertidas para <br>.
+        4. "suggestedComponents": Se aplicável, sugira componentes de hardware (ex: "SSD NVMe de 1TB") ou software (ex: "MSI Afterburner para monitoramento") que possam ajudar. Se não for aplicável, retorne "N/A".
+
+        Responda APENAS com o objeto JSON.
+    `;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => null); // Tenta ler o corpo do erro
+            throw new Error(`Erro na API: ${response.status} ${response.statusText}. ${errorData?.error?.message || ''}`);
         }
 
-        async function diagnoseProblem() {
-            const problemDescription = dom.problemInput.value.trim();
-            if (!problemDescription) {
-                alert("Por favor, descreva o problema antes de diagnosticar.");
-                return;
-            }
-            if (!apiKey) {
-                alert("Por favor, configure sua chave de API do Gemini primeiro.");
-                if(dom.apiKeysModal) dom.apiKeysModal.classList.remove('hidden');
-                return;
-            }
+        const data = await response.json();
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+            let jsonString = data.candidates[0].content.parts[0].text;
 
-            toggleLoading(true);
-            dom.outputSection.classList.remove('hidden');
-            dom.diagnosisOutput.textContent = "Analisando as entranhas do silício...";
-            dom.causeOutput.textContent = "Consultando os espíritos da máquina...";
-            dom.solutionOutput.innerHTML = "Traçando o caminho da cura..."; // Use innerHTML se for inserir <br>
-            dom.componentsOutput.textContent = "Forjando as ferramentas necessárias...";
+            // Encontra o início e o fim do JSON
+            const jsonStart = jsonString.indexOf('{');
+            const jsonEnd = jsonString.lastIndexOf('}');
 
-            const prompt = `
-                Você é o CapyByte, um Oráculo Tecnológico especialista em hardware e software.
-                Um usuário descreveu o seguinte problema: "${problemDescription}".
-                Sua tarefa é fornecer uma análise estruturada em formato JSON.
-
-                O JSON deve ter as seguintes chaves:
-                1. "diagnosis": Um diagnóstico preliminar, explicando o que provavelmente está acontecendo em linguagem clara.
-                2. "rootCause": A causa raiz mais provável do problema, sendo específico (ex: "Driver da GPU desatualizado", "Superaquecimento do processador por poeira no cooler").
-                3. "stepByStepSolution": Um guia passo a passo, fácil de seguir, para resolver o problema. Use \\n para quebras de linha que serão convertidas para <br>.
-                4. "suggestedComponents": Se aplicável, sugira componentes de hardware (ex: "SSD NVMe de 1TB") ou software (ex: "MSI Afterburner para monitoramento") que possam ajudar. Se não for aplicável, retorne "N/A".
-
-                Responda APENAS com o objeto JSON.
-            `;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null); // Tenta ler o corpo do erro
-                    throw new Error(`Erro na API: ${response.status} ${response.statusText}. ${errorData?.error?.message || ''}`);
-                }
-
-                const data = await response.json();
-                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-                    const jsonString = data.candidates[0].content.parts[0].text.replace(/^```json\s*|```$/g, '').trim();
+            if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
+                jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+                try {
                     const result = JSON.parse(jsonString);
                     displayResults(result);
-                } else {
-                     throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
+                } catch (parseError) {
+                    console.error("Erro ao analisar JSON:", parseError);
+                    console.error("String JSON com problema:", jsonString); // Log da string problemática
+                    throw new Error("Resposta da API contém JSON inválido: " + parseError.message);
                 }
-
-            } catch (error) {
-                console.error("Erro ao diagnosticar:", error);
-                dom.diagnosisOutput.textContent = `Ocorreu um erro: ${error.message}. Verifique sua chave de API e a conexão.`;
-                dom.causeOutput.textContent = "-";
-                dom.solutionOutput.innerHTML = "-"; // Use innerHTML aqui também
-                dom.componentsOutput.textContent = "-";
-            } finally {
-                toggleLoading(false);
+            } else {
+                throw new Error("JSON inválido encontrado na resposta da API.");
             }
+        } else {
+            throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
         }
+
+    } catch (error) {
+        console.error("Erro ao diagnosticar:", error);
+        dom.diagnosisOutput.textContent = `Ocorreu um erro: ${error.message}. Verifique sua chave de API e a conexão.`;
+        dom.causeOutput.textContent = "-";
+        dom.solutionOutput.innerHTML = "-"; // Use innerHTML aqui também
+        dom.componentsOutput.textContent = "-";
+    } finally {
+        toggleLoading(false);
+    }
+}
         
         async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
                 const response = await fetch('tools.json'); 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
-                }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const toolsData = await response.json();
                 
                 const categories = {};
                 toolsData.forEach(tool => {
-                    if (!categories[tool.category]) {
-                        categories[tool.category] = [];
-                    }
+                    if (!categories[tool.category]) categories[tool.category] = [];
                     categories[tool.category].push(tool);
                 });
                 dom.sidebar.innerHTML = ''; 
@@ -328,7 +340,7 @@
                 }
             } catch (error) {
                 console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
             }
         }
 
@@ -341,7 +353,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); 
+            renderSidebar(); // Corrigido para chamar a função correta
             loadApiKey();
 
             if(dom.diagnoseButton) dom.diagnoseButton.addEventListener('click', diagnoseProblem);
