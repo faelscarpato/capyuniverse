@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CapyCLT - Sua Especialista em CLT</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts for Inter, Syne, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+
+    <!-- PDF.js for PDF parsing (worker will be loaded dynamically by JS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        /* Base styles from CapyContrato */
+        html {
+            background: #121217;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb;
+            /* zinc-200 */
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b;
+            /* zinc-900 */
+        }
+
+        .font-syne {
+            font-family: 'Syne', sans-serif;
+        }
+
+        .font-jetbrains {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass {
+            background: rgba(24, 24, 27, 0.6);
+            /* zinc-900 with opacity */
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4);
+            /* zinc-700 with opacity */
+        }
+
+        .sidebar-glass {
+            background: rgba(39, 39, 42, 0.7);
+            /* zinc-800 with opacity */
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(63, 63, 70, 0.3);
+            /* zinc-700 */
+        }
+
+        /* Custom scrollbar for chat area and sidebar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #292932;
+            border-radius: 60px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Loader animation */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8b5cf6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Notification Styles */
+        #notificationArea {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 24rem;
+        }
+
+        .notification {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-size: 0.875rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .notification-error {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .notification-info {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .notification-warning {
+            background-color: #f59e0b;
+            color: #1f2937;
+        }
+
+        .notification button {
+            margin-left: 0.75rem;
+            font-weight: bold;
+            font-size: 1.125rem;
+            line-height: 1;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        /* Chat-specific styles (adjusted for dark theme contrast) */
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            /* Slightly larger padding */
+            border-radius: 1.2rem;
+            /* More rounded corners */
+            margin-bottom: 12px;
+            /* More spacing */
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            /* Slightly larger font */
+            line-height: 1.4;
+        }
+
+        .message-bubble pre, 
+.message-bubble code {
+  background: rgba(255,255,255,0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+  margin-top: 0.5rem;
+  color: #fcd34d;
+}
+
+.message-bubble p {
+  margin-bottom: 0.5rem;
+  margin-top: 5px;
+    color: #d4d4d8;
+    /* zinc-300 */
+    
+}
+
+        .user-message {
+            background-color: #8e4bf3;
+            /* Deep purple for user */
+            align-self: flex-end;
+            border-bottom-right-radius: 0.5rem;
+            /* Smoother corner transition */
+            color: #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-top: 0.5rem;
+        }
+
+        .capy-message {
+            background-color: #141314;
+            /* Darker purple for Capy */
+            align-self: flex-start;
+            border-bottom-left-radius: 0.5rem;
+            /* Smoother corner transition */
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            padding: 12px ;
+            border-radius: 1.2rem;
+        }
+
+        /* File Input Customization */
+        .custom-file-input {
+            width: auto;
+            /* Adjust width */
+        }
+
+        .custom-file-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+
+        .custom-file-input::before {
+            content: 'Escolher Arquivo';
+            display: inline-block;
+            background: linear-gradient(180deg, #6b21a8, #8b5cf6);
+            /* Purple shades */
+            color: white;
+            padding: 10px 20px;
+            /* Larger padding */
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            outline: none;
+            white-space: nowrap;
+            -webkit-user-select: none;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .custom-file-input:hover::before {
+            background: linear-gradient(180deg, #8b5cf6, #a78bfa);
+            /* Lighter purple on hover */
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        .custom-file-input:active::before {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        /* Buttons general style from CapyContrato */
+        button {
+            background-color: #8b5cf6;
+            /* default purple */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #a78bfa;
+            /* lighter purple on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Specific button colors */
+        #analyze-document-button {
+            background-color: #db2777;
+        }
+
+        /* pink-600 */
+        #analyze-document-button:hover {
+            background-color: #be185d;
+        }
+
+        /* pink-700 */
+        #summarize-article-button {
+            background-color: #fbbf24;
+            color: #1f2937;
+        }
+
+        /* amber-400 */
+        #summarize-article-button:hover {
+            background-color: #f59e0b;
+        }
+
+        /* amber-500 */
+        #generate-scenario-button {
+            background-color: #10b981;
+        }
+
+        /* emerald-500 */
+        #generate-scenario-button:hover {
+            background-color: #059669;
+        }
+
+        /* emerald-600 */
+        #send-button {
+            background-color: #3b82f6;
+        }
+
+        /* blue-500 */
+        #send-button:hover {
+            background-color: #2563eb;
+        }
+
+        /* blue-600 */
+        #export-pdf-button {
+            background-color: #dc2626;
+        }
+
+        /* red-600 */
+        #export-pdf-button:hover {
+            background-color: #b91c1c;
+        }
+
+        /* red-700 */
+
+
+        /* Textarea and Input fields */
+        textarea,
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="password"] {
+            background-color: #27272a;
+            /* zinc-800 */
+            border: 1px solid #3f3f46;
+            /* zinc-700 */
+            color: #d4d4d8;
+            /* zinc-300 */
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        textarea:focus,
+        input:focus {
+            outline: none;
+            border-color: #a78bfa;
+            /* violet-400 */
+            box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5);
+            /* violet-400 with opacity */
+            background-color: #2e2e30;
+            /* slightly lighter for focus */
+        }
+
+        ::placeholder {
+            color: #a1a1aa;
+            /* zinc-400 */
+            opacity: 0.8;
+            
+        }
+
+        #chat-messages {
+  max-height: 400px; /* ou o valor que preferir */
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+    <header
+        class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn"
+                class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html"
+                class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse
+                IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'"
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton"
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves
+                API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1 pt-16">
+        <aside id="sidebar"
+            class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+            <section class="glass border-zinc-800 p-6 flex flex-col max-w-3xl mx-auto">
+                <div class="text-center mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="mx-auto h-12 w-12 text-violet-400 mb-2">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <path d="M8 12h8"></path>
+                        <path d="M8 16h8"></path>
+                    </svg>
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyCLT</h1>
+                    <p class="text-md text-gray-300 mt-1">Sua especialista em Lei Trabalhista Brasileira.</p>
+                </div>
+
+                <!-- Chat Messages Area -->
+                <div id="chat-messages"
+                    class="flex-1 overflow-y-auto p-4 rounded-xl bg-zinc-800 mb-6 shadow-inner border border-zinc-700 scrollbar-thin">
+                    <!-- Messages will be appended here -->
+                    <div class="flex flex-col items-start">
+                        <div class="capy-message rounded-bl-none shadow">Olá! Sou a CapyCLT, sua especialista em
+                            legislação trabalhista brasileira. Como posso te ajudar hoje?</div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="flex flex-col space-y-4">
+                    <textarea id="user-input"
+                        class="w-full p-4 rounded-xl border border-zinc-600 focus:ring-violet-500 focus:border-violet-500 transition shadow-sm resize-none bg-zinc-700 text-gray-200"
+                        rows="3"
+                        placeholder="Faça sua pergunta sobre a CLT, cole um texto para resumir, descreva um cenário, ou faça o upload de um documento para análise..."></textarea>
+
+                    <div
+                        class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-3">
+                        <input type="file" id="file-upload" class="custom-file-input flex-1 w-full"
+                            accept=".pdf,.txt,.docx" />
+                        <button id="analyze-document-button"
+                            class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
+                            Analisar Documento
+                        </button>
+                        <button id="summarize-article-button"
+                            class="bg-amber-400 hover:bg-amber-500 text-zinc-900 font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
+                            ✨ Resumir Artigo
+                        </button>
+                    </div>
+                    <div
+                        class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-3">
+                        <button id="generate-scenario-button"
+                            class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
+                            ✨ Gerar Cenários
+                        </button>
+                        <button id="send-button"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
+                            Perguntar
+                        </button>
+                    </div>
+                    <div class="flex justify-center mt-4">
+                         <!-- <button id="export-pdf-button"
+                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
+                            Exportar Conversa para PDF
+                        </button>-->
+                    </div>
+                    <div id="loading-indicator" class="hidden text-center text-violet-400 font-semibold mt-2">
+                        Carregando... <span class="loader ml-2"></span>
+                    </div>
+                    <div id="error-message" class="hidden text-center text-red-400 font-semibold mt-2">
+                        Ocorreu um erro. Por favor, tente novamente.
+                    </div>
+                </div>
+
+                <!-- Footer / User ID (Removed as per user request) -->
+            </section>
+        </main>
+    </div>
+
+    <!-- API Keys Modal (from CapyContrato) -->
+    <div id="apiKeysModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
+                <button id="closeApiKeysModalButton"
+                    class="text-gray-400 hover:text-white text-2xl leading-none bg-transparent shadow-none">&times;</button>
+            </div>
+            <div class="space-y-3">
+                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                    <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key
+                        Gemini:</label>
+                    <div class="flex">
+                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini"
+                            class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700" />
+                        <button id="saveGeminiKey" data-provider="gemini"
+                            class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white shadow-none">Salvar</button>
+                    </div>
+                    <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse
+                        que requerem Gemini.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for CapyCLT -->
+    <script type="module">
+        // PDF.js for PDF parsing
+        import { getDocument, GlobalWorkerOptions } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.3.136/build/pdf.min.mjs';
+        GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.3.136/build/pdf.worker.min.mjs';
+
+
+        const currentPageId = 'CapyCLT'; // This app's ID
+        let geminiApiKey = ''; // Global API Key for Gemini
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini'; // Key for localStorage
+
+        // DOM elements
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            geminiApiKeyInputModal: document.getElementById('geminiApiKeyInputModal'),
+            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+            notificationArea: document.getElementById('notificationArea'),
+
+            chatMessagesDiv: document.getElementById('chat-messages'),
+            userInput: document.getElementById('user-input'),
+            sendButton: document.getElementById('send-button'),
+            fileUpload: document.getElementById('file-upload'),
+            analyzeDocumentButton: document.getElementById('analyze-document-button'),
+            summarizeArticleButton: document.getElementById('summarize-article-button'),
+            generateScenarioButton: document.getElementById('generate-scenario-button'),
+           // exportPdfButton: document.getElementById('export-pdf-button'), // New button
+            loadingIndicator: document.getElementById('loading-indicator'),
+            errorMessageDiv: document.getElementById('error-message')
+        };
+
+        // Chat history (in-memory only, no Firebase persistence)
+        let chatHistory = [];
+
+        // Displays a message in the chat interface
+        const displayMessage = (message, sender) => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message-bubble', 'shadow');
+            if (sender === 'user') {
+  messageDiv.textContent = message;
+} else {
+  messageDiv.innerHTML = marked.parse(message);
+}
+
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message', 'rounded-tr-none', 'self-end');
+            } else { // 'model' or 'capy'
+                messageDiv.classList.add('capy-message', 'rounded-tl-none', 'self-start');
+            }
+            dom.chatMessagesDiv.appendChild(messageDiv);
+            dom.chatMessagesDiv.scrollTop = dom.chatMessagesDiv.scrollHeight;
+
+            // Add to in-memory chat history for PDF export and API context
+            chatHistory.push({ sender: sender, message: message });
+        };
+
+        // Shows the loading indicator
+        const showLoading = () => {
+            dom.loadingIndicator.classList.remove('hidden');
+            dom.sendButton.disabled = true;
+            dom.analyzeDocumentButton.disabled = true;
+            dom.summarizeArticleButton.disabled = true;
+            dom.generateScenarioButton.disabled = true;
+            //dom.exportPdfButton.disabled = false; // Disable export button during loading
+            dom.userInput.disabled = true;
+            dom.fileUpload.disabled = true;
+        };
+
+        // Hides the loading indicator
+        const hideLoading = () => {
+            dom.loadingIndicator.classList.add('hidden');
+            dom.sendButton.disabled = false;
+            dom.analyzeDocumentButton.disabled = false;
+            dom.summarizeArticleButton.disabled = false;
+            dom.generateScenarioButton.disabled = false;
+           // dom.exportPdfButton.disabled = true; // Enable export button after loading
+            dom.userInput.disabled = false;
+            dom.fileUpload.disabled = false;
+        };
+
+        // Shows an error message
+        const showError = (message) => {
+            dom.errorMessageDiv.textContent = message;
+            dom.errorMessageDiv.classList.remove('hidden');
+        };
+
+        // Hides the error message
+        const hideError = () => {
+            dom.errorMessageDiv.classList.add('hidden');
+        };
+
+        // Helper for Notifications (copied from CapyContrato)
+        let notificationCounter = 0;
+        function addNotification(message, type = 'info', duration = 5000) {
+            const notificationId = `notif-${notificationCounter++}`;
+            const notificationDiv = document.createElement('div');
+            notificationDiv.id = notificationId;
+            notificationDiv.classList.add('notification');
+
+            if (type === 'success') notificationDiv.classList.add('notification-success');
+            else if (type === 'error') notificationDiv.classList.add('notification-error');
+            else if (type === 'warning') notificationDiv.classList.add('notification-warning');
+            else notificationDiv.classList.add('notification-info');
+
+            notificationDiv.innerHTML = `<span>${message}</span><button onclick="removeNotification('${notificationId}')">&times;</button>`;
+            dom.notificationArea.appendChild(notificationDiv);
+
+            setTimeout(() => notificationDiv.classList.add('show'), 10); // Trigger transition
+            setTimeout(() => removeNotification(notificationId), duration);
+        }
+
+        window.removeNotification = (id) => {
+            const notification = document.getElementById(id);
+            if (notification) {
+                notification.classList.remove('show');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }
+        };
+
+        // Calls the Gemini API to get a response
+        const callGeminiAPI = async (promptText) => {
+            showLoading();
+            hideError();
+
+            if (!geminiApiKey) {
+                addNotification("Chave API Gemini não configurada. Por favor, insira sua chave em 'Chaves API'.", "error");
+                hideLoading();
+                return;
+            }
+
+            // Define the system instruction (CapyCLT persona)
+            const systemInstructionText = `Você é a CapyCLT, uma especialista em legislação trabalhista brasileira. Sua função é responder a perguntas sobre a CLT de forma clara, objetiva, precisa e em português do Brasil. Adote um tone formal e profissional, mas seja empática e compreensiva. Use um humor rápido e sagaz ocasionalmente, quando apropriado, para descontrair temas complexos, como "Essa questão é mais intrincada que um nó de marinheiro, mas a gente desvenda!" ou "Ah, a CLT e suas nuances! Vamos desbravar isso juntos.". Priorize a clareza e a simplicidade, evitando jargões jurídicos excessivos. Se uma pergunta for muito específica, exigir aconselhamento legal ou envolver interpretação de casos concretos, você deve indicar que é apenas um assistente de IA e que a consulta a um advogado ou profissional do direito é indispensável. Nunca forneça conselhos jurídicos diretos ou personalizados. Mantenha as respostas concisas e focadas no tópico da CLT.`;
+
+            // Prepare the conversation history for the API call.
+            let apiChatHistory = [];
+
+            // Prepend the system instruction to the very first user message.
+            if (chatHistory.length === 0) {
+                apiChatHistory.push({ role: "user", parts: [{ text: systemInstructionText + "\n\n" + promptText }] });
+            } else {
+                // Reconstruct the history with user/model roles for the API.
+                apiChatHistory = chatHistory.map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.message }]
+                }));
+                // Add the current user's prompt to the API history
+                apiChatHistory.push({ role: "user", parts: [{ text: promptText }] });
+            }
+
+            const payload = {
+                contents: apiChatHistory,
+                generationConfig: {
+                    temperature: 0.7,
+                    topP: 0.95,
+                    topK: 40,
+                },
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("API Response:", result);
+
+                if (!response.ok) {
+                    let msg = `Erro ${response.status}: ${result?.error?.message || response.statusText}`;
+                    if (response.status === 400 && msg.toLowerCase().includes("api key not valid")) msg = "Erro: API Key Gemini inválida ou mal formatada.";
+                    else if (response.status === 403) msg = "Erro 403: Acesso negado. Verifique sua API Key e configurações.";
+                    throw new Error(msg);
+                }
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    displayMessage(text, 'model');
+                } else {
+                    showError("Não consegui gerar uma resposta. Por favor, tente reformular sua pergunta.");
+                    console.error("Estrutura de resposta inesperada da API:", result);
+                    addNotification("Resposta da IA vazia ou em formato inesperado.", "error");
+                }
+            } catch (error) {
+                console.error("Erro ao chamar a API Gemini:", error);
+                showError("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.");
+                addNotification(`Erro na API: ${error.message}`, "error");
+            } finally {
+                hideLoading();
+            }
+        };
+
+        // Sends the user's message
+        const sendMessage = async () => {
+            const prompt = dom.userInput.value.trim();
+            if (prompt) {
+                displayMessage(prompt, 'user');
+                dom.userInput.value = '';
+                await callGeminiAPI(prompt);
+            }
+        };
+
+        // Handles document file upload and extraction
+        const handleDocumentUpload = async () => {
+            const file = dom.fileUpload.files[0];
+            if (!file) {
+                showError("Por favor, selecione um arquivo para analisar.");
+                addNotification("Selecione um arquivo para analisar.", "warning");
+                return;
+            }
+
+            hideError();
+            showLoading();
+
+            console.log("Iniciando upload de documento.");
+            console.log("Nome do arquivo:", file.name);
+            console.log("Tipo de arquivo (MIME Type):", file.type);
+            console.log("Tamanho do arquivo:", file.size, "bytes");
+
+
+            let fileContent = '';
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    // Check file extension first, then MIME type
+                    const fileNameLower = file.name.toLowerCase();
+
+                    if (fileNameLower.endsWith('.pdf')) {
+                        console.log("Detectado arquivo PDF pela extensão. Tentando carregar como ArrayBuffer...");
+                        const pdfData = new Uint8Array(e.target.result);
+                        const pdfDoc = await getDocument({ data: pdfData }).promise;
+                        console.log("PDF carregado. Número de páginas:", pdfDoc.numPages);
+                        let fullText = '';
+                        for (let i = 1; i <= pdfDoc.numPages; i++) {
+                            const page = await pdfDoc.getPage(i);
+                            const textContent = await page.getTextContent();
+                            fullText += textContent.items.map(item => item.str).join(' ') + '\n';
+                        }
+                        fileContent = fullText;
+                        console.log("Texto extraído do PDF (primeiros 500 caracteres):", fileContent.substring(0, 500));
+                        if (fileContent.length === 0) {
+                            console.warn("PDF lido, mas nenhum texto foi extraído. Pode ser um PDF baseado em imagem.");
+                            addNotification("O PDF foi lido, mas nenhum texto foi extraído. Parece ser um PDF de imagem. Por favor, tente copiar o texto manualmente.", "warning");
+                            showError("Nenhum texto extraído do PDF. Pode ser um PDF de imagem.");
+                            hideLoading();
+                            return;
+                        }
+
+                    } else if (fileNameLower.endsWith('.txt')) {
+                        console.log("Detectado arquivo TXT pela extensão. Lendo texto...");
+                        fileContent = e.target.result;
+                        console.log("Texto lido do TXT (primeiros 500 caracteres):", fileContent.substring(0, 500));
+                    } else if (fileNameLower.endsWith('.docx')) {
+                        showError("Análise de arquivos .docx não é diretamente suportada pelo navegador. Por favor, copie o texto e cole-o, ou converta para PDF/TXT.");
+                        addNotification("Arquivos DOCX não suportados para análise direta. Cole o texto ou converta.", "warning");
+                        hideLoading();
+                        return;
+                    } else {
+                        // Fallback for unexpected MIME types not covered by common extensions
+                        showError(`Formato de arquivo "${file.type}" não suportado. Por favor, use PDF ou TXT.`);
+                        addNotification(`Formato de arquivo "${file.type}" não suportado. Use PDF ou TXT.`, "warning");
+                        hideLoading();
+                        return;
+                    }
+
+                    if (fileContent) {
+                        const analysisPrompt = `Analise o seguinte documento relacionado à CLT brasileira e extraia as informações mais relevantes, como tipo de contrato, jornada de trabalho, salário, férias, rescisão, etc. Se houver alguma inconformidade ou ponto de atenção, destaque-o. Forneça uma análise clara e concisa:\n\n${fileContent.substring(0, 5000)}`; // Limit content length for API
+                        displayMessage(`Analisando o documento: ${file.name}...`, 'user');
+                        await callGeminiAPI(analysisPrompt);
+                    } else {
+                        showError("Não foi possível extrair conteúdo do arquivo ou o arquivo está vazio.");
+                        addNotification("Não foi possível extrair conteúdo do arquivo ou o arquivo está vazio.", "error");
+                    }
+                } catch (error) {
+                    console.error("Erro no processamento do arquivo:", error);
+                    showError(`Erro ao analisar o arquivo: ${error.message}. Certifique-se de que é um PDF ou TXT válido.`);
+                    addNotification(`Erro ao analisar o arquivo: ${error.message}`, "error");
+                } finally {
+                    hideLoading();
+                }
+            };
+
+            reader.onerror = (error) => {
+                console.error("Erro na leitura do arquivo pelo FileReader:", error);
+                showError("Erro na leitura do arquivo. O arquivo pode estar corrompido ou o navegador não conseguiu lê-lo.");
+                addNotification("Erro na leitura do arquivo. Tente novamente.", "error");
+                hideLoading();
+            };
+
+            // Determine how to read the file based on its perceived type/extension
+            const fileNameLower = file.name.toLowerCase();
+            if (fileNameLower.endsWith('.pdf')) {
+                reader.readAsArrayBuffer(file); // PDFs need to be read as ArrayBuffer
+            } else if (fileNameLower.endsWith('.txt')) {
+                reader.readAsText(file); // TXT files are read as text
+            } else {
+                // For other types, try to read as text by default, but it will be caught by the file extension/type check in onload
+                reader.readAsText(file);
+            }
+        };
+
+        // Function to summarize the text from user input
+        const summarizeArticle = async () => {
+            const textToSummarize = dom.userInput.value.trim();
+            if (!textToSummarize) {
+                showError("Por favor, digite ou cole o texto que deseja resumir.");
+                addNotification("Digite o texto para resumir.", "warning");
+                return;
+            }
+            displayMessage('Por favor, CapyCLT, faça um resumo dos pontos chave da CLT no texto abaixo, focado na legislação e suas implicações:\n\n' + textToSummarize, 'user');
+            dom.userInput.value = '';
+            const prompt = `Por favor, CapyCLT, faça um resumo dos pontos chave da CLT no texto abaixo, focado na legislação e suas implicações:\n\n${textToSummarize}`;
+            await callGeminiAPI(prompt);
+        };
+
+        // Function to generate a CLT scenario
+        const generateScenario = async () => {
+            const scenarioDescription = dom.userInput.value.trim();
+            if (!scenarioDescription) {
+                showError("Por favor, digite uma breve descrição para o cenário da CLT que deseja gerar.");
+                addNotification("Descreva o cenário da CLT que deseja gerar.", "warning");
+                return;
+            }
+            displayMessage('Crie um cenário prático da CLT sobre: ' + scenarioDescription, 'user');
+            dom.userInput.value = '';
+            const prompt = `Crie um cenário prático e realista da CLT, com foco em direitos e deveres de empregador e empregado, baseado na seguinte descrição: "${scenarioDescription}". Inclua elementos como tipo de contrato, jornada, e possíveis situações de conflito ou conformidade.`;
+            await callGeminiAPI(prompt);
+        };
+
+
+        
+
+
+
+        const exportChatToPdf = () => {
+            const chatElement = document.getElementById("chat-messages");
+
+            if (!chatElement || chatElement.innerText.trim() === "") {
+                addNotification("Nada para exportar!", "warning");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+            pdf.setFont("Helvetica", "normal");
+            pdf.setFontSize(12);
+            pdf.text("CapyCLT - Conversa", 10, 10);
+            let y = 10; // Start position for text
+            const lines = chatElement.innerText.split("\n");
+            lines.forEach((line) => {
+                if (y + 10 > pdf.internal.pageSize.height) {
+                    pdf.addPage();
+                    y = 10; // Reset y position for new page
+                }
+                pdf.text(line, 10, y);
+                y += 10; // Move down for next line
+
+            });
+
+
+                pdf.save("CapyCLT-conversa.pdf");
+                addNotification("PDF exportado com sucesso!", "success");
+
+
+            };
+
+
+
+            // Sidebar rendering logic (from CapyContrato, adapted)
+
+            async function renderSidebar() {
+                if (!dom.sidebar) return;
+                try {
+                    // Fetch tools.json from the root of the serving directory
+                    const response = await fetch('tools.json');
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const toolsData = await response.json();
+
+                    const categories = {};
+                    toolsData.forEach(tool => {
+                        if (!categories[tool.category]) categories[tool.category] = [];
+                        categories[tool.category].push(tool);
+                    });
+                    dom.sidebar.innerHTML = '';
+
+                    const homeLinkSidebar = document.createElement('a');
+                    homeLinkSidebar.href = 'index.html';
+                    homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+                    homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                    dom.sidebar.appendChild(homeLinkSidebar);
+
+                    for (const categoryName in categories) {
+                        const categoryDiv = document.createElement('div');
+                        categoryDiv.className = 'mb-1';
+                        const categoryButton = document.createElement('button');
+                        categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150 bg-transparent shadow-none';
+                        categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                        const categoryContent = document.createElement('div');
+                        categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+                        categories[categoryName].forEach(tool => {
+                            const link = document.createElement('a');
+                            link.href = tool.pageUrl;
+                            const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                            link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                            categoryContent.appendChild(link);
+                        });
+
+                        categoryButton.addEventListener('click', () => {
+                            categoryContent.classList.toggle('expanded');
+                            categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                        });
+
+                        if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                            categoryContent.classList.add('expanded');
+                            categoryButton.querySelector('svg').classList.add('rotate-180');
+                        }
+
+                        categoryDiv.appendChild(categoryButton);
+                        categoryDiv.appendChild(categoryContent);
+                        dom.sidebar.appendChild(categoryDiv);
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                    if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+                }
+            }
+
+            // API Key loading/saving
+            function loadApiKey() {
+                const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+                if (savedKey) {
+                    geminiApiKey = savedKey;
+                    if (dom.geminiApiKeyInputModal) dom.geminiApiKeyInputModal.value = savedKey;
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                renderSidebar();
+                loadApiKey();
+
+                // Event Listeners for CapyCLT functionality
+                dom.sendButton.addEventListener('click', sendMessage);
+                dom.userInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+                dom.analyzeDocumentButton.addEventListener('click', handleDocumentUpload);
+                dom.summarizeArticleButton.addEventListener('click', summarizeArticle);
+                dom.generateScenarioButton.addEventListener('click', generateScenario);
+              //  dom.exportPdfButton.addEventListener('click', exportChatToPdf); // New event listener
+
+                // Event Listeners for Sidebar and API Key Modal
+                if (dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay) {
+                    dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+                    if (dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+                }
+                if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+                if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+                if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInputModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+                    const key = dom.geminiApiKeyInputModal.value.trim();
+                    if (key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); geminiApiKey = key; addNotification("Chave API do Gemini salva!", "success"); dom.apiKeysModal.classList.add('hidden'); }
+                    else { addNotification("Por favor, insira uma chave API.", "warning"); }
+                });
+            });
+    </script>
+</body>
+
+</html>
