@@ -6,8 +6,18 @@
     "imageUrl": "img/capyaudiencias.webp",
     "description": "Analise e resuma atas de audiência com precisão jurídica de IA.",
     "category": "Jurídico",
-    "pageUrl": "capyaudiencias.html",
+    "pageUrl": "CapyAudiencias.html",
     "color": "indigo-400"
+  },
+  {
+    "id": "CapyBula",
+    "title": "Bulário Inteligente",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-blue-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"></rect><path d=\"M16 2v4\"></path><path d=\"M8 2v4\"></path><path d=\"M3 11h18\"></path><path d=\"M10 16h4\"></path></svg>",
+    "imageUrl": "img/capybulario.webp",
+    "description": "Consulte informações detalhadas sobre medicamentos de forma rápida e segura.",
+    "category": "Saúde e Bem-Estar",
+    "pageUrl": "CapyBula.html",
+    "color": "blue-400"
   },
   {
     "id": "CapyByte",
@@ -36,8 +46,18 @@
     "imageUrl": "img/capychat.webp",
     "description": "Converse com uma IA sobre qualquer tópico que desejar.",
     "category": "Chatbots Especializados",
-    "pageUrl": "capychat.html",
+    "pageUrl": "CapyChat.html",
     "color": "violet-400"
+  },
+  {
+    "id": "CapyConciliaFacil",
+    "title": "Conciliador de Acordos",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-indigo-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2a10 10 0 0 0-7.07 17.07l-.61 2.45 2.45-.61A10 10 0 1 0 12 2Z\"></path><path d=\"m15.5 7.5-5 5\"></path><path d=\"m15.5 12.5-5-5\"></path></svg>",
+    "imageUrl": "img/capyconcilia.webp",
+    "description": "Receba sugestões de acordo geradas por IA para resolver disputas de forma amigável.",
+    "category": "Jurídico",
+    "pageUrl": "CapyConciliaFacil.html",
+    "color": "indigo-400"
   },
   {
     "id": "CapyContrato",
@@ -50,23 +70,33 @@
     "color": "violet-400"
   },
   {
-    "id": "CapyCopy",
+    "id": "CapyCopywriterAds",
     "title": "Gerador de Copy para Anúncios",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-pink-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 8L3 12l4 4\"/><path d=\"M21 8l-4 4 4 4\"/><path d=\"M14 4l-4 16\"/></svg>",
-    "imageUrl": "img/capycopy.webp",
+    "imageUrl": "img/capycopywriterads.webp",
     "description": "Gere textos de anúncio que vendem, com a lábia de uma capivara publicitária.",
     "category": "Mídia & Marketing",
-    "pageUrl": "capycopy.html",
+    "pageUrl": "CapyCopywriterAds.html",
+    "color": "pink-400"
+  },
+{
+    "id": "CapyCLT",
+    "title": "CapyCLT",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-pink-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 8L3 12l4 4\"/><path d=\"M21 8l-4 4 4 4\"/><path d=\"M14 4l-4 16\"/></svg>",
+    "imageUrl": "img/capycopywriterads.webp",
+    "description": "Converse com as leis trabalhistas.",
+    "category": "Jurídico",
+    "pageUrl": "capyclt.html",
     "color": "pink-400"
   },
   {
-    "id": "CapyCronos",
+    "id": "CapyCronosLegal",
     "title": "Gerenciador de Prazos Jurídicos",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-amber-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
-    "imageUrl": "img/capycronos.webp",
+    "imageUrl": "img/capycronoslegal.webp",
     "description": "Automatize a identificação e o gerenciamento de prazos em documentos jurídicos.",
     "category": "Jurídico",
-    "pageUrl": "capycronos.html",
+    "pageUrl": "CapyCronosLegal.html",
     "color": "amber-400"
   },
   {
@@ -86,7 +116,7 @@
     "imageUrl": "img/capydados.webp",
     "description": "Obtenha insights e análises a partir dos seus conjuntos de dados.",
     "category": "Análise de Dados",
-    "pageUrl": "capydados.html",
+    "pageUrl": "CapyDados.html",
     "color": "blue-400"
   },
   {
@@ -186,8 +216,18 @@
     "imageUrl": "img/capyfiscal.webp",
     "description": "Tire dúvidas e obtenha informações sobre questões fiscais e tributárias.",
     "category": "Finanças e Negócios",
-    "pageUrl": "capyfiscal.html",
+    "pageUrl": "CapyFiscal.html",
     "color": "green-400"
+  },
+  {
+    "id": "CapyFix",
+    "title": "Corretor de Código",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-cyan-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.7-3.7a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L14.7 6.3z\"/><path d=\"M9.6 11.7a1 1 0 0 0-1.4 0l-1.6 1.6a1 1 0 0 0 0 1.4l3.7 3.7a1 1 0 0 0 1.4 0l1.6-1.6a1 1 0 0 0 0-1.4L9.6 11.7z\"/></svg>",
+    "imageUrl": "img/capyfix.png",
+    "description": "Descreva seu problema, cole seu código e deixe a IA encontrar a solução e a correção.",
+    "category": "Desenvolvimento e TI",
+    "pageUrl": "CapyFix.html",
+    "color": "cyan-400"
   },
   {
     "id": "CapyFlashcards",
@@ -216,7 +256,7 @@
     "imageUrl": "img/capygrana.webp",
     "description": "O seu consultor financeiro pessoal com a sabedoria de uma capivara próspera!",
     "category": "Finanças e Negócios",
-    "pageUrl": "#",
+    "pageUrl": "CapyGrana.html",
     "color": "green-400"
   },
   {
@@ -234,7 +274,7 @@
     "title": "IDE com IA",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline></svg>",
     "imageUrl": "img/capyide.webp",
-    "description": "Ambiente de desenvolvimento generativo de WebSites e WebApps integrado com assistência de IA.",
+    "description": "Ambiente de desenvolvimento integrado com assistência de IA.",
     "category": "Desenvolvimento e TI",
     "pageUrl": "capyide.html",
     "color": "purple-400"
@@ -246,7 +286,7 @@
     "imageUrl": "img/capymarkdown.webp",
     "description": "Formate os seus textos com Markdown de forma simples e eficiente.",
     "category": "Criação de Conteúdo",
-    "pageUrl": "capymarkdown.html",
+    "pageUrl": "CapyMarkdown.html",
     "color": "pink-400"
   },
   {
@@ -363,11 +403,21 @@
     "id": "CapySimulador",
     "title": "Simulador Estrutural",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-sky-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3\"/><path d=\"M3 8V5a2 2 0 0 1 2-2h3\"/><path d=\"M21 8v3\"/><path d=\"M3 16v-3\"/></svg>",
-    "imageUrl": "img/capyengenheiro.webp",
+    "imageUrl": "img/capysimulador.webp",
     "description": "Simule o comportamento de vigas, pilares e lajes de forma simplificada.",
     "category": "Engenharia & Arquitetura",
-    "pageUrl": "capysimulador.html",
+    "pageUrl": "CapySimulador.html",
     "color": "sky-400"
+  },
+  {
+    "id": "CapySimuladorSolar",
+    "title": "Simulador Solar",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-amber-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2\"></path><path d=\"M12 20v2\"></path><path d=\"m4.93 4.93 1.41 1.41\"></path><path d=\"m17.66 17.66 1.41 1.41\"></path><path d=\"M2 12h2\"></path><path d=\"M20 12h2\"></path><path d=\"m6.34 17.66-1.41 1.41\"></path><path d=\"m19.07 4.93-1.41 1.41\"></path></svg>",
+    "imageUrl": "img/capysimuladorsolar.webp",
+    "description": "Estime o potencial de geração de energia solar para qualquer localização.",
+    "category": "Engenharia & Arquitetura",
+    "pageUrl": "CapySimuladorSolar.html",
+    "color": "amber-400"
   },
   {
     "id": "CapySolucao",
@@ -405,7 +455,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-indigo-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M12 1v2m0 18v-2M4.22 4.22l1.42 1.42m12.8 12.8l-1.42-1.42M1 12h2m18 0h-2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42\"/></svg>",
     "imageUrl": "img/capyti.webp",
     "description": "Seu suporte técnico de plantão. Descreva problemas de software, hardware ou redes e receba diagnósticos e soluções passo a passo.",
-    "category": "Desenvolvimento e TI",
+    "category": "Suporte Técnico",
     "pageUrl": "capyti.html",
     "color": "indigo"
   },
