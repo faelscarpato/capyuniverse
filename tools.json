@@ -16,7 +16,7 @@
     "imageUrl": "img/capybulario.webp",
     "description": "Consulte informações detalhadas sobre medicamentos de forma rápida e segura.",
     "category": "Saúde e Bem-Estar",
-    "pageUrl": "CapyBula.html",
+    "pageUrl": "capybula.html",
     "color": "blue-400"
   },
   {
@@ -56,7 +56,7 @@
     "imageUrl": "img/capyconcilia.webp",
     "description": "Receba sugestões de acordo geradas por IA para resolver disputas de forma amigável.",
     "category": "Jurídico",
-    "pageUrl": "CapyConciliaFacil.html",
+    "pageUrl": "capyconciliador.html",
     "color": "indigo-400"
   },
   {
@@ -76,7 +76,7 @@
     "imageUrl": "img/capycopywriterads.webp",
     "description": "Gere textos de anúncio que vendem, com a lábia de uma capivara publicitária.",
     "category": "Mídia & Marketing",
-    "pageUrl": "CapyCopywriterAds.html",
+    "pageUrl": "capycopy.html",
     "color": "pink-400"
   },
 {
@@ -96,7 +96,7 @@
     "imageUrl": "img/capycronoslegal.webp",
     "description": "Automatize a identificação e o gerenciamento de prazos em documentos jurídicos.",
     "category": "Jurídico",
-    "pageUrl": "CapyCronosLegal.html",
+    "pageUrl": "capycronos.html",
     "color": "amber-400"
   },
   {
@@ -116,7 +116,7 @@
     "imageUrl": "img/capydados.webp",
     "description": "Obtenha insights e análises a partir dos seus conjuntos de dados.",
     "category": "Análise de Dados",
-    "pageUrl": "CapyDados.html",
+    "pageUrl": "capydados.html",
     "color": "blue-400"
   },
   {
@@ -216,7 +216,7 @@
     "imageUrl": "img/capyfiscal.webp",
     "description": "Tire dúvidas e obtenha informações sobre questões fiscais e tributárias.",
     "category": "Finanças e Negócios",
-    "pageUrl": "CapyFiscal.html",
+    "pageUrl": "capyfiscal.html",
     "color": "green-400"
   },
   {
@@ -226,7 +226,7 @@
     "imageUrl": "img/capyfix.png",
     "description": "Descreva seu problema, cole seu código e deixe a IA encontrar a solução e a correção.",
     "category": "Desenvolvimento e TI",
-    "pageUrl": "CapyFix.html",
+    "pageUrl": "capyfix.html",
     "color": "cyan-400"
   },
   {
@@ -256,7 +256,7 @@
     "imageUrl": "img/capygrana.webp",
     "description": "O seu consultor financeiro pessoal com a sabedoria de uma capivara próspera!",
     "category": "Finanças e Negócios",
-    "pageUrl": "CapyGrana.html",
+    "pageUrl": "capygrana.html",
     "color": "green-400"
   },
   {
@@ -286,7 +286,7 @@
     "imageUrl": "img/capymarkdown.webp",
     "description": "Formate os seus textos com Markdown de forma simples e eficiente.",
     "category": "Criação de Conteúdo",
-    "pageUrl": "CapyMarkdown.html",
+    "pageUrl": "capymarkdown.html",
     "color": "pink-400"
   },
   {
@@ -406,7 +406,7 @@
     "imageUrl": "img/capysimulador.webp",
     "description": "Simule o comportamento de vigas, pilares e lajes de forma simplificada.",
     "category": "Engenharia & Arquitetura",
-    "pageUrl": "CapySimulador.html",
+    "pageUrl": "capysimulador.html",
     "color": "sky-400"
   },
   {
@@ -416,7 +416,7 @@
     "imageUrl": "img/capysimuladorsolar.webp",
     "description": "Estime o potencial de geração de energia solar para qualquer localização.",
     "category": "Engenharia & Arquitetura",
-    "pageUrl": "CapySimuladorSolar.html",
+    "pageUrl": "capysolar.html",
     "color": "amber-400"
   },
   {
