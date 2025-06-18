@@ -182,248 +182,249 @@
     </div>
 
     <script>
-        const currentPageId = 'CapyDoc';
-        let apiKey = '';
-        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+       const currentPageId = 'CapyDoc';
+let apiKey = '';
+const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
 
-        const dom = {
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            apiKeysModal: document.getElementById('apiKeysModal'),
-            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
-            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
-            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
-            
-            docTextInput: document.getElementById('document-text-input'),
-            analysisTypeSelect: document.getElementById('analysis-type'),
-            questionInputGroup: document.getElementById('question-input-group'),
-            userQuestionInput: document.getElementById('user-question'),
-            analyzeDocButton: document.getElementById('analyze-document-button'),
-            
-            outputSection: document.getElementById('output-section'),
-            docOutput: document.getElementById('document-output'),
-            copyOutputButton: document.getElementById('copy-output-button')
-        };
+const dom = {
+    sidebar: document.getElementById('sidebar'),
+    sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+    sidebarOverlay: document.getElementById('sidebarOverlay'),
+    apiKeysModal: document.getElementById('apiKeysModal'),
+    openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+    closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+    geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+    saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+    
+    docTextInput: document.getElementById('document-text-input'),
+    analysisTypeSelect: document.getElementById('analysis-type'),
+    questionInputGroup: document.getElementById('question-input-group'),
+    userQuestionInput: document.getElementById('user-question'),
+    analyzeDocButton: document.getElementById('analyze-document-button'),
+    
+    outputSection: document.getElementById('output-section'),
+    docOutput: document.getElementById('document-output'),
+    copyOutputButton: document.getElementById('copy-output-button')
+};
 
-        const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
-        
-        function toggleLoading(isLoading) {
-            const btnText = dom.analyzeDocButton.querySelector('.btn-text');
-            const loader = dom.analyzeDocButton.querySelector('.loader');
-            dom.analyzeDocButton.disabled = isLoading;
-            if(isLoading) {
-                btnText.classList.add('hidden');
-                loader.classList.remove('hidden');
-            } else {
-                btnText.classList.remove('hidden');
-                loader.classList.add('hidden');
-            }
-        }
-        
-        function basicMarkdownToHtml(md) {
-            let html = md;
-            html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
-            html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
-            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-            html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
-            html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
-            if (html.includes('<li>')) {
-                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
-            }
-            html = html.split(/\n\s*\n/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
-            html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
-            return html;
-        }
-        
-        dom.analysisTypeSelect.addEventListener('change', function() {
-            if (this.value === 'ask_specific_question') {
-                dom.questionInputGroup.classList.remove('hidden');
-            } else {
-                dom.questionInputGroup.classList.add('hidden');
-            }
+const tools = [ /* Cole a sua lista completa de ferramentas aqui */ ];
+
+function toggleLoading(isLoading) {
+    const btnText = dom.analyzeDocButton.querySelector('.btn-text');
+    const loader = dom.analyzeDocButton.querySelector('.loader');
+    dom.analyzeDocButton.disabled = isLoading;
+    if(isLoading) {
+        btnText.classList.add('hidden');
+        loader.classList.remove('hidden');
+    } else {
+        btnText.classList.remove('hidden');
+        loader.classList.add('hidden');
+    }
+}
+
+function basicMarkdownToHtml(md) {
+    let html = md;
+    html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
+    html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+    html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+    html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+    html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+    if (html.includes('<li>')) {
+        html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
+    }
+    html = html.split(/\n\s*\n/).map(p => p.trim() ? `<p>${p.replace(/\n/g, '<br>')}</p>` : '').join('');
+    html = html.replace(/<li><br>/g, '<li>').replace(/<br><\/li>/g, '</li>');
+    return html;
+}
+
+dom.analysisTypeSelect.addEventListener('change', function() {
+    if (this.value === 'ask_specific_question') {
+        dom.questionInputGroup.classList.remove('hidden');
+    } else {
+        dom.questionInputGroup.classList.add('hidden');
+    }
+});
+// Trigger change on load to set initial visibility
+dom.analysisTypeSelect.dispatchEvent(new Event('change'));
+
+
+async function handleAnalyzeDocument() {
+    if (!apiKey) {
+        alert("Por favor, configure a sua chave API do Gemini primeiro.");
+        if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
+        return;
+    }
+
+    const docText = dom.docTextInput.value.trim();
+    const action = dom.analysisTypeSelect.value;
+    const userQuestion = dom.userQuestionInput.value.trim();
+
+    if (!docText) {
+        alert("Por favor, cole o conteúdo do documento para análise.");
+        return;
+    }
+    if (action === 'ask_specific_question' && !userQuestion) {
+        alert("Por favor, insira a sua pergunta sobre o documento.");
+        return;
+    }
+
+    toggleLoading(true);
+    dom.outputSection.classList.add('hidden');
+    dom.docOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-IA está a analisar o teu documento...</p>';
+
+    let prompt = `Aja como CapyDoc, um assistente inteligente para análise de documentos. O utilizador forneceu o seguinte texto extraído de um documento:\n\n"""${docText}"""\n\n`;
+
+    switch(action) {
+        case 'summarize_main_points':
+            prompt += "Por favor, gere um resumo conciso dos pontos principais deste texto.";
+            break;
+        case 'extract_action_items':
+            prompt += "Por favor, extraia quaisquer itens de ação, tarefas ou próximos passos mencionados neste texto. Se não houver, indique isso.";
+            break;
+        case 'identify_document_type':
+            prompt += "Por favor, tente identificar o tipo deste documento (ex: contrato, relatório, artigo científico, e-mail formal, etc.) e justifique brevemente.";
+            break;
+        case 'ask_specific_question':
+            prompt += `Com base no texto fornecido, responda à seguinte pergunta: "${userQuestion}"`;
+            break;
+        case 'list_key_arguments':
+            prompt += "Por favor, liste os principais argumentos ou teses apresentadas no texto.";
+            break;
+    }
+    prompt += "\nResponda de forma clara e bem estruturada, usando Markdown simples para formatação, se apropriado.";
+    
+    try {
+        // Corrigido: Alterado o modelo para 'gemini-1.0-pro' (ou outro modelo válido)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-        // Trigger change on load to set initial visibility
-        dom.analysisTypeSelect.dispatchEvent(new Event('change'));
 
-
-        async function handleAnalyzeDocument() {
-            if (!apiKey) {
-                alert("Por favor, configure a sua chave API do Gemini primeiro.");
-                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
-                return;
-            }
-
-            const docText = dom.docTextInput.value.trim();
-            const action = dom.analysisTypeSelect.value;
-            const userQuestion = dom.userQuestionInput.value.trim();
-
-            if (!docText) {
-                alert("Por favor, cole o conteúdo do documento para análise.");
-                return;
-            }
-            if (action === 'ask_specific_question' && !userQuestion) {
-                alert("Por favor, insira a sua pergunta sobre o documento.");
-                return;
-            }
-
-            toggleLoading(true);
-            dom.outputSection.classList.add('hidden');
-            dom.docOutput.innerHTML = '<p class="text-center text-zinc-400">A Capy-IA está a analisar o teu documento...</p>';
-
-            let prompt = `Aja como CapyDoc, um assistente inteligente para análise de documentos. O utilizador forneceu o seguinte texto extraído de um documento:\n\n"""${docText}"""\n\n`;
-
-            switch(action) {
-                case 'summarize_main_points':
-                    prompt += "Por favor, gere um resumo conciso dos pontos principais deste texto.";
-                    break;
-                case 'extract_action_items':
-                    prompt += "Por favor, extraia quaisquer itens de ação, tarefas ou próximos passos mencionados neste texto. Se não houver, indique isso.";
-                    break;
-                case 'identify_document_type':
-                    prompt += "Por favor, tente identificar o tipo deste documento (ex: contrato, relatório, artigo científico, e-mail formal, etc.) e justifique brevemente.";
-                    break;
-                case 'ask_specific_question':
-                    prompt += `Com base no texto fornecido, responda à seguinte pergunta: "${userQuestion}"`;
-                    break;
-                case 'list_key_arguments':
-                    prompt += "Por favor, liste os principais argumentos ou teses apresentadas no texto.";
-                    break;
-            }
-            prompt += "\nResponda de forma clara e bem estruturada, usando Markdown simples para formatação, se apropriado.";
-            
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-
-                if (!response.ok) {
-                    const errorBody = await response.text();
-                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
-                }
-                
-                const data = await response.json();
-                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-                    const resultText = data.candidates[0].content.parts[0].text.trim();
-                    dom.docOutput.innerHTML = basicMarkdownToHtml(resultText);
-                    dom.copyOutputButton.classList.remove('hidden');
-                } else {
-                    throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
-                }
-
-            } catch (error) {
-                console.error("Erro ao analisar documento:", error);
-                dom.docOutput.innerHTML = `<p class="text-center text-red-400">Erro ao analisar: ${error.message}</p>`;
-            } finally {
-                dom.outputSection.classList.remove('hidden');
-                toggleLoading(false);
-            }
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Erro na API: ${response.status} - ${response.statusText}. Detalhes: ${errorBody}`);
         }
         
-        async function renderSidebar() {
-            if (!dom.sidebar) return;
-            try {
-                const response = await fetch('tools.json'); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const toolsData = await response.json();
-                
-                const categories = {};
-                toolsData.forEach(tool => {
-                    if (!categories[tool.category]) categories[tool.category] = [];
-                    categories[tool.category].push(tool);
-                });
-                dom.sidebar.innerHTML = ''; 
-                
-                const homeLinkSidebar = document.createElement('a');
-                homeLinkSidebar.href = 'index.html';
-                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-                dom.sidebar.appendChild(homeLinkSidebar);
-
-                for (const categoryName in categories) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'mb-1';
-                    const categoryButton = document.createElement('button');
-                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                    const categoryContent = document.createElement('div');
-                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-                    
-                    categories[categoryName].forEach(tool => {
-                        const link = document.createElement('a');
-                        link.href = tool.pageUrl;
-                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-                        categoryContent.appendChild(link);
-                    });
-
-                    categoryButton.addEventListener('click', () => {
-                        categoryContent.classList.toggle('expanded');
-                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                    });
-                    
-                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                        categoryContent.classList.add('expanded');
-                        categoryButton.querySelector('svg').classList.add('rotate-180');
-                    }
-
-                    categoryDiv.appendChild(categoryButton);
-                    categoryDiv.appendChild(categoryContent);
-                    dom.sidebar.appendChild(categoryDiv);
-                }
-            } catch (error) {
-                console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
-            }
+        const data = await response.json();
+        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+            const resultText = data.candidates[0].content.parts[0].text.trim();
+            dom.docOutput.innerHTML = basicMarkdownToHtml(resultText);
+            dom.copyOutputButton.classList.remove('hidden');
+        } else {
+            throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
         }
 
-        function loadApiKey() {
-            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) { 
-                apiKey = savedKey; 
-                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
-            }
-        }
+    } catch (error) {
+        console.error("Erro ao analisar documento:", error);
+        dom.docOutput.innerHTML = `<p class="text-center text-red-400">Erro ao analisar: ${error.message}</p>`;
+    } finally {
+        dom.outputSection.classList.remove('hidden');
+        toggleLoading(false);
+    }
+}
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); // Corrigido para chamar a função correta
-            loadApiKey();
+async function renderSidebar() {
+    if (!dom.sidebar) return;
+    try {
+        const response = await fetch('tools.json'); 
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const toolsData = await response.json();
+        
+        const categories = {};
+        toolsData.forEach(tool => {
+            if (!categories[tool.category]) categories[tool.category] = [];
+            categories[tool.category].push(tool);
+        });
+        dom.sidebar.innerHTML = ''; 
+        
+        const homeLinkSidebar = document.createElement('a');
+        homeLinkSidebar.href = 'index.html';
+        homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+        homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(homeLinkSidebar);
+
+        for (const categoryName in categories) {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'mb-1';
+            const categoryButton = document.createElement('button');
+            categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+            categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+            const categoryContent = document.createElement('div');
+            categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
             
-            if(dom.analyzeDocButton) dom.analyzeDocButton.addEventListener('click', handleAnalyzeDocument);
-            if(dom.copyOutputButton) dom.copyOutputButton.addEventListener('click', () => {
-                const outputHtml = dom.docOutput.innerHTML;
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = outputHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
-                const outputText = tempDiv.textContent || tempDiv.innerText || "";
-
-                if(outputText && !outputText.includes("O resultado da análise do documento aparecerá aqui...") && !outputText.includes("Erro ao analisar:")) {
-                    navigator.clipboard.writeText(outputText.trim()).then(() => {
-                        alert('Análise copiada para a área de transferência!');
-                    }).catch(err => {
-                        alert('Falha ao copiar. Tente manualmente.');
-                        console.error('Erro ao copiar: ', err);
-                    });
-                } else {
-                     alert('Não há análise válida para copiar.');
-                }
+            categories[categoryName].forEach(tool => {
+                const link = document.createElement('a');
+                link.href = tool.pageUrl;
+                const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                categoryContent.appendChild(link);
             });
 
-            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
-                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
-                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
-            }
-            if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-            if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-            if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
-                const key = dom.geminiApiKeyInput.value.trim();
-                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
-                else { alert("Por favor, insira uma chave API.");}
+            categoryButton.addEventListener('click', () => {
+                categoryContent.classList.toggle('expanded');
+                categoryButton.querySelector('svg').classList.toggle('rotate-180');
             });
-        });
+            
+            if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                categoryContent.classList.add('expanded');
+                categoryButton.querySelector('svg').classList.add('rotate-180');
+            }
+
+            categoryDiv.appendChild(categoryButton);
+            categoryDiv.appendChild(categoryContent);
+            dom.sidebar.appendChild(categoryDiv);
+        }
+    } catch (error) {
+        console.error("Erro ao carregar ferramentas para a sidebar:", error);
+        if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+    }
+}
+
+function loadApiKey() {
+    const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+    if(savedKey) { 
+        apiKey = savedKey; 
+        if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderSidebar(); // Corrigido para chamar a função correta
+    loadApiKey();
+    
+    if(dom.analyzeDocButton) dom.analyzeDocButton.addEventListener('click', handleAnalyzeDocument);
+    if(dom.copyOutputButton) dom.copyOutputButton.addEventListener('click', () => {
+        const outputHtml = dom.docOutput.innerHTML;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = outputHtml.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p><p>/gi, '\n\n').replace(/<p>|<\/p>/gi, '');
+        const outputText = tempDiv.textContent || tempDiv.innerText || "";
+
+        if(outputText && !outputText.includes("O resultado da análise do documento aparecerá aqui...") && !outputText.includes("Erro ao analisar:")) {
+            navigator.clipboard.writeText(outputText.trim()).then(() => {
+                alert('Análise copiada para a área de transferência!');
+            }).catch(err => {
+                alert('Falha ao copiar. Tente manualmente.');
+                console.error('Erro ao copiar: ', err);
+            });
+        } else {
+             alert('Não há análise válida para copiar.');
+        }
+    });
+
+    if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+        dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+        if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+    }
+    if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+    if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+    if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+        const key = dom.geminiApiKeyInput.value.trim();
+        if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+        else { alert("Por favor, insira uma chave API.");}
+    });
+});
     </script>
 </body>
 </html>
