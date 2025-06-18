@@ -294,9 +294,6 @@ const dom = {
 };
 
 // Configs
-if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-}
 let apiKeys = { gemini: '', openai: '' };
 let apiKey = '';
 const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
@@ -549,7 +546,10 @@ async function processFile(file, statusElementId, outputTextareaId, extractedTex
                 let text = '';
                 statusEl.innerHTML = '<span class="loader inline-block mr-2"></span>Extraindo texto...';
                 if (fileName.endsWith('.pdf')) {
-                    if (typeof pdfjsLib === 'undefined') throw new Error('Biblioteca PDF.js não carregada.');
+                    // Garante que pdfjsLib está carregado antes de usar
+                    if (typeof pdfjsLib === 'undefined') {
+                        throw new Error('Biblioteca PDF.js não carregada.');
+                    }
                     const typedarray = new Uint8Array(event.target.result);
                     const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
                     for (let i = 1; i <= pdf.numPages; i++) {
@@ -697,7 +697,6 @@ userInputDocChat.addEventListener('keypress', (e) => {
         sendDocChatButton.click();
     }
 });
-
     </script>
 </body>
 </html>
