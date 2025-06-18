@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR" class="dark">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CapyBranding - Criação de Identidades Visuais e Estratégias de Marca</title>
+
+    <!-- Inclui Tailwind CSS para um estilo moderno e responsivo -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes do CapyDebate -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome para ícones -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Favicon do CapyUniverse -->
+
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <!-- jsPDF para exportação de PDF -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- html2canvas para exportação de imagem -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+
+    <style>
+
+        /* Estilos globais e cores do CapyDebate */
+
+        html { background: #121217; }
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            color: #e5e7eb; /* zinc-200 */
+
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+
+            background-repeat: repeat;
+
+            background-size: 300px;
+
+            background-color: #18181b; /* zinc-900 */
+
+        }
+
+        .font-syne { font-family: 'Syne', sans-serif; }
+
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+
+
+
+        /* Estilos Glassmorphism */
+
+        .glass {
+
+            background: rgba(24, 24, 27, 0.6); /* zinc-900 com opacidade */
+
+            backdrop-filter: blur(12px);
+
+            border-radius: 1.2rem;
+
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 com opacidade */
+
+        }
+
+        .sidebar-glass {
+
+             background: rgba(39, 39, 42, 0.7); /* zinc-800 com opacidade */
+
+             backdrop-filter: blur(15px);
+
+             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
+
+        }
+
+
+
+        /* Estilos da barra de rolagem fina */
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+
+        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
+
+
+
+        /* Estilo para o spinner de carregamento */
+
+        .loader {
+
+            border: 4px solid #f3f3f3;
+
+            border-top: 4px solid #3498db;
+
+            border-radius: 50%;
+
+            width: 20px;
+
+            height: 20px;
+
+            animation: spin 1s linear infinite;
+
+            display: inline-block;
+
+            vertical-align: middle;
+
+            margin-left: 8px;
+
+        }
+
+        @keyframes spin {
+
+            0% { transform: rotate(0deg); }
+
+            100% { transform: rotate(360deg); }
+
+        }
+
+        .hidden {
+
+            display: none;
+
+        }
+
+        /* Estilo para o link da sidebar ativo */
+
+        .sidebar-link.active {
+
+            background-color: #4f46e5; /* indigo-600 */
+
+            color: white;
+
+            font-weight: 600;
+
+        }
+
+        /* Estilo para categorias da sidebar */
+
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+
+        .category-content.expanded { max-height: 1500px; } /* Ajuste conforme necessário */
+
+        /* Estilo para a visualização da paleta de cores */
+
+        .color-swatch {
+
+            display: inline-block;
+
+            width: 20px;
+
+            height: 20px;
+
+            border-radius: 4px;
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            margin-right: 8px;
+
+            vertical-align: middle;
+
+        }
+
+        .markdown-output strong, .markdown-output b { font-weight: bold; }
+
+        .markdown-output em, .markdown-output i { font-style: italic; }
+
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+
+        .markdown-output ol { list-style-type: decimal; margin-left: 1.5rem; margin-top: 0.5rem; margin-bottom: 0.5rem;}
+
+        .markdown-output li { margin-bottom: 0.25rem; }
+
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; }
+
+        .markdown-output p:last-child { margin-bottom: 0; }
+
+        .markdown-output h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #a78bfa; } /* purple-400 */
+
+        .markdown-output h4 { font-size: 1.1rem; font-weight: 600; margin-top: 0.8rem; margin-bottom: 0.4rem; color: #818cf8; } /* indigo-400 */
+
+    </style>
+
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+
+
+    <!-- Cabeçalho Principal (Similar ao CapyDebate) -->
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+
+        <div class="flex items-center">
+
+            <!-- Botão para abrir/fechar a sidebar em mobile -->
+
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+
+                <i class="fas fa-bars text-xl"></i>
+
+            </button>
+
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+
+        </div>
+
+        <div class="flex items-center">
+
+            <!-- Botões de navegação e API Keys -->
+
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+
+        </div>
+
+    </header>
+
+
+
+    <div class="flex flex-1 pt-16">
+
+        <!-- Sidebar de Navegação (Similar ao CapyDebate) -->
+
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+
+        </aside>
+
+        <!-- Overlay para fechar a sidebar em mobile -->
+
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+
+                <div class="text-center mb-8">
+
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyBranding 🎨</h1>
+
+                    <p class="text-zinc-300 mt-1">Seu assistente criativo para identidade visual e estratégias de marca!</p>
+
+                </div>
+
+
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+                    <div class="lg:col-span-1 space-y-4">
+
+                        <h2 class="text-xl font-syne text-zinc-100 mb-2">Definir Marca</h2>
+
+                        <div>
+
+                            <label for="brandSuggestion" class="block text-sm font-semibold mb-1 text-zinc-200">Sugestão de Nome (Opcional):</label>
+
+                            <input type="text" id="brandSuggestion" placeholder="Ex: CapyTech, Soluções Digitais" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500">
+
+                        </div>
+
+                        <div>
+
+                            <label for="creationStyle" class="block text-sm font-semibold mb-1 text-zinc-200">Estilo de Criação:</label>
+
+                            <select id="creationStyle" class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500">
+
+                                <option value="Moderno">Moderno</option>
+
+                                <option value="Criativo">Criativo</option>
+
+                                <option value="Profissional">Profissional</option>
+
+                                <option value="Informal">Informal</option>
+
+                                <option value="Duplo Sentido">Duplo Sentido</option>
+
+                                <option value="Luxuoso">Luxuoso</option>
+
+                                <option value="Minimalista">Minimalista</option>
+
+                                <option value="Tecnológico">Tecnológico</option>
+
+                            </select>
+
+                        </div>
+
+                        <div>
+
+                            <label for="targetAudience" class="block text-sm font-semibold mb-1 text-zinc-200">Público-alvo:</label>
+
+                            <textarea id="targetAudience" rows="3" placeholder="Ex: Jovens profissionais de tecnologia, pequenas empresas de artesanato." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500 scrollbar-thin resize-y"></textarea>
+
+                        </div>
+
+                        <div>
+
+                            <label for="companyValues" class="block text-sm font-semibold mb-1 text-zinc-200">Valores da Empresa:</label>
+
+                            <textarea id="companyValues" rows="3" placeholder="Ex: Inovação, sustentabilidade, comunidade, acessibilidade." class="w-full bg-zinc-800/70 border border-zinc-600 text-zinc-100 font-jetbrains rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-violet-500 scrollbar-thin resize-y"></textarea>
+
+                        </div>
+
+                        <button id="generateBrandingBtn" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+
+                            <span class="btn-text">Gerar Branding</span>
+
+                            <div class="loader hidden"></div>
+
+                        </button>
+
+                    </div>
+
+
+
+                    <div class="lg:col-span-1 flex flex-col">
+
+                        <h2 class="text-xl font-syne text-zinc-100 mb-2 text-center lg:text-left">Resultados da Marca</h2>
+
+                        <div id="brandingOutput" class="flex-grow bg-zinc-900/50 border border-zinc-700 rounded-lg p-4 overflow-y-auto scrollbar-thin min-h-[300px] markdown-output">
+
+                            <p class="text-zinc-400 text-center">Preencha os campos e clique em "Gerar Branding" para ver suas sugestões!</p>
+
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-4">
+
+                             <button id="saveBrandingBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 hidden">
+
+                                Salvar Sugestões
+
+                            </button>
+
+                            <button id="exportPdfBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 hidden">
+
+                                Exportar PDF
+
+                            </button>
+
+                            <button id="exportTxtBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 hidden">
+
+                                Exportar TXT
+
+                            </button>
+
+                            <button id="exportImgBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 hidden">
+
+                                Exportar Imagem
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+
+    <!-- Rodapé (Ajustado para o novo layout) -->
+
+    <footer class="w-full text-center text-gray-600 text-sm py-4">
+
+        <p>&copy; 2025 CapyBranding. Todos os direitos reservados. Um produto do CapyUniverso.</p>
+
+    </footer>
+
+
+
+    <!-- Modal para confirmação, expansão de cartão e API Keys (Unificado e estilizado) -->
+
+    <div id="customModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+
+        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+
+            <div class="flex justify-between items-center mb-4">
+
+                <h2 id="modalTitle" class="text-lg font-bold text-purple-400 font-syne"></h2>
+
+                <button id="closeCustomModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+
+            </div>
+
+            <div id="modalContent" class="mb-4 text-gray-300 text-sm"></div>
+
+            <div id="modalButtons" class="flex justify-end space-x-3"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        const currentPageId = 'CapyBranding'; // ID para destacar no menu
+
+        
+
+
+
+        const dom = {
+
+            sidebar: document.getElementById('sidebar'),
+
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+
+            customModal: document.getElementById('customModal'),
+
+            modalTitle: document.getElementById('modalTitle'),
+
+            modalContent: document.getElementById('modalContent'),
+
+            modalButtons: document.getElementById('modalButtons'),
+
+            closeCustomModalButton: document.getElementById('closeCustomModalButton'),
+
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+
+
+
+            brandSuggestionInput: document.getElementById('brandSuggestion'),
+
+            creationStyleSelect: document.getElementById('creationStyle'),
+
+            targetAudienceInput: document.getElementById('targetAudience'),
+
+            companyValuesInput: document.getElementById('companyValues'),
+
+            generateBrandingBtn: document.getElementById('generateBrandingBtn'),
+
+            brandingOutput: document.getElementById('brandingOutput'),
+
+            saveBrandingBtn: document.getElementById('saveBrandingBtn'),
+
+            exportPdfBtn: document.getElementById('exportPdfBtn'),
+
+            exportTxtBtn: document.getElementById('exportTxtBtn'),
+
+            exportImgBtn: document.getElementById('exportImgBtn')
+
+        };
+
+
+
+        const BRANDING_STORAGE_KEY = 'capyBrandingData';
+
+
+
+        // Função para carregar dados do localStorage
+
+        function loadBrandingData() {
+
+            const savedData = localStorage.getItem(BRANDING_STORAGE_KEY);
+
+            if (savedData) {
+
+                const brandingData = JSON.parse(savedData);
+
+                dom.brandSuggestionInput.value = brandingData.brandSuggestion || '';
+
+                dom.creationStyleSelect.value = brandingData.creationStyle || 'Moderno';
+
+                dom.targetAudienceInput.value = brandingData.targetAudience || '';
+
+                dom.companyValuesInput.value = brandingData.companyValues || '';
+
+                if (brandingData.outputHtml) {
+
+                    dom.brandingOutput.innerHTML = brandingData.outputHtml;
+
+                    dom.saveBrandingBtn.classList.remove('hidden');
+
+                    dom.exportPdfBtn.classList.remove('hidden');
+
+                    dom.exportTxtBtn.classList.remove('hidden');
+
+                    dom.exportImgBtn.classList.remove('hidden');
+
+                }
+
+            }
+
+        }
+
+
+
+        // Função para salvar dados no localStorage
+
+        function saveBrandingData() {
+
+            const brandingData = {
+
+                brandSuggestion: dom.brandSuggestionInput.value,
+
+                creationStyle: dom.creationStyleSelect.value,
+
+                targetAudience: dom.targetAudienceInput.value,
+
+                companyValues: dom.companyValuesInput.value,
+
+                outputHtml: dom.brandingOutput.innerHTML
+
+            };
+
+            localStorage.setItem(BRANDING_STORAGE_KEY, JSON.stringify(brandingData));
+
+            showNotification("Sugestões salvas com sucesso!", "green");
+
+        }
+
+
+
+        // Função para toggle do estado de carregamento do botão
+
+        function toggleButtonLoading(buttonElement, isLoading) {
+
+            const btnText = buttonElement.querySelector('.btn-text');
+
+            const loader = buttonElement.querySelector('.loader');
+
+            buttonElement.disabled = isLoading;
+
+            if(isLoading) {
+
+                if(btnText) btnText.classList.add('hidden');
+
+                if(loader) loader.classList.remove('hidden');
+
+            } else {
+
+                if(btnText) btnText.classList.remove('hidden');
+
+                if(loader) loader.classList.add('hidden');
+
+            }
+
+        }
+
+
+
+        // Função para exibir um modal personalizado (para confirmações e API Keys)
+
+        function showCustomModal(options) {
+
+            dom.modalTitle.innerText = options.title;
+
+            dom.modalContent.innerHTML = options.contentHtml;
+
+            dom.modalButtons.innerHTML = ''; // Limpa botões anteriores
+
+
+
+            options.buttons.forEach(btnOptions => {
+
+                const button = document.createElement('button');
+
+                button.innerText = btnOptions.text;
+
+                button.className = btnOptions.class;
+
+                button.onclick = btnOptions.action;
+
+                dom.modalButtons.appendChild(button);
+
+            });
+
+
+
+            dom.customModal.classList.remove('hidden');
+
+        }
+
+
+
+        // Função para simular o modal de API Keys
+
+        function showApiKeysModal() {
+
+            showCustomModal({
+
+                title: 'Gerenciar Chaves de API',
+
+                contentHtml: `
+
+                    <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+
+                        <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+
+                        <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+
+                        <div class="flex">
+
+                            <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+
+                            <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+
+                        </div>
+
+                    </div>
+
+                `,
+
+                buttons: [] // Não há botões adicionais no rodapé do modal de API Keys
+
+            });
+
+
+
+            // Adicionar lógica de salvar API Key (se necessário, para compatibilidade)
+
+            document.getElementById('saveGeminiKey').addEventListener('click', () => {
+
+                const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
+
+                const key = apiKeyInput.value.trim();
+
+                if (key) {
+
+                    // Aqui você salvaria a chave se fosse necessário persistir fora do escopo atual
+
+                    // Por enquanto, apenas um feedback visual
+
+                    alert("Chave API salva (apenas para simulação nesta ferramenta)!");
+
+                    dom.customModal.classList.add('hidden');
+
+                } else {
+
+                    alert("Por favor, insira uma chave API.");
+
+                }
+
+            });
+
+        }
+
+
+
+        // Função para renderizar a sidebar
+
+        async function renderSidebar() {
+
+                if (!dom.sidebar) return;
+
+                try {
+
+                    // Fetch tools.json from the root of the serving directory
+
+                    const response = await fetch('tools.json');
+
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                    const toolsData = await response.json();
+
+
+
+                    const categories = {};
+
+                    toolsData.forEach(tool => {
+
+                        if (!categories[tool.category]) categories[tool.category] = [];
+
+                        categories[tool.category].push(tool);
+
+                    });
+
+                    dom.sidebar.innerHTML = '';
+
+
+
+                    const homeLinkSidebar = document.createElement('a');
+
+                    homeLinkSidebar.href = 'index.html';
+
+                    homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+
+                    homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+
+                    dom.sidebar.appendChild(homeLinkSidebar);
+
+
+
+                    for (const categoryName in categories) {
+
+                        const categoryDiv = document.createElement('div');
+
+                        categoryDiv.className = 'mb-1';
+
+                        const categoryButton = document.createElement('button');
+
+                        categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150 bg-transparent shadow-none';
+
+                        categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+
+                        const categoryContent = document.createElement('div');
+
+                        categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+
+
+                        categories[categoryName].forEach(tool => {
+
+                            const link = document.createElement('a');
+
+                            link.href = tool.pageUrl;
+
+                            const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+
+                            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+
+                            link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+
+                            categoryContent.appendChild(link);
+
+                        });
+
+
+
+                        categoryButton.addEventListener('click', () => {
+
+                            categoryContent.classList.toggle('expanded');
+
+                            categoryButton.querySelector('svg').classList.toggle('rotate-180');
+
+                        });
+
+
+
+                        if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+
+                            categoryContent.classList.add('expanded');
+
+                            categoryButton.querySelector('svg').classList.add('rotate-180');
+
+                        }
+
+
+
+                        categoryDiv.appendChild(categoryButton);
+
+                        categoryDiv.appendChild(categoryContent);
+
+                        dom.sidebar.appendChild(categoryDiv);
+
+                    }
+
+                } catch (error) {
+
+                    console.error("Erro ao carregar ferramentas para a sidebar:", error);
+
+                    if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+
+                }
+
+            }
+
+
+
+        // Função para mostrar notificações temporárias
+
+        function showNotification(message, type = "info") {
+
+            const notificationArea = document.getElementById('notificationArea');
+
+            if (!notificationArea) {
+
+                console.warn("Elemento #notificationArea não encontrado.");
+
+                return;
+
+            }
+
+
+
+            const notification = document.createElement('div');
+
+            notification.className = `fixed top-16 right-4 px-4 py-2 rounded-lg shadow-lg text-white text-sm z-50 transition-transform transform translate-y-0 opacity-100`;
+
+
+
+            if (type === "success" || type === "green") {
+
+                notification.classList.add('bg-green-500');
+
+            } else if (type === "error" || type === "red") {
+
+                notification.classList.add('bg-red-500');
+
+            } else {
+
+                notification.classList.add('bg-blue-500');
+
+            }
+
+
+
+            notification.textContent = message;
+
+            notificationArea.appendChild(notification);
+
+
+
+            setTimeout(() => {
+
+                notification.classList.add('translate-y-full', 'opacity-0');
+
+                notification.addEventListener('transitionend', () => notification.remove());
+
+            }, 3000);
+
+        }
+
+
+
+        // Função principal para gerar branding com Gemini
+
+        async function generateBranding() {
+
+            const brandSuggestion = dom.brandSuggestionInput.value.trim();
+
+            const creationStyle = dom.creationStyleSelect.value;
+
+            const targetAudience = dom.targetAudienceInput.value.trim();
+
+            const companyValues = dom.companyValuesInput.value.trim();
+
+
+
+            if (!targetAudience || !companyValues) {
+
+                showNotification("Por favor, preencha o público-alvo e os valores da empresa.", "red");
+
+                return;
+
+            }
+
+
+
+            toggleButtonLoading(dom.generateBrandingBtn, true);
+
+            dom.brandingOutput.innerHTML = `<p class="text-zinc-400 text-center">Gerando sugestões de branding... <span class="loader ml-2"></span></p>`;
+
+            dom.saveBrandingBtn.classList.add('hidden');
+
+            dom.exportPdfBtn.classList.add('hidden');
+
+            dom.exportTxtBtn.classList.add('hidden');
+
+            dom.exportImgBtn.classList.add('hidden');
+
+
+
+            try {
+
+                let prompt = `Crie sugestões de branding para uma empresa com o seguinte público-alvo: "${targetAudience}" e os seguintes valores: "${companyValues}". `;
+
+                if (brandSuggestion) {
+
+                    prompt += `Use "${brandSuggestion}" como uma sugestão ou inspiração para o nome da marca. `;
+
+                }
+
+                prompt += `O estilo de criação deve ser: "${creationStyle}". `;
+
+                prompt += `Inclua as seguintes seções formatadas em Markdown:\n\n`;
+
+                prompt += `### Nomes de Marca Criativos\n(Liste 3-5 nomes criativos, considerando o estilo de criação e a sugestão de nome)\n\n`;
+
+                prompt += `### Slogan\n(Sugira 3-5 slogans cativantes e relevantes para a marca)\n\n`;
+
+                prompt += `### Paleta de Cores\n(Liste 3-5 cores com seus códigos hexadecimais e uma breve descrição da emoção que transmitem. Ex: #RRGGBB - Descrição)\n\n`;
+
+                prompt += `### Tipografia\n(Liste 2-3 sugestões de pares ou famílias de fontes, com uma breve justificativa. Ex: Nome da Fonte - Justificativa)\n\n`;
+
+                prompt += `### Tom de Voz\n(Descreva o tom de voz da marca em 1-2 parágrafos)\n\n`;
+
+                prompt += `### Estratégias de Posicionamento\n(Descreva 2-3 estratégias de posicionamento de mercado relevantes para a marca)\n\n`;
+
+                prompt += `### Estratégia de Publicidade Virtual (com CapyCopy)\n(Crie uma breve estratégia de publicidade online, com foco em anúncios e conteúdo para internet, como se fosse escrita pela CapyCopy)\n\n`;
+
+                prompt += `### Prompt para Geração de Logotipo (para IAs de imagem)\n(Crie um prompt detalhado e criativo para uma IA de geração de imagem, a fim de criar um logotipo que reflita as sugestões de branding acima. Mencione elementos visuais, estilo e cores chave. Exemplo: "Um logo minimalista e moderno para uma empresa de tecnologia com o nome 'TechWave', usando cores azuis e brancas, com um ícone que transmita movimento e inovação.")`;
+
+
+
+
+
+                let chatHistory = [];
+
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+
+                const apiKey = ""; // Canvas will automatically provide the API key here
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+
+
+                const response = await fetch(apiUrl, {
+
+                    method: 'POST',
+
+                    headers: { 'Content-Type': 'application/json' },
+
+                    body: JSON.stringify(payload)
+
+                });
+
+                const result = await response.json();
+
+
+
+                if (result.candidates && result.candidates.length > 0 &&
+
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+
+                    result.candidates[0].content.parts.length > 0) {
+
+                    let text = result.candidates[0].content.parts[0].text;
+
+                    // Adicionar lógica para formatar as cores com swatches
+
+                    text = text.replace(/#([0-9A-Fa-f]{6})\s*-\s*(.*?)(?=\n|$)/g, (match, hex, desc) => {
+
+                        return `<span class="color-swatch" style="background-color: #${hex};"></span> #${hex} - ${desc}`;
+
+                    });
+
+                    dom.brandingOutput.innerHTML = basicMarkdownToHtml(text);
+
+                    dom.saveBrandingBtn.classList.remove('hidden');
+
+                    dom.exportPdfBtn.classList.remove('hidden');
+
+                    dom.exportTxtBtn.classList.remove('hidden');
+
+                    dom.exportImgBtn.classList.remove('hidden');
+
+                } else {
+
+                    dom.brandingOutput.innerHTML = "<p class='text-red-400 text-center'>Erro ao gerar branding. Tente novamente.</p>";
+
+                }
+
+            } catch (error) {
+
+                console.error('Erro ao chamar a API do Gemini:', error);
+
+                dom.brandingOutput.innerHTML = "<p class='text-red-400 text-center'>Ocorreu um erro ao conectar com o Gemini. Verifique sua conexão ou tente mais tarde.</p>";
+
+            } finally {
+
+                toggleButtonLoading(dom.generateBrandingBtn, false);
+
+            }
+
+        }
+
+
+
+        // Função para converter markdown básico para HTML (similar ao CapyDebate)
+
+        function basicMarkdownToHtml(md) {
+
+            let html = md;
+
+            html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>');
+
+            html = html.replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
+
+            html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+            html = html.replace(/###\s*(.*)/g, '<h3>$1</h3>'); // Para H3
+
+            html = html.replace(/####\s*(.*)/g, '<h4>$1</h4>'); // Para H4
+
+            html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+
+            html = html.replace(/^\s*\*\s+(.*)/gm, '<li>$1</li>');
+
+            if (html.includes('<li>')) {
+
+                html = html.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, (match) => `<ul>${match}</ul>`);
+
+            }
+
+            // Quebra de linha para parágrafos, ignorando se já estiver dentro de um elemento como <li> ou <h3>
+
+            html = html.split('\n').map(p => {
+
+                const trimmedP = p.trim();
+
+                if (trimmedP && !trimmedP.startsWith('<h3') && !trimmedP.startsWith('<h4') && !trimmedP.startsWith('<ul') && !trimmedP.startsWith('<li') && !trimmedP.startsWith('<span class="color-swatch"')) {
+
+                    return `<p>${trimmedP}</p>`;
+
+                }
+
+                return trimmedP;
+
+            }).filter(p => p).join('');
+
+            html = html.replace(/<\/p><p>/g, '</p><p class="mt-2">');
+
+            return html;
+
+        }
+
+
+
+        // Função para exportar para PDF
+
+        function exportToPdf() {
+
+            const { jsPDF } = window.jspdf;
+
+            const doc = new jsPDF();
+
+            const element = dom.brandingOutput;
+
+
+
+            doc.html(element, {
+
+                callback: function (doc) {
+
+                    doc.save('CapyBranding_Resultados.pdf');
+
+                    showNotification("PDF exportado com sucesso!", "green");
+
+                },
+
+                x: 10,
+
+                y: 10,
+
+                html2canvas: { scale: 0.25 } // Ajuste a escala conforme necessário
+
+            });
+
+        }
+
+
+
+        // Função para exportar para TXT
+
+        function exportToTxt() {
+
+            const textContent = dom.brandingOutput.innerText;
+
+            const blob = new Blob([textContent], { type: 'text/plain' });
+
+            const a = document.createElement('a');
+
+            a.href = URL.createObjectURL(blob);
+
+            a.download = 'CapyBranding_Resultados.txt';
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            document.body.removeChild(a);
+
+            URL.revokeObjectURL(a.href);
+
+            showNotification("TXT exportado com sucesso!", "green");
+
+        }
+
+
+
+        // Função para exportar para Imagem (PNG)
+
+        function exportToImg() {
+
+            html2canvas(dom.brandingOutput, {
+
+                backgroundColor: '#18181b', // Cor de fundo do body
+
+                useCORS: true // Importante se houver imagens externas
+
+            }).then(canvas => {
+
+                const imgData = canvas.toDataURL('image/png');
+
+                const a = document.createElement('a');
+
+                a.href = imgData;
+
+                a.download = 'CapyBranding_Resultados.png';
+
+                document.body.appendChild(a);
+
+                a.click();
+
+                document.body.removeChild(a);
+
+                showNotification("Imagem exportada com sucesso!", "green");
+
+            }).catch(error => {
+
+                console.error("Erro ao exportar imagem:", error);
+
+                showNotification("Erro ao exportar imagem.", "red");
+
+            });
+
+        }
+
+
+
+        // Event Listeners
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            renderSidebar();
+
+            loadBrandingData();
+
+
+
+            if (dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay) {
+
+                dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+
+                dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+
+            }
+
+
+
+            if (dom.openApiKeysModalButton) {
+
+                dom.openApiKeysModalButton.addEventListener('click', showApiKeysModal);
+
+            }
+
+
+
+            if (dom.closeCustomModalButton) {
+
+                dom.closeCustomModalButton.addEventListener('click', () => dom.customModal.classList.add('hidden'));
+
+            }
+
+
+
+            dom.generateBrandingBtn.addEventListener('click', generateBranding);
+
+            dom.saveBrandingBtn.addEventListener('click', saveBrandingData);
+
+            dom.exportPdfBtn.addEventListener('click', exportToPdf);
+
+            dom.exportTxtBtn.addEventListener('click', exportToTxt);
+
+            dom.exportImgBtn.addEventListener('click', exportToImg);
+
+        });
+
+    </script>
+
+</body>
+
+  </html>
