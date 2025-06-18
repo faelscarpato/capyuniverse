@@ -16,7 +16,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="CapyUniverse IA">
   <meta name="twitter:title" content="CapyUniverse: IA para Inovação Digital">
-  <meta name="twitter:description" content="CapyUniverse, plataforma de IA criada por Rafael Scarpato, oferece soluções criativas, produtivas e educacionais para profissionais e entusiastas da inovação digital.">
+  <meta name="twitter:description" content="CapyUniverse, plataforma de IA criada por Rafael Scarpato, oferece soluções criativas, produtivas e educacionais para profissionais e entusiastas da inovação digital">
   <meta name="twitter:image" content="https://faelscarpato.github.io/capyuniverse/img/capyuniverse.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@rafaelscarpato">
@@ -53,7 +53,7 @@
     }
     @keyframes floatyCard {
         from { transform: translateY(0px); }
-        to   { transform: translateY(-8px); } 
+        to   { transform: translateY(-8px); }
     }
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #1f2937; }
@@ -71,12 +71,12 @@
     }
     #no-tools-message {
         text-align: center;
-        font-size: 1.25rem; 
-        color: #9ca3af; 
-        margin-top: 2rem; 
-        padding: 2rem; 
-        background-color: #374151; 
-        border-radius: 0.75rem; 
+        font-size: 1.25rem;
+        color: #9ca3af;
+        margin-top: 2rem;
+        padding: 2rem;
+        background-color: #374151;
+        border-radius: 0.75rem;
     }
     .modal-overlay-bg {
         transition: opacity 0.3s ease-in-out;
@@ -96,7 +96,7 @@
         transform: translateY(-20px) scale(0.95);
     }
     .modal-visible .modal-overlay-bg {
-        opacity: 0.75; 
+        opacity: 0.75;
     }
     .modal-visible .modal-content {
         opacity: 1;
@@ -112,39 +112,39 @@
     position: relative;
     max-width: 100%;
     overflow: hidden;
-    border-radius: 1.5rem; 
+    border-radius: 1.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
   .carrossel {
-    position: relative; 
-    width: 100%; 
-    transition: height 0.4s ease-in-out; 
+    position: relative;
+    width: 100%;
+    transition: height 0.4s ease-in-out;
   }
   .carrossel-slide {
-    transition: opacity 0.7s ease-in-out; 
+    transition: opacity 0.7s ease-in-out;
     opacity: 0;
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%; 
-    padding: 1.5rem; 
+    width: 100%;
+    padding: 1.5rem;
     box-sizing: border-box;
-    pointer-events: none; 
-    z-index: 1; 
+    pointer-events: none;
+    z-index: 1;
   }
   .carrossel-slide.active {
     opacity: 1;
-    pointer-events: auto; 
-    z-index: 2; 
+    pointer-events: auto;
+    z-index: 2;
   }
   .carrossel-dots {
     position: absolute;
-    bottom: 1.5rem; 
+    bottom: 1.5rem;
     left: 0;
     right: 0;
     display: flex;
     justify-content: center;
-    gap: 0.75rem; 
+    gap: 0.75rem;
     z-index: 10;
   }
   .dot {
@@ -156,25 +156,25 @@
     transition: all 0.3s ease;
   }
   .dot.active {
-    background: #f59e0b; 
+    background: #f59e0b;
     transform: scale(1.2);
   }
     #notificationArea {
         position: fixed;
-        top: 1.25rem; 
-        right: 1.25rem; 
-        z-index: 1000; 
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 1000;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem; 
+        gap: 0.5rem;
         width: 100%;
-        max-width: 24rem; 
+        max-width: 24rem;
     }
     .notification {
-        padding: 1rem; 
-        border-radius: 0.5rem; 
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
-        font-size: 0.875rem; 
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        font-size: 0.875rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -191,31 +191,93 @@
     .notification-info { background-color: #3b82f6; color: white; }
     .notification-warning { background-color: #f59e0b; color: #1f2937; }
     .notification button {
-        margin-left: 0.75rem; 
+        margin-left: 0.75rem;
         font-weight: bold;
-        font-size: 1.125rem; 
+        font-size: 1.125rem;
         line-height: 1;
         background: none;
         border: none;
-        color: inherit; 
+        color: inherit;
         cursor: pointer;
     }
     .tool-card-image {
-        width: auto; 
+        width: auto;
         height: 100%;
-        
-        
+
+
     }
     .loading-placeholder {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 200px;
-        font-size: 1.125rem; 
-        color: #a1a1aa; 
+        font-size: 1.125rem;
+        color: #a1a1aa;
     }
+
+    /* Estilos para o cabeçalho fixo e responsivo */
+    .header-gradient {
+        background: linear-gradient(to right, #200229, #18032c);
+    }
+    .nav-link {
+        position: relative;
+        padding: 0.5rem 0.75rem;
+        color: #e5e7eb; /* cor padrão */
+        transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(to right, #a200ff, #fbbf24); /* Cor de destaque */
+        transition: width 0.3s ease;
+    }
+    .nav-link:hover::after, .nav-link.active::after {
+        width: 100%;
+    }
+    .nav-link:hover {
+        color: #fbbf24; /* Cor ao passar o mouse */
+        transform: translateY(-2px);
+    }
+    /* Menu Hamburguer */
+    .hamburger-icon {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 20px;
+        cursor: pointer;
+    }
+    .hamburger-icon span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    .hamburger-icon.open span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger-icon.open span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-icon.open span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+    .mobile-menu {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-out;
+    }
+    .mobile-menu.open {
+        transform: translateX(0);
+    }
+
   </style>
-<!-- Google tag (gtag.js) -->
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -226,6 +288,43 @@
 </script>
 </head>
 <body class="text-gray-100">
+
+  <header class="fixed top-0 left-0 w-full z-50 py-4 px-6 md:px-10 shadow-lg header-gradient backdrop-blur-md bg-opacity-70">
+    <div class="flex items-center justify-between max-w-7xl mx-auto">
+      <a href="index.html" class="flex items-center space-x-2">
+        <img src="img/logo.png" alt="CapyUniverse Logo" class="h-8 w-8 md:h-10 md:w-10">
+        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent font-syne">CapyUniverse</span>
+      </a>
+
+      <nav class="hidden md:flex space-x-6 lg:space-x-8">
+        <a href="#contato" class="nav-link">Contato</a>
+        <a href="#seja-beta" class="nav-link">Seja Beta</a>
+        <a href="#quem-somos" class="nav-link">Quem Somos</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="md:hidden flex items-center">
+        <button id="hamburger-button" class="focus:outline-none p-2 rounded-md">
+          <div class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 shadow-2xl p-6 pt-20 md:hidden">
+      <nav class="flex flex-col space-y-6 text-xl">
+        <a href="#contato" class="nav-link py-2" onclick="closeMobileMenu()">Contato</a>
+        <a href="#seja-beta" class="nav-link py-2" onclick="closeMobileMenu()">Seja Beta</a>
+        <a href="#quem-somos" class="nav-link py-2" onclick="closeMobileMenu()">Quem Somos</a>
+        <a href="#faq" class="nav-link py-2" onclick="closeMobileMenu()">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="pt-20 md:pt-24"></div>
 
   <div id="notificationArea"></div>
 
@@ -355,7 +454,6 @@
 
   <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20">
     <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-         <!-- Cards serão inseridos aqui pelo JavaScript -->
          <div class="loading-placeholder col-span-full">
             <p>A carregar ferramentas...</p>
         </div>
@@ -460,7 +558,7 @@
     const searchInput = document.getElementById('search-input');
     const categorySelect = document.getElementById('category-select');
     const noToolsMessage = document.getElementById('no-tools-message');
-    const currentYearSpan = document.getElementById('current-year'); 
+    const currentYearSpan = document.getElementById('current-year');
     const toolModal = document.getElementById('toolModal');
     const closeToolModalButton = document.getElementById('closeToolModalButton');
     const modalIconContainer = document.getElementById('modalIconContainer');
@@ -474,7 +572,7 @@
     const gotItManageApiKeysButton = document.getElementById('gotItManageApiKeysButton');
     const geminiApiKeyInputModal = document.getElementById('geminiApiKeyInputModal');
     const saveApiKeyButtonModal = document.getElementById('saveApiKeyButtonModal');
-    const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_'; 
+    const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
     const notificationArea = document.getElementById('notificationArea');
 
     let allToolsData = []; // Para armazenar os dados do JSON
@@ -499,9 +597,9 @@
         emerald: { text: 'text-emerald-400', hoverShadow: 'hover:shadow-emerald-400/30', bg: 'bg-emerald-500', bgIcon: 'bg-emerald-400/20' },
         violet: { text: 'text-violet-400', hoverShadow: 'hover:shadow-violet-400/30', bg: 'bg-violet-500', bgIcon: 'bg-violet-400/20' },
         trueGray: { text: 'text-gray-400', hoverShadow: 'hover:shadow-gray-400/30', bg: 'bg-gray-500', bgIcon: 'bg-gray-400/20' },
-        lightBlue: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' }, 
-        warmGray: { text: 'text-stone-400', hoverShadow: 'hover:shadow-stone-400/30', bg: 'bg-stone-500', bgIcon: 'bg-stone-400/20' }, 
-        coolGray: { text: 'text-slate-400', hoverShadow: 'hover:shadow-slate-400/30', bg: 'bg-slate-500', bgIcon: 'bg-slate-400/20' }  
+        lightBlue: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' },
+        warmGray: { text: 'text-stone-400', hoverShadow: 'hover:shadow-stone-400/30', bg: 'bg-stone-500', bgIcon: 'bg-stone-400/20' },
+        coolGray: { text: 'text-slate-400', hoverShadow: 'hover:shadow-slate-400/30', bg: 'bg-slate-500', bgIcon: 'bg-slate-400/20' }
     };
 
     // --- Funções ---
@@ -519,7 +617,7 @@
         requestAnimationFrame(() => { notificationDiv.classList.add('show'); });
         setTimeout(() => removeNotification(notificationId), 6000);
     }
-    window.removeNotification = (id) => { 
+    window.removeNotification = (id) => {
         const el = document.getElementById(id);
         if (el) { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }
     };
@@ -529,7 +627,7 @@
       const card = document.createElement('div');
       // Mantém as classes originais do teu card
       card.className = `group bg-gray-800/80 rounded-xl p-0 shadow-lg hover:shadow-xl ${colorTheme.hoverShadow} transition-all duration-300 ease-in-out card-float overflow-hidden flex flex-col`;
-      card.style.animationDelay = `${index * 0.05}s`; 
+      card.style.animationDelay = `${index * 0.05}s`;
 
       // Armazena todos os dados da ferramenta no dataset do card para o modal
       Object.keys(tool).forEach(key => {
@@ -563,7 +661,7 @@
       modalIconContainer.innerHTML = `<span class="text-3xl">${tool.icon || '✨'}</span>`; // Usa o emoji/texto do JSON
       modalIconContainer.className = `w-12 h-12 rounded-full flex items-center justify-center mr-4 text-3xl shadow-inner ${colorTheme.bgIcon} ${colorTheme.text}`;
       
-      modalToolName.textContent = tool.title; // Usar title do JSON
+      modalToolName.textContent = tool.id; // Usar title do JSON
       modalToolCategory.textContent = `Categoria: ${tool.category}`;
       modalToolDescription.textContent = tool.description;
       modalToolLink.href = tool.pageUrl; // Usar pageUrl do JSON
@@ -581,7 +679,7 @@
     }
 
     function openManageApiModal() {
-        loadApiKeyToModal(); 
+        loadApiKeyToModal();
         manageApiKeysModal.classList.remove('modal-hidden');
         manageApiKeysModal.classList.add('modal-visible');
         document.body.style.overflow = 'hidden';
@@ -609,7 +707,7 @@
 
     function populateCategories(data) { // Recebe os dados do JSON
       const categories = [...new Set(data.map(tool => tool.category))].sort();
-      categorySelect.innerHTML = '<option value="">Todas as Categorias</option>'; 
+      categorySelect.innerHTML = '<option value="">Todas as Categorias</option>';
       categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category;
@@ -706,9 +804,9 @@
       let slideInterval;
       
       function initCarrossel() {
-        const carrosselWrapper = document.querySelector('.lg\\:w-7\\/12'); 
+        const carrosselWrapper = document.querySelector('.lg\\:w-7\\/12');
         if (!carrosselWrapper || getComputedStyle(carrosselWrapper).display === 'none' || !slides || slides.length === 0) {
-          return; 
+          return;
         }
         slides[0].classList.add('active');
         if (dots.length > 0) dots[0].classList.add('active');
@@ -731,13 +829,13 @@
       
       function updateCarrossel(newSlideIndexOrDirection) {
         if (isAnimating || !slides || slides.length === 0) return;
-        isAnimating = true; 
+        isAnimating = true;
         const oldSlideIndex = currentSlide;
         let newSlideIndex;
         if (typeof newSlideIndexOrDirection === 'string') {
           newSlideIndex = (newSlideIndexOrDirection === 'next') ? (oldSlideIndex + 1) % totalSlides : (oldSlideIndex - 1 + totalSlides) % totalSlides;
         } else {
-          newSlideIndex = newSlideIndexOrDirection; 
+          newSlideIndex = newSlideIndexOrDirection;
         }
         if (oldSlideIndex === newSlideIndex) { isAnimating = false; return; }
         const oldSlide = slides[oldSlideIndex];
@@ -748,17 +846,17 @@
         oldSlide.classList.remove('active');
         currentSlide = newSlideIndex;
         requestAnimationFrame(() => {
-          const newSlideHeight = newSlide.scrollHeight; 
+          const newSlideHeight = newSlide.scrollHeight;
           if (carrossel) carrossel.style.height = `${newSlideHeight}px`;
         });
-        setTimeout(() => { isAnimating = false; }, 700); 
+        setTimeout(() => { isAnimating = false; }, 700);
       }
       
       function nextSlide() { updateCarrossel('next'); resetAutoPlay(); }
       function goToSlide(index) { if (isAnimating || index === currentSlide) return; updateCarrossel(index); resetAutoPlay(); }
       function startAutoPlay() {
         pauseAutoPlay();
-        if (slides.length > 1) { 
+        if (slides.length > 1) {
             slideInterval = setInterval(() => { if (!document.hidden) { nextSlide(); }}, 7000);
         }
       }
@@ -771,7 +869,38 @@
       // A inicialização do carrossel já está a ser feita, não é preciso chamar initCarrossel() aqui novamente
       // se já estiver a ser chamada no final do script original.
       // Se o teu script original do carrossel já o inicializa, esta linha abaixo pode ser redundante.
-      initCarrossel(); 
+      initCarrossel();
+    });
+
+    // Lógica para o menu hamburguer
+    const hamburgerButton = document.getElementById('hamburger-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    function toggleMobileMenu() {
+        mobileMenu.classList.toggle('open');
+        hamburgerButton.querySelector('.hamburger-icon').classList.toggle('open');
+        if (mobileMenu.classList.contains('open')) {
+            document.body.style.overflow = 'hidden'; // Impede scroll do body
+        } else {
+            document.body.style.overflow = ''; // Permite scroll
+        }
+    }
+
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('open');
+        hamburgerButton.querySelector('.hamburger-icon').classList.remove('open');
+        document.body.style.overflow = ''; // Permite scroll
+    }
+
+    hamburgerButton.addEventListener('click', toggleMobileMenu);
+
+    // Fecha o menu mobile se clicar fora dele, mas não no botão
+    document.addEventListener('click', (event) => {
+        const isClickInsideMobileMenu = mobileMenu.contains(event.target);
+        const isClickOnHamburger = hamburgerButton.contains(event.target);
+        if (mobileMenu.classList.contains('open') && !isClickInsideMobileMenu && !isClickOnHamburger) {
+            closeMobileMenu();
+        }
     });
 
     if ('serviceWorker' in navigator) {
