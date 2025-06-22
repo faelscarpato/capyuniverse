@@ -6,7 +6,7 @@
     "imageUrl": "img/capyaudiencias.webp",
     "description": "Analise e resuma atas de audiência com precisão jurídica de IA.",
     "category": "Jurídico",
-    "pageUrl": "CapyAudiencias.html",
+    "pageUrl": "capyaudiencias.html",
     "color": "indigo-400"
   },
   {
@@ -267,7 +267,7 @@
     "imageUrl": "img/capygrana.webp",
     "description": "O seu consultor financeiro pessoal com a sabedoria de uma capivara próspera!",
     "category": "Finanças e Negócios",
-    "pageUrl": "CapyGrana.html",
+    "pageUrl": "capygrana.html",
     "color": "green-400"
   },
   {
@@ -440,7 +440,7 @@
     "imageUrl": "img/capyengenheiro.webp",
     "description": "Simule o comportamento de vigas, pilares e lajes de forma simplificada.",
     "category": "Engenharia & Arquitetura",
-    "pageUrl": "CapySimulador.html",
+    "pageUrl": "capysimulador.html",
     "color": "sky-400"
   },
   {
@@ -450,7 +450,7 @@
     "imageUrl": "img/capysolar.webp",
     "description": "Estime o potencial de geração de energia solar para qualquer localização.",
     "category": "Engenharia & Arquitetura",
-    "pageUrl": "capysimuladorsolar.html",
+    "pageUrl": "capysolar.html",
     "color": "amber-400"
   },
   {
