@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyIMGtxt - Analisador de Imagem para Prompt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+    <style>
+        html { background: #121217; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #e5e7eb;
+            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+            background-repeat: repeat;
+            background-size: 300px;
+            background-color: #18181b;
+        }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass {
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(63, 63, 70, 0.4);
+        }
+        .sidebar-glass { 
+             background: rgba(39, 39, 42, 0.7);
+             backdrop-filter: blur(15px);
+             border-right: 1px solid rgba(63, 63, 70, 0.3);
+        }
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); }
+        
+        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .category-content.expanded { max-height: 1500px; }
+        .sidebar-link.active { background-color: #be185d; color: white; font-weight: 600; } /* pink-700 */
+
+        .loader { border: 4px solid rgba(255,255,255,0.2); border-left-color: #ec4899; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        #image-drop-zone {
+            border-style: dashed;
+        }
+        #image-drop-zone.dragover {
+            border-color: #ec4899;
+            background-color: rgba(236, 72, 153, 0.1);
+        }
+    </style>
+</head>
+
+<body class="dark min-h-screen flex flex-col text-[15px]">
+
+    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        </div>
+    </header>
+    
+    <div class="flex flex-1 pt-16"> 
+        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-pink-400">CapyIMGtxt 🖼️</h1>
+                    <p class="text-zinc-300 mt-1">Transforme imagens em prompts detalhados para IA com um clique.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow">
+                    <!-- Coluna de Upload -->
+                    <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700 flex flex-col items-center justify-center">
+                        <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4 text-center">Envie sua Imagem</h2>
+                        <div id="image-drop-zone" class="w-full h-64 border-2 border-zinc-600 rounded-lg flex flex-col justify-center items-center text-center p-6 cursor-pointer hover:border-pink-500 transition-colors">
+                            <div id="upload-prompt">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-zinc-500 mb-3"></i>
+                                <p class="text-zinc-400">Arraste e solte uma imagem aqui</p>
+                                <p class="text-xs text-zinc-500 mt-1">ou</p>
+                                <button id="upload-button" class="mt-3 bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded-md">
+                                    Selecione um Ficheiro
+                                </button>
+                                <input type="file" id="image-input" class="hidden" accept="image/png, image/jpeg, image/webp">
+                            </div>
+                            <img id="image-preview" src="" alt="Pré-visualização da Imagem" class="hidden max-h-full max-w-full rounded-md">
+                        </div>
+                        <button id="analyze-button" class="mt-4 bg-pink-700 text-white font-bold py-3 px-8 rounded-lg w-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                           <span class="btn-text">Analisar Imagem e Gerar Prompt</span>
+                           <div class="loader hidden ml-2"></div>
+                        </button>
+                    </div>
+
+                    <!-- Coluna de Resultado -->
+                    <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700 flex flex-col">
+                        <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4">Prompt Gerado pela IA</h2>
+                        <div id="result-container" class="flex-grow flex flex-col">
+                           <div id="loading" class="hidden text-center flex-grow flex flex-col justify-center items-center">
+                                <div class="loader"></div>
+                                <p class="mt-4 text-white">Capy está a analisar os pixels...</p>
+                            </div>
+                           <textarea id="prompt-output" class="font-mono bg-zinc-900 border border-zinc-700 rounded-md p-4 text-zinc-300 w-full h-full flex-grow hidden resize-none scrollbar-thin" readonly placeholder="O prompt detalhado da sua imagem aparecerá aqui..."></textarea>
+                        </div>
+                        <button id="copy-button" class="mt-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-md w-full flex items-center justify-center hidden">
+                            <i class="fas fa-copy mr-2"></i>Copiar Prompt
+                         </button>
+                         <p id="errorMessage" class="text-red-400 text-sm mt-2 text-center"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+    <script>
+        const currentPageId = 'CapyIMGtxt'; 
+        let apiKey = '';
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let imageData = null;
+
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+            sidebarOverlay: document.getElementById('sidebarOverlay'),
+            apiKeysModal: document.getElementById('apiKeysModal'),
+            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            
+            dropZone: document.getElementById('image-drop-zone'),
+            uploadPrompt: document.getElementById('upload-prompt'),
+            uploadButton: document.getElementById('upload-button'),
+            imageInput: document.getElementById('image-input'),
+            imagePreview: document.getElementById('image-preview'),
+            analyzeButton: document.getElementById('analyze-button'),
+            loadingDiv: document.getElementById('loading'),
+            promptOutput: document.getElementById('prompt-output'),
+            copyButton: document.getElementById('copy-button'),
+            errorMessage: document.getElementById('errorMessage'),
+        };
+        
+        function toggleLoading(isLoading) {
+            const btnText = dom.analyzeButton.querySelector('.btn-text');
+            const loader = dom.analyzeButton.querySelector('.loader');
+            dom.analyzeButton.disabled = isLoading;
+            dom.loadingDiv.classList.toggle('hidden', !isLoading);
+            dom.promptOutput.classList.toggle('hidden', isLoading);
+
+            if (isLoading) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
+            } else {
+                if(btnText) btnText.classList.remove('hidden');
+                if(loader) loader.classList.add('hidden');
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                dom.errorMessage.textContent = 'Por favor, envie um ficheiro de imagem (jpeg, png, webp).';
+                return;
+            }
+            dom.errorMessage.textContent = '';
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                dom.imagePreview.src = e.target.result;
+                dom.imagePreview.classList.remove('hidden');
+                dom.uploadPrompt.classList.add('hidden');
+                dom.analyzeButton.disabled = false;
+                imageData = e.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        }
+
+        dom.uploadButton.addEventListener('click', () => dom.imageInput.click());
+        dom.imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dom.dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dom.dropZone.addEventListener(eventName, () => {
+                dom.dropZone.classList.add('dragover');
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dom.dropZone.addEventListener(eventName, () => {
+                dom.dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        dom.dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        async function analyzeImage() {
+            if (!apiKey) {
+                dom.errorMessage.textContent = "Chave API Gemini não configurada. Por favor, configure-a no menu 'Chaves API'.";
+                return;
+            }
+            if (!imageData) {
+                dom.errorMessage.textContent = 'Por favor, carregue uma imagem primeiro.';
+                return;
+            }
+            dom.errorMessage.textContent = '';
+            toggleLoading(true);
+
+            const prompt = "Descreva esta imagem em detalhes para que possa ser usada como um prompt para uma IA geradora de imagens. Detalhe o estilo, composição, cores, iluminação, objetos e o sentimento geral da imagem.";
+
+            try {
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inline_data: { mime_type: "image/jpeg", data: imageData } }
+                        ]
+                    }]
+                };
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`Erro na API ${response.status}: ${errorBody.error.message}`);
+                }
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0].content.parts[0].text) {
+                    const generatedPrompt = result.candidates[0].content.parts[0].text;
+                    dom.promptOutput.value = generatedPrompt;
+                    dom.copyButton.classList.remove('hidden');
+                } else {
+                    throw new Error("A API não retornou um prompt válido.");
+                }
+
+            } catch (error) {
+                console.error("Erro ao analisar imagem:", error);
+                dom.errorMessage.textContent = `Erro: ${error.message}`;
+                dom.promptOutput.value = "Falha ao gerar o prompt. Tente novamente.";
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        dom.copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(dom.promptOutput.value).then(() => {
+                const originalText = dom.copyButton.innerHTML;
+                dom.copyButton.innerHTML = '<i class="fas fa-check mr-2"></i>Copiado!';
+                setTimeout(() => {
+                    dom.copyButton.innerHTML = originalText;
+                }, 2000);
+            });
+        });
+
+        // ---- Funções Padrão do CapyUniverse ----
+        
+        async function renderSidebar() {
+             if (!dom.sidebar) return;
+            try {
+                const response = await fetch('tools.json'); 
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+                
+                const categories = {};
+                toolsData.forEach(tool => {
+                    if (!categories[tool.category]) categories[tool.category] = [];
+                    categories[tool.category].push(tool);
+                });
+                dom.sidebar.innerHTML = ''; 
+                
+                const homeLinkSidebar = document.createElement('a');
+                homeLinkSidebar.href = 'index.html';
+                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLinkSidebar);
+
+                for (const categoryName in categories) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-1';
+                    const categoryButton = document.createElement('button');
+                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    const categoryContent = document.createElement('div');
+                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    
+                    categories[categoryName].forEach(tool => {
+                        const link = document.createElement('a');
+                        link.href = tool.pageUrl;
+                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        categoryContent.appendChild(link);
+                    });
+
+                    categoryButton.addEventListener('click', () => {
+                        categoryContent.classList.toggle('expanded');
+                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                    });
+                    
+                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                        categoryContent.classList.add('expanded');
+                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                    }
+
+                    categoryDiv.appendChild(categoryButton);
+                    categoryDiv.appendChild(categoryContent);
+                    dom.sidebar.appendChild(categoryDiv);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar ferramentas para a sidebar:", error);
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+            }
+        }
+
+        function loadApiKey() {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+            if(savedKey) { 
+                apiKey = savedKey; 
+                 const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
+                if(apiKeyInput) apiKeyInput.value = savedKey; 
+            } else {
+                 dom.errorMessage.textContent = "Atenção: Chave API Gemini não configurada. A análise de IA não funcionará. Configure-a no menu 'Chaves API'.";
+            }
+        }
+        
+        function setupApiKeyModal() {
+            const modalHTML = `
+                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div class="glass border-zinc-800 p-7 rounded-2xl shadow-lg w-full max-w-md">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
+                            <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                                <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                                 <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
+                                <div class="flex">
+                                    <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
+                                    <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+                                </div>
+                                <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada para as funcionalidades de IA.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            dom.apiKeysModal.innerHTML = modalHTML;
+            dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            dom.apiKeysModal.querySelector('#closeApiKeysModalButton').addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            dom.apiKeysModal.querySelector('#saveGeminiKey').addEventListener('click', () => {
+                const keyInput = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+                const key = keyInput.value.trim();
+                if(key) { 
+                    localStorage.setItem(API_KEY_STORAGE_KEY, key); 
+                    apiKey = key; 
+                    alert("Chave API do Gemini salva!"); 
+                    dom.apiKeysModal.classList.add('hidden'); 
+                    dom.errorMessage.textContent = "";
+                } else { 
+                    alert("Por favor, insira uma chave API.");
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar(); 
+            setupApiKeyModal();
+            loadApiKey();
+            dom.analyzeButton.addEventListener('click', analyzeImage);
+
+            if(dom.sidebarToggleBtn){
+                dom.sidebarToggleBtn.addEventListener('click', () => { 
+                    dom.sidebar.classList.toggle('-translate-x-full'); 
+                    dom.sidebarOverlay.classList.toggle('hidden'); 
+                });
+            }
+            if(dom.sidebarOverlay){
+                 dom.sidebarOverlay.addEventListener('click', () => { 
+                    dom.sidebar.classList.add('-translate-x-full'); 
+                    dom.sidebarOverlay.classList.add('hidden'); 
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>
