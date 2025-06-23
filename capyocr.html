@@ -13,7 +13,11 @@
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
 
     <style>
-        html { background: #121217; }
+        /* Correções para o scroll */
+        html, body {
+            height: 100%; /* Garante que HTML e Body ocupem a altura total do viewport */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             color: #e5e7eb;
@@ -94,7 +98,8 @@
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
         <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-6xl mx-auto">
+            <!-- Adicionado overflow-y-auto à seção glass para gerenciar seu próprio scroll -->
+            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-6xl mx-auto overflow-y-auto">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl font-bold font-syne text-blue-400">CapyOCR 📷✍️</h1>
                     <p class="text-zinc-300 mt-1">Extraia texto de múltiplas imagens com a visão aguçada de uma capivara.</p>
@@ -108,13 +113,19 @@
                                 <i class="fas fa-cloud-upload-alt text-4xl text-gray-500 mb-2"></i>
                                 <p class="text-gray-400">Arraste e largue aqui</p>
                                 <p class="text-xs text-gray-500 mt-1">ou</p>
-                                <button id="select-file-button" class="mt-2 text-sm font-semibold text-blue-400 hover:text-blue-300">Selecione os ficheiros</button>
+                                <div class="flex flex-wrap justify-center mt-2 gap-4">
+                                    <button id="select-file-button" class="text-sm font-semibold text-blue-400 hover:text-blue-300">Selecione os ficheiros</button>
+                                    <button id="take-photo-button" class="text-sm font-semibold text-green-400 hover:text-green-300">Tirar Foto com a Câmera</button>
+                                </div>
                             </div>
                             <div id="preview-container" class="preview-grid w-full h-full overflow-y-auto scrollbar-thin">
                                 <!-- As miniaturas das imagens aparecerão aqui -->
                             </div>
                         </div>
+                        <!-- Inputs de arquivo para upload e câmera -->
                         <input type="file" id="image-upload" class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp" multiple>
+                        <input type="file" id="camera-upload" class="hidden" accept="image/*" capture="camera">
+                        
                         <button id="clear-button" class="w-full mt-2 text-xs text-red-400 hover:text-red-300 disabled:opacity-50" disabled>Limpar Seleção</button>
                     </div>
                     <div>
@@ -123,13 +134,31 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button id="extract-text-button" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                         <span class="btn-text">Extrair Texto de Todas as Imagens</span>
                         <div class="loader hidden"></div>
                     </button>
-                    <button id="copy-text-button" title="Copiar Texto Extraído" class="text-zinc-400 hover:text-blue-400 transition-colors p-2">
-                        <i class="fas fa-copy fa-lg"></i>
+                    <div class="flex gap-4">
+                        <button id="copy-text-button" title="Copiar Texto Extraído" class="flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                            <i class="fas fa-copy fa-lg mr-2"></i>
+                            <span>Copiar</span>
+                        </button>
+                        <button id="export-text-button" title="Exportar Texto Extraído" class="flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors">
+                            <i class="fas fa-file-export fa-lg mr-2"></i>
+                            <span>Exportar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-4">
+                    <button id="summarize-text-button" title="Resumir o Texto Extraído com IA" class="flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-magic fa-lg mr-2"></i>
+                        <span>Resumir Texto ✨</span>
+                    </button>
+                    <button id="translate-text-button" title="Traduzir o Texto Extraído para Inglês com IA" class="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-language fa-lg mr-2"></i>
+                        <span>Traduzir para Inglês ✨</span>
                     </button>
                 </div>
             </section>
@@ -155,12 +184,20 @@
         </div>
     </div>
 
+    <!-- Custom Message Box -->
+    <div id="customMessageBox" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] hidden p-4">
+        <div class="glass border border-zinc-700 p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
+            <p id="messageBoxText" class="text-white text-lg mb-4"></p>
+            <button id="messageBoxCloseBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-md transition-colors">OK</button>
+        </div>
+    </div>
 
     <script>
         const currentPageId = 'CapyOCR';
-        let apiKey = '';
+        let apiKey = ''; // Esta variável global armazenará a chave da API
+
         const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
-        let currentImages = []; // Agora é um array para múltiplas imagens
+        let currentImages = []; 
 
         const dom = {
             sidebar: document.getElementById('sidebar'),
@@ -174,15 +211,50 @@
             
             imageDropZone: document.getElementById('image-drop-zone'),
             imageUploadInput: document.getElementById('image-upload'),
+            cameraUploadInput: document.getElementById('camera-upload'), 
+            takePhotoButton: document.getElementById('take-photo-button'), 
             previewContainer: document.getElementById('preview-container'),
             uploadPlaceholder: document.getElementById('upload-placeholder'),
             selectFileButton: document.getElementById('select-file-button'),
             extractedTextArea: document.getElementById('extracted-text'),
             extractTextButton: document.getElementById('extract-text-button'),
             copyTextButton: document.getElementById('copy-text-button'),
-            clearButton: document.getElementById('clear-button')
+            exportTextButton: document.getElementById('export-text-button'), 
+            clearButton: document.getElementById('clear-button'),
+            summarizeTextButton: document.getElementById('summarize-text-button'), 
+            translateTextButton: document.getElementById('translate-text-button'), 
+
+            customMessageBox: document.getElementById('customMessageBox'),
+            messageBoxText: document.getElementById('messageBoxText'),
+            messageBoxCloseBtn: document.getElementById('messageBoxCloseBtn')
         };
         
+        /**
+         * Exibe uma mensagem personalizada ao usuário.
+         * @param {string} message - A mensagem a ser exibida.
+         */
+        function showMessageBox(message) {
+            if (dom.customMessageBox && dom.messageBoxText) {
+                dom.messageBoxText.textContent = message;
+                dom.customMessageBox.classList.remove('hidden');
+            } else {
+                console.warn("MessageBox elements not found. Falling back to console.log:", message);
+            }
+        }
+
+        /**
+         * Esconde a caixa de mensagem personalizada.
+         */
+        function hideMessageBox() {
+            if (dom.customMessageBox) {
+                dom.customMessageBox.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Alterna o estado de carregamento do botão principal de extração de texto.
+         * @param {boolean} isLoading - True para mostrar o loader e desabilitar o botão, false para o contrário.
+         */
         function toggleLoading(isLoading) {
             const btnText = dom.extractTextButton.querySelector('.btn-text');
             const loader = dom.extractTextButton.querySelector('.loader');
@@ -194,18 +266,38 @@
                 btnText.classList.remove('hidden');
                 loader.classList.add('hidden');
             }
+            // Desabilita/Habilita os botões de IA durante o processo de extração para evitar ações duplas
+            dom.summarizeTextButton.disabled = isLoading || !dom.extractedTextArea.value.trim();
+            dom.translateTextButton.disabled = isLoading || !dom.extractedTextArea.value.trim();
+        }
+
+        /**
+         * Habilita/Desabilita um botão e opcionalmente exibe um loader.
+         * @param {HTMLElement} buttonElement - O elemento do botão.
+         * @param {boolean} isLoading - True para desabilitar e mostrar loader, false para habilitar e esconder loader.
+         */
+        function toggleButtonState(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            buttonElement.disabled = isLoading;
+            // Para adicionar um loader específico para este botão, você precisaria de um elemento loader dentro dele
+            // e lógica para alternar sua visibilidade.
         }
         
+        /**
+         * Lida com a seleção de arquivos de imagem e as adiciona à pré-visualização.
+         * @param {FileList} files - Lista de arquivos File obtidos do input ou drag-and-drop.
+         */
         function handleImageFiles(files) {
             if (files.length === 0) return;
-            if (files.length > 20) {
-                alert("Pode carregar no máximo 20 imagens de cada vez.");
+            if (files.length + currentImages.length > 20) {
+                showMessageBox("Você pode carregar no máximo 20 imagens no total.");
                 return;
             }
             
-            resetSelection();
-            
-            dom.uploadPlaceholder.classList.add('hidden');
+            // Esconde o placeholder se novas imagens estiverem sendo adicionadas
+            if (currentImages.length === 0) {
+                dom.uploadPlaceholder.classList.add('hidden');
+            }
 
             Array.from(files).forEach(file => {
                 if (!file.type.startsWith('image/')) return;
@@ -219,7 +311,7 @@
                         name: file.name
                     });
                     
-                    // Cria e adiciona a miniatura
+                    // Cria e adiciona a miniatura da imagem
                     const previewItem = document.createElement('div');
                     previewItem.className = 'preview-item text-center';
                     previewItem.innerHTML = `
@@ -231,33 +323,48 @@
                 reader.readAsDataURL(file);
             });
 
+            // Habilita os botões de extração e limpeza quando imagens são carregadas
             dom.extractTextButton.disabled = false;
             dom.clearButton.disabled = false;
+            // Limpa o valor dos inputs de arquivo para permitir o mesmo arquivo ser selecionado novamente (móvel)
+            dom.imageUploadInput.value = null; 
+            dom.cameraUploadInput.value = null; 
         }
 
+        /**
+         * Reseta toda a seleção de imagens e o texto extraído.
+         */
         function resetSelection() {
             currentImages = [];
             dom.previewContainer.innerHTML = '';
             dom.extractedTextArea.value = '';
             dom.uploadPlaceholder.classList.remove('hidden');
-            dom.imageUploadInput.value = ''; // Limpa o input de ficheiro
+            dom.imageUploadInput.value = ''; 
+            dom.cameraUploadInput.value = ''; 
             dom.extractTextButton.disabled = true;
             dom.clearButton.disabled = true;
+            // Desabilita os botões de IA após a limpeza
+            dom.summarizeTextButton.disabled = true;
+            dom.translateTextButton.disabled = true;
         }
 
+        /**
+         * Lógica principal para extrair texto das imagens usando a API do Gemini.
+         */
         async function handleOcr() {
+            // Usa a variável global apiKey que é carregada do localStorage
             if (!apiKey) {
-                alert("Por favor, configure a sua chave API do Gemini primeiro.");
+                showMessageBox("Por favor, configure a sua chave API do Gemini primeiro.");
                 if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
                 return;
             }
             if (currentImages.length === 0) {
-                alert("Por favor, carregue uma ou mais imagens primeiro.");
+                showMessageBox("Por favor, carregue uma ou mais imagens primeiro.");
                 return;
             }
 
-            toggleLoading(true);
-            dom.extractedTextArea.value = ""; // Limpa antes de começar
+            toggleLoading(true); // Inicia o estado de carregamento
+            dom.extractedTextArea.value = ""; // Limpa a área de texto antes de começar
             let fullTextOutput = "";
 
             for (let i = 0; i < currentImages.length; i++) {
@@ -269,13 +376,16 @@
                     contents: [{
                         parts: [
                             { text: prompt },
-                            { inline_data: { mime_type: image.mimeType, data: image.base64 } }
+                            { inlineData: { mimeType: image.mimeType, data: image.base64 } } 
                         ]
                     }]
                 };
 
                 try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+                    // Usa a variável global apiKey para a URL da API
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -284,7 +394,8 @@
                     if (!response.ok) {
                         const errorBody = await response.text();
                         fullTextOutput += `--- ERRO AO PROCESSAR ${image.name} ---\n${errorBody}\n\n`;
-                        continue; // Passa para a próxima imagem
+                        console.error(`Erro da API para ${image.name}:`, errorBody);
+                        continue; 
                     }
                     
                     const data = await response.json();
@@ -307,19 +418,184 @@
                 await new Promise(resolve => setTimeout(resolve, 500)); 
             }
             dom.extractedTextArea.placeholder = "O texto extraído das imagens aparecerá aqui...";
-            toggleLoading(false);
+            toggleLoading(false); // Finaliza o estado de carregamento
+            // Habilita os botões de IA se houver texto extraído
+            if (dom.extractedTextArea.value.trim().length > 0) {
+                dom.summarizeTextButton.disabled = false;
+                dom.translateTextButton.disabled = false;
+            }
         }
+
+        /**
+         * Lida com a funcionalidade de resumo de texto usando a API do Gemini.
+         */
+        async function handleSummarizeText() {
+            // Usa a variável global apiKey que é carregada do localStorage
+            const textToSummarize = dom.extractedTextArea.value.trim();
+            if (!apiKey) {
+                showMessageBox("Por favor, configure a sua chave API do Gemini primeiro.");
+                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
+                return;
+            }
+            if (textToSummarize.length === 0 || textToSummarize.startsWith("A Capy-IA está a ler...")) {
+                showMessageBox("Não há texto válido para resumir. Por favor, extraia o texto de uma imagem primeiro.");
+                return;
+            }
+
+            toggleButtonState(dom.summarizeTextButton, true); // Desabilita o botão durante o resumo
+            dom.extractedTextArea.placeholder = "A Capy-IA está resumindo o texto...";
+            
+            const prompt = `Resuma o seguinte texto de forma concisa e clara:\n\n${textToSummarize}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            try {
+                // Usa a variável global apiKey para a URL da API
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    dom.extractedTextArea.value = `Erro ao resumir: ${errorBody}`;
+                    showMessageBox(`Erro ao resumir texto: ${errorBody}`);
+                    console.error("Erro da API ao resumir:", errorBody);
+                } else {
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                        dom.extractedTextArea.value = data.candidates[0].content.parts[0].text.trim();
+                        showMessageBox('Texto resumido com sucesso!');
+                    } else {
+                        dom.extractedTextArea.value = "Nenhum resumo gerado ou a resposta foi bloqueada.";
+                        showMessageBox('Nenhum resumo gerado ou a resposta foi bloqueada.');
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao chamar a API para resumir:", error);
+                dom.extractedTextArea.value = `Falha na conexão ao resumir: ${error.message}`;
+                showMessageBox(`Falha na conexão ao resumir texto: ${error.message}`);
+            } finally {
+                dom.extractedTextArea.placeholder = "O texto extraído das imagens aparecerá aqui...";
+                toggleButtonState(dom.summarizeTextButton, false); // Habilita o botão de resumo
+            }
+        }
+
+        /**
+         * Lida com a funcionalidade de tradução de texto usando a API do Gemini.
+         */
+        async function handleTranslateText() {
+            // Usa a variável global apiKey que é carregada do localStorage
+            const textToTranslate = dom.extractedTextArea.value.trim();
+            if (!apiKey) {
+                showMessageBox("Por favor, configure a sua chave API do Gemini primeiro.");
+                if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.click();
+                return;
+            }
+            if (textToTranslate.length === 0 || textToTranslate.startsWith("A Capy-IA está a ler...")) {
+                showMessageBox("Não há texto válido para traduzir. Por favor, extraia o texto de uma imagem primeiro.");
+                return;
+            }
+
+            toggleButtonState(dom.translateTextButton, true); // Desabilita o botão durante a tradução
+            dom.extractedTextArea.placeholder = "A Capy-IA está traduzindo o texto...";
+
+            const prompt = `Traduza o seguinte texto para o inglês:\n\n${textToTranslate}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            try {
+                // Usa a variável global apiKey para a URL da API
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    dom.extractedTextArea.value = `Erro ao traduzir: ${errorBody}`;
+                    showMessageBox(`Erro ao traduzir texto: ${errorBody}`);
+                    console.error("Erro da API ao traduzir:", errorBody);
+                } else {
+                    const data = await response.json();
+                    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
+                        dom.extractedTextArea.value = data.candidates[0].content.parts[0].text.trim();
+                        showMessageBox('Texto traduzido com sucesso!');
+                    } else {
+                        dom.extractedTextArea.value = "Nenhuma tradução gerada ou a resposta foi bloqueada.";
+                        showMessageBox('Nenhuma tradução gerada ou a resposta foi bloqueada.');
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao chamar a API para traduzir:", error);
+                dom.extractedTextArea.value = `Falha na conexão ao traduzir: ${error.message}`;
+                showMessageBox(`Falha na conexão ao traduzir texto: ${error.message}`);
+            } finally {
+                dom.extractedTextArea.placeholder = "O texto extraído das imagens aparecerá aqui...";
+                toggleButtonState(dom.translateTextButton, false); // Habilita o botão de tradução
+            }
+        }
+
+
+        // Dados de ferramentas mockados diretamente no JS para evitar o erro de fetch
+        // Isso substitui a tentativa de carregar 'tools.json'
+        const toolsData = [
+            {
+                "id": "CapyOCR",
+                "title": "CapyOCR",
+                "pageUrl": "capyocr.html",
+                "category": "Utilitários de Imagem",
+                "description": "Extraia texto de imagens com IA.",
+                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-camera-off w-10 h-10 mb-2\"><line x1=\"2\" x2=\"22\" y1=\"2\" y2=\"22\"></line><path d=\"M10.9 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12.1\"></path><path d=\"M18 5 22 9\"></path><path d=\"M14.5 19H20a2 2 0 0 0 2-2V7.5\"></path><path d=\"M10.9 10.9V14a2 2 0 0 1-2 2H4\"></path><path d=\"M16 16v3.1\"></path></svg>"
+            },
+            {
+                "id": "CapySummarizer",
+                "title": "CapySummarizer",
+                "pageUrl": "capysummarizer.html",
+                "category": "Processamento de Texto",
+                "description": "Resuma textos longos em segundos.",
+                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-file-text w-10 h-10 mb-2\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
+            },
+            {
+                "id": "CapyTranscriber",
+                "title": "CapyTranscriber",
+                "pageUrl": "capytranscriber.html",
+                "category": "Áudio e Vídeo",
+                "description": "Transcreva áudios e vídeos para texto.",
+                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-mic-vocal w-10 h-10 mb-2\"><path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\"/><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/></svg>"
+            },
+            {
+                "id": "CapyCode",
+                "title": "CapyCode",
+                "pageUrl": "capycode.html",
+                "category": "Desenvolvimento",
+                "description": "Gere código, explique e depure.",
+                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-code w-10 h-10 mb-2\"><polyline points=\"16 18 22 12 16 6\"/><polyline points=\"8 6 2 12 8 18\"/></svg>"
+            },
+            {
+                "id": "CapyChat",
+                "title": "CapyChat",
+                "pageUrl": "capychat.html",
+                "category": "Comunicação",
+                "description": "Converse e obtenha respostas.",
+                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-circle w-10 h-10 mb-2\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>"
+            }
+        ];
 
          async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
-                const response = await fetch('tools.json'); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
-                const toolsData = await response.json();
-                
+                // Usando diretamente os dados de toolsData mockados
                 const categories = {};
                 toolsData.forEach(tool => {
-                    // Suporte a múltiplas categorias (array ou string)
                     let toolCategories = tool.category;
                     if (typeof toolCategories === 'string') {
                         toolCategories = [toolCategories];
@@ -336,7 +612,7 @@
                 const homeLinkSidebar = document.createElement('a');
                 homeLinkSidebar.href = 'index.html';
                 homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"text-purple-400\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg> <span>Página Inicial</span>`;
                 dom.sidebar.appendChild(homeLinkSidebar);
 
                 for (const categoryName in categories) {
@@ -344,7 +620,7 @@
                     categoryDiv.className = 'mb-1';
                     const categoryButton = document.createElement('button');
                     categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 9l-7 7-7-7\"></path></svg>`;
                     const categoryContent = document.createElement('div');
                     categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
                     
@@ -377,6 +653,9 @@
             }
         }
 
+        /**
+         * Carrega a chave da API do Gemini do localStorage.
+         */
         function loadApiKey() {
             const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
             if(savedKey) { 
@@ -393,7 +672,9 @@
             // Event Listeners
             if(dom.extractTextButton) dom.extractTextButton.addEventListener('click', handleOcr);
             if(dom.selectFileButton) dom.selectFileButton.addEventListener('click', () => dom.imageUploadInput.click());
+            if(dom.takePhotoButton) dom.takePhotoButton.addEventListener('click', () => dom.cameraUploadInput.click()); 
             if(dom.imageUploadInput) dom.imageUploadInput.addEventListener('change', (e) => handleImageFiles(e.target.files));
+            if(dom.cameraUploadInput) dom.cameraUploadInput.addEventListener('change', (e) => handleImageFiles(e.target.files)); 
             if(dom.clearButton) dom.clearButton.addEventListener('click', resetSelection);
 
             // Drag and Drop Events
@@ -413,19 +694,49 @@
                 }, false);
             }
             
+            // Evento para o botão de copiar texto
             if(dom.copyTextButton) dom.copyTextButton.addEventListener('click', () => {
                 const textToCopy = dom.extractedTextArea.value;
                 if(textToCopy && !textToCopy.startsWith("A Capy-IA está a ler...")) {
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        alert('Texto extraído copiado!');
-                    }).catch(err => {
-                        alert('Falha ao copiar. Tente manualmente.');
+                    try {
+                        const textArea = dom.extractedTextArea;
+                        textArea.select();
+                        document.execCommand('copy'); 
+                        showMessageBox('Texto extraído copiado!');
+                    } catch (err) {
                         console.error('Erro ao copiar: ', err);
-                    });
+                        showMessageBox('Falha ao copiar. Tente manualmente.');
+                    }
                 } else {
-                     alert('Não há texto válido para copiar.');
+                     showMessageBox('Não há texto válido para copiar.');
                 }
             });
+
+            // Evento para o botão de exportar texto
+            if (dom.exportTextButton) {
+                dom.exportTextButton.addEventListener('click', () => {
+                    const textToExport = dom.extractedTextArea.value;
+                    if (textToExport && !textToExport.startsWith("A Capy-IA está a ler...")) {
+                        const blob = new Blob([textToExport], { type: 'text/plain;charset=utf-8' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'texto_extraido_capyocr.txt';
+                        document.body.appendChild(a); 
+                        a.click();
+                        document.body.removeChild(a); 
+                        URL.revokeObjectURL(url); 
+                        showMessageBox('Texto extraído exportado com sucesso!');
+                    } else {
+                        showMessageBox('Não há texto válido para exportar.');
+                    }
+                });
+            }
+
+            // Eventos para os novos botões de IA
+            if (dom.summarizeTextButton) dom.summarizeTextButton.addEventListener('click', handleSummarizeText);
+            if (dom.translateTextButton) dom.translateTextButton.addEventListener('click', handleTranslateText);
+
 
             // Lógica da Sidebar Global e Modal de API...
              if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
@@ -436,9 +747,14 @@
             if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
             if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInput && dom.apiKeysModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
                 const key = dom.geminiApiKeyInput.value.trim();
-                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; alert("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
-                else { alert("Por favor, insira uma chave API.");}
+                if(key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); apiKey = key; showMessageBox("Chave API do Gemini salva!"); dom.apiKeysModal.classList.add('hidden'); }
+                else { showMessageBox("Por favor, insira uma chave API.");}
             });
+
+            // Event listener para fechar a caixa de mensagem personalizada
+            if (dom.messageBoxCloseBtn) {
+                dom.messageBoxCloseBtn.addEventListener('click', hideMessageBox);
+            }
         });
     </script>
 </body>
