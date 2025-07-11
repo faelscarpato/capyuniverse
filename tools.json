@@ -2,7 +2,7 @@
   {
     "id": "CapyAudiencias",
     "title": "Analisador de Atas de Audiência",
-   "iconUrl": "icon/capybranding.png",
+    "iconUrl": "icon/capybranding.png",
     "imageUrl": "img/capyaudiencias.webp",
     "description": "Analise e resuma atas de audiência com precisão jurídica de IA.",
     "category": "Jurídico",
@@ -18,12 +18,11 @@
     "description": "Consultas rápidas e seguras sobre identidade visual e branding.",
     "category": "Mídia & Marketing",
     "color": "blue-400"
-
   },
   {
     "id": "CapyBula",
     "title": "Bulário Inteligente",
-   "iconUrl": "icon/bula.webp",
+    "iconUrl": "icon/bula.webp",
     "imageUrl": "img/capybula.webp",
     "description": "Consulte informações detalhadas sobre medicamentos de forma rápida e segura.",
     "category": "Saúde e Bem-Estar",
@@ -90,7 +89,7 @@
     "pageUrl": "capycopy.html",
     "color": "pink-400"
   },
-{
+  {
     "id": "CapyCLT",
     "title": "CapyCLT",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-pink-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 8L3 12l4 4\"/><path d=\"M21 8l-4 4 4 4\"/><path d=\"M14 4l-4 16\"/></svg>",
@@ -290,7 +289,7 @@
     "pageUrl": "capyide.html",
     "color": "purple-400"
   },
-{
+  {
     "id": "CapyIMG/TXT",
     "title": "Imagem para Texto",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline></svg>",
@@ -300,7 +299,6 @@
     "pageUrl": "capyimgtxt.html",
     "color": "purple-400"
   },
-
   {
     "id": "CapyMarkdown",
     "title": "Editor Markdown",
@@ -341,7 +339,6 @@
     "pageUrl": "capyminuta.html",
     "color": "slate-400"
   },
-
   {
     "id": "CapyOCR",
     "title": "Imagem para Texto (OCR)",
@@ -352,7 +349,6 @@
     "pageUrl": "capyocr.html",
     "color": "blue-400"
   },
-  
   {
     "id": "CapyPDF",
     "title": "Chat com PDF (Texto)",
@@ -476,7 +472,7 @@
   {
     "id": "CapyTCC",
     "title": "Tutor de TCC",
-    "icon": "<svg class=\"w-5 h-5 mr-2 text-indigo-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"></path><path d=\"M12 13L12 7\"></path><path d=\"M9 10L15 10\"></path></svg>",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-indigo-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2 0 0 1 4 19.5v-15A2.5 2 0 0 1 6.5 2z\"></path><path d=\"M12 13L12 7\"></path><path d=\"M9 10L15 10\"></path></svg>",
     "imageUrl": "img/capytcc.webp",
     "description": "O teu orientador de TCC com inteligência de capivara!",
     "category": "Aprendizagem e Educação",
@@ -542,5 +538,35 @@
     "category": "Carreira e RH",
     "pageUrl": "capyvagamatch.html",
     "color": "green-400"
+  },
+  {
+    "id": "CapyCID",
+    "title": "Informador de CID Médico",
+    "icon": "⚕️",
+    "imageUrl": "img/capycid.webp",
+    "description": "Informe-se detalhadamente sobre CIDs e medicamentos de atestados e receitas médicas.",
+    "category": "Saúde e Bem-Estar",
+    "pageUrl": "capycid.html",
+    "color": "blue-400"
+  },
+  {
+    "id": "CapyAPPMaker",
+    "title": "Construtor de Apps",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"6\" width=\"20\" height=\"12\" rx=\"2\" ry=\"2\"></rect><line x1=\"6\" y1=\"10\" x2=\"6\" y2=\"14\"></line><line x1=\"10\" y1=\"10\" x2=\"10\" y2=\"14\"></line><line x1=\"14\" y1=\"10\" x2=\"14\" y2=\"14\"></line></svg>",
+    "imageUrl": "img/capyapmaker.webp",
+    "description": "Gere aplicativos funcionais para hospedagem, sob demanda.",
+    "category": "Desenvolvimento e TI",
+    "pageUrl": "capyapmaker.html",
+    "color": "purple-400"
+  },
+  {
+    "id": "CapyTabela",
+    "title": "Formatador de Tabelas",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-emerald-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\"></line><line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\"></line><line x1=\"9\" y1=\"3\" x2=\"9\" y2=\"21\"></line><line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\"></line></svg>",
+    "imageUrl": "img/capytabela.webp",
+    "description": "Transforme listas em tabelas formatadas, com funções e opção de exportação (XLS/XLSX).",
+    "category": "Produtividade e Organização",
+    "pageUrl": "capytabela.html",
+    "color": "emerald-400"
   }
 ]

@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapyCID: Informador de CID e Receitas Médicas</title>
+  <meta name="description" content="CapyCID, a ferramenta de IA que informa detalhadamente o CID de atestados médicos e explica medicamentos de receitas.">
+  <meta name="keywords" content="CapyCID, IA, inteligência artificial, CID, atestado médico, receita médica, medicamentos, saúde, bem-estar">
+  <meta name="author" content="Rafael Scarpato">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="CapyCID: Informador de CID e Receitas Médicas">
+  <meta property="og:description" content="CapyCID, a ferramenta de IA que informa detalhadamente o CID de atestados médicos e explica medicamentos de receitas.">
+  <meta property="og:image" content="https://faelscarpato.github.io/capyuniverse/img/capycid.webp">
+  <meta property="og:url" content="https://faelscarpato.github.io/capyuniverse/capycid.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CapyUniverse IA">
+  <meta name="twitter:title" content="CapyCID: Informador de CID e Receitas Médicas">
+  <meta name="twitter:description" content="CapyCID, a ferramenta de IA que informa detalhadamente o CID de atestados médicos e explica medicamentos de receitas.">
+  <meta name="twitter:image" content="https://faelscarpato.github.io/capyuniverse/img/capycid.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@rafaelscarpato">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#9333ea">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <style>
+    /* Base styles from CapyContrato */
+    html {
+        background: #121217;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        color: #e5e7eb;
+        /* zinc-200 */
+        background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+        background-repeat: repeat;
+        background-size: 300px;
+        background-color: #18181b;
+        /* zinc-900 */
+    }
+
+    .font-syne {
+        font-family: 'Syne', sans-serif;
+    }
+
+    .font-jetbrains {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .glass {
+        background: rgba(24, 24, 27, 0.6);
+        /* zinc-900 with opacity */
+        backdrop-filter: blur(12px);
+        border-radius: 1.2rem;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border: 1px solid rgba(63, 63, 70, 0.4);
+        /* zinc-700 with opacity */
+    }
+
+    .sidebar-glass {
+        background: rgba(39, 39, 42, 0.7);
+        /* zinc-800 with opacity */
+        backdrop-filter: blur(15px);
+        border-right: 1px solid rgba(63, 63, 70, 0.3);
+        /* zinc-700 */
+    }
+
+    /* Custom scrollbar for chat area and sidebar */
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #292932;
+        border-radius: 60px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Loader animation */
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #8b5cf6;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Notification Styles */
+    #notificationArea {
+        position: fixed;
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 1050;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 24rem;
+    }
+
+    .notification {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        font-size: 0.875rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateX(100%);
+    }
+
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .notification-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .notification-error {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .notification-info {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .notification-warning {
+        background-color: #f59e0b;
+        color: #1f2937;
+    }
+
+    .notification button {
+        margin-left: 0.75rem;
+        font-weight: bold;
+        font-size: 1.125rem;
+        line-height: 1;
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    /* Textarea and Input fields */
+    textarea,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="password"],
+    input[type="file"] { /* Added file input to general styling */
+        background-color: #27272a;
+        /* zinc-800 */
+        border: 1px solid #3f3f46;
+        /* zinc-700 */
+        color: #d4d4d8;
+        /* zinc-300 */
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    textarea:focus,
+    input:focus {
+        outline: none;
+        border-color: #a78bfa;
+        /* violet-400 */
+        box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5);
+        /* violet-400 with opacity */
+        background-color: #2e2e30;
+        /* slightly lighter for focus */
+    }
+
+    ::placeholder {
+        color: #a1a1aa;
+        /* zinc-400 */
+        opacity: 0.8;
+    }
+
+    /* Buttons general style from CapyContrato */
+    button {
+        background-color: #8b5cf6;
+        /* default purple */
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.6rem;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    button:hover {
+        background-color: #a78bfa;
+        /* lighter purple on hover */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Specific button colors (adjusted for CapyCID) */
+    #getCidInfoButton {
+        background-color: #3b82f6; /* blue-500 */
+    }
+    #getCidInfoButton:hover {
+        background-color: #2563eb; /* blue-600 */
+    }
+    #analyzePrescriptionButton {
+        background-color: #10b981; /* emerald-500 */
+    }
+    #analyzePrescriptionButton:hover {
+        background-color: #059669; /* emerald-600 */
+    }
+
+    /* Custom styles for CapyCID */
+    .cid-input-group, .prescription-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .response-area {
+        background-color: #2d3748; /* Darker blue-gray */
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-style: italic;
+        color: #a0aec0;
+        word-wrap: break-word; /* Ensure long words wrap */
+        white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    }
+    .response-area.has-content {
+        text-align: left;
+        font-style: normal;
+        color: #e5e7eb;
+    }
+    .loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #3b82f6; /* Blue for CapyCID */
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+  </style>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3FFD7ZEBN1');
+</script>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+        <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+        <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+        <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div id="notificationArea"></div>
+
+  <div class="flex flex-1 pt-16">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+        <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full lg:ml-64">
+      <section class="glass border-zinc-800 p-6 flex flex-col max-w-3xl mx-auto">
+        <div class="text-center mb-8">
+          <div class="mx-auto h-12 w-12 text-blue-400 mb-2 flex items-center justify-center text-4xl">
+            ⚕️
+          </div>
+          <h1 class="text-3xl font-bold font-syne text-blue-400">CapyCID</h1>
+          <p class="text-md text-gray-300 mt-1">Informador de CID e Receitas Médicas.</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Seção de Consulta de CID -->
+          <div class="bg-zinc-800/50 p-6 rounded-lg border border-zinc-700/50 shadow-md">
+            <h2 class="text-2xl font-bold text-blue-300 mb-4">Consultar CID</h2>
+            <div class="cid-input-group">
+              <label for="cidInput" class="text-gray-300 text-sm">Insira o código CID (ex: J10.0):</label>
+              <input type="text" id="cidInput" placeholder="Ex: J10.0" class="w-full">
+              <button id="getCidInfoButton" class="w-full">
+                Obter Informações do CID
+              </button>
+            </div>
+            <div id="cidResponseArea" class="response-area mt-6">
+              As informações detalhadas do CID aparecerão aqui.
+            </div>
+          </div>
+
+          <!-- Seção de Análise de Receita Médica -->
+          <div class="bg-zinc-800/50 p-6 rounded-lg border border-zinc-700/50 shadow-md">
+            <h2 class="text-2xl font-bold text-blue-300 mb-4">Analisar Receita Médica</h2>
+            <div class="prescription-input-group">
+              <label for="prescriptionImageInput" class="text-gray-300 text-sm">Faça upload de uma foto da receita médica:</label>
+              <input type="file" id="prescriptionImageInput" accept="image/*" class="w-full">
+              <button id="analyzePrescriptionButton" class="w-full">
+                Analisar Receita
+              </button>
+            </div>
+            <div id="prescriptionResponseArea" class="response-area mt-6">
+              A análise dos medicamentos e a importância da receita aparecerão aqui.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- API Keys Modal (from CapyCLT) -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
+    <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
+            <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none bg-transparent shadow-none">&times;</button>
+        </div>
+        <div class="space-y-3">
+            <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+                <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+                <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+                <div class="flex">
+                    <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700" />
+                    <button id="saveGeminiKey" data-provider="gemini" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white shadow-none">Salvar</button>
+                </div>
+                <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse que requerem Gemini.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const currentPageId = 'CapyCID'; // This app's ID
+    let geminiApiKey = ''; // Global API Key for Gemini
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini'; // Key for localStorage
+
+    // DOM elements
+    const dom = {
+        sidebar: document.getElementById('sidebar'),
+        sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+        sidebarOverlay: document.getElementById('sidebarOverlay'),
+        apiKeysModal: document.getElementById('apiKeysModal'),
+        openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+        closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+        geminiApiKeyInputModal: document.getElementById('geminiApiKeyInputModal'),
+        saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+        notificationArea: document.getElementById('notificationArea'),
+
+        cidInput: document.getElementById('cidInput'),
+        getCidInfoButton: document.getElementById('getCidInfoButton'),
+        cidResponseArea: document.getElementById('cidResponseArea'),
+        prescriptionImageInput: document.getElementById('prescriptionImageInput'),
+        analyzePrescriptionButton: document.getElementById('analyzePrescriptionButton'),
+        prescriptionResponseArea: document.getElementById('prescriptionResponseArea'),
+    };
+
+    // Helper for Notifications
+    let notificationCounter = 0;
+    function addNotification(message, type = 'info', duration = 5000) {
+        const notificationId = `notif-${notificationCounter++}`;
+        const notificationDiv = document.createElement('div');
+        notificationDiv.id = notificationId;
+        notificationDiv.classList.add('notification');
+
+        if (type === 'success') notificationDiv.classList.add('notification-success');
+        else if (type === 'error') notificationDiv.classList.add('notification-error');
+        else if (type === 'warning') notificationDiv.classList.add('notification-warning');
+        else notificationDiv.classList.add('notification-info');
+
+        notificationDiv.innerHTML = `<span>${message}</span><button onclick="removeNotification('${notificationId}')">&times;</button>`;
+        dom.notificationArea.appendChild(notificationDiv);
+
+        setTimeout(() => notificationDiv.classList.add('show'), 10); // Trigger transition
+        setTimeout(() => removeNotification(notificationId), duration);
+    }
+
+    window.removeNotification = (id) => {
+        const notification = document.getElementById(id);
+        if (notification) {
+            notification.classList.remove('show');
+            notification.addEventListener('transitionend', () => notification.remove());
+        }
+    };
+
+    // Shows the loading indicator
+    const showLoading = (element, message = 'Analisando...') => {
+        element.innerHTML = `<div class="loading-spinner"></div><p class="mt-2 text-gray-400">${message}</p>`;
+        element.classList.add('loading');
+    };
+
+    // Hides the loading indicator and displays result
+    const displayResult = (element, result) => {
+        element.innerHTML = result;
+        element.classList.remove('loading');
+        element.classList.add('has-content'); // Add class for content styling
+    };
+
+    // Calls the Gemini API to get a response
+    const callGeminiAPI = async (promptText, imageBase64 = null, mimeType = null) => {
+        let targetElement = imageBase64 ? dom.prescriptionResponseArea : dom.cidResponseArea;
+        showLoading(targetElement);
+
+        if (!geminiApiKey) {
+            addNotification("Chave API Gemini não configurada. Por favor, insira sua chave em 'Chaves API'.", "error");
+            hideLoading(targetElement); // Use hideLoading with element
+            return;
+        }
+
+        let chatHistory = [];
+        let parts = [{ text: promptText }];
+
+        if (imageBase64) {
+            parts.push({ inlineData: { mimeType: mimeType, data: imageBase64 } });
+        }
+
+        chatHistory.push({ role: "user", parts: parts });
+
+        const payload = { contents: chatHistory };
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            console.log("API Response:", result);
+
+            if (!response.ok) {
+                let msg = `Erro ${response.status}: ${result?.error?.message || response.statusText}`;
+                if (response.status === 400 && msg.toLowerCase().includes("api key not valid")) msg = "Erro: API Key Gemini inválida ou mal formatada.";
+                else if (response.status === 403) msg = "Erro 403: Acesso negado. Verifique sua API Key e configurações.";
+                throw new Error(msg);
+            }
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                displayResult(targetElement, text);
+                addNotification('Informações obtidas com sucesso!', 'success');
+            } else {
+                displayResult(targetElement, 'Não foi possível obter informações. Tente novamente ou verifique os dados.');
+                addNotification('Resposta da IA vazia ou em formato inesperado.', "error");
+                console.error("Estrutura de resposta inesperada da API:", result);
+            }
+        } catch (error) {
+            console.error("Erro ao chamar a API Gemini:", error);
+            displayResult(targetElement, `Ocorreu um erro: ${error.message}.`);
+            addNotification(`Erro na comunicação com a IA: ${error.message}`, "error");
+        } finally {
+            // No need to hideLoading here, as displayResult already handles removing the loading class
+        }
+    };
+
+    // Handles CID lookup
+    const handleCidLookup = async () => {
+        const cidCode = dom.cidInput.value.trim();
+        if (!cidCode) {
+            addNotification('Por favor, insira um código CID.', 'warning');
+            return;
+        }
+        const prompt = `Explique o CID ${cidCode} em detalhes, incluindo sua importância, possíveis implicações, sintomas comuns e tratamento geral. Forneça informações de forma clara e acessível, como se estivesse explicando para uma pessoa leiga, mas com precisão médica.`;
+        await callGeminiAPI(prompt);
+    };
+
+    // Handles prescription analysis
+    const handlePrescriptionAnalysis = async () => {
+        const file = dom.prescriptionImageInput.files[0];
+        if (!file) {
+            addNotification('Por favor, selecione uma imagem da receita médica.', 'warning');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64ImageData = e.target.result.split(',')[1]; // Get base64 part
+            const prompt = "Analise esta imagem de receita médica. Identifique e explique os medicamentos listados (nome, dosagem, finalidade principal). Reforce a importância de seguir rigorosamente as instruções médicas, os horários e a duração do tratamento. Se houver qualquer indicação de CID ou condição médica no atestado junto, por favor, mencione e explique brevemente. Mantenha a linguagem clara, acessível e profissional, priorizando a segurança e a adesão ao tratamento.";
+            await callGeminiAPI(prompt, base64ImageData, file.type);
+        };
+        reader.onerror = (error) => {
+            console.error("Erro ao ler o arquivo:", error);
+            addNotification('Erro ao carregar a imagem. Tente novamente.', 'error');
+            displayResult(dom.prescriptionResponseArea, 'Erro ao carregar a imagem.');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Sidebar rendering logic
+    async function renderSidebar() {
+        if (!dom.sidebar) return;
+        try {
+            const response = await fetch('tools.json');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const toolsData = await response.json();
+
+            const categories = {};
+            toolsData.forEach(tool => {
+                if (!categories[tool.category]) categories[tool.category] = [];
+                categories[tool.category].push(tool);
+            });
+            dom.sidebar.innerHTML = '';
+
+            const homeLinkSidebar = document.createElement('a');
+            homeLinkSidebar.href = 'index.html';
+            homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
+            homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+            dom.sidebar.appendChild(homeLinkSidebar);
+
+            for (const categoryName in categories) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'mb-1';
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150 bg-transparent shadow-none';
+                categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+                categories[categoryName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    // Use tool.icon if available, otherwise use a default SVG or empty span
+                    const iconHtml = tool.icon || `<svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>`;
+                    link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active bg-gray-700 text-white' : 'text-gray-400'}`;
+                    link.innerHTML = `${iconHtml}<span>${tool.title}</span>`;
+                    categoryContent.appendChild(link);
+                });
+
+                categoryButton.addEventListener('click', () => {
+                    categoryContent.classList.toggle('expanded');
+                    categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                });
+
+                if (categories[categoryName].some(tool => tool.id === currentPageId)) {
+                    categoryContent.classList.add('expanded');
+                    categoryButton.querySelector('svg').classList.add('rotate-180');
+                }
+
+                categoryDiv.appendChild(categoryButton);
+                categoryDiv.appendChild(categoryContent);
+                dom.sidebar.appendChild(categoryDiv);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar ferramentas para a sidebar:", error);
+            if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+        }
+    }
+
+    // API Key loading/saving
+    function loadApiKey() {
+        const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+        if (savedKey) {
+            geminiApiKey = savedKey;
+            if (dom.geminiApiKeyInputModal) dom.geminiApiKeyInputModal.value = savedKey;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderSidebar();
+        loadApiKey();
+
+        // Event Listeners for CapyCID functionality
+        dom.getCidInfoButton.addEventListener('click', handleCidLookup);
+        dom.analyzePrescriptionButton.addEventListener('click', handlePrescriptionAnalysis);
+
+        // Event Listeners for Sidebar and API Key Modal
+        if (dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay) {
+            dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+            if (dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+        }
+        if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+        if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+        if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInputModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
+            const key = dom.geminiApiKeyInputModal.value.trim();
+            if (key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); geminiApiKey = key; addNotification("Chave API do Gemini salva!", "success"); dom.apiKeysModal.classList.add('hidden'); }
+            else { addNotification("Por favor, insira uma chave API.", "warning"); }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (!dom.apiKeysModal.classList.contains('hidden')) {
+                    dom.apiKeysModal.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+    // Service Worker registration (copied from index.html)
+    // Removed service worker registration due to protocol issues in this environment
+    /*
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('Service Worker registrado'))
+        .catch(err => console.error('Erro no SW', err));
+    }
+    */
+  </script>
+</body>
+</html>
