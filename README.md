@@ -1,4 +1,4 @@
-# 🪐 CapyUniverse
+# 🐿️ CapyUniverse
 
 **O ecossistema definitivo de ferramentas inteligentes e criativas com a alma de uma capivara astronauta.**  
 Desenvolvido por [@faelscarpato](https://github.com/faelscarpato) com 💡 inovação, 🛠️ código afiado e 🧠 IA de verdade.
