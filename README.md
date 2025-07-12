@@ -3,7 +3,7 @@
 **O ecossistema definitivo de ferramentas inteligentes e criativas com a alma de uma capivara astronauta.**  
 Desenvolvido por [@faelscarpato](https://github.com/faelscarpato) com 💡 inovação, 🛠️ código afiado e 🧠 IA de verdade.
 
-![CapyUniverse Banner](https://github.com/faelscarpato/capyuniverse/assets/banner-capyuniverse.png)
+![CapyUniverse Banner](https://github.com/faelscarpato/capyuniverse/img/banner-capyuniverse.png)
 
 ---
 
@@ -31,7 +31,7 @@ O **CapyUniverse** é um superapp web que une várias ferramentas baseadas em IA
 
 ## 🌐 Demonstração
 
-[🔗 Acesse a versão atual (se disponível)](https://capyuniverse.vercel.app/)  
+[🔗 Acesse a versão atual (se disponível)](https://capyuniverse.pages.dev/)  
 > *Ou rode localmente e entre nesse universo insano de IA.*
 
 ---
