@@ -3,7 +3,7 @@
 **O ecossistema definitivo de ferramentas inteligentes e criativas com a alma de uma capivara astronauta.**  
 Desenvolvido por [@faelscarpato](https://github.com/faelscarpato) com 💡 inovação, 🛠️ código afiado e 🧠 IA de verdade.
 
-![CapyUniverse Banner](https://github.com/faelscarpato/capyuniverse/img/banner-capyuniverse.png)
+![CapyUniverse Banner](https://faelscarpato.github.io/capyuniverse/img/banner-capyuniverse.png)
 
 ---
 
