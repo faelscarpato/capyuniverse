@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1 " />
+  <title>Bem-vindo ao CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Helvetica Neue', sans-serif;
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: white;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    button:hover {
+      border: 0.3px solid #ffffff; /* Cor do hover */
+      background-color: rgb(42, 0, 110); /* Cor de fundo com opacidade */
+      color: #ffffff; /* Cor do texto */
+      
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col animate-fade-in overscroll-y-none">
+
+  <!-- Main Content -->
+  <main role="main" class="flex-grow flex flex-col items-center justify-around px-7 pt-2 text-center">
+    <img src="logo-colorida.png" alt="CapyUniverse Logo" class="w-48 mb-2">
+    <div id="capy-scene" class="w-56 h-auto mb-2 relative">
+      <img data-depth="0.5" src="capyuniverse.png" alt="Capy Mascote" class="block w-full">
+    </div>
+    <h1 class="text-3xl font-bold">Venha para o universo das Capy's</h1>
+    <p class="mt-0 text-xs text-gray-200">Suas Capy's Inteligentes, prontas para te ajudar.</p>
+     <button id="accessButton" class="w-full max-w-sm mx-auto rounded-full bg-purple-900 py-3 text-lg font-semibold text-white shadow-md  ">
+      Acesse Agora
+    </button>
+  </main>
+
+  <!-- Footer / Action Area -->
+  <footer role="contentinfo" class="w-full px-6 pb-6 text-center">
+   
+    <p class="text-xs text-gray-400 mt-2">© 2024 CapyUniverse. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    // Navegação para a próxima página
+    document.getElementById('accessButton').addEventListener('click', function() {
+      window.location.href = 'index.html?from=splash';
+    });
+
+    // Inicialização do efeito Parallax
+    var scene = document.getElementById('capy-scene');
+    var parallaxInstance = new Parallax(scene, {
+      relativeInput: true, // Faz o movimento ser relativo ao container
+      hoverOnly: true     // Ativa o efeito com o giroscópio do celular também
+    });
+  </script>
+
+</body>
+</html>
