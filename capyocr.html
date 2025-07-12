@@ -547,53 +547,14 @@
 
         // Dados de ferramentas mockados diretamente no JS para evitar o erro de fetch
         // Isso substitui a tentativa de carregar 'tools.json'
-        const toolsData = [
-            {
-                "id": "CapyOCR",
-                "title": "CapyOCR",
-                "pageUrl": "capyocr.html",
-                "category": "Utilitários de Imagem",
-                "description": "Extraia texto de imagens com IA.",
-                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-camera-off w-10 h-10 mb-2\"><line x1=\"2\" x2=\"22\" y1=\"2\" y2=\"22\"></line><path d=\"M10.9 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12.1\"></path><path d=\"M18 5 22 9\"></path><path d=\"M14.5 19H20a2 2 0 0 0 2-2V7.5\"></path><path d=\"M10.9 10.9V14a2 2 0 0 1-2 2H4\"></path><path d=\"M16 16v3.1\"></path></svg>"
-            },
-            {
-                "id": "CapySummarizer",
-                "title": "CapySummarizer",
-                "pageUrl": "capysummarizer.html",
-                "category": "Processamento de Texto",
-                "description": "Resuma textos longos em segundos.",
-                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-file-text w-10 h-10 mb-2\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M10 9H8\"/><path d=\"M16 13H8\"/><path d=\"M16 17H8\"/></svg>"
-            },
-            {
-                "id": "CapyTranscriber",
-                "title": "CapyTranscriber",
-                "pageUrl": "capytranscriber.html",
-                "category": "Áudio e Vídeo",
-                "description": "Transcreva áudios e vídeos para texto.",
-                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-mic-vocal w-10 h-10 mb-2\"><path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\"/><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/></svg>"
-            },
-            {
-                "id": "CapyCode",
-                "title": "CapyCode",
-                "pageUrl": "capycode.html",
-                "category": "Desenvolvimento",
-                "description": "Gere código, explique e depure.",
-                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-code w-10 h-10 mb-2\"><polyline points=\"16 18 22 12 16 6\"/><polyline points=\"8 6 2 12 8 18\"/></svg>"
-            },
-            {
-                "id": "CapyChat",
-                "title": "CapyChat",
-                "pageUrl": "capychat.html",
-                "category": "Comunicação",
-                "description": "Converse e obtenha respostas.",
-                "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-message-circle w-10 h-10 mb-2\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>"
-            }
-        ];
 
          async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
-                // Usando diretamente os dados de toolsData mockados
+                 const response = await fetch('tools.json');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const toolsData = await response.json();
+
                 const categories = {};
                 toolsData.forEach(tool => {
                     let toolCategories = tool.category;
