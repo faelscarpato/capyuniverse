@@ -497,7 +497,7 @@
     "description": "Seu suporte técnico de plantão. Descreva problemas de software, hardware ou redes e receba diagnósticos e soluções passo a passo.",
     "category": "Suporte Técnico",
     "pageUrl": "capyti.html",
-    "color": "indigo"
+    "color": "indigo-400"
   },
   {
     "id": "CapyTone",
