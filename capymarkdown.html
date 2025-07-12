@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>CapyMarkdown - Editor e Visualizador</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +40,7 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
         }
-        .sidebar-glass { 
+        .sidebar-glass {
              background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
              backdrop-filter: blur(15px);
              border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
@@ -58,7 +57,7 @@
         .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .category-content.expanded { max-height: 1500px; }
         .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
-        
+
         /* ESTILIZAÇÃO DOS ELEMENTOS DO EDITOR MARKDOWN */
         #preview-output {
             background-color: #ffffff;
@@ -101,17 +100,17 @@
 
     <div id="notificationArea"></div>
 
-    <div class="flex flex-1 pt-16"> 
+    <div class="flex flex-1 pt-16">
         <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
             <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
         </aside>
         <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
             <section class="md:col-span-2 glass border-zinc-800 p-6 flex flex-col h-full">
                 <h1 class="text-2xl font-bold text-center mb-4 font-syne">CapyMarkdown 📝</h1>
-                
+
                 <div class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex flex-col">
                         <h3 class="text-lg font-semibold mb-2 font-syne text-center">Editor</h3>
@@ -177,7 +176,7 @@
         const textarea = document.getElementById('input-text');
         const preview = document.getElementById('preview-output');
 
-       
+
         // --- LÓGICA DO EDITOR MARKDOWN ---
         function updatePreview() {
             preview.innerHTML = marked.parse(textarea.value);
@@ -209,7 +208,7 @@
             textarea.focus();
             updatePreview();
         }
-        
+
         function convertToTxt() {
             if (confirm("Isso removerá toda a formatação Markdown. Deseja continuar?")) {
                 let text = textarea.value.replace(/(\*\*|__)(.*?)\1/g, '$2').replace(/(\*|_)(.*?)\1/g, '$2').replace(/^#+\s/gm, '').replace(/!\[(.*?)\]\(.*?\)/g, '').replace(/\[(.*?)\]\(.*?\)/g, '$1').replace(/^>\s/gm, '').replace(/^(\s*(\*|-|\+)\s)/gm, '').replace(/^(\s*\d+\.\s)/gm, '').replace(/`{3}[\s\S]*?`{3}/g, m => m.replace(/`/g, '')).replace(/`/g, '');
@@ -230,20 +229,24 @@
         }
 
         // --- LÓGICA DA SIDEBAR E NAVEGAÇÃO ---
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+        };
+
         async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
-                const response = await fetch('tools.json'); 
+                const response = await fetch('tools.json');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const toolsData = await response.json();
-                
+
                 const categories = {};
                 toolsData.forEach(tool => {
                     if (!categories[tool.category]) categories[tool.category] = [];
                     categories[tool.category].push(tool);
                 });
-                dom.sidebar.innerHTML = ''; 
-                
+                dom.sidebar.innerHTML = '';
+
                 const homeLinkSidebar = document.createElement('a');
                 homeLinkSidebar.href = 'index.html';
                 homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
@@ -258,7 +261,7 @@
                     categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
                     const categoryContent = document.createElement('div');
                     categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-                    
+
                     categories[categoryName].forEach(tool => {
                         const link = document.createElement('a');
                         link.href = tool.pageUrl;
@@ -272,7 +275,7 @@
                         categoryContent.classList.toggle('expanded');
                         categoryButton.querySelector('svg').classList.toggle('rotate-180');
                     });
-                    
+
                     if (categories[categoryName].some(tool => tool.id === currentPageId)) {
                         categoryContent.classList.add('expanded');
                         categoryButton.querySelector('svg').classList.add('rotate-180');
@@ -290,6 +293,7 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar();
             updatePreview(); // Renderiza o preview inicial (caso haja texto)
 
             if(sidebarToggleBtn && sidebar && sidebarOverlay){

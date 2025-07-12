@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CapyPDF - Interagir com Conteúdo de PDF com IA</title>
+    <title>CapyPDF - Converse com seus PDFs</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,8 +14,9 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js";
+    </script>
 
 
     <style>
@@ -337,19 +337,20 @@
             sidebarOverlay: document.getElementById('sidebarOverlay'),
             apiKeysModal: document.getElementById('apiKeysModal'),
             openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+            saveGeminiKey: document.getElementById('saveGeminiKey'),
+            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+            fileInputPDF: document.getElementById('fileInputPDF'),
+            fileStatusPDF: document.getElementById('fileStatusPDF'),
+            pdfThumbnail: document.getElementById('pdfThumbnail'),
+            pdfPreviewSection: document.getElementById('pdfPreviewSection'),
+            pdfTextExtracted: document.getElementById('pdfTextExtracted'),
+            showMorePDF: document.getElementById('showMorePDF'),
+            analisarPDFButton: document.getElementById('analisarPDFButton'),
+            chatBoxPDF: document.getElementById('chatBoxPDF'),
+            userInputPDFChat: document.getElementById('userInputPDFChat'),
+            sendPDFChatButton: document.getElementById('sendPDFChatButton'),
         };
-
-        const fileInputPDF = document.getElementById('fileInputPDF');
-        const fileStatusPDF = document.getElementById('fileStatusPDF');
-        const pdfThumbnail = document.getElementById('pdfThumbnail');
-        const pdfPreviewSection = document.getElementById('pdfPreviewSection');
-        const pdfTextExtracted = document.getElementById('pdfTextExtracted');
-        const showMorePDF = document.getElementById('showMorePDF');
-        const analisarPDFButton = document.getElementById('analisarPDFButton');
-        const chatBoxPDF = document.getElementById('chatBoxPDF');
-        const userInputPDFChat = document.getElementById('userInputPDFChat');
-        const sendPDFChatButton = document.getElementById('sendPDFChatButton');
-
 
         // Loader visual
         function showLoadingBtn(btn, show = true) {
@@ -359,13 +360,13 @@
             else { btnText.classList.remove('hidden'); loader.classList.add('hidden'); btn.disabled = false; }
         }
 
-        // ExtraÃ§Ã£o de texto PDF
+        // Extração de texto PDF
         async function extractTextFromPDF(file) {
             dom.fileStatusPDF.innerHTML = '<span class="loader inline-block mr-2"></span>Processando PDF...';
             dom.pdfPreviewSection.classList.add('hidden');
             extractedTextPDF = '';
             if (!file || !file.name.endsWith('.pdf')) {
-                dom.fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF vÃ¡lido.';
+                dom.fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF válido.';
                 return;
             }
             const reader = new FileReader();
@@ -381,7 +382,7 @@
                             text += content.items.map(item => item.str).join(' ') + '\n\n';
                         }
                         extractedTextPDF = text.trim();
-                        dom.pdfTextExtracted.value = extractedTextPDF.substring(0, 3000) + (extractedTextPDF.length > 3000 ? '\n\n[ConteÃºdo truncado para preview]' : '');
+                        dom.pdfTextExtracted.value = extractedTextPDF.substring(0, 3000) + (extractedTextPDF.length > 3000 ? '\n\n[Conteúdo truncado para preview]' : '');
                         dom.pdfPreviewSection.classList.remove('hidden');
                         dom.fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 15)}.`;
                         resolve(extractedTextPDF);
@@ -398,7 +399,7 @@
             });
         }
 
-        // --- FunÃ§Ãµes de NotificaÃ§Ã£o ---
+        // --- Funções de Notificação ---
         function addNotification(message, type = 'info') {
             const notificationId = 'notif-' + Date.now();
             const typeClasses = {
@@ -432,7 +433,7 @@
         // IA Gemini API
         async function callGemini(prompt, chatHistoryArr = []) {
             if (!apiKey) throw new Error("API Key não configurada.");
-            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + apiKey;
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
             let contents = chatHistoryArr.length
                 ? chatHistoryArr.map(turn => ({ role: turn.role, parts: [{ text: turn.text }] }))
                 : [{ parts: [{ text: prompt }], role: "user" }];
@@ -466,28 +467,28 @@
             msgDiv.className = 'chat-message rounded-md p-2 my-1 ' +
                 (sender === 'user' ? 'bg-red-800/40 self-end text-right' : 'bg-zinc-700/60 self-start');
             msgDiv.innerHTML = md2html(msg);
-            chatBoxPDF.appendChild(msgDiv);
-            chatBoxPDF.scrollTop = chatBoxPDF.scrollHeight;
+            dom.chatBoxPDF.appendChild(msgDiv);
+            dom.chatBoxPDF.scrollTop = dom.chatBoxPDF.scrollHeight;
         }
 
-        fileInputPDF.addEventListener('change', async (e) => {
+        dom.fileInputPDF.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file || !file.name.endsWith('.pdf')) {
-                fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF vÃ¡lido.';
-                pdfTextExtracted.value = '';
-                analisarPDFButton.disabled = true;
-                userInputPDFChat.disabled = true;
-                sendPDFChatButton.disabled = true;
+                dom.fileStatusPDF.textContent = 'Por favor, envie um arquivo PDF válido.';
+                dom.pdfTextExtracted.value = '';
+                dom.analisarPDFButton.disabled = true;
+                dom.userInputPDFChat.disabled = true;
+                dom.sendPDFChatButton.disabled = true;
                 return;
             }
-            fileStatusPDF.innerHTML = '<span class="loader"></span> Processando PDF...';
-            pdfTextExtracted.value = '';
+            dom.fileStatusPDF.innerHTML = '<span class="loader"></span> Processando PDF...';
+            dom.pdfTextExtracted.value = '';
             extractedTextPDF = '';
             pdfFile = file;
-            analisarPDFButton.disabled = false;
+            dom.analisarPDFButton.disabled = false;
 
             // Miniatura
-            pdfThumbnail.innerHTML = '<span class="loader"></span>';
+            dom.pdfThumbnail.innerHTML = '<span class="loader"></span>';
             try {
                 const fileReader = new FileReader();
                 fileReader.onload = async function (event) {
@@ -500,10 +501,10 @@
                     canvas.height = viewport.height;
                     const ctx = canvas.getContext("2d");
                     await page.render({ canvasContext: ctx, viewport }).promise;
-                    pdfThumbnail.innerHTML = '';
-                    pdfThumbnail.appendChild(canvas);
+                    dom.pdfThumbnail.innerHTML = '';
+                    dom.pdfThumbnail.appendChild(canvas);
 
-                    // ExtraÃ§Ã£o simples de texto (atÃ© 10 Páginas)
+                    // Extração simples de texto (até 10 Páginas)
                     let text = '';
                     for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
                         const p = await pdf.getPage(i);
@@ -512,82 +513,82 @@
                     }
                     extractedTextPDF = text.trim();
                     // Preview limitado
-                    pdfTextExtracted.value = extractedTextPDF.substring(0, maxPreviewChars) + (extractedTextPDF.length > maxPreviewChars ? "\n\n[ConteÃºdo truncado para preview]" : "");
-                    showMorePDF.classList.toggle('hidden', extractedTextPDF.length <= maxPreviewChars);
-                    fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 10)}.`;
-                    analisarPDFButton.disabled = false;
-                    userInputPDFChat.disabled = true;
-                    sendPDFChatButton.disabled = true;
-                    chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Pronto para analisar! Clique no botÃ£o abaixo para gerar a persona IA.</div>';
+                    dom.pdfTextExtracted.value = extractedTextPDF.substring(0, maxPreviewChars) + (extractedTextPDF.length > maxPreviewChars ? "\n\n[Conteúdo truncado para preview]" : "");
+                    dom.showMorePDF.classList.toggle('hidden', extractedTextPDF.length <= maxPreviewChars);
+                    dom.fileStatusPDF.textContent = `PDF "${file.name}" processado. Páginas lidas: ${Math.min(pdf.numPages, 10)}.`;
+                    dom.analisarPDFButton.disabled = false;
+                    dom.userInputPDFChat.disabled = true;
+                    dom.sendPDFChatButton.disabled = true;
+                    dom.chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Pronto para analisar! Clique no botão abaixo para gerar a persona IA.</div>';
                 }
                 fileReader.readAsArrayBuffer(file);
             } catch (e) {
-                pdfThumbnail.innerHTML = '<i class="fas fa-file-pdf text-5xl text-red-500"></i>';
-                fileStatusPDF.textContent = 'Erro ao processar PDF.';
+                dom.pdfThumbnail.innerHTML = '<i class="fas fa-file-pdf text-5xl text-red-500"></i>';
+                dom.fileStatusPDF.textContent = 'Erro ao processar PDF.';
             }
         });
 
-        showMorePDF.addEventListener('click', () => {
-            pdfTextExtracted.value = extractedTextPDF;
-            showMorePDF.classList.add('hidden');
+        dom.showMorePDF.addEventListener('click', () => {
+            dom.pdfTextExtracted.value = extractedTextPDF;
+            dom.showMorePDF.classList.add('hidden');
         });
 
         // Análise com IA Gemini
-        analisarPDFButton.disabled = true;
-        userInputPDFChat.disabled = true;
-        sendPDFChatButton.disabled = true;
+        dom.analisarPDFButton.disabled = true;
+        dom.userInputPDFChat.disabled = true;
+        dom.sendPDFChatButton.disabled = true;
 
-        analisarPDFButton.addEventListener('click', async () => {
-            if (!extractedTextPDF) { fileStatusPDF.textContent = "Primeiro envie um PDF!"; return; }
-            showLoadingBtn(analisarPDFButton, true);
-            chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Analisando PDF e gerando persona IA... <span class="loader"></span></div>';
+        dom.analisarPDFButton.addEventListener('click', async () => {
+            if (!extractedTextPDF) { dom.fileStatusPDF.textContent = "Primeiro envie um PDF!"; return; }
+            showLoadingBtn(dom.analisarPDFButton, true);
+            dom.chatBoxPDF.innerHTML = '<div class="ia-message chat-message">Analisando PDF e gerando persona IA... <span class="loader"></span></div>';
             chatHistoryPDF = [];
             pdfPersona = '';
             try {
-                const prompt = `você Ã© o CapyPDF. Analise o conteÃºdo extraÃ­do de um PDF abaixo.
-1. FaÃ§a um resumo objetivo dos temas, tom e intenÃ§Ãµes do documento.
-2. Imagine uma personalidade para a IA que irÃ¡ responder perguntas sobre este PDF:
+                const prompt = `você é o CapyPDF. Analise o conteúdo extraído de um PDF abaixo.
+1. Faça um resumo objetivo dos temas, tom e intenções do documento.
+2. Imagine uma personalidade para a IA que irá responder perguntas sobre este PDF:
    - Defina um "avatar", tom de voz, modo de falar e atitude com base no texto do documento.
-3. Explique ao usuÃ¡rio qual serÃ¡ sua personalidade. Ex: "Vou responder como advogado sÃ©rio", "Serei um professor paciente", etc.
-ConteÃºdo (atÃ© 10000 caracteres):
+3. Explique ao usuário qual será sua personalidade. Ex: "Vou responder como advogado sério", "Serei um professor paciente", etc.
+Conteúdo (até 10000 caracteres):
 ---
 ${extractedTextPDF.substring(0, 10000)}
 ---
-Responda em Markdown. DÃª um nome para sua persona (ex: CapyAdvogado, CapyGuia, CapyProfessor) e explique como serÃ¡ o personagem.`
+Responda em Markdown. Dê um nome para sua persona (ex: CapyAdvogado, CapyGuia, CapyProfessor) e explique como será o personagem.`
                 const textoIA = await callGemini(prompt);
-                chatBoxPDF.innerHTML = md2html(textoIA);
+                dom.chatBoxPDF.innerHTML = md2html(textoIA);
                 // Pega nome da persona:
                 const persona = textoIA.match(/(?:Nome|Persona|Personagem)[:ï¼š]?\s*(.+)$/mi);
                 pdfPersona = persona ? persona[1] : '';
                 chatHistoryPDF = [
                     { role: "model", text: textoIA }
                 ];
-                userInputPDFChat.disabled = false;
-                sendPDFChatButton.disabled = false;
-                showLoadingBtn(analisarPDFButton, false);
+                dom.userInputPDFChat.disabled = false;
+                dom.sendPDFChatButton.disabled = false;
+                showLoadingBtn(dom.analisarPDFButton, false);
                 addMsgToPDFChat('Estou pronto! Pergunte o que quiser sobre este PDF e responderei como prometido acima.', 'ia');
             } catch (err) {
-                chatBoxPDF.innerHTML = `<span class="text-red-500">Erro ao chamar IA: ${err.message}</span>`;
-                showLoadingBtn(analisarPDFButton, false);
+                dom.chatBoxPDF.innerHTML = `<span class="text-red-500">Erro ao chamar IA: ${err.message}</span>`;
+                showLoadingBtn(dom.analisarPDFButton, false);
             }
         });
 
         // Chat real com IA
-        sendPDFChatButton.addEventListener('click', async () => {
-            const userMsg = userInputPDFChat.value.trim();
+        dom.sendPDFChatButton.addEventListener('click', async () => {
+            const userMsg = dom.userInputPDFChat.value.trim();
             if (!userMsg) return;
             addMsgToPDFChat(userMsg, 'user');
-            userInputPDFChat.value = '';
-            showLoadingBtn(sendPDFChatButton, true);
+            dom.userInputPDFChat.value = '';
+            showLoadingBtn(dom.sendPDFChatButton, true);
             chatHistoryPDF.push({ role: "user", text: userMsg });
-            const contextPrompt = `Lembre-se: você Ã© o personagem/persona extraÃ­do deste PDF, definido na Análise anterior.
-Responda mantendo a personalidade e o tom prometido. Fale baseado APENAS no conteÃºdo abaixo:
+            const contextPrompt = `Lembre-se: você é o personagem/persona extraído deste PDF, definido na Análise anterior.
+Responda mantendo a personalidade e o tom prometido. Fale baseado APENAS no conteúdo abaixo:
 ---
 ${extractedTextPDF.substring(0, maxContextChars)}
 ---
-A pergunta Ã©:
+A pergunta é:
 ${userMsg}
-Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãºtil.`;
+Responda de forma autêntica ao personagem, cite exemplos do texto quando útil.`;
             try {
                 const respIA = await callGemini(contextPrompt, chatHistoryPDF);
                 addMsgToPDFChat(respIA, 'ia');
@@ -595,13 +596,13 @@ Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãº
             } catch (err) {
                 addMsgToPDFChat("Erro ao chamar IA: " + err.message, 'ia');
             }
-            showLoadingBtn(sendPDFChatButton, false);
+            showLoadingBtn(dom.sendPDFChatButton, false);
         });
 
-        userInputPDFChat.addEventListener('keypress', e => {
-            if (e.key === "Enter" && !e.shiftKey && !sendPDFChatButton.disabled) {
+        dom.userInputPDFChat.addEventListener('keypress', e => {
+            if (e.key === "Enter" && !e.shiftKey && !dom.sendPDFChatButton.disabled) {
                 e.preventDefault();
-                sendPDFChatButton.click();
+                dom.sendPDFChatButton.click();
             }
         });
 
@@ -694,7 +695,7 @@ Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãº
                                 <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
                                 <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>
                             </div>
-                            <p class="text-xs text-zinc-400 mt-2">Sua chave Ã© salva localmente e usada para as funcionalidades de IA.</p>
+                            <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada para as funcionalidades de IA.</p>
                         </div>
                     </div>
                 </div>
@@ -715,7 +716,6 @@ Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãº
                         apiKey = key;
                         alert("Chave API do Gemini salva!");
                         dom.apiKeysModal.classList.add('hidden');
-                        dom.errorMessage.textContent = "";
                     } else {
                         alert("Por favor, insira uma chave API.");
                     }
@@ -762,7 +762,7 @@ Responda de forma autÃªntica ao personagem, cite exemplos do texto quando Ãº
                 console.warn("dom.sidebarOverlay not found!");
             }
 
-            // Inicializa o sidebar como fechado por padrÃ£o
+            // Inicializa o sidebar como fechado por padrão
             toggleSidebar(false);
         });
     </script>
