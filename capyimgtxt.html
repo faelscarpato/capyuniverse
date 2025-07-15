@@ -53,6 +53,25 @@
             border-color: #ec4899;
             background-color: rgba(236, 72, 153, 0.1);
         }
+
+        /* Estilos para as tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* Full rounded */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            background-color: #3f3f46; /* zinc-700 */
+            color: #e5e7eb; /* gray-200 */
+            border: 1px solid #52525b; /* zinc-600 */
+            white-space: nowrap;
+        }
+        .tag.color-tag {
+            background-color: #be185d; /* pink-700 */
+            color: white;
+            border-color: #db2777; /* pink-600 */
+        }
     </style>
 </head>
 
@@ -120,6 +139,32 @@
                             <i class="fas fa-copy mr-2"></i>Copiar Prompt
                          </button>
                          <p id="errorMessage" class="text-red-400 text-sm mt-2 text-center"></p>
+
+                        <!-- Nova Seção: Análise Detalhada -->
+                        <div id="detailed-analysis-section" class="mt-8 pt-4 border-t border-zinc-700 hidden">
+                            <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4">Análise Detalhada</h2>
+                            
+                            <div class="mb-4">
+                                <h3 class="text-lg font-semibold text-zinc-200 mb-2">Cores Dominantes:</h3>
+                                <div id="cores-dominantes-tags" class="flex flex-wrap gap-2">
+                                    <!-- Tags de cores serão inseridas aqui -->
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h3 class="text-lg font-semibold text-zinc-200 mb-2">Estilo:</h3>
+                                <div id="estilo-tags" class="flex flex-wrap gap-2">
+                                    <!-- Tags de estilo serão inseridas aqui -->
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold text-zinc-200 mb-2">Iluminação:</h3>
+                                <div id="iluminacao-tags" class="flex flex-wrap gap-2">
+                                    <!-- Tags de iluminação serão inseridas aqui -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -151,6 +196,12 @@
             promptOutput: document.getElementById('prompt-output'),
             copyButton: document.getElementById('copy-button'),
             errorMessage: document.getElementById('errorMessage'),
+
+            // Novos elementos DOM para a análise detalhada
+            detailedAnalysisSection: document.getElementById('detailed-analysis-section'),
+            coresDominantesTags: document.getElementById('cores-dominantes-tags'),
+            estiloTags: document.getElementById('estilo-tags'),
+            iluminacaoTags: document.getElementById('iluminacao-tags'),
         };
         
         function toggleLoading(isLoading) {
@@ -159,6 +210,7 @@
             dom.analyzeButton.disabled = isLoading;
             dom.loadingDiv.classList.toggle('hidden', !isLoading);
             dom.promptOutput.classList.toggle('hidden', isLoading);
+            dom.detailedAnalysisSection.classList.toggle('hidden', isLoading); // Oculta a seção de análise detalhada ao carregar
 
             if (isLoading) {
                 if(btnText) btnText.classList.add('hidden');
@@ -219,6 +271,14 @@
                 handleFile(files[0]);
             }
         });
+
+        // Função para criar tags
+        function createTag(text, isColor = false) {
+            const span = document.createElement('span');
+            span.className = `tag ${isColor ? 'color-tag' : 'bg-zinc-700 text-gray-200 border-zinc-600'}`;
+            span.textContent = text;
+            return span;
+        }
         
         async function analyzeImage() {
             if (!apiKey) {
@@ -232,7 +292,54 @@
             dom.errorMessage.textContent = '';
             toggleLoading(true);
 
-            const prompt = "Descreva esta imagem em detalhes para que possa ser usada como um prompt para uma IA geradora de imagens. Detalhe o estilo, composição, cores, iluminação, objetos e o sentimento geral da imagem.";
+            // Limpa os resultados anteriores
+            dom.promptOutput.value = '';
+            dom.coresDominantesTags.innerHTML = '';
+            dom.estiloTags.innerHTML = '';
+            dom.iluminacaoTags.innerHTML = '';
+            dom.copyButton.classList.add('hidden');
+            dom.detailedAnalysisSection.classList.add('hidden');
+
+
+            // PROMPT REESCRITO PARA JSON
+            const prompt = `Analise a imagem fornecida e gere um objeto JSON com duas chaves principais: "prompt_texto" e "analise_detalhada".
+
+1.  A chave "prompt_texto" deve conter um prompt otimizado e detalhado para um gerador de imagem IA, descrevendo a imagem em termos de:
+    - Objetos: Liste e descreva os elementos visuais presentes.
+    - Paleta de cores: Mencione as cores principais.
+    - Texturas: Descreva as texturas visuais.
+    - Composição: Analise o arranjo dos elementos, perspectiva e enquadramento.
+    - Iluminação: Detalhe a fonte, direção, tipo e efeitos de luz.
+    - Estilo: Descreva o estilo visual e características específicas (ex: fotorrealista, alta qualidade, 8k, detalhado, renderização profissional).
+
+2.  A chave "analise_detalhada" deve ser um objeto contendo as seguintes sub-chaves:
+    - "cores_dominantes": Um array de objetos, onde cada objeto tem "text" (nome da cor) e "hex" (código hexadecimal aproximado da cor).
+    - "estilo": Um array de strings descrevendo o estilo.
+    - "iluminacao": Um array de strings descrevendo a iluminação.
+
+Exemplo de formato de saída JSON esperado:
+{
+  "prompt_texto": "Um gato laranja sentado em uma janela, observando uma paisagem urbana ao pôr do sol, com prédios altos ao fundo e luzes acesas. Paleta de cores: laranja vibrante, marrom dourado, preto profundo. Texturas: pelo macio e detalhado do animal, superfície lisa do vidro da janela, texturas urbanas ao fundo, acabamento fosco em algumas áreas. Composição: composição landscape equilibrada, elementos distribuídos seguindo regra dos terços, perspectiva urbana com profundidade. Iluminação: iluminação dourada do pôr do sol, luz natural difusa e quente, contraste suave entre luzes e sombras, reflexos dourados nas superfícies. Estilo: estilo fotorrealista com detalhes nítidos, cores quentes e saturadas, renderização cinematográfica, alta qualidade, 8k, detalhado, renderização profissional, fotorrealismo.",
+  "analise_detalhada": {
+    "cores_dominantes": [
+      {"text": "laranja vibrante", "hex": "#FF8C42"},
+      {"text": "marrom dourado", "hex": "#B8860B"},
+      {"text": "preto profundo", "hex": "#1A1A1A"}
+    ],
+    "estilo": [
+      "estilo fotorrealista com detalhes nítidos",
+      "cores quentes e saturadas",
+      "renderização cinematográfica"
+    ],
+    "iluminacao": [
+      "iluminação dourada do pôr do sol",
+      "luz natural difusa e quente",
+      "contraste suave entre luzes e sombras",
+      "reflexos dourados nas superfícies"
+    ]
+  }
+}
+`;
 
             try {
                 const payload = {
@@ -241,7 +348,42 @@
                             { text: prompt },
                             { inline_data: { mime_type: "image/jpeg", data: imageData } }
                         ]
-                    }]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                prompt_texto: { type: "STRING" },
+                                analise_detalhada: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        cores_dominantes: {
+                                            type: "ARRAY",
+                                            items: {
+                                                type: "OBJECT",
+                                                properties: {
+                                                    text: { type: "STRING" },
+                                                    hex: { type: "STRING" }
+                                                },
+                                                required: ["text"] // hex is optional
+                                            }
+                                        },
+                                        estilo: {
+                                            type: "ARRAY",
+                                            items: { type: "STRING" }
+                                        },
+                                        iluminacao: {
+                                            type: "ARRAY",
+                                            items: { type: "STRING" }
+                                        }
+                                    },
+                                    required: ["cores_dominantes", "estilo", "iluminacao"]
+                                }
+                            },
+                            required: ["prompt_texto", "analise_detalhada"]
+                        }
+                    }
                 };
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
@@ -256,16 +398,45 @@
                 const result = await response.json();
 
                 if (result.candidates && result.candidates[0].content.parts[0].text) {
-                    const generatedPrompt = result.candidates[0].content.parts[0].text;
-                    dom.promptOutput.value = generatedPrompt;
+                    const parsedResult = JSON.parse(result.candidates[0].content.parts[0].text);
+                    
+                    // Preenche o prompt principal
+                    dom.promptOutput.value = parsedResult.prompt_texto;
+                    dom.promptOutput.classList.remove('hidden');
                     dom.copyButton.classList.remove('hidden');
+
+                    // Preenche a seção de análise detalhada
+                    dom.detailedAnalysisSection.classList.remove('hidden');
+
+                    // Cores Dominantes
+                    if (parsedResult.analise_detalhada.cores_dominantes) {
+                        parsedResult.analise_detalhada.cores_dominantes.forEach(color => {
+                            const colorText = color.hex ? `${color.text} (${color.hex})` : color.text;
+                            dom.coresDominantesTags.appendChild(createTag(colorText, true));
+                        });
+                    }
+
+                    // Estilo
+                    if (parsedResult.analise_detalhada.estilo) {
+                        parsedResult.analise_detalhada.estilo.forEach(style => {
+                            dom.estiloTags.appendChild(createTag(style));
+                        });
+                    }
+
+                    // Iluminação
+                    if (parsedResult.analise_detalhada.iluminacao) {
+                        parsedResult.analise_detalhada.iluminacao.forEach(lighting => {
+                            dom.iluminacaoTags.appendChild(createTag(lighting));
+                        });
+                    }
+
                 } else {
-                    throw new Error("A API não retornou um prompt válido.");
+                    throw new Error("A API não retornou um prompt válido ou o formato JSON esperado.");
                 }
 
             } catch (error) {
                 console.error("Erro ao analisar imagem:", error);
-                dom.errorMessage.textContent = `Erro: ${error.message}`;
+                dom.errorMessage.textContent = `Erro: ${error.message}. Verifique sua chave API e tente novamente.`;
                 dom.promptOutput.value = "Falha ao gerar o prompt. Tente novamente.";
             } finally {
                 toggleLoading(false);
@@ -273,6 +444,7 @@
         }
         
         dom.copyButton.addEventListener('click', () => {
+            // Copia o conteúdo do prompt principal
             navigator.clipboard.writeText(dom.promptOutput.value).then(() => {
                 const originalText = dom.copyButton.innerHTML;
                 dom.copyButton.innerHTML = '<i class="fas fa-check mr-2"></i>Copiado!';
