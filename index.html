@@ -198,6 +198,47 @@
       90% { opacity: 1; }
       100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
     }
+
+    /* Utility classes */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .text-shadow-lg {
+      text-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Custom focus styles */
+    input:focus, select:focus, button:focus {
+      outline: none;
+    }
+
+    /* Loading animation */
+    @keyframes shimmer {
+      0% { background-position: -468px 0; }
+      100% { background-position: 468px 0; }
+    }
+
+    .loading-shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      background-size: 468px 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .particles { display: none; }
+      .floating-orb { transform: scale(0.7); }
+      .modern-glow { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); }
+    }
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #1f2937; }
     ::-webkit-scrollbar-thumb { background: #a200ff; border-radius: 4px; }
@@ -748,7 +789,7 @@
             <p>Para utilizar todas as funcionalidades do CapyUniverse IA, você precisará de uma Chave API do Google Gemini. O Gemini 1.5 Flash, que usamos, oferece um <strong class="text-yellow-400">nível gratuito generoso</strong>.</p>
             <div>
                 <h4 class="font-semibold text-sky-300 mb-2 text-md">Passo 1: Acesse o Google AI Studio</h4>
-                <p class="mb-2">Se voc�� ainda não tem uma conta Google, precisará criar uma. Depois, acesse o Google AI Studio:</p>
+                <p class="mb-2">Se você ainda não tem uma conta Google, precisará criar uma. Depois, acesse o Google AI Studio:</p>
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-block px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md text-sm transition-colors shadow-md">
                     Ir para Google AI Studio &rarr;
                 </a>
