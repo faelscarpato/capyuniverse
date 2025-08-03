@@ -32,34 +32,92 @@
     }
   </script>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow-purple: #8b5cf6;
+      --glow-blue: #06b6d4;
+      --glow-pink: #ec4899;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-accent: #fbbf24;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #18032c;
-      color: #e5e7eb;
+      background: var(--dark-gradient);
+      color: var(--text-primary);
+      overflow-x: hidden;
     }
+
     .parallax-bg {
-      background: linear-gradient(135deg, #200229 0%, #200229 100%);
+      background: var(--dark-gradient);
       min-height: 100vh;
       position: relative;
+      overflow: hidden;
     }
+
+    .parallax-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
     .font-syne { font-family: 'Syne', sans-serif; }
-    .glow {
-      box-shadow: 0 0 60px 10px #d946ef80, 0 0 160px 30px #fbbf24a0;
-      filter: blur(0.5px);
+
+    .modern-glow {
+      box-shadow: 0 0 80px rgba(139, 92, 246, 0.4),
+                  0 0 160px rgba(6, 182, 212, 0.2),
+                  0 0 240px rgba(236, 72, 153, 0.1);
+      filter: blur(1px);
     }
+
     .floating-hero {
-      animation: floatyHero 3s ease-in-out infinite alternate;
+      animation: floatyHero 4s ease-in-out infinite alternate;
     }
     @keyframes floatyHero {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-20px); }
+      from { transform: translateY(0px) scale(1); }
+      to   { transform: translateY(-15px) scale(1.02); }
     }
+
     .card-float {
-        animation: floatyCard 3s ease-in-out infinite alternate;
+      animation: floatyCard 3s ease-in-out infinite alternate;
     }
     @keyframes floatyCard {
-        from { transform: translateY(0px); }
-        to   { transform: translateY(-8px); }
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-6px); }
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--card-shadow);
+    }
+
+    .premium-gradient {
+      background: var(--primary-gradient);
+    }
+
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #1f2937; }
