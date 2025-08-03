@@ -32,34 +32,212 @@
     }
   </script>
   <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow-purple: #8b5cf6;
+      --glow-blue: #06b6d4;
+      --glow-pink: #ec4899;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-accent: #fbbf24;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #18032c;
-      color: #e5e7eb;
+      background: var(--dark-gradient);
+      color: var(--text-primary);
+      overflow-x: hidden;
     }
+
     .parallax-bg {
-      background: linear-gradient(135deg, #200229 0%, #200229 100%);
+      background: var(--dark-gradient);
       min-height: 100vh;
       position: relative;
+      overflow: hidden;
     }
+
+    .parallax-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
     .font-syne { font-family: 'Syne', sans-serif; }
-    .glow {
-      box-shadow: 0 0 60px 10px #d946ef80, 0 0 160px 30px #fbbf24a0;
-      filter: blur(0.5px);
+
+    .modern-glow {
+      box-shadow: 0 0 80px rgba(139, 92, 246, 0.4),
+                  0 0 160px rgba(6, 182, 212, 0.2),
+                  0 0 240px rgba(236, 72, 153, 0.1);
+      filter: blur(1px);
     }
+
     .floating-hero {
-      animation: floatyHero 3s ease-in-out infinite alternate;
+      animation: floatyHero 4s ease-in-out infinite alternate;
     }
     @keyframes floatyHero {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-20px); }
+      from { transform: translateY(0px) scale(1); }
+      to   { transform: translateY(-15px) scale(1.02); }
     }
+
     .card-float {
-        animation: floatyCard 3s ease-in-out infinite alternate;
+      animation: floatyCard 3s ease-in-out infinite alternate;
     }
     @keyframes floatyCard {
-        from { transform: translateY(0px); }
-        to   { transform: translateY(-8px); }
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-6px); }
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--card-shadow);
+    }
+
+    .premium-gradient {
+      background: var(--primary-gradient);
+    }
+
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .floating-orb {
+      animation: floatingOrb 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatingOrb {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+      100% { transform: translateY(-10px) rotate(360deg); }
+    }
+
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(139, 92, 246, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .particle:nth-child(1) {
+      width: 4px;
+      height: 4px;
+      top: 20%;
+      left: 10%;
+      animation: floatParticle 8s linear infinite;
+    }
+
+    .particle:nth-child(2) {
+      width: 6px;
+      height: 6px;
+      top: 40%;
+      left: 80%;
+      background: rgba(6, 182, 212, 0.6);
+      animation: floatParticle 12s linear infinite;
+      animation-delay: -3s;
+    }
+
+    .particle:nth-child(3) {
+      width: 3px;
+      height: 3px;
+      top: 70%;
+      left: 30%;
+      background: rgba(236, 72, 153, 0.6);
+      animation: floatParticle 10s linear infinite;
+      animation-delay: -6s;
+    }
+
+    .particle:nth-child(4) {
+      width: 5px;
+      height: 5px;
+      top: 60%;
+      left: 70%;
+      background: rgba(251, 191, 36, 0.6);
+      animation: floatParticle 15s linear infinite;
+      animation-delay: -9s;
+    }
+
+    .particle:nth-child(5) {
+      width: 4px;
+      height: 4px;
+      top: 30%;
+      left: 50%;
+      background: rgba(168, 85, 247, 0.6);
+      animation: floatParticle 11s linear infinite;
+      animation-delay: -12s;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Utility classes */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .text-shadow-lg {
+      text-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Custom focus styles */
+    input:focus, select:focus, button:focus {
+      outline: none;
+    }
+
+    /* Loading animation */
+    @keyframes shimmer {
+      0% { background-position: -468px 0; }
+      100% { background-position: 468px 0; }
+    }
+
+    .loading-shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      background-size: 468px 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .particles { display: none; }
+      .floating-orb { transform: scale(0.7); }
+      .modern-glow { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); }
     }
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #1f2937; }
@@ -296,11 +474,13 @@
 </head>
 <body class="text-gray-100">
 
-  <header class="fixed top-0 left-0 w-full z-50 py-4 px-6 md:px-10 shadow-lg header-gradient backdrop-blur-md bg-opacity-70">
+  <header class="fixed top-0 left-0 w-full z-50 py-4 px-6 md:px-10 glass-card border-b border-white/10">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
-      <a href="index.html" class="flex items-center space-x-2">
-        <img src="img/logo.png" alt="CapyUniverse Logo" class="h-8 w-8 md:h-10 md:w-10">
-        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent font-syne">CapyUniverse</span>
+      <a href="index.html" class="flex items-center space-x-3 hover-lift group">
+        <div class="glass-card p-2 rounded-xl border border-white/20 group-hover:border-purple-400/50 transition-all duration-300">
+          <img src="img/logo.png" alt="CapyUniverse Logo" class="h-8 w-8 md:h-10 md:w-10 group-hover:scale-110 transition-transform duration-300">
+        </div>
+        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-syne">CapyUniverse</span>
       </a>
 
       <nav class="hidden md:flex space-x-6 lg:space-x-8">
@@ -336,31 +516,62 @@
   <div id="notificationArea"></div>
 
   <div class="parallax-bg flex items-center justify-center relative py-16 px-4 min-h-screen">
+    <!-- Elementos de background modernos -->
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-      <div class="absolute -top-24 left-1/3 w-72 h-72 md:w-96 md:h-96 rounded-full glow bg-fuchsia-400 opacity-25"></div>
-      <div class="absolute top-24 right-1/4 w-56 h-56 md:w-64 md:h-64 rounded-full glow bg-yellow-400 opacity-25"></div>
-      <div class="absolute bottom-0 left-1/2 w-60 h-60 md:w-72 md:h-72 rounded-full glow bg-sky-400 opacity-20"></div>
+      <div class="floating-orb absolute -top-32 left-1/4 w-80 h-80 md:w-96 md:h-96 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%); opacity: 0.3;"></div>
+      <div class="floating-orb absolute top-1/4 right-1/5 w-64 h-64 md:w-80 md:h-80 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%); opacity: 0.25; animation-delay: -1s;"></div>
+      <div class="floating-orb absolute bottom-1/4 left-1/2 w-72 h-72 md:w-88 md:h-88 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%); opacity: 0.2; animation-delay: -2s;"></div>
+
+      <!-- Partículas flutuantes -->
+      <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+      </div>
     </div>
-    
+
     <div class="relative z-10 w-full max-w-7xl mx-auto px-4">
-      <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-8">
-        <div class="w-full lg:w-5/12 flex flex-col justify-center text-center lg:text-left">
-          <div class="inline-flex items-center justify-center bg-gray-900/60 rounded-full p-3 mb-6 shadow-xl border-2 border-yellow-400 lg:mx-0 mx-auto w-24 h-24 md:w-28 md:h-28">
-            <img src="img/logo.png" class="w-full h-full object-contain" alt="Logo CapyUniverse" onerror="this.onerror=null;this.src='img/logo.png';">
+      <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-12">
+        <div class="w-full lg:w-5/12 flex flex-col justify-center text-center lg:text-left floating-hero">
+          <!-- Logo container modernizado -->
+          <div class="glass-card inline-flex items-center justify-center rounded-3xl p-4 mb-8 lg:mx-0 mx-auto w-28 h-28 md:w-32 md:h-32 hover-lift">
+            <img src="img/logo.png" class="w-full h-full object-contain drop-shadow-2xl" alt="Logo CapyUniverse" onerror="this.onerror=null;this.src='img/logo.png';">
           </div>
-          <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent font-inter">
+
+          <!-- Título com gradiente premium -->
+          <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-syne leading-tight">
             CapyUniverse IA
           </h1>
-          <p class="text-xl sm:text-2xl text-gray-300 mb-8 max-w-2xl lg:max-w-none">
-            Soluções de IA inovadoras e amigáveis, com a simpatia das capivaras.
-            <span class="block font-bold text-yellow-400 mt-2">Descubra o Universo da IA com Capivaras!</span>
+
+          <!-- Subtítulo modernizado -->
+          <p class="text-xl sm:text-2xl text-slate-300 mb-4 max-w-2xl lg:max-w-none font-light">
+            Inteligência Artificial <span class="text-cyan-400 font-semibold">Premium</span> com a
           </p>
+          <p class="text-lg sm:text-xl text-slate-400 mb-8 max-w-2xl lg:max-w-none">
+            <span class="text-2xl">🚀</span> simpatia das capivaras mais futuristas do universo
+          </p>
+
+          <!-- Badge de status -->
+          <div class="glass-card inline-flex items-center px-4 py-2 rounded-full mb-8 lg:mx-0 mx-auto">
+            <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+            <span class="text-sm text-slate-300">Plataforma Ativa • 50+ Ferramentas IA</span>
+          </div>
+
+          <!-- Botões modernos -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
-            <a href="#ferramentas" class="px-8 py-4 rounded-xl font-semibold bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 shadow-lg hover:scale-105 transition-all duration-300 text-center">
-              Explorar Ferramentas
+            <a href="#ferramentas" class="group premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift text-center relative overflow-hidden">
+              <span class="relative z-10">Explorar Ferramentas</span>
+              <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </a>
-             <button id="openManageApiKeyModalButton" class="px-8 py-4 rounded-xl font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-lg hover:scale-105 transition-all duration-300 text-center">
-              Configurar Chave API
+            <button id="openManageApiKeyModalButton" class="glass-card px-8 py-4 rounded-2xl font-semibold text-cyan-400 hover-lift text-center border border-cyan-400/30 hover:border-cyan-400/50 transition-all duration-300">
+              <span class="flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                </svg>
+                Configurar API
+              </span>
             </button>
           </div>
         </div>
@@ -443,15 +654,31 @@
   </div>
 
   <section class="max-w-7xl mx-auto px-4 py-10">
-    <div class="bg-gray-800/70 p-6 rounded-xl shadow-xl mb-12">
+    <div class="glass-card p-8 rounded-3xl mb-12 hover-lift">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">
+          Descubra sua Ferramenta IA
+        </h2>
+        <p class="text-slate-400">Mais de 50 ferramentas inteligentes ao seu alcance</p>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-        <div>
-          <label for="search-input" class="block text-sm font-medium text-gray-300 mb-1">Buscar Ferramenta</label>
-          <input type="text" id="search-input" placeholder="Nome, categoria ou serviço..." class="w-full bg-gray-700 border border-gray-600 text-gray-200 placeholder-gray-400 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition duration-150 ease-in-out">
+        <div class="space-y-2">
+          <label for="search-input" class="block text-sm font-medium text-slate-300">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Buscar Ferramenta
+          </label>
+          <input type="text" id="search-input" placeholder="Digite o nome, categoria ou funcionalidade..." class="w-full glass-card border border-white/10 text-slate-200 placeholder-slate-500 rounded-xl p-4 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400/50 transition-all duration-300 hover:border-white/20">
         </div>
-        <div>
-          <label for="category-select" class="block text-sm font-medium text-gray-300 mb-1">Filtrar por Categoria</label>
-          <select id="category-select" class="w-full bg-gray-700 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition duration-150 ease-in-out">
+        <div class="space-y-2">
+          <label for="category-select" class="block text-sm font-medium text-slate-300">
+            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+            </svg>
+            Categoria
+          </label>
+          <select id="category-select" class="w-full glass-card border border-white/10 text-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-purple-400 focus:border-purple-400/50 transition-all duration-300 hover:border-white/20">
             <option value="">Todas as Categorias</option>
           </select>
         </div>
@@ -468,11 +695,60 @@
     <div id="no-tools-message" class="hidden">Nenhuma ferramenta encontrada com os critérios selecionados.</div>
   </section>
 
-  <footer class="relative text-center mt-8 py-10 px-4 bg-gradient-to-tr from-fuchsia-950/80 via-gray-900/90 to-yellow-900/50 rounded-t-3xl shadow-2xl">
-    <h2 class="text-2xl font-extrabold mb-2 bg-gradient-to-r from-fuchsia-400 via-yellow-400 to-sky-400 bg-clip-text text-transparent drop-shadow-2xl">Entre no CapyUniverse agora</h2>
-    <p class="text-gray-400 mb-4 max-w-xl mx-auto">Deixe a IA fazer o pesado. Desbloqueie sua criatividade, produtividade e aprendizado em outro nível.</p>
-    <a href="#ferramentas" class="inline-block px-8 py-3 rounded-xl font-semibold bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300">Começar de Graça</a>
-    <p class="text-gray-600 mt-8 text-xs">&copy; <span id="current-year"></span> CapyUniverse IA • Feito para insanos como você.</p>
+  <footer class="relative text-center mt-16 py-12 px-4 glass-card rounded-t-3xl border-t border-white/10">
+    <div class="max-w-4xl mx-auto">
+      <!-- Elemento decorativo -->
+      <div class="flex justify-center mb-6">
+        <div class="glass-card p-4 rounded-2xl border border-white/20">
+          <div class="text-3xl">🚀</div>
+        </div>
+      </div>
+
+      <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+        Transforme suas ideias em realidade
+      </h2>
+      <p class="text-slate-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
+        Junte-se a milhares de usuários que já descobriram o poder da IA com a simpatia das capivaras.
+        <span class="text-cyan-400 font-medium">Comece sua jornada hoje mesmo.</span>
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+        <a href="#ferramentas" class="premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift group">
+          <span class="flex items-center">
+            Começar de Graça
+            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </span>
+        </a>
+
+        <div class="text-slate-400 text-sm">
+          ✨ Sem cadastro necessário • 🚀 Acesso instantâneo
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-cyan-400">50+</div>
+          <div class="text-xs text-slate-500">Ferramentas</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-purple-400">24/7</div>
+          <div class="text-xs text-slate-500">Disponível</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-pink-400">Free</div>
+          <div class="text-xs text-slate-500">Para Sempre</div>
+        </div>
+      </div>
+
+      <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-6"></div>
+
+      <p class="text-slate-600 text-sm">
+        &copy; <span id="current-year"></span> CapyUniverse IA • Construído com ❤️ para inovadores como você
+      </p>
+    </div>
   </footer>
 
   <div id="toolModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 modal-hidden">
@@ -630,31 +906,65 @@
     };
 
     function createToolCard(tool, index) {
-      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia; // Usa a cor do JSON
+      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
       const card = document.createElement('div');
-      // Mantém as classes originais do teu card
-      card.className = `group bg-gray-800/80 rounded-xl p-0 shadow-lg hover:shadow-xl ${colorTheme.hoverShadow} transition-all duration-300 ease-in-out card-float overflow-hidden flex flex-col`;
-      card.style.animationDelay = `${index * 0.05}s`;
 
-      // Armazena todos os dados da ferramenta no dataset do card para o modal
+      card.className = `group glass-card rounded-2xl p-0 hover-lift overflow-hidden flex flex-col border border-white/10 hover:border-white/20 transition-all duration-500 ease-out`;
+      card.style.animationDelay = `${index * 0.08}s`;
+      card.style.setProperty('--hover-glow', colorTheme.text.replace('text-', ''));
+
       Object.keys(tool).forEach(key => {
         card.dataset[key] = tool[key];
       });
-      
+
       card.innerHTML = `
-        <div class="aspect-[3/2] w-full bg-gray-700/50 flex items-center justify-center cursor-pointer tool-image-placeholder">
-          <img src="${tool.imageUrl || `https://placehold.co/80x80/374151/E5E7EB?text=${encodeURIComponent(tool.title.substring(0,3))}`}" alt="Visualização da ferramenta ${tool.title}" class="tool-card-image group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null;this.src='https://placehold.co/80x80/4A5568/E2E8F0?text=Erro';">
+        <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder group">
+          <div class="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/80 z-10"></div>
+          <img src="${tool.imageUrl || `https://placehold.co/120x90/1e293b/64748b?text=${encodeURIComponent(tool.title.substring(0,3))}`}"
+               alt="Visualização da ferramenta ${tool.title}"
+               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+               onerror="this.onerror=null;this.src='https://placehold.co/120x90/334155/94a3b8?text=IA';">
+
+          <!-- Badge de categoria -->
+          <div class="absolute top-3 left-3 z-20">
+            <span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">
+              ${tool.category}
+            </span>
+          </div>
+
+          <!-- Ícone da ferramenta -->
+          <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">
+            ${tool.icon || '🤖'}
+          </div>
+
+          <!-- Overlay com gradiente -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-15"></div>
         </div>
-        <div class="p-4 flex-grow flex flex-col justify-between">
-            <div>
-                <h3 class="text-md font-bold text-gray-100 truncate" title="${tool.title}">${tool.title}</h3>
-                <p class="text-xs text-yellow mb-2 truncate">${tool.category}</p>
-            </div>
-            <button class="mt-2 text-sm ${colorTheme.text} font-semibold hover:underline text-left w-full open-modal-button">
-              Ver Detalhes &rarr;
-            </button>
+
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-slate-100 mb-2 group-hover:text-white transition-colors" title="${tool.title}">
+              ${tool.title}
+            </h3>
+            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
+              ${tool.description || 'Ferramenta de inteligência artificial avançada'}
+            </p>
+          </div>
+
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 open-modal-button glass-card border border-white/10 hover:border-${colorTheme.text.replace('text-', '')}-400/50 text-slate-300 hover:text-white group/btn">
+            <span>Explorar</span>
+            <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Efeito de glow no hover -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+          <div class="absolute inset-0 rounded-2xl shadow-lg" style="box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);"></div>
         </div>
       `;
+
       card.querySelector('.tool-image-placeholder').addEventListener('click', () => openToolModal(tool));
       card.querySelector('.open-modal-button').addEventListener('click', () => openToolModal(tool));
       return card;
