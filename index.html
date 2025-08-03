@@ -814,31 +814,65 @@
     };
 
     function createToolCard(tool, index) {
-      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia; // Usa a cor do JSON
+      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
       const card = document.createElement('div');
-      // Mantém as classes originais do teu card
-      card.className = `group bg-gray-800/80 rounded-xl p-0 shadow-lg hover:shadow-xl ${colorTheme.hoverShadow} transition-all duration-300 ease-in-out card-float overflow-hidden flex flex-col`;
-      card.style.animationDelay = `${index * 0.05}s`;
 
-      // Armazena todos os dados da ferramenta no dataset do card para o modal
+      card.className = `group glass-card rounded-2xl p-0 hover-lift overflow-hidden flex flex-col border border-white/10 hover:border-white/20 transition-all duration-500 ease-out`;
+      card.style.animationDelay = `${index * 0.08}s`;
+      card.style.setProperty('--hover-glow', colorTheme.text.replace('text-', ''));
+
       Object.keys(tool).forEach(key => {
         card.dataset[key] = tool[key];
       });
-      
+
       card.innerHTML = `
-        <div class="aspect-[3/2] w-full bg-gray-700/50 flex items-center justify-center cursor-pointer tool-image-placeholder">
-          <img src="${tool.imageUrl || `https://placehold.co/80x80/374151/E5E7EB?text=${encodeURIComponent(tool.title.substring(0,3))}`}" alt="Visualização da ferramenta ${tool.title}" class="tool-card-image group-hover:scale-105 transition-transform duration-300" onerror="this.onerror=null;this.src='https://placehold.co/80x80/4A5568/E2E8F0?text=Erro';">
+        <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder group">
+          <div class="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/80 z-10"></div>
+          <img src="${tool.imageUrl || `https://placehold.co/120x90/1e293b/64748b?text=${encodeURIComponent(tool.title.substring(0,3))}`}"
+               alt="Visualização da ferramenta ${tool.title}"
+               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+               onerror="this.onerror=null;this.src='https://placehold.co/120x90/334155/94a3b8?text=IA';">
+
+          <!-- Badge de categoria -->
+          <div class="absolute top-3 left-3 z-20">
+            <span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">
+              ${tool.category}
+            </span>
+          </div>
+
+          <!-- Ícone da ferramenta -->
+          <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">
+            ${tool.icon || '🤖'}
+          </div>
+
+          <!-- Overlay com gradiente -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-15"></div>
         </div>
-        <div class="p-4 flex-grow flex flex-col justify-between">
-            <div>
-                <h3 class="text-md font-bold text-gray-100 truncate" title="${tool.title}">${tool.title}</h3>
-                <p class="text-xs text-yellow mb-2 truncate">${tool.category}</p>
-            </div>
-            <button class="mt-2 text-sm ${colorTheme.text} font-semibold hover:underline text-left w-full open-modal-button">
-              Ver Detalhes &rarr;
-            </button>
+
+        <div class="p-5 flex-grow flex flex-col justify-between">
+          <div class="mb-4">
+            <h3 class="text-lg font-bold text-slate-100 mb-2 group-hover:text-white transition-colors" title="${tool.title}">
+              ${tool.title}
+            </h3>
+            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
+              ${tool.description || 'Ferramenta de inteligência artificial avançada'}
+            </p>
+          </div>
+
+          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 open-modal-button glass-card border border-white/10 hover:border-${colorTheme.text.replace('text-', '')}-400/50 text-slate-300 hover:text-white group/btn">
+            <span>Explorar</span>
+            <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Efeito de glow no hover -->
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+          <div class="absolute inset-0 rounded-2xl shadow-lg" style="box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);"></div>
         </div>
       `;
+
       card.querySelector('.tool-image-placeholder').addEventListener('click', () => openToolModal(tool));
       card.querySelector('.open-modal-button').addEventListener('click', () => openToolModal(tool));
       return card;
