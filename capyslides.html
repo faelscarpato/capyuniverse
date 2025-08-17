@@ -10,14 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
-  <!-- Libs para exportação -->
+  <!-- Libs -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
 
   <style>
-    /* ======== Tema/Glass/Gradientes (mesmo set pedido) ======== */
     :root {
       --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -42,7 +41,7 @@
     .api-status-indicator { width:10px; height:10px; border-radius:50%; }
     .api-status-ok{ background:#22c55e } .api-status-unset{ background:#f59e0b } .api-status-error{ background:#ef4444 }
 
-    /* ======== Slides 100% responsivos (um por linha) ======== */
+    /* Slides: empilhados no desktop */
     .slide-card { width: 100%; }
     .slide-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); background:#0b0d10; }
     .slide-bg-img { position:absolute; inset:0; width:100%; height:100%; object-fit: cover; filter: saturate(1.05) contrast(1.02); }
@@ -53,7 +52,6 @@
     .slide-bullets li { margin-bottom: 8px; }
 
     @media (min-width: 1024px) {
-      /* Desktop: sempre um abaixo do outro */
       #slidesArea { display:flex; flex-direction:column; gap:24px; }
     }
   </style>
@@ -75,8 +73,7 @@
   </header>
 
   <div class="flex flex-1 pt-16">
-    <!-- Sidebar dummy (opcional) -->
-    <aside class="sidebar-glass w-64 hidden lg:block p-3 border-r border-white/10 text-zinc-400">CapySidebar (use tools.json)</aside>
+    <aside class="sidebar-glass w-64 hidden lg:block p-3 border-r border-white/10 text-zinc-400">CapySidebar (tools.json)</aside>
 
     <main class="flex-grow max-w-7xl mx-auto w-full pt-6 pb-10 px-3 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Configs -->
@@ -108,7 +105,7 @@
         <input id="inpAudience" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2" placeholder="Diretoria, time de produto…" />
 
         <label class="text-sm text-zinc-300">Estilo visual da imagem</label>
-        <input id="inpStyle" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2" placeholder="Futurista, neon, low‑poly…" />
+        <input id="inpStyle" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2" placeholder="Futurista, neon, low-poly…" />
 
         <div>
           <label class="text-sm text-zinc-300 mb-1">Gerador de imagens</label>
@@ -174,7 +171,7 @@
     slidesArea: document.getElementById('slidesArea'), empty: document.getElementById('emptyState'),
     btnExportPNG: document.getElementById('btnExportPNG'), btnExportPPTX: document.getElementById('btnExportPPTX')
   };
-  let slidesData = []; // { title, bullets[], imgUrl?, imgDataUrl? }
+  let slidesData = []; // { title, bullets[], imgUrl?, bgData? (dataURL) }
 
   function setApiStatus(s){ dom.apiStatus.className='api-status-indicator ' + (s||'api-status-unset'); }
   function openModal(){ dom.apiModal.classList.remove('hidden'); dom.apiModal.classList.add('flex'); }
@@ -190,24 +187,53 @@
     setApiStatus('api-status-ok');
     const parts = data?.candidates?.[0]?.content?.parts||[]; return parts.map(p=>p.text||'').join('\n').trim();
   }
-  async function geminiImageDataURL(prompt){
-    if(!GEMINI_KEY) return null; // fallback Pollinations
-    try{
-      const body = { contents:[{ role:'user', parts:[{ text: `Gere UMA imagem 16:9 estilo ${dom.inpStyle.value||'moderno'} sobre: ${prompt}. Retorne base64 PNG.` }] }], generationConfig:{ temperature:0.6 } };
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-      const data = await res.json();
-      const part = data?.candidates?.[0]?.content?.parts?.find(p=>p.inline_data && p.inline_data.mime_type?.includes('image'));
-      if(part){ return `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`; }
-    }catch(e){ /* fallback */ }
-    return null;
-  }
 
+  
+  async function renderGlobalSidebar(){
+      if(!dom.sidebar) return;
+      try{
+        const res = await fetch('tools.json');
+        if(!res.ok) throw new Error('tools.json não encontrado');
+        const tools = await res.json();
+        const categories = {};
+        tools.forEach(t=>{ if(!categories[t.category]) categories[t.category]=[]; categories[t.category].push(t); });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a');
+        home.href='index.html';
+        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+        home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 mr-2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>';
+        dom.sidebar.appendChild(home);
+        for(const cat in categories){
+          const catDiv = document.createElement('div');
+          catDiv.className='mb-1';
+          const catBtn = document.createElement('button');
+          catBtn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+          catBtn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const catContent = document.createElement('div');
+          catContent.className='category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach(tool=>{
+            const link = document.createElement('a'); link.href = tool.pageUrl;
+            const active = tool.id===currentPageId;
+            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${active? 'bg-indigo-600 text-white font-semibold':'text-gray-400'}`;
+            const icon = tool.icon? tool.icon.replace(/class="[^"]*"/g, 'class="w-5 h-5 mr-2"') : '<span class="w-5 h-5 mr-2"></span>';
+            link.innerHTML = icon + `<span>${tool.title}</span>`;
+            catContent.appendChild(link);
+          });
+          catBtn.addEventListener('click', ()=>{ catContent.classList.toggle('expanded'); catBtn.querySelector('svg').classList.toggle('rotate-180'); });
+          if(categories[cat].some(t=>t.id===currentPageId)){ catContent.classList.add('expanded'); catBtn.querySelector('svg').classList.add('rotate-180'); }
+          catDiv.appendChild(catBtn); catDiv.appendChild(catContent); dom.sidebar.appendChild(catDiv);
+        }
+      }catch(e){ dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>'; }
+    }
+
+  
   // ===== Helpers =====
   function extractJSONBlock(t){ try{ const m=t.match(/\{[\s\S]*\}/); return m? JSON.parse(m[0]):null }catch{ return null } }
   function sanitize(t){ return (t||'').replace(/[<>]/g,'').trim(); }
   function selectedImgProvider(){ const r=[...document.querySelectorAll('input[name="imgp"]')].find(x=>x.checked); return r? r.value:'pollinations'; }
   function buildPollinationsURL(prompt){ const style = dom.inpStyle.value?.trim(); const full = `${prompt}${style? ', style '+style:''}, cinematic, 16:9, ultra-detailed`; return `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=1280&height=720&nologo=true`; }
-  async function urlToDataURL(url){ const resp = await fetch(url, {mode:'cors'}); const blob = await resp.blob(); return await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(blob); }); }
+  async function toDataURL(url){ const resp = await fetch(url, {mode:'cors'}); const blob = await resp.blob(); return await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(blob); }); }
+  async function ensureImgLoaded(img){ if(img.complete) return; try{ await img.decode(); }catch{} }
 
   // ===== UI =====
   function clearSlides(){ slidesData=[]; dom.slidesArea.innerHTML=''; dom.empty.classList.remove('hidden'); toggleExports(false); }
@@ -216,7 +242,7 @@
   function slideCardTemplate(s, i){
     const card = document.createElement('div'); card.className='slide-card';
     const frame = document.createElement('div'); frame.className='slide-frame'; frame.dataset.index=i;
-    const img = document.createElement('img'); img.className='slide-bg-img'; img.decoding='async'; img.loading='lazy'; img.crossOrigin='anonymous'; if(s.imgUrl) img.src=s.imgUrl; if(s.imgDataUrl) img.src=s.imgDataUrl; 
+    const img = document.createElement('img'); img.className='slide-bg-img'; img.decoding='async'; img.loading='lazy'; img.crossOrigin='anonymous'; if(s.bgData) img.src=s.bgData; else if(s.imgUrl) img.src=s.imgUrl;
     const overlay = document.createElement('div'); overlay.className='slide-overlay';
     const content = document.createElement('div'); content.className='slide-content';
     const h = document.createElement('h4'); h.className='slide-title'; h.textContent = s.title;
@@ -235,13 +261,14 @@
   function btn(icon, title, label){ const b=document.createElement('button'); b.className='text-xs bg-zinc-800 text-white px-2 py-1 rounded hover:bg-zinc-700'; b.title=title; b.innerHTML = `<i class="fa ${icon}"></i>${label?' '+label:''}`; return b; }
   function render(){ dom.slidesArea.innerHTML=''; slidesData.forEach((s,i)=> dom.slidesArea.appendChild(slideCardTemplate(s,i))); dom.empty.classList.toggle('hidden', slidesData.length>0); toggleExports(slidesData.length>0); }
   function moveSlide(i,delta){ const ni=i+delta; if(ni<0||ni>=slidesData.length) return; const t=slidesData[i]; slidesData[i]=slidesData[ni]; slidesData[ni]=t; render(); }
-  async function regenImage(i){ const s=slidesData[i]; if(!s) return; dom.status.textContent='Gerando imagem...';
-    const prov = selectedImgProvider(); let durl=null, url=null;
-    if(prov==='gemini') durl = await geminiImageDataURL(`${s.title}. ${dom.inpStyle.value||''}`);
-    if(!durl){ url = buildPollinationsURL(`${s.title}. ${dom.inpStyle.value||''}`); }
-    s.imgDataUrl = durl||null; s.imgUrl = url||null; render(); dom.status.textContent='Pronto.'; }
 
-  // ===== Geração principal =====
+  async function regenImage(i){ const s=slidesData[i]; if(!s) return; dom.status.textContent='Gerando imagem...';
+    const prov = selectedImgProvider(); let url=null;
+    if(prov==='gemini'){ /* opcional: Gemini */ }
+    url = buildPollinationsURL(`${s.title}. ${dom.inpStyle.value||''}`);
+    s.bgData = await toDataURL(url); render(); dom.status.textContent='Pronto.'; }
+
+  // ===== Geração =====
   async function generate(){
     const prompt = dom.inpPrompt.value.trim(); if(!prompt){ dom.status.textContent='Digite um prompt.'; return; }
     const n = parseInt(dom.inpCount.value||'6',10); const tone = dom.inpTone.value; const audience = dom.inpAudience.value.trim();
@@ -250,69 +277,70 @@
     try{
       const text = await geminiText(`${sys}\n\nTema: ${prompt}`);
       const j = extractJSONBlock(text) || {}; let arr = Array.isArray(j.slides)? j.slides : [];
-      if(arr.length===0){ // fallback bruto
+      if(arr.length===0){
         arr = text.split(/\n+/).filter(Boolean).slice(0,n).map((t,i)=>({ title: `Slide ${i+1}`, bullets:[t] }));
         while(arr.length<n) arr.push({ title:`Slide ${arr.length+1}`, bullets:["Ponto 1","Ponto 2","Ponto 3"] });
       }
       slidesData = arr.slice(0,n).map((s,i)=>({ title:sanitize(s.title)||`Slide ${i+1}`, bullets:(s.bullets||[]).slice(0,5).map(sanitize) }));
-      // imagens
-      const prov = selectedImgProvider();
+      // imagens -> sempre dataURL pra evitar CORS e garantir export
       for(let i=0;i<slidesData.length;i++){
         const s = slidesData[i];
-        let durl = null, url = null;
-        if(prov==='gemini') durl = await geminiImageDataURL(`${prompt}. ${s.title}. ${dom.inpStyle.value||''}`);
-        if(!durl) url = buildPollinationsURL(`${prompt}. ${s.title}. ${dom.inpStyle.value||''}`);
-        s.imgDataUrl = durl||null; s.imgUrl = url||null;
+        const url = buildPollinationsURL(`${prompt}. ${s.title}. ${dom.inpStyle.value||''}`);
+        s.imgUrl = url;
+        s.bgData = await toDataURL(url);
       }
       render(); dom.status.textContent='Slides prontos!';
     }catch(e){ dom.status.textContent='Erro: '+e.message; }
     finally{ document.getElementById('loading').classList.add('hidden'); document.getElementById('loading').classList.remove('flex'); }
   }
 
-  // ===== Export PNG (com imagem, CORS OK) =====
+  // ===== Export PNG =====
   async function exportPNGsZip(){ if(!slidesData.length) return; document.getElementById('loading').classList.add('flex'); document.getElementById('loading').classList.remove('hidden');
     try{
       const zip = new JSZip();
       const frames = [...document.querySelectorAll('.slide-frame')];
       let idx=1;
       for(const frame of frames){
-        const dataUrl = await html2canvas(frame, { useCORS:true, allowTaint:false, backgroundColor:null, scale:2 });
-        const b64 = dataUrl.toDataURL? dataUrl.toDataURL('image/png') : dataUrl; // compat
-        const out = b64.startsWith('data:')? b64.split(',')[1] : b64;
-        zip.file(`slide_${String(idx).padStart(2,'0')}.png`, out, {base64:true}); idx++;
+        const img = frame.querySelector('img'); if(img) await ensureImgLoaded(img);
+        const canvas = await html2canvas(frame, { useCORS:true, allowTaint:false, backgroundColor:null, scale:2, windowWidth:1920, windowHeight:1080 });
+        const b64 = canvas.toDataURL('image/png').split(',')[1];
+        zip.file(`slide_${String(idx).padStart(2,'0')}.png`, b64, {base64:true}); idx++;
       }
       const blob = await zip.generateAsync({type:'blob'}); saveAs(blob, 'capyslides_png.zip');
     }catch(e){ alert('Erro ao exportar PNG: '+e.message); }
     finally{ document.getElementById('loading').classList.add('hidden'); document.getElementById('loading').classList.remove('flex'); }
   }
 
-  // ===== Export PPTX (EDITÁVEL: texto como elementos) =====
+  // ===== Export PPTX (editável 16:9) =====
   async function exportPPTX(){ if(!slidesData.length) return; document.getElementById('loading').classList.add('flex'); document.getElementById('loading').classList.remove('hidden');
     try{
-      const pptx = new PptxGenJS(); pptx.layout='LAYOUT_16x9';
+      const pptx = new PptxGenJS();
+      pptx.layout = 'LAYOUT_16x9'; // 10 x 5.625 in
+
       for(const s of slidesData){
         const slide = pptx.addSlide();
-        // Fundo: se houver imagem, aplica como background visual
-        let bgData = s.imgDataUrl || (s.imgUrl? await urlToDataURL(s.imgUrl): null);
-        if(bgData){ slide.addImage({ data:bgData, x:0, y:0, w:pptx.width, h:pptx.height }); }
-        // Título (EDITÁVEL)
-        slide.addText(s.title, { x:0.5, y:0.6, w:pptx.width-1, h:1, fontFace:'Inter', fontSize:28, bold:true, color:'FFFFFF' });
-        // Bullets (EDITÁVEIS)
+        if(s.bgData){ slide.addImage({ data:s.bgData, x:0, y:0, w:pptx.width, h:pptx.height }); } // fundo visual
+
+        const marginX = 0.6, marginTop = 0.6;
+        const contentW = pptx.width - marginX*2;
+
+        slide.addText(s.title, { x: marginX, y: marginTop, w: contentW, h: 1, fontFace: 'Inter', fontSize: 32, bold: true, color: 'FFFFFF' });
+
         const txt = (s.bullets||[]).map(b=>'• '+b).join('\n');
-        slide.addText(txt, { x:0.5, y:1.6, w:pptx.width-1, h:4.5, fontFace:'Inter', fontSize:16, color:'FFFFFF', lineSpacingMultiple:1.2 });
+        slide.addText(txt, { x: marginX, y: marginTop + 1.0, w: contentW, h: 4.2, fontFace: 'Inter', fontSize: 18, color: 'FFFFFF', lineSpacingMultiple: 1.2 });
       }
       await pptx.writeFile({ fileName:'CapySlides_editavel.pptx' });
     }catch(e){ alert('Erro ao exportar PPTX: '+e.message); }
     finally{ document.getElementById('loading').classList.add('hidden'); document.getElementById('loading').classList.remove('flex'); }
   }
 
-  // ===== Eventos =====
+  // Eventos
   dom.openApi.onclick = openModal; dom.closeApi.onclick = closeModal; dom.saveApi.onclick = ()=>{ const k=dom.apiKey.value.trim(); if(!k) return; localStorage.setItem(LS_KEY,k); GEMINI_KEY=k; setApiStatus('api-status-ok'); closeModal(); };
-  dom.btnGenerate.onclick = generate; dom.clearAll.onclick = clearSlides; dom.btnImprove.onclick = async()=>{ if(!dom.inpPrompt.value.trim()) return; try{ const t=await geminiText(`Melhore o prompt abaixo e retorne apenas o prompt melhorado.\n\n${dom.inpPrompt.value}`); dom.inpPrompt.value=t; }catch{} };
+  dom.btnGenerate.onclick = generate; dom.clearAll.onclick = clearSlides;
+  dom.btnImprove.onclick = async()=>{ if(!dom.inpPrompt.value.trim()) return; try{ const t=await geminiText(`Melhore o prompt abaixo e retorne apenas o prompt melhorado.\n\n${dom.inpPrompt.value}`); dom.inpPrompt.value=t; }catch{} };
   dom.btnSuggest.onclick = async()=>{ try{ const t=await geminiText('Sugira um prompt criativo e detalhado para gerar uma apresentação (retorne apenas o prompt).'); dom.inpPrompt.value=t; }catch{} };
   dom.btnExportPNG.onclick = exportPNGsZip; dom.btnExportPPTX.onclick = exportPPTX;
 
-  // Boot
   loadKey();
 </script>
 </body>
