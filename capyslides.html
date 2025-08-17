@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapySlides — Ferramenta CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+  <!-- Libs para exportação -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+
+  <style>
+    /* ==================== ESTILIZAÇÃO SOLICITADA ==================== */
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --glow-purple: #8b5cf6;
+      --glow-blue: #06b6d4;
+      --glow-pink: #ec4899;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-accent: #fbbf24;
+    }
+
+    html { background: var(--dark-gradient); scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--dark-gradient); color: var(--text-primary); overflow-x: hidden; position: relative; }
+
+    /* Orbes/partículas de fundo */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+    }
+
+    .font-syne { font-family: 'Syne', sans-serif; }
+    .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+
+    .glass { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 1.25rem; box-shadow: var(--card-shadow); border: 1px solid var(--glass-border); transition: all .25s ease; }
+    .glass:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+    .sidebar-glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border); }
+
+    .premium-gradient { background: var(--primary-gradient); }
+    .hover-lift { transition: all .3s cubic-bezier(.4,0,.2,1); }
+    .hover-lift:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+
+    .api-status-indicator { width: 10px; height: 10px; border-radius: 50%; margin-left:6px; margin-right:3px; }
+    .api-status-ok { background: #22c55e; }
+    .api-status-unset { background: #f59e0b; }
+    .api-status-error { background: #ef4444; }
+
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
+    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00; }
+
+    /* Partículas decorativas (opcionais em mobile) */
+    .particles { position: absolute; inset: 0; overflow: hidden; }
+    .particle { position: absolute; background: rgba(139, 92, 246, 0.6); border-radius: 50%; pointer-events: none; }
+    .particle.p2 { background: rgba(6, 182, 212, 0.6); }
+    .particle.p3 { background: rgba(236, 72, 153, 0.6); }
+
+    @keyframes floatParticle { 0%{ transform: translateY(100vh) rotate(0); opacity: 0; } 10%{ opacity:1 } 90%{ opacity:1 } 100%{ transform: translateY(-100vh) rotate(360deg); opacity:0 } }
+
+    /* Slides: viewport 16:9 com escala responsiva */
+    .slide-card { position: relative; }
+    .slide-viewport { position: relative; width: 1280px; height: 720px; transform-origin: top left; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); background: #0b0d10; }
+    .slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(1.05) contrast(1.02); }
+    .slide-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55)); }
+    .slide-content { position: relative; z-index: 2; padding: 48px; display: flex; height: 100%; flex-direction: column; justify-content: center; }
+    .slide-title { font-weight: 800; letter-spacing: -.02em; }
+    .slide-bullets { margin-top: 18px; }
+    .slide-bullets li { margin-bottom: 10px; line-height: 1.25; }
+
+    /* Header / Sidebar globais */
+    .global-header { background-color: #0b0b10cc; backdrop-filter: blur(10px); border-bottom: 1px solid #1f2937; }
+    .global-sidebar { background-color: #11131a; color: #d1d5db; }
+
+    /* Modal base */
+    .modal-overlay-bg { transition: opacity .3s ease-in-out; }
+    .modal-content { transition: transform .3s ease-in-out, opacity .3s ease-in-out; }
+    .modal-hidden { opacity: 0; pointer-events: none; }
+    .modal-hidden .modal-overlay-bg { opacity: 0; }
+    .modal-hidden .modal-content { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    .modal-visible .modal-overlay-bg { opacity: .75; }
+    .modal-visible .modal-content { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* Mobile opts */
+    @media (max-width: 768px) { .particles { display:none } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <!-- Header Global -->
+  <header class="global-header w-full fixed top-0 left-0 right-0 z-40 py-1 px-0">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
+      <div class="flex items-center">
+        <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+        <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapySlides</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 mr-2 text-xs text-zinc-400">
+          <span>API Gemini:</span>
+          <div id="apiStatusIndicator" class="api-status-indicator api-status-unset" title="API Key Não Configurada"></div>
+        </div>
+        <button id="showApiKeyModalBtn" class="text-zinc-400 hover:text-fuchsia-400 transition-colors" title="Configurar API Key"><i class="fas fa-key"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <div id="notificationArea" class="fixed top-5 right-5 z-[1000] flex flex-col gap-2 w-full max-w-md"></div>
+
+  <div class="flex flex-1 pt-16">
+    <!-- Sidebar Global -->
+    <aside id="sidebar" class="global-sidebar sidebar-glass w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-7xl mx-auto w-full pt-6 pb-10 px-3 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+      <!-- Partículas decorativas -->
+      <div class="particles pointer-events-none absolute inset-0 -z-10">
+        <span class="particle" style="width:4px;height:4px;top:20%;left:8%; animation: floatParticle 8s linear infinite;"></span>
+        <span class="particle p2" style="width:6px;height:6px;top:35%;left:82%; animation: floatParticle 12s linear infinite -3s;"></span>
+        <span class="particle p3" style="width:3px;height:3px;top:70%;left:28%; animation: floatParticle 10s linear infinite -6s;"></span>
+        <span class="particle" style="width:5px;height:5px;top:60%;left:68%; animation: floatParticle 15s linear infinite -9s;"></span>
+        <span class="particle" style="width:4px;height:4px;top:30%;left:50%; animation: floatParticle 11s linear infinite -12s;"></span>
+      </div>
+
+      <!-- Painel de Configurações -->
+      <section class="md:col-span-1 glass border border-zinc-800 px-5 pt-5 pb-4 flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-zinc-200 font-syne">Configurações</h2>
+          <button id="clearAllBtn" class="text-xs text-zinc-400 hover:text-white" title="Limpar tudo"><i class="fa fa-broom"></i> Limpar</button>
+        </div>
+
+        <label class="text-sm text-zinc-300">Prompt da apresentação</label>
+        <textarea id="promptInput" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 min-h-[120px] resize-vertical outline-none focus:ring-2 focus:ring-purple-700" placeholder="Ex.: Pitch de startup sobre CapyUniverse destacando visão, problema, solução, tração e roadmap."></textarea>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm text-zinc-300">Nº de Slides</label>
+            <select id="numSlides" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-700">
+              <option>4</option><option selected>6</option><option>8</option><option>10</option><option>12</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-zinc-300">Tom</label>
+            <select id="tone" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-700">
+              <option selected>Profissional</option>
+              <option>Criativo</option>
+              <option>Didático</option>
+              <option>Persuasivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="text-sm text-zinc-300">Público-alvo (opcional)</label>
+            <input id="audience" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-700" placeholder="Investidores, clientes B2B, equipe interna..." />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="text-sm text-zinc-300">Estilo visual da imagem</label>
+            <input id="imageStyle" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-700" placeholder="Futurista, neon, material you, low-poly..." />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="text-sm text-zinc-300 mb-1">Gerador de imagens</label>
+            <div class="flex items-center gap-3 text-sm">
+              <label class="inline-flex items-center gap-2 cursor-pointer"><input type="radio" name="imgProvider" value="pollinations" checked> <span>Pollinations (grátis)</span></label>
+              <label class="inline-flex items-center gap-2 cursor-pointer"><input type="radio" name="imgProvider" value="gemini"> <span>Gemini (precisa API)</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 mt-1">
+          <button id="generateSlidesBtn" class="btn-main w-full premium-gradient text-white rounded-xl py-2.5 font-syne text-[15px] hover-lift">
+            <i class="fa fa-wand-magic-sparkles mr-2"></i> Gerar Slides com IA
+          </button>
+          <div class="flex items-center justify-between">
+            <button id="improvePromptBtn" class="text-zinc-300 hover:text-white text-sm"><i class="fa fa-wand-magic mr-1"></i> Melhorar prompt</button>
+            <button id="suggestPromptBtn" class="text-zinc-300 hover:text-white text-sm"><i class="fa fa-lightbulb mr-1"></i> Sugerir prompt</button>
+          </div>
+          <p id="chatStatus" class="text-xs text-zinc-500 font-jetbrains">Pronto.</p>
+        </div>
+      </section>
+
+      <!-- Painel de Slides -->
+      <section class="md:col-span-2 glass border border-zinc-800 p-5">
+        <div class="flex items-center gap-3 mb-3 flex-wrap">
+          <h3 class="text-lg font-bold font-syne">Slides Gerados</h3>
+          <div class="ml-auto flex items-center gap-2">
+            <button id="btnExportPNG" class="text-xs bg-zinc-800 text-white px-3 py-2 rounded-lg hover:bg-zinc-700"><i class="fa fa-file-image mr-1"></i> Exportar PNG (ZIP)</button>
+            <button id="btnExportPPTX" class="text-xs bg-zinc-800 text-white px-3 py-2 rounded-lg hover:bg-zinc-700"><i class="fa fa-file-powerpoint mr-1"></i> Exportar PPTX</button>
+          </div>
+        </div>
+
+        <div id="emptyState" class="border border-dashed border-zinc-700 rounded-xl p-8 text-center text-zinc-400">
+          Descreva o que você quer e clique em <strong>Gerar Slides com IA</strong>.
+        </div>
+        <div id="slidesArea" class="grid gap-6 sm:grid-cols-1 md:grid-cols-2"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal API Key Global -->
+  <div id="apiKeysModalGlobal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
+    <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-purple-400 font-syne">Chave de API — Google Gemini</h2>
+        <button id="closeApiKeysModalButtonGlobal" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+          <label for="geminiApiKeyInputModalGlobal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini</label>
+          <div class="flex">
+            <input id="geminiApiKeyInputModalGlobal" type="password" placeholder="Cole sua API Key Gemini" class="font-jetbrains p-2 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
+            <button id="saveGeminiKeyGlobal" class="bg-sky-500 hover:bg-sky-600 px-3 py-2 rounded-r-md text-xs text-white">Salvar</button>
+          </div>
+          <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas do CapyUniverse.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading" class="fixed inset-0 hidden items-center justify-center bg-black/70 backdrop-blur-sm z-[1100]">
+    <div class="text-center">
+      <div class="animate-spin inline-block h-10 w-10 border-4 border-white/30 border-t-white rounded-full mb-3"></div>
+      <p class="text-sm text-zinc-200 font-jetbrains">Processando...</p>
+    </div>
+  </div>
+
+  <script>
+    // ======================= ESTADO GLOBAL =======================
+    const currentPageId = 'CapySlides';
+    const API_KEY_STORAGE_KEY_GLOBAL = 'capyUniverseApiKey_gemini';
+    let geminiApiKeyGlobal = '';
+
+    const dom = {
+      // header / sidebar
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiStatusIndicator: document.getElementById('apiStatusIndicator'),
+      showApiKeyModalBtn: document.getElementById('showApiKeyModalBtn'),
+      // modal
+      apiKeysModalGlobal: document.getElementById('apiKeysModalGlobal'),
+      closeApiKeysModalGlobal: document.getElementById('closeApiKeysModalButtonGlobal'),
+      geminiApiKeyInputGlobal: document.getElementById('geminiApiKeyInputModalGlobal'),
+      saveGeminiKeyGlobal: document.getElementById('saveGeminiKeyGlobal'),
+      // configs
+      promptInput: document.getElementById('promptInput'),
+      numSlides: document.getElementById('numSlides'),
+      tone: document.getElementById('tone'),
+      audience: document.getElementById('audience'),
+      imageStyle: document.getElementById('imageStyle'),
+      imgProviderRadios: () => Array.from(document.querySelectorAll('input[name="imgProvider"]')),
+      generateSlidesBtn: document.getElementById('generateSlidesBtn'),
+      clearAllBtn: document.getElementById('clearAllBtn'),
+      improvePromptBtn: document.getElementById('improvePromptBtn'),
+      suggestPromptBtn: document.getElementById('suggestPromptBtn'),
+      chatStatus: document.getElementById('chatStatus'),
+      // slides
+      emptyState: document.getElementById('emptyState'),
+      slidesArea: document.getElementById('slidesArea'),
+      // export
+      btnExportPNG: document.getElementById('btnExportPNG'),
+      btnExportPPTX: document.getElementById('btnExportPPTX'),
+      // loading
+      loading: document.getElementById('loading'),
+      // notifications
+      notificationArea: document.getElementById('notificationArea'),
+    };
+
+    let slidesData = []; // { title, bullets[], bg, promptImg }
+
+    // ======================= UI UTIL =======================
+    function updateApiStatusIndicator(status='unset') {
+      const el = dom.apiStatusIndicator; if(!el) return;
+      el.classList.remove('api-status-ok','api-status-unset','api-status-error');
+      if(status==='ok'){ el.classList.add('api-status-ok'); el.title='API Key Configurada'; }
+      else if(status==='error'){ el.classList.add('api-status-error'); el.title='Erro na API Key'; }
+      else { el.classList.add('api-status-unset'); el.title='API Key Não Configurada'; }
+    }
+    function showLoading(on=true){ dom.loading.classList.toggle('hidden', !on); if(on) dom.loading.classList.add('flex'); else dom.loading.classList.remove('flex'); }
+    function notify(msg, type='info', timeout=3500){
+      const div = document.createElement('div');
+      div.className = `notification show text-sm rounded-md p-3 ${
+        type==='success'?'bg-emerald-600 text-white': type==='error'?'bg-rose-600 text-white': type==='warn'?'bg-amber-400 text-zinc-900':'bg-sky-600 text-white'
+      }`;
+      div.innerHTML = `<span>${msg}</span><button aria-label="fechar">×</button>`;
+      div.querySelector('button').onclick = ()=> div.remove();
+      dom.notificationArea.appendChild(div);
+      setTimeout(()=> div.remove(), timeout);
+    }
+
+    function getSelectedImageProvider(){
+      const r = dom.imgProviderRadios().find(x=>x.checked); return r? r.value : 'pollinations';
+    }
+
+    function loadApiKeyGlobal(){
+      geminiApiKeyGlobal = localStorage.getItem(API_KEY_STORAGE_KEY_GLOBAL) || '';
+      if(dom.geminiApiKeyInputGlobal) dom.geminiApiKeyInputGlobal.value = geminiApiKeyGlobal;
+      updateApiStatusIndicator(geminiApiKeyGlobal? 'ok':'unset');
+    }
+
+    function openApiModal(){ dom.apiKeysModalGlobal.classList.remove('hidden'); dom.apiKeysModalGlobal.classList.add('modal-visible'); }
+    function closeApiModal(){ dom.apiKeysModalGlobal.classList.add('hidden'); dom.apiKeysModalGlobal.classList.remove('modal-visible'); }
+
+    // ======================= SIDEBAR GLOBAL =======================
+    async function renderGlobalSidebar(){
+      if(!dom.sidebar) return;
+      try{
+        const res = await fetch('tools.json');
+        if(!res.ok) throw new Error('tools.json não encontrado');
+        const tools = await res.json();
+        const categories = {};
+        tools.forEach(t=>{ if(!categories[t.category]) categories[t.category]=[]; categories[t.category].push(t); });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a');
+        home.href='index.html';
+        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+        home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 mr-2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>';
+        dom.sidebar.appendChild(home);
+        for(const cat in categories){
+          const catDiv = document.createElement('div');
+          catDiv.className='mb-1';
+          const catBtn = document.createElement('button');
+          catBtn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
+          catBtn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const catContent = document.createElement('div');
+          catContent.className='category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach(tool=>{
+            const link = document.createElement('a'); link.href = tool.pageUrl;
+            const active = tool.id===currentPageId;
+            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${active? 'bg-indigo-600 text-white font-semibold':'text-gray-400'}`;
+            const icon = tool.icon? tool.icon.replace(/class="[^"]*"/g, 'class="w-5 h-5 mr-2"') : '<span class="w-5 h-5 mr-2"></span>';
+            link.innerHTML = icon + `<span>${tool.title}</span>`;
+            catContent.appendChild(link);
+          });
+          catBtn.addEventListener('click', ()=>{ catContent.classList.toggle('expanded'); catBtn.querySelector('svg').classList.toggle('rotate-180'); });
+          if(categories[cat].some(t=>t.id===currentPageId)){ catContent.classList.add('expanded'); catBtn.querySelector('svg').classList.add('rotate-180'); }
+          catDiv.appendChild(catBtn); catDiv.appendChild(catContent); dom.sidebar.appendChild(catDiv);
+        }
+      }catch(e){ dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>'; }
+    }
+
+    // ======================= GEMINI API =======================
+    async function callGeminiText(prompt){
+      const key = geminiApiKeyGlobal; if(!key){ notify('Configure sua API Key Gemini.', 'warn'); openApiModal(); return null; }
+      try{
+        const body = { contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { temperature: 0.6, topP: 0.9, topK: 40 } };
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const data = await resp.json();
+        if(!resp.ok){ updateApiStatusIndicator('error'); throw new Error(data?.error?.message || resp.statusText); }
+        updateApiStatusIndicator('ok');
+        const text = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('\n') || '';
+        return (text||'').trim();
+      }catch(err){ console.error(err); notify('Falha na chamada ao Gemini: '+err.message, 'error'); return null; }
+    }
+
+    async function callGeminiImage(prompt){
+      const key = geminiApiKeyGlobal; if(!key) return null; // modal já foi aberto na call de texto
+      try{
+        const body = { contents: [{ role: 'user', parts: [{ text: `Gere uma única imagem no estilo ${dom.imageStyle.value||'moderno'} 16:9, tema: ${prompt}. Retorne a imagem codificada em base64 PNG.` }] }], generationConfig: { temperature: 0.6 } };
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const data = await resp.json();
+        // Tenta encontrar inline_data (pode variar por versão). Se não achar, retorna null para fallback Pollinations
+        const parts = data?.candidates?.[0]?.content?.parts || [];
+        const imgPart = parts.find(p=> p.inline_data && p.inline_data.mime_type && p.inline_data.mime_type.includes('image'));
+        if(imgPart){ const b64 = imgPart.inline_data.data; return `data:${imgPart.inline_data.mime_type};base64,${b64}`; }
+        return null;
+      }catch(err){ console.warn('Gemini image gen falhou, fallback Pollinations', err); return null; }
+    }
+
+    // ======================= SLIDES =======================
+    function clearSlides(){ slidesData = []; dom.slidesArea.innerHTML=''; dom.emptyState.classList.remove('hidden'); toggleExports(false); }
+    function toggleExports(on){ dom.btnExportPNG.disabled = !on; dom.btnExportPPTX.disabled = !on; dom.btnExportPNG.classList.toggle('opacity-50', !on); dom.btnExportPPTX.classList.toggle('opacity-50', !on); }
+
+    function buildPollinationsURL(prompt){
+      const style = dom.imageStyle.value?.trim();
+      const full = `${prompt}${style? ', style '+style:''}, cinematic, 16:9, ultra-detailed`;
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=1280&height=720&nologo=true`;
+      return url;
+    }
+
+    function createSlideCard(slide, index){
+      const card = document.createElement('div'); card.className = 'slide-card';
+      const wrapper = document.createElement('div'); wrapper.className = 'slide-viewport'; wrapper.dataset.index = index;
+      const bg = document.createElement('div'); bg.className = 'slide-bg'; bg.style.backgroundImage = slide.bg? `url('${slide.bg}')` : 'none';
+      const overlay = document.createElement('div'); overlay.className = 'slide-overlay';
+
+      const content = document.createElement('div'); content.className = 'slide-content';
+      const h = document.createElement('h4'); h.className = 'slide-title text-white text-4xl sm:text-5xl'; h.textContent = slide.title || `Slide ${index+1}`;
+      const ul = document.createElement('ul'); ul.className = 'slide-bullets text-white/95 text-lg';
+      (slide.bullets||[]).forEach(b=>{ const li=document.createElement('li'); li.innerHTML = '• '+b; ul.appendChild(li); });
+      content.appendChild(h); content.appendChild(ul);
+
+      wrapper.appendChild(bg); wrapper.appendChild(overlay); wrapper.appendChild(content);
+
+      const tools = document.createElement('div'); tools.className = 'flex items-center gap-2 mt-2';
+      const upBtn = document.createElement('button'); upBtn.className='text-xs bg-zinc-800 text-white px-2 py-1 rounded hover:bg-zinc-700'; upBtn.innerHTML='<i class="fa fa-arrow-up"></i>'; upBtn.title='Mover para cima';
+      const downBtn = document.createElement('button'); downBtn.className='text-xs bg-zinc-800 text-white px-2 py-1 rounded hover:bg-zinc-700'; downBtn.innerHTML='<i class="fa fa-arrow-down"></i>'; downBtn.title='Mover para baixo';
+      const regenBtn = document.createElement('button'); regenBtn.className='text-xs bg-zinc-800 text-white px-2 py-1 rounded hover:bg-zinc-700'; regenBtn.innerHTML='<i class="fa fa-image"></i> Fundo'; regenBtn.title='Regenerar imagem';
+
+      upBtn.onclick = ()=> moveSlide(index, -1);
+      downBtn.onclick = ()=> moveSlide(index, +1);
+      regenBtn.onclick = ()=> regenSlideImage(index);
+
+      const outer = document.createElement('div'); outer.className='p-2 border border-zinc-700 rounded-xl';
+      outer.appendChild(wrapper); outer.appendChild(tools);
+      card.appendChild(outer);
+      // colocar no grid
+      dom.slidesArea.appendChild(card);
+      // ajustar escala
+      requestAnimationFrame(()=> resizeViewport(wrapper));
+    }
+
+    function renderSlides(){ dom.slidesArea.innerHTML=''; slidesData.forEach((s,i)=> createSlideCard(s,i)); dom.emptyState.classList.toggle('hidden', slidesData.length>0); toggleExports(slidesData.length>0); }
+
+    function moveSlide(idx, delta){
+      const ni = idx + delta; if(ni<0 || ni>=slidesData.length) return;
+      const tmp = slidesData[idx]; slidesData[idx] = slidesData[ni]; slidesData[ni] = tmp; renderSlides(); notify('Ordem atualizada','success',1600);
+    }
+
+    async function regenSlideImage(idx){
+      const slide = slidesData[idx]; if(!slide) return;
+      showLoading(true);
+      try{
+        const provider = getSelectedImageProvider();
+        let imgURL = null;
+        if(provider==='gemini') imgURL = await callGeminiImage(slide.promptImg || slide.title);
+        if(!imgURL) imgURL = buildPollinationsURL(slide.promptImg || slide.title);
+        slide.bg = imgURL; renderSlides();
+      } finally { showLoading(false); }
+    }
+
+    function resizeViewport(view){
+      // Escala 1280x720 para caber na largura do container
+      const card = view.parentElement; const maxW = card.clientWidth - 8; // padding
+      const scale = Math.max(0.2, Math.min(1, maxW / 1280));
+      view.style.transform = `scale(${scale})`;
+      // Ajustar altura do card para reservar espaço
+      card.style.minHeight = (720*scale + 0) + 'px';
+    }
+
+    window.addEventListener('resize', ()=>{
+      document.querySelectorAll('.slide-viewport').forEach(resizeViewport);
+    });
+
+    // ======================= GERAÇÃO =======================
+    async function generateSlides(){
+      const prompt = dom.promptInput.value.trim();
+      if(!prompt){ notify('Descreva o que você quer nos slides.', 'warn'); dom.promptInput.focus(); return; }
+      const n = parseInt(dom.numSlides.value||'6',10);
+      const tone = dom.tone.value; const audience = dom.audience.value.trim();
+
+      const sys = `Você é um criador de apresentações. Gere um JSON com a estrutura:\n\n{
+  "slides": [
+    { "title": "...", "bullets": ["...","...","..."] }
+  ]
+}\n\nRegras: \n- Gere exatamente ${n} slides. \n- Títulos curtos e fortes. Bullets objetivos (3 a 5 por slide). \n- Tom: ${tone}. ${audience?('Público-alvo: '+audience+'.'):''}`;
+
+      dom.chatStatus.textContent = 'Gerando conteúdo...'; showLoading(true);
+      try{
+        const text = await callGeminiText(`${sys}\n\nTema central/pedido: ${prompt}`);
+        if(!text){ dom.chatStatus.textContent = 'Falha na IA.'; showLoading(false); return; }
+        // tentar obter JSON
+        const json = extractJSON(text);
+        if(!json || !Array.isArray(json.slides)){ notify('IA não retornou JSON válido. Tentando parse alternativo...', 'warn'); }
+        const arr = (json && Array.isArray(json.slides))? json.slides : fallbackParseSlides(text, n);
+        // construir slidesData
+        slidesData = arr.map((s, i)=>({
+          title: sanitizeText(s.title||`Slide ${i+1}`),
+          bullets: (s.bullets||[]).slice(0,5).map(b=> sanitizeText(b)),
+          promptImg: `${prompt} — ${dom.imageStyle.value||'estilo moderno'}`,
+          bg: ''
+        }));
+        // gerar imagens de fundo
+        const provider = getSelectedImageProvider();
+        for(let i=0;i<slidesData.length;i++){
+          const s = slidesData[i];
+          let imgURL = null; if(provider==='gemini') imgURL = await callGeminiImage(`${s.title}. ${s.promptImg}`);
+          if(!imgURL) imgURL = buildPollinationsURL(`${s.title}. ${s.promptImg}`);
+          s.bg = imgURL;
+        }
+        renderSlides(); dom.chatStatus.textContent = 'Slides prontos!';
+      }catch(e){ console.error(e); notify('Erro geral na geração: '+e.message,'error'); }
+      finally{ showLoading(false); }
+    }
+
+    function sanitizeText(t){ return (t||'').replace(/[<>]/g,'').trim(); }
+
+    function extractJSON(text){
+      try{
+        const match = text.match(/\{[\s\S]*\}/); if(!match) return null; return JSON.parse(match[0]);
+      }catch{ return null; }
+    }
+
+    function fallbackParseSlides(text, n){
+      // Fallback muito simples: separar por linhas com hifens como bullets
+      const lines = text.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+      const slides = [];
+      let bufTitle = null; let bufBullets = [];
+      for(const ln of lines){
+        if(/^\d+\.|^Slide\s*\d+/i.test(ln) || (!bufTitle && ln.length>0 && ln.length<80)){
+          if(bufTitle){ slides.push({title: bufTitle, bullets: bufBullets}); bufBullets=[]; }
+          bufTitle = ln.replace(/^\d+\.\s*/,'').replace(/^Slide\s*\d+[:\-]?\s*/i,'');
+        } else if(/^[-•\*]/.test(ln)){
+          bufBullets.push(ln.replace(/^[-•\*]\s*/,''));
+        }
+      }
+      if(bufTitle) slides.push({title: bufTitle, bullets: bufBullets});
+      while(slides.length<n) slides.push({title:`Slide ${slides.length+1}`, bullets:["Ponto 1","Ponto 2","Ponto 3"]});
+      return slides.slice(0,n);
+    }
+
+    // ======================= EXPORTAÇÃO =======================
+    async function exportPNGsZip(){
+      if(!slidesData.length) return; showLoading(true);
+      try{
+        const zip = new JSZip();
+        const nodes = Array.from(dom.slidesArea.querySelectorAll('.slide-viewport'));
+        let idx=1;
+        for(const node of nodes){
+          const dataUrl = await captureSlide(node);
+          const b64 = dataUrl.split(',')[1];
+          zip.file(`slide_${String(idx).padStart(2,'0')}.png`, b64, {base64:true});
+          idx++;
+        }
+        const blob = await zip.generateAsync({type:'blob'});
+        saveAs(blob, 'capyslides_png.zip');
+      }catch(e){ console.error(e); notify('Erro ao exportar PNGs: '+e.message,'error'); }
+      finally{ showLoading(false); }
+    }
+
+    async function exportPPTX(){
+      if(!slidesData.length) return; showLoading(true);
+      try{
+        const pptx = new PptxGenJS();
+        pptx.layout = 'LAYOUT_16x9';
+        const nodes = Array.from(dom.slidesArea.querySelectorAll('.slide-viewport'));
+        for(const node of nodes){
+          const dataUrl = await captureSlide(node, 2);
+          const slide = pptx.addSlide();
+          slide.addImage({ data: dataUrl, x:0, y:0, w:pptx.width, h:pptx.height });
+        }
+        await pptx.writeFile({ fileName: 'CapySlides.pptx' });
+      }catch(e){ console.error(e); notify('Erro ao exportar PPTX: '+e.message,'error'); }
+      finally{ showLoading(false); }
+    }
+
+    async function captureSlide(node, scale=2){
+      // Renderiza o viewport 1280x720; para garantir nitidez, usa scale>1
+      // Remove transform antes de capturar
+      const prev = node.style.transform; node.style.transform = 'scale(1)';
+      const canvas = await html2canvas(node, { backgroundColor: null, scale });
+      node.style.transform = prev;
+      return canvas.toDataURL('image/png');
+    }
+
+    // ======================= PROMPTS AUX =======================
+    async function improvePrompt(){
+      const cur = dom.promptInput.value.trim(); if(!cur){ notify('Digite um prompt para melhorar.','warn'); return; }
+      dom.chatStatus.textContent = 'Melhorando prompt...';
+      const improved = await callGeminiText(`Melhore o prompt a seguir para gerar uma apresentação impactante. Retorne APENAS o prompt melhorado.\n\n"""${cur}"""`);
+      if(improved){ dom.promptInput.value = improved; notify('Prompt melhorado!','success'); }
+      dom.chatStatus.textContent = 'Pronto.';
+    }
+
+    async function suggestPrompt(){
+      dom.chatStatus.textContent = 'Sugerindo prompt...';
+      const sug = await callGeminiText('Sugira um prompt criativo e detalhado para gerar uma apresentação (10-12 palavras-chave de contexto, objetivos claros, público-alvo e estilo visual). Retorne apenas o prompt sugerido.');
+      if(sug){ dom.promptInput.value = sug; notify('Sugestão inserida!','success'); }
+      dom.chatStatus.textContent = 'Pronto.';
+    }
+
+    // ======================= EVENTOS =======================
+    function bindEvents(){
+      // Sidebar
+      if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
+        dom.sidebarToggleBtn.addEventListener('click', ()=>{ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+        dom.sidebarOverlay.addEventListener('click', ()=>{ dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+      }
+      // API modal
+      dom.showApiKeyModalBtn?.addEventListener('click', openApiModal);
+      dom.closeApiKeysModalGlobal?.addEventListener('click', closeApiModal);
+      dom.saveGeminiKeyGlobal?.addEventListener('click', ()=>{
+        const key = dom.geminiApiKeyInputGlobal.value.trim();
+        if(!key){ notify('Informe a API key.', 'warn'); return; }
+        localStorage.setItem(API_KEY_STORAGE_KEY_GLOBAL, key);
+        geminiApiKeyGlobal = key; updateApiStatusIndicator('ok'); notify('Chave salva!','success'); closeApiModal();
+      });
+
+      // Geração
+      dom.generateSlidesBtn.addEventListener('click', generateSlides);
+      dom.clearAllBtn.addEventListener('click', clearSlides);
+      dom.improvePromptBtn.addEventListener('click', improvePrompt);
+      dom.suggestPromptBtn.addEventListener('click', suggestPrompt);
+
+      // Export
+      dom.btnExportPNG.addEventListener('click', exportPNGsZip);
+      dom.btnExportPPTX.addEventListener('click', exportPPTX);
+
+      // Enter para gerar
+      dom.promptInput.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); generateSlides(); }
+      });
+    }
+
+    // ======================= INIT =======================
+    (function init(){
+      renderGlobalSidebar();
+      bindEvents();
+      loadApiKeyGlobal();
+      clearSlides();
+    })();
+  </script>
+</body>
+</html>
