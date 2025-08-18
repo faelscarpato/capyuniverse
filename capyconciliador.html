@@ -476,7 +476,7 @@
                         <p>${sugg.impactoLegal}</p>
                     </div>`;
             });
-            htmlContent += '</body></html>';
+            htmlContent += "</body></html>";
             const blob = new Blob([htmlContent], { type: 'application/msword;charset=utf-8' });
             saveAs(blob, 'sugestoes_de_acordo_capyconcilia.doc');
         }
@@ -635,5 +635,286 @@
             }
         });
     </script>
+<script>
+/* ===== CapyLink v2 – interliga ferramentas, estado no localStorage e UI auxiliar ===== */
+(function () {
+  const LS_KEY = 'capy:audiencia:summary';
+  const NOTIFY_MS = 10000; // 10s
+  const IS_AUDIENCIAS = /CapyAudiências|CapyAudiencias/i.test(document.title);
+  const IS_CONCILIADOR = /CapyConcilia|CapyConciliador/i.test(document.title);
+  const IS_CRONOS = /CapyCronos/i.test(document.title);
+  const IS_CLT = /CapyCLT/i.test(document.title);
+
+  /* ---------- helpers UI ---------- */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function ensureArea() {
+    // Reaproveita notificationArea das páginas que já têm, senão cria o nosso.
+    let area = document.getElementById('notificationArea');
+    if (!area) {
+      area = document.createElement('div');
+      area.id = 'capyLinkNotifyArea';
+      area.style.position = 'fixed';
+      area.style.top = '16px';
+      area.style.right = '16px';
+      area.style.zIndex = '2147483647';
+      document.body.appendChild(area);
+    }
+    return area;
+  }
+
+  function showToast(html, ms = NOTIFY_MS) {
+    const area = ensureArea();
+    const box = document.createElement('div');
+    box.style.cssText =
+      'max-width:360px;background:rgba(17,17,20,.96);border:1px solid rgba(99,102,241,.4);' +
+      'padding:12px 14px;margin-bottom:10px;border-radius:14px;color:#e5e7eb;' +
+      'box-shadow:0 10px 30px rgba(0,0,0,.5);font:500 14px/1.35 Inter,system-ui;';
+    box.innerHTML = html;
+    area.appendChild(box);
+    setTimeout(() => box.remove(), ms);
+  }
+
+  function createDock() {
+    if (document.getElementById('capyDock')) return;
+    const dock = document.createElement('div');
+    dock.id = 'capyDock';
+    dock.style.cssText = `
+      position:fixed; right:18px; bottom:18px; z-index:2147483647;
+      display:flex; flex-direction:column; gap:10px;
+    `;
+    const btnStyle = `
+      width:52px; height:52px; border-radius:9999px; border:1px solid rgba(63,63,70,.6);
+      background:rgba(24,24,27,.88); color:#fff; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 6px 18px rgba(0,0,0,.45); cursor:pointer; backdrop-filter: blur(8px);
+      transition: transform .15s ease, opacity .15s ease;
+    `;
+
+    function makeBtn(title, icon, click) {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', title);
+      b.title = title;
+      b.style.cssText = btnStyle;
+      b.innerHTML = icon;
+      on(b, 'click', click);
+      on(b, 'mouseenter', () => (b.style.transform = 'translateY(-2px)'));
+      on(b, 'mouseleave', () => (b.style.transform = 'translateY(0)'));
+      return b;
+    }
+
+    const icoConcilia = '<i class="fas fa-handshake"></i>';
+    const icoCronos   = '<i class="fas fa-stopwatch"></i>';
+    const icoCLT      = '<i class="fas fa-scale-balanced"></i>';
+    const icoClose    = '<i class="fas fa-times"></i>';
+
+    dock.appendChild(makeBtn('Abrir CapyConciliador', icoConcilia, () => openTool('concilia')));
+    dock.appendChild(makeBtn('Abrir CapyCronos',     icoCronos,   () => openTool('cronos')));
+    dock.appendChild(makeBtn('Abrir CapyCLT',        icoCLT,      () => openTool('clt')));
+    dock.appendChild(makeBtn('Ocultar atalhos',      icoClose,    () => dock.remove()));
+
+    document.body.appendChild(dock);
+  }
+
+  /* ---------- estado compartilhado ---------- */
+  function saveSharedState(state) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
+  }
+  function loadSharedState() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch { return null; }
+  }
+
+  /* ---------- modal embutindo ferramenta (versão “compacta” porém completa) ---------- */
+  function openTool(which) {
+    const map = {
+      concilia: 'capyconciliador.html?embed=1',
+      cronos:   'capycronos.html?embed=1',
+      clt:      'capyclt.html?embed=1'
+    };
+    const src = map[which];
+    if (!src) return;
+
+    const wrap = document.createElement('div');
+    wrap.id = 'capyLinkModal';
+    wrap.style.cssText = `
+      position:fixed; inset:0; background:rgba(0,0,0,.7);
+      display:flex; align-items:center; justify-content:center; z-index:2147483647;
+    `;
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      width:min(100vw - 40px, 1100px); height:min(100vh - 40px, 720px);
+      background:#0b0b0e; border:1px solid rgba(99,102,241,.4); border-radius:16px; overflow:hidden;
+      box-shadow:0 20px 80px rgba(0,0,0,.6);
+    `;
+    const bar = document.createElement('div');
+    bar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:rgba(24,24,27,.9); color:#e5e7eb;';
+    bar.innerHTML = `<strong style="font:600 14px Inter,system-ui">CapyLink</strong>
+      <button id="capyClose" style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;padding:6px 10px;color:#fff;cursor:pointer">
+        Fechar
+      </button>`;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.style.cssText = 'width:100%; height:100%; border:0; display:block;';
+    panel.appendChild(bar);
+    panel.appendChild(iframe);
+    wrap.appendChild(panel);
+    document.body.appendChild(wrap);
+
+    on($('#capyClose', bar), 'click', () => wrap.remove());
+    // Prefill após carregar
+    on(iframe, 'load', () => {
+      const shared = loadSharedState();
+      if (!shared) return;
+      try {
+        const doc = iframe.contentWindow.document;
+        if (which === 'concilia') {
+          const ta = doc.getElementById('caseDescription');
+          if (ta) ta.value = shared.prefillForCase || '';
+        } else if (which === 'cronos') {
+          const ta = doc.getElementById('documentInput');
+          if (ta) ta.value = shared.prefillForDeadlines || '';
+        } else if (which === 'clt') {
+          // Não vou disparar automaticamente chat; só deixo o texto pronto no input para não assustar
+          const inp = doc.getElementById('user-input');
+          if (inp) inp.value = shared.prefillForCLT || '';
+        }
+      } catch (e) { /* cross-origin? ignore */ }
+    });
+  }
+
+  /* ---------- lógica: CapyAudiências detecta “resumo pronto”, notifica e cria Dock ---------- */
+  async function initAudiencias() {
+    const decisions = document.getElementById('decisionsOutput');
+    const steps     = document.getElementById('nextStepsOutput');
+    const parties   = document.getElementById('partiesOutput');
+    const ataInput  = document.getElementById('ataInput');
+
+    if (!decisions || !steps || !parties) return;
+
+    function isMeaningful(text) {
+      if (!text) return false;
+      const t = text.trim().toLowerCase();
+      return t && !/^analisando\.\.\.|erro|nenhuma/.test(t);
+    }
+    function extractListText(el) {
+      // pega texto limpo das ULs/PLAIN
+      const clone = el.cloneNode(true);
+      // remove tags e junta linhas
+      return (clone.textContent || '').trim();
+    }
+
+    function buildSharedPayload() {
+      const src = (window.parsedResultCache || null); // global no CapyAudiências
+      const decisionsTxt = extractListText(decisions);
+      const stepsTxt     = extractListText(steps);
+      const partiesTxt   = extractListText(parties);
+      const resumoOk = src || (isMeaningful(decisionsTxt) || isMeaningful(stepsTxt));
+      if (!resumoOk) return null;
+
+      // Prefills para cada ferramenta
+      const prefillForCase =
+        `-- Principais Decisões:\n${decisionsTxt || '- (não informado)'}\n\n` +
+        `-- Próximos Passos:\n${stepsTxt || '- (não informado)'}\n\n` +
+        `-- Partes:\n${partiesTxt || '- (não informado)'}\n`;
+
+      const prefillForDeadlines =
+        `${decisionsTxt ? 'PRINCIPAIS TRECHOS RELEVANTES:\n' + decisionsTxt + '\n\n' : ''}` +
+        `${stepsTxt ? 'POSSÍVEIS PRAZOS / PRÓXIMOS PASSOS:\n' + stepsTxt + '\n\n' : ''}` +
+        `${partiesTxt ? 'PARTES ENVOLVIDAS:\n' + partiesTxt + '\n' : ''}`;
+
+      const prefillForCLT =
+        `Analise sob a ótica da CLT o resumo abaixo (contrato/emprego/FGTS etc.). ` +
+        `Aponte obrigações, direitos e riscos:\n\n${prefillForCase}`;
+
+      return {
+        from: 'CapyAudiências',
+        rawAta: (ataInput && ataInput.value) || '',
+        parsed: window.parsedResultCache || null,
+        decisionsTxt, stepsTxt, partiesTxt,
+        prefillForCase, prefillForDeadlines, prefillForCLT,
+        ts: Date.now()
+      };
+    }
+
+    let alreadyNotified = false;
+    const observer = new MutationObserver(async () => {
+      const payload = buildSharedPayload();
+      if (!payload || alreadyNotified) return;
+      // Debounce curto para evitar pegar “meio render”
+      await sleep(350);
+      const again = buildSharedPayload();
+      if (!again) return;
+
+      saveSharedState(again);
+      alreadyNotified = true;
+
+      // Toast com call-to-actions
+      showToast(`
+        <div style="display:flex; gap:10px; align-items:flex-start">
+          <div style="font-size:18px;margin-top:2px">✅</div>
+          <div>
+            <div style="font-weight:700;color:#a5b4fc;margin-bottom:4px">Resumo pronto!</div>
+            <div style="opacity:.9;margin-bottom:8px">Você pode avançar para a próxima etapa sem sair desta página.</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
+              <button data-open="concilia" style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyConciliador</button>
+              <button data-open="cronos"   style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCronos</button>
+              <button data-open="clt"      style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCLT</button>
+            </div>
+          </div>
+        </div>
+      `, NOTIFY_MS);
+
+      // clique nos botões do toast
+      const area = document.getElementById('notificationArea') || document.getElementById('capyLinkNotifyArea');
+      if (area) {
+        area.querySelectorAll('[data-open]').forEach(btn =>
+          btn.addEventListener('click', (e) => {
+            const w = e.currentTarget.getAttribute('data-open');
+            openTool(w);
+          })
+        );
+      }
+
+      // Cria dock flutuante amigável à leitura
+      createDock();
+    });
+    observer.observe(decisions, { subtree:true, childList:true, characterData:true });
+    observer.observe(steps,     { subtree:true, childList:true, characterData:true });
+    observer.observe(parties,   { subtree:true, childList:true, characterData:true });
+  }
+
+  /* ---------- nas outras páginas: se houver state salvo, sugere continuar ---------- */
+  function initOtherPages() {
+    const shared = loadSharedState();
+    if (!shared) return;
+
+    // CapyConciliador: se o textarea estiver vazio, sugira prefill
+    if (IS_CONCILIADOR) {
+      const ta = document.getElementById('caseDescription');
+      if (ta && !ta.value.trim()) ta.value = shared.prefillForCase || '';
+    }
+    // CapyCronos
+    if (IS_CRONOS) {
+      const ta = document.getElementById('documentInput');
+      if (ta && !ta.value.trim()) ta.value = shared.prefillForDeadlines || '';
+    }
+    // CapyCLT – só prepara o prompt
+    if (IS_CLT) {
+      const inp = document.getElementById('user-input');
+      if (inp && !inp.value.trim()) inp.value = shared.prefillForCLT || '';
+    }
+  }
+
+  /* ---------- boot ---------- */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (IS_AUDIENCIAS) initAudiencias();
+    else initOtherPages();
+  });
+})();
+</script>
+
+
 </body>
 </html>
