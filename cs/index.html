@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapySLIDE — Zeph</title>
+  <meta name="color-scheme" content="dark" />
+  <link rel="preconnect" href="https://image.pollinations.ai" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="zeph-header">
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🦫</div>
+        <strong>CapySLIDE</strong>
+      </div>
+      <nav class="menu">
+        <button class="btn tab-btn" data-tab="brief">Briefing</button>
+        <button class="btn tab-btn" data-tab="edit">Editor</button>
+        <button class="btn tab-btn" data-tab="preview">Apresentar</button>
+          <button id="btnToggleAside" class="btn" aria-expanded="true" title="Mostrar/ocultar miniaturas">Miniaturas</button>
+
+      </nav>
+      <div class="actions">
+        <input id="apiKey" class="input" placeholder="Gemini API Key (opcional)" />
+        <select id="modelSel" class="select">
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-grid">
+    <!-- ==== BRIEFING (campos + detalhes + upload) ==== -->
+    <section id="panelBrief" class="card">
+      <h2>Briefing para Pitch</h2>
+      <p class="lead">Preencha. O gerador (local/IA) monta os slides só com isso.</p>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Nome do Projeto</label>
+          <input id="inName" class="input" placeholder="CapyUniverse" />
+        </div>
+        <div class="field">
+          <label>Tagline</label>
+          <input id="inTagline" class="input" placeholder="Plataforma de IA modular — acessível e poderosa" />
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>Tipo de Apresentação</label>
+          <select id="inType" class="select">
+            <option value="negocios">Apresentações de Negócios</option>
+            <option value="vendas">Apresentações de Vendas</option>
+            <option value="investidores">Apresentações para Investidores</option>
+            <option value="resultados">Apresentações de Resultados</option>
+            <option value="produtos">Apresentações de Produtos</option>
+            <option value="projetos">Apresentações de Projetos</option>
+            <option value="pitch" selected>Apresentações de Pitch</option>
+            <option value="pessoais">Apresentações Pessoais</option>
+            <option value="criativas">Apresentações Criativas</option>
+          </select>
+          <div class="hint">O tipo orienta estrutura, tom e elementos sugeridos.</div>
+        </div>
+        <div class="field">
+          <label>Qtd. de slides (opcional)</label>
+          <input id="inSlideCount" class="input" type="number" min="1" max="30" placeholder="ex.: 10" />
+        </div>
+      </div>
+
+      <!-- Detalhes por tipo (viram tokens para o prompt) -->
+      <div class="card soft">
+        <div class="grid2">
+          <div class="field">
+            <label>Elementos a incluir</label>
+            <div id="elChecklist" class="checks">
+              <!-- preenchido dinamicamente conforme o tipo -->
+            </div>
+          </div>
+          <div class="field">
+            <label>Estilo visual</label>
+            <div class="checks">
+              <label><input type="checkbox" class="styleTok" value="minimalist"> Minimalista</label>
+              <label><input type="checkbox" class="styleTok" value="high contrast"> Alto contraste</label>
+              <label><input type="checkbox" class="styleTok" value="data-driven"> Data-driven</label>
+              <label><input type="checkbox" class="styleTok" value="storytelling"> Storytelling</label>
+              <label><input type="checkbox" class="styleTok" value="corporate"> Corporate</label>
+              <label><input type="checkbox" class="styleTok" value="playful"> Playful</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>Upload (opcional): .txt, .pdf, .docx</label>
+            <input id="inFiles" class="input" type="file" multiple accept=".txt,.md,.pdf,.docx" />
+            <div id="fileInfo" class="hint"></div>
+          </div>
+          <div class="field">
+            <label>Observações (opcional)</label>
+            <textarea id="inNotes" class="textarea" rows="3" placeholder="Constraints, tom desejado, público alvo, KPIs..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="btnGenerateLocal" class="btn">Gerar Slides (Local)</button>
+        <button id="btnGenerateGemini" class="btn">Gerar com Gemini</button>
+        <button id="btnSave" class="btn">Salvar</button>
+        <button id="btnLoad" class="btn">Carregar</button>
+      </div>
+    </section>
+
+    <!-- ==== SIDEBAR / THUMBS ==== -->
+    <aside id="panelAside" class="card">
+      <div class="row between">
+        <h3>Slides</h3>
+        <div class="row">
+          <button id="btnAddSlide" class="btn">+ Slide</button>
+          <button id="btnDeleteSlide" class="btn">Excluir</button>
+        </div>
+      </div>
+      <div id="thumbs" class="thumbs"></div>
+      <div class="meta">Arraste para reordenar • Clique para editar</div>
+    </aside>
+
+    <!-- ==== EDITOR ==== -->
+    <section id="panelEdit" class="card hide">
+      <div class="row between">
+        <h2>Editor de Slide</h2>
+        <span id="selIndex" class="chip">Slide 1</span>
+      </div>
+
+      <div class="grid2">
+        <div class="field col-2">
+          <label>Título</label>
+          <input id="edTitle" class="input" />
+        </div>
+        <div class="field col-2">
+          <label>Subtítulo</label>
+          <input id="edSub" class="input" />
+        </div>
+        <div class="field col-2">
+          <label>Bullets (1 por linha)</label>
+          <textarea id="edBullets" class="textarea" rows="5"></textarea>
+        </div>
+        <div class="field">
+          <label>Fundo (URL) — vazio = automático</label>
+          <input id="edBG" class="input" placeholder="https://..." />
+        </div>
+        <div class="field">
+          <label>Overlay (0–0.8)</label>
+          <input id="edOverlay" type="number" min="0" max="0.8" step="0.05" class="input" value="0.5" />
+        </div>
+        <div class="field col-2">
+          <label>Notas do Apresentador</label>
+          <textarea id="edNotes" class="textarea" rows="3"></textarea>
+        </div>
+        <div class="field col-2">
+          <label>Marca d'água</label>
+          <input id="edFooter" class="input" placeholder="© CapyUniverse" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Prompt de Imagem (por slide)</label>
+        <textarea id="edImgPrompt" class="textarea" rows="2" placeholder="futuristic gradient, sleek, investor deck, 16:9"></textarea>
+        <div class="row mt">
+          <button id="btnSuggestPrompt" class="btn">Sugerir Prompt</button>
+          <button id="btnGenFromPrompt" class="btn">Gerar Fundo (Prompt)</button>
+          <button id="btnAutoBG" class="btn">Gerar Fundo (Título)</button>
+          <button id="btnDuplicate" class="btn">Duplicar Slide</button>
+          <button id="btnApply" class="btn">Aplicar</button>
+          <button id="btnTalkTrack" class="btn">Gerar resumo de fala (IA)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==== PREVIEW ==== -->
+    <section id="panelPreview" class="card hide">
+      <div class="row between">
+        <h2>Apresentação</h2>
+        <div class="row gap">
+  <button id="btnPrev" class="btn">◀</button>
+  <span id="playIndex" class="chip">1 / 1</span>
+  <button id="btnNext" class="btn">▶</button>
+
+  <!-- NOVO: toggle também dentro da apresentação -->
+  <button id="btnToggleAsidePreview" class="btn" title="Mostrar/ocultar miniaturas">Miniaturas</button>
+
+  <div class="row">
+    <label class="chip">Zoom</label>
+    <select id="zoomSel" class="select small">
+      <option value="fit" selected>Ajustar</option>
+      <option value="0.5">50%</option>
+      <option value="0.75">75%</option>
+      <option value="1">100%</option>
+      <option value="1.25">125%</option>
+    </select>
+  </div>
+</div>
+      </div>
+
+      <div id="stageWrap" class="stage-wrap">
+        <div id="stage" class="slide-canvas"></div>
+      </div>
+
+      <div class="row mt">
+        <button id="btnExportPDF" class="btn">Exportar PDF</button>
+        <button id="btnExportPPTX" class="btn">Exportar PPTX</button>
+      </div>
+
+      <div class="row mt">
+        <div class="field">
+          <label>Agendar (ICS)</label>
+          <div class="grid2">
+            <input id="calTitle" class="input" placeholder="Pitch CapyUniverse" />
+            <input id="calLocation" class="input" placeholder="Google Meet / Endereço" />
+            <input id="calStart" type="datetime-local" class="input" />
+            <input id="calEnd" type="datetime-local" class="input" />
+          </div>
+          <div class="row mt">
+            <button id="btnICS" class="btn">Baixar .ics</button>
+            <button id="btnGCal" class="btn">Google Calendar</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Notas do slide</label>
+          <div id="notesBox" class="notes"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div>© 2025 CapyUniverse. Tema: Zeph-inspired. • CapySLIDE</div>
+  </footer>
+
+  <!-- Leitores para PDF/DOCX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
+
