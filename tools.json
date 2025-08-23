@@ -290,6 +290,16 @@
     "color": "purple-400"
   },
   {
+  "id": "capyimg",
+  "title": "CapyIMG",
+  "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm3 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm11 11l-5-6-4 5-2-2-3 3h14z\"/></svg>",
+  "imageUrl": "img/capyimg.webp",
+  "description": "Gerador de imagens com IA (Pollinations/flux).",
+  "category": "Criação e Edição",
+  "pageUrl": "capyimg.html",
+  "color": "purple-400"
+},
+  {
     "id": "CapyIMG/TXT",
     "title": "Imagem para Texto",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline></svg>",
