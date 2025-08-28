@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CapySlides — Ferramenta CapyUniverse (Responsivo + Export Fix)</title>
+  <title>CapySlides — CapyUniverse</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
     }
     .font-syne { font-family: 'Syne', sans-serif; }
     .glass { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 1.25rem; box-shadow: var(--card-shadow); border: 1px solid var(--glass-border); }
-    .sidebar-glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border); }
+    .sidebar-glass { background: rgba(39,39,42,.7); backdrop-filter: blur(15px); border-right: 1px solid rgba(63,63,70,.3); }
     .global-header { background-color:#0b0b10cc; backdrop-filter: blur(10px); border-bottom:1px solid #1f2937; }
     .api-status-indicator { width:10px; height:10px; border-radius:50%; }
     .api-status-ok{ background:#22c55e } .api-status-unset{ background:#f59e0b } .api-status-error{ background:#ef4444 }
@@ -51,6 +51,13 @@
     .slide-bullets { margin-top: 14px; color:#fff; font-size: clamp(13px, 1.3vw, 18px); line-height:1.35; }
     .slide-bullets li { margin-bottom: 8px; }
 
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24,24,27,.1); }
+    .category-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
+    .category-content.expanded { max-height: 1500px; }
+    .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; }
+
     @media (min-width: 1024px) {
       #slidesArea { display:flex; flex-direction:column; gap:24px; }
     }
@@ -60,20 +67,26 @@
   <!-- Header -->
   <header class="global-header w-full fixed top-0 left-0 right-0 z-40 py-1">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
-      <div class="flex items-center">
-        <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
-        <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapySlides</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-zinc-400">API Gemini:</span>
-        <div id="apiStatus" class="api-status-indicator api-status-unset" title="API Key Não Configurada"></div>
-        <button id="openApi" class="text-zinc-400 hover:text-fuchsia-400" title="Configurar API"><i class="fas fa-key"></i></button>
-      </div>
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapySlides</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-zinc-400">API Gemini:</span>
+            <div id="apiStatus" class="api-status-indicator api-status-unset" title="API Key Não Configurada"></div>
+            <button id="openApi" class="text-zinc-400 hover:text-fuchsia-400" title="Configurar API"><i class="fas fa-key"></i></button>
+        </div>
     </div>
   </header>
 
   <div class="flex flex-1 pt-16">
-    <aside class="sidebar-glass w-64 hidden lg:block p-3 border-r border-white/10 text-zinc-400">CapySidebar (tools.json)</aside>
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+        <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
     <main class="flex-grow max-w-7xl mx-auto w-full pt-6 pb-10 px-3 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- Configs -->
@@ -115,7 +128,7 @@
           </div>
         </div>
 
-        <button id="btnGenerate" class="w-full premium-gradient text-white rounded-xl py-2.5 font-syne text-[15px]"><i class="fa fa-wand-magic-sparkles mr-2"></i>Gerar Slides com IA</button>
+        <button id="btnGenerate" class="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-2.5 font-syne text-[15px]"><i class="fa fa-wand-magic-sparkles mr-2"></i>Gerar Slides com IA</button>
         <div class="flex items-center justify-between">
           <button id="btnImprove" class="text-zinc-300 hover:text-white text-sm"><i class="fa fa-wand-magic mr-1"></i> Melhorar prompt</button>
           <button id="btnSuggest" class="text-zinc-300 hover:text-white text-sm"><i class="fa fa-lightbulb mr-1"></i> Sugerir prompt</button>
@@ -163,7 +176,11 @@
   // ===== Estado =====
   const LS_KEY = 'capyUniverseApiKey_gemini';
   let GEMINI_KEY = '';
+  const currentPageId = 'CapySlides';
   const dom = {
+    sidebar: document.getElementById('sidebar'),
+    sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+    sidebarOverlay: document.getElementById('sidebarOverlay'),
     apiStatus: document.getElementById('apiStatus'), openApi: document.getElementById('openApi'), apiModal: document.getElementById('apiModal'), closeApi: document.getElementById('closeApi'), apiKey: document.getElementById('apiKey'), saveApi: document.getElementById('saveApi'),
     inpPrompt: document.getElementById('inpPrompt'), inpCount: document.getElementById('inpCount'), inpTone: document.getElementById('inpTone'), inpAudience: document.getElementById('inpAudience'), inpStyle: document.getElementById('inpStyle'),
     btnGenerate: document.getElementById('btnGenerate'), btnImprove: document.getElementById('btnImprove'), btnSuggest: document.getElementById('btnSuggest'),
@@ -172,6 +189,54 @@
     btnExportPNG: document.getElementById('btnExportPNG'), btnExportPPTX: document.getElementById('btnExportPPTX')
   };
   let slidesData = []; // { title, bullets[], imgUrl?, bgData? (dataURL) }
+
+  // ===== Sidebar =====
+  function toggleSidebar(){ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); }
+
+  async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+          const response = await fetch('tools.json');
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          const toolsData = await response.json();
+          const categories = {};
+          toolsData.forEach(tool => { if (!categories[tool.category]) categories[tool.category] = []; categories[tool.category].push(tool); });
+          dom.sidebar.innerHTML = '';
+
+          const homeLinkSidebar = document.createElement('a');
+          homeLinkSidebar.href = 'index.html';
+          homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
+          homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+          dom.sidebar.appendChild(homeLinkSidebar);
+
+          for (const categoryName in categories) {
+              const categoryDiv = document.createElement('div');
+              categoryDiv.className = 'mb-1';
+              const categoryButton = document.createElement('button');
+              categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
+              categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+              const categoryContent = document.createElement('div');
+              categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+              categories[categoryName].forEach(tool => {
+                  const link = document.createElement('a');
+                  link.href = tool.pageUrl;
+                  const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                  link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+                  link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                  categoryContent.appendChild(link);
+              });
+
+              categoryButton.addEventListener('click', () => { categoryContent.classList.toggle('expanded'); categoryButton.querySelector('svg').classList.toggle('rotate-180'); });
+              if (categories[categoryName].some(tool => tool.id === currentPageId)) { categoryContent.classList.add('expanded'); categoryButton.querySelector('svg').classList.add('rotate-180'); }
+
+              categoryDiv.appendChild(categoryButton); categoryDiv.appendChild(categoryContent); dom.sidebar.appendChild(categoryDiv);
+          }
+      } catch (error) {
+          console.error('Erro ao carregar ferramentas para a sidebar:', error);
+          dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+      }
+  }
 
   function setApiStatus(s){ dom.apiStatus.className='api-status-indicator ' + (s||'api-status-unset'); }
   function openModal(){ dom.apiModal.classList.remove('hidden'); dom.apiModal.classList.add('flex'); }
@@ -188,45 +253,6 @@
     const parts = data?.candidates?.[0]?.content?.parts||[]; return parts.map(p=>p.text||'').join('\n').trim();
   }
 
-  
-  async function renderGlobalSidebar(){
-      if(!dom.sidebar) return;
-      try{
-        const res = await fetch('tools.json');
-        if(!res.ok) throw new Error('tools.json não encontrado');
-        const tools = await res.json();
-        const categories = {};
-        tools.forEach(t=>{ if(!categories[t.category]) categories[t.category]=[]; categories[t.category].push(t); });
-        dom.sidebar.innerHTML = '';
-        const home = document.createElement('a');
-        home.href='index.html';
-        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
-        home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 mr-2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>';
-        dom.sidebar.appendChild(home);
-        for(const cat in categories){
-          const catDiv = document.createElement('div');
-          catDiv.className='mb-1';
-          const catBtn = document.createElement('button');
-          catBtn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-          catBtn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-          const catContent = document.createElement('div');
-          catContent.className='category-content pl-3 pt-0.5 space-y-0.5';
-          categories[cat].forEach(tool=>{
-            const link = document.createElement('a'); link.href = tool.pageUrl;
-            const active = tool.id===currentPageId;
-            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${active? 'bg-indigo-600 text-white font-semibold':'text-gray-400'}`;
-            const icon = tool.icon? tool.icon.replace(/class="[^"]*"/g, 'class="w-5 h-5 mr-2"') : '<span class="w-5 h-5 mr-2"></span>';
-            link.innerHTML = icon + `<span>${tool.title}</span>`;
-            catContent.appendChild(link);
-          });
-          catBtn.addEventListener('click', ()=>{ catContent.classList.toggle('expanded'); catBtn.querySelector('svg').classList.toggle('rotate-180'); });
-          if(categories[cat].some(t=>t.id===currentPageId)){ catContent.classList.add('expanded'); catBtn.querySelector('svg').classList.add('rotate-180'); }
-          catDiv.appendChild(catBtn); catDiv.appendChild(catContent); dom.sidebar.appendChild(catDiv);
-        }
-      }catch(e){ dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>'; }
-    }
-
-  
   // ===== Helpers =====
   function extractJSONBlock(t){ try{ const m=t.match(/\{[\s\S]*\}/); return m? JSON.parse(m[0]):null }catch{ return null } }
   function sanitize(t){ return (t||'').replace(/[<>]/g,'').trim(); }
@@ -272,7 +298,9 @@
   async function generate(){
     const prompt = dom.inpPrompt.value.trim(); if(!prompt){ dom.status.textContent='Digite um prompt.'; return; }
     const n = parseInt(dom.inpCount.value||'6',10); const tone = dom.inpTone.value; const audience = dom.inpAudience.value.trim();
-    const sys = `Você é um criador de apresentações. Gere JSON:\n{ "slides": [ { "title":"...", "bullets":["...","..."] } ] }\nRegras: exatamente ${n} slides; títulos curtos e fortes; bullets objetivos (3 a 5); Tom: ${tone}. ${audience?('Público-alvo:'+audience):''}`;
+    const sys = `Você é um criador de apresentações. Gere JSON:
+{ "slides": [ { "title":"...", "bullets":["...","..."] } ] }
+Regras: exatamente ${n} slides; títulos curtos e fortes; bullets objetivos (3 a 5); Tom: ${tone}. ${audience?('Público-alvo:'+audience):''}`;
     dom.status.textContent='Gerando conteúdo...'; document.getElementById('loading').classList.add('flex'); document.getElementById('loading').classList.remove('hidden');
     try{
       const text = await geminiText(`${sys}\n\nTema: ${prompt}`);
@@ -311,23 +339,33 @@
     finally{ document.getElementById('loading').classList.add('hidden'); document.getElementById('loading').classList.remove('flex'); }
   }
 
-  // ===== Export PPTX (editável 16:9) =====
+    // ===== Export PPTX (editável 16:9) =====
   async function exportPPTX(){ if(!slidesData.length) return; document.getElementById('loading').classList.add('flex'); document.getElementById('loading').classList.remove('hidden');
     try{
       const pptx = new PptxGenJS();
       pptx.layout = 'LAYOUT_16x9'; // 10 x 5.625 in
+      const slideW = 10;
+      const slideH = 5.625;
 
       for(const s of slidesData){
         const slide = pptx.addSlide();
-        if(s.bgData){ slide.addImage({ data:s.bgData, x:0, y:0, w:pptx.width, h:pptx.height }); } // fundo visual
+        if(s.bgData){ slide.addImage({ data:s.bgData, x:0, y:0, w:slideW, h:slideH }); } // fundo visual
 
-        const marginX = 0.6, marginTop = 0.6;
-        const contentW = pptx.width - marginX*2;
+        const marginX = 0.5, marginTop = 0.4;
+        const contentW = slideW - marginX * 2;
 
-        slide.addText(s.title, { x: marginX, y: marginTop, w: contentW, h: 1, fontFace: 'Inter', fontSize: 32, bold: true, color: 'FFFFFF' });
+        slide.addText(s.title, { 
+          x: marginX, y: marginTop, w: contentW, h: 1, 
+          fontFace: 'Inter', fontSize: 32, bold: true, color: 'FFFFFF',
+          shadow: { type: 'outer', color: '000000', blur: 1, offset: 2, angle: 45, opacity: 0.6 }
+        });
 
         const txt = (s.bullets||[]).map(b=>'• '+b).join('\n');
-        slide.addText(txt, { x: marginX, y: marginTop + 1.0, w: contentW, h: 4.2, fontFace: 'Inter', fontSize: 18, color: 'FFFFFF', lineSpacingMultiple: 1.2 });
+        slide.addText(txt, { 
+          x: marginX, y: marginTop + 0.9, w: contentW, h: slideH - marginTop - 1.2, 
+          fontFace: 'Inter', fontSize: 18, color: 'FFFFFF', lineSpacing: 28,
+          shadow: { type: 'outer', color: '000000', blur: 1, offset: 2, angle: 45, opacity: 0.8 }
+        });
       }
       await pptx.writeFile({ fileName:'CapySlides_editavel.pptx' });
     }catch(e){ alert('Erro ao exportar PPTX: '+e.message); }
@@ -335,6 +373,11 @@
   }
 
   // Eventos
+  document.addEventListener('DOMContentLoaded', ()=>{
+      renderSidebar();
+      loadKey();
+      if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){ dom.sidebarToggleBtn.addEventListener('click', toggleSidebar); dom.sidebarOverlay.addEventListener('click', toggleSidebar); }
+  });
   dom.openApi.onclick = openModal; dom.closeApi.onclick = closeModal; dom.saveApi.onclick = ()=>{ const k=dom.apiKey.value.trim(); if(!k) return; localStorage.setItem(LS_KEY,k); GEMINI_KEY=k; setApiStatus('api-status-ok'); closeModal(); };
   dom.btnGenerate.onclick = generate; dom.clearAll.onclick = clearSlides;
   dom.btnImprove.onclick = async()=>{ if(!dom.inpPrompt.value.trim()) return; try{ const t=await geminiText(`Melhore o prompt abaixo e retorne apenas o prompt melhorado.\n\n${dom.inpPrompt.value}`); dom.inpPrompt.value=t; }catch{} };
@@ -342,6 +385,7 @@
   dom.btnExportPNG.onclick = exportPNGsZip; dom.btnExportPPTX.onclick = exportPPTX;
 
   loadKey();
+  renderSidebar();
 </script>
 </body>
 </html>
