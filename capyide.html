@@ -10,181 +10,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <link rel="stylesheet" href="tool-styles.css">
 
-  gtag('config', 'G-3FFD7ZEBN1');
-</script>
-
-  <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-        --glass-bg: rgba(255, 255, 255, 0.05);
-        --glass-border: rgba(255, 255, 255, 0.1);
-        --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        --glow-purple: #8b5cf6;
-        --glow-blue: #06b6d4;
-        --glow-pink: #ec4899;
-        --text-primary: #f8fafc;
-        --text-secondary: #cbd5e1;
-        --text-accent: #fbbf24;
-    }
-
-    html {
-        background: var(--dark-gradient);
-        scroll-behavior: smooth;
-    }
-
-    body {
-        font-family: 'Inter', sans-serif;
-        color: var(--text-primary);
-        background: var(--dark-gradient);
-        position: relative;
-        overflow-x: hidden;
-    }
-
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: -1;
-    }
-
-    .font-syne { font-family: 'Syne', sans-serif; }
-    .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
-
-    .glass {
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
-        border-radius: 1.5rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid var(--glass-border);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .glass:hover {
-        border-color: rgba(255, 255, 255, 0.2);
-        transform: translateY(-2px);
-    }
-
-    .sidebar-glass {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(20px);
-        border-right: 1px solid var(--glass-border);
-    }
-
-    .premium-gradient {
-        background: var(--primary-gradient);
-    }
-
-    .hover-lift {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-4px) scale(1.01);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-
-    .shadow-glass { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.137); }
-    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
-    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
-    
-    /* Estilos da Sidebar Global CapyUniverse */
-    .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-    .category-content.expanded { max-height: 1500px; }
-    .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; } /* Cor de destaque da sidebar global */
-
-    .chat-bubble { background: rgba(39,39,42,0.9); border: 1px solid #32323a; border-radius: 10px; padding: 8px 14px; margin-bottom: 8px; font-size: 14px; color: #d4d4d8; max-width: 90%; word-break: break-word; }
-    .chat-bubble.user { background: linear-gradient(90deg, #ede13a 60%, #f6cd5c 100%); color: #fff; border: 1px solid #fadc8ba2; align-self: flex-end; }
-    .chat-bubble.error { background: #e11d48; color: #fff; border: 1px solid #be123c; }
-    .api-status-indicator { width: 10px; height: 10px; border-radius: 50%; margin-left:6px; margin-right:3px; }
-    .api-status-ok { background: #22c55e; }
-    .api-status-unset { background: #f59e0b; }
-    .api-status-error { background: #ef4444; }
-    .btn-main { background: linear-gradient(180deg, #00000098 0%, #6666664f 100%); border: 2px solid #ffffff3d; border-radius: 1.2rem; color: #ffffff; font-weight: 500; font-family: 'Syne', sans-serif; font-size: 15px;  padding: 5px 0; margin-top: 7px; box-shadow: 0 2px 20px 0 #00000042; }
-    .btn-main:hover { background: linear-gradient(90deg, #ffffff33 0%, #ffffff05 100%); box-shadow: 0 2px 20px #1b1b1b90; color: #000; border: #000 solid 3px; }
-    .btn-link-style { background: none; color: #ffffff; border: none; font-weight: 500; font-size: 0.93rem; cursor: pointer; padding: 0 6px; }
-    .btn-link-style:hover { color: #a5b4fc; text-decoration: underline; }
-    .tab-btn { background: none; border: none; color: #a1a1aa; font-weight: 600; padding: 10px 22px; border-bottom: 3px solid transparent; font-family: 'Syne',sans-serif; font-size: 1.09rem; letter-spacing: -1px; border-radius: 0; transition: color .17s, border .2s; }
-    .tab-btn.active, .tab-btn:hover { color: #fff; border-bottom: 3px solid #ffffff; background: none; }
-    .editor-action-btn { background: #00000038; border-radius: 0.7rem; color: #ffffff; padding: 4px 10px; font-weight: 200; margin-left: 6px; border: none; transition: background .15s, color .14s; font-size: 10px; }
-    .editor-action-btn:hover { background: linear-gradient(180deg, #ffffff33 0%, #ffffff05 100%); color: #fff; }
-    .footer-logo { height: 42px; width: 42px; object-fit: contain; display: inline-block; vertical-align: middle; }
-    .footer-title { font-family: sans-serif; font-weight: 800; font-size: 1.15rem; letter-spacing: -1px; color: #fff; display: inline-block; }
-    .footer-desc { color: #a1a1aa; font-size: 0.97rem; }
-    .footer-link { color: #c7d2fe; margin: 0 10px; font-size: 0.93rem; }
-    .footer-link:hover { color: #fff; text-decoration: underline; }
-    
-    .loader {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-      margin-left: 8px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-     /* Estilos do Header Global CapyUniverse (adaptado para manter o tom do CapyIDE) */
-    .global-header {
-        background-color: #1f2937; /* Cor de fundo original do header CapyIDE: bg-zinc-950/90 backdrop-blur-lg */
-        border-bottom: 1px solid #374151; /* Cor da borda original: border-zinc-900 */
-    }
-    .global-header-title {
-        color: #e5e7eb; /* Cor do texto original do CapyIDE */
-    }
-    .global-header-button { /* Botões Início e Chaves API */
-        background-color: #4f46e5; /* Roxo da sidebar para destaque */
-        color: white;
-    }
-    .global-header-button:hover {
-        background-color: #4338ca; /* Roxo mais escuro */
-    }
-    /* Sidebar global */
-    .global-sidebar {
-        background-color: #1f2937; /* Cor escura para a sidebar, ex: gray-800 */
-        color: #d1d5db; /* Cor de texto para a sidebar, ex: gray-300 */
-    }
-  </style>
 </head>
-<body class="dark min-h-screen flex flex-col text-[15px]">
-    <!-- Header -->
-    <header class="w-full fixed top-0 left-0 right-0 z-40 bg-zinc-950/90 backdrop-blur-lg border-b border-zinc-900 shadow-glass py-1 px-0">
+<body class="min-h-screen flex flex-col text-[15px]">
+    <header class="global-header w-full fixed top-0 left-0 right-0 z-40 py-1">
         <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
             <div class="flex items-center">
-                <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-gray-700 focus:outline-none">
+                <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
-                      </div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-zinc-400 font-semibold">API Gemini:</span>
-            <div id="apiStatusIndicator" class="api-status-indicator api-status-unset"></div>
-            <button id="showApiKeyModalBtn" class="text-zinc-400 hover:text-fuchsia-400 transition-colors" title="Configurar API Key"><i class="fas fa-key"></i></button>
-          </div>
+                <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyIDE</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-400">API Gemini:</span>
+                <div id="apiStatus" class="api-status-indicator api-status-unset" title="API Key Não Configurada"></div>
+                <button id="openApi" class="text-zinc-400 hover:text-fuchsia-400" title="Configurar API"><i class="fas fa-key"></i></button>
+            </div>
         </div>
-      </header>
+    </header>
 
     <div id="notificationArea"></div>
 
@@ -250,41 +95,23 @@
     </main>
   </div>
 
-  <!-- Modal API Key Global (para o header CapyUniverse) -->
-  <div id="apiKeysModalGlobal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
-    <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
-            <button id="closeApiKeysModalButtonGlobal" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+  <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="glass border-zinc-800 p-6 rounded-2xl w-full max-w-md">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-lg font-bold text-purple-400 font-syne">Google Gemini API Key</h2>
+            <button id="closeApi" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
         </div>
-        <div class="space-y-3">
-            <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                 <label for="geminiApiKeyInputModalGlobal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
-                <div class="flex">
-                    <input id="geminiApiKeyInputModalGlobal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
-                    <button id="saveGeminiKeyGlobal" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
-                </div>
-                 <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse que requerem Gemini.</p>
-            </div>
+        <label class="block text-xs text-zinc-300 mb-1">API Key</label>
+        <div class="flex">
+            <input id="apiKey" type="password" class="font-jetbrains p-2 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border border-zinc-700" placeholder="Cole sua API Key"/>
+            <button id="saveApi" class="bg-sky-500 hover:bg-sky-600 px-3 py-2 rounded-r-md text-xs text-white">Salvar</button>
         </div>
-    </div>
-  </div>
-
-  <!-- Modal API Key Específico do CapyIDE (mantido do teu código original) -->
-  <div id="apiKeyModalLocal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-    <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-      <h2 class="text-lg font-bold mb-4 text-fuchsia-400 font-syne">Configurar API Key do Gemini (CapyIDE)</h2>
-      <input id="apiKeyInputModalLocalValue" type="password" class="bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg px-4 py-3 mb-5 w-full outline-none focus:ring-2 focus:ring-fuchsia-700" placeholder="Cole sua API Key do Gemini aqui"/>
-      <div class="flex justify-end gap-3">
-        <button id="closeApiKeyModalBtnLocal" type="button" class="editor-action-btn !bg-zinc-700 !border-zinc-600 hover:!bg-zinc-600">Cancelar</button>
-        <button id="saveApiKeyBtnModalLocal" type="button" class="btn-main py-2 px-5 !rounded-lg">Salvar Chave</button>
-      </div>
+        <p class="text-xs text-zinc-400 mt-2">Usada para gerar conteúdo.</p>
     </div>
   </div>
 
 
-  <script>
+<script>
     const currentPageId = 'CapyIDE'; // ID desta ferramenta
     let geminiApiKeyGlobal = ''; // Para a chave global, se usada
     let geminiApiKeyLocal = ''; // Para a chave local do CapyIDE
