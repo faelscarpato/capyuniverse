@@ -31,6 +31,7 @@
       window.location.href = "abertura.html";
     }
   </script>
+  
   <style>
     :root {
       --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -462,14 +463,15 @@
 
   </style>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
+  </script>
 
-  gtag('config', 'G-3FFD7ZEBN1');
-</script>
   <script src="https://cdn.amplitude.com/script/923ad9fef9eabc6dd7b7194bc8c91d41.js"></script><script>window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41', {"fetchRemoteConfig":true,"autocapture":true});</script>
 </head>
 <body class="text-gray-100">

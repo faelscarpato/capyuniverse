@@ -71,7 +71,7 @@
         #dark-mode-toggle:checked + .block + .dot {
             transform: translateX(100%); /* Move o "dot" para a direita */
         }
-    </style
+    </style>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
@@ -79,8 +79,7 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
-  gtag('config', 'G-3FFD7ZEBN1');
+  gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
 </script>
 </head>
 <body class="bg-gray-50 text-gray-900 transition-colors duration-300">
