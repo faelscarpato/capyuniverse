@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <title>CapyPDF Lab — CapyUniverse</title>
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif} .font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700} .btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.4rem .6rem;border-radius:.6rem}
+    .dropzone{position:relative;border:2px dashed rgba(71,85,105,.5);border-radius:1.25rem;padding:2rem;text-align:center;cursor:pointer}
+    .dropzone.dragover{outline:2px dashed #7c5cff;outline-offset:-6px}
+    .hidden-input{position:absolute;inset:0;opacity:0}
+    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}.scrollbar-thin::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:60px}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass border-zinc-800 p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold font-syne text-rose-400">CapyPDF Lab 🧪</h1>
+          <p class="text-zinc-300 mt-1">Junte, separe, rotacione e reconstrua PDFs direto no navegador.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <div id="pdfDrop" class="dropzone">
+                <input id="pdfInput" type="file" accept="application/pdf" multiple class="hidden-input">
+                <p class="text-zinc-300"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste seus PDFs aqui ou <span class="underline">clique para selecionar</span>.</p>
+                <p class="text-xs text-zinc-500 mt-2">Nada sai do seu dispositivo.</p>
+              </div>
+            </div>
+            <div id="pdfList" class="grid sm:grid-cols-2 gap-3"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-3 text-zinc-200">Ações</h3>
+              <div class="space-y-2">
+                <button id="btnMerge" class="btn w-full"><i class="fa-solid fa-object-group mr-2"></i>Juntar PDFs</button>
+                <div class="chip w-full flex items-center gap-2">
+                  <input id="range" class="input w-full" placeholder="Páginas (ex: 1-3,5,8) p/ extrair/rotacionar">
+                </div>
+                <button id="btnExtract" class="btn w-full bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-scissors mr-2"></i>Extrair páginas</button>
+                <button id="btnRotate" class="btn w-full bg-amber-600 hover:bg-amber-700"><i class="fa-solid fa-rotate-right mr-2"></i>Rotacionar 90° (intervalo)</button>
+                <button id="btnRebuild" class="btn w-full bg-zinc-700 hover:bg-zinc-600"><i class="fa-solid fa-wrench mr-2"></i>Reconstruir (pode reduzir)</button>
+              </div>
+              <p class="text-[12px] mt-3 text-zinc-400">Dica: selecione um arquivo clicando no card. Várias ações usam o arquivo selecionado.</p>
+            </div>
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Arquivo selecionado</h3>
+              <p id="currentSel" class="text-zinc-400 text-sm">Nenhum.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script>
+    // ===== Sidebar + API modal (mesmo padrão das capys) =====
+    const API_KEY_STORAGE_KEY='capyUniverseApiKey_gemini';
+    const dom={sidebar:document.getElementById('sidebar'),sidebarToggleBtn:document.getElementById('sidebarToggleBtn'),sidebarOverlay:document.getElementById('sidebarOverlay'),apiKeysModal:document.getElementById('apiKeysModal'),openApiKeysModalButton:document.getElementById('openApiKeysModalButton')};
+    async function renderSidebar(currentPageId){try{const r=await fetch('tools.json');const data=await r.json();const cats={};data.forEach(t=>{let c=t.category;if(typeof c==='string')c=[c];(c||[]).forEach(cat=>{(cats[cat]=cats[cat]||[]).push(t);});});dom.sidebar.innerHTML='';const home=document.createElement('a');home.href='index.html';home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';home.innerHTML='<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"text-purple-400\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg><span>Página Inicial</span>';dom.sidebar.appendChild(home);for(const name in cats){const box=document.createElement('div');box.className='mb-1';const btn=document.createElement('button');btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';btn.innerHTML=`<span class='font-semibold text-sm'>${name}</span><svg class='w-4 h-4 transform transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'></path></svg>`;const content=document.createElement('div');content.className='category-content pl-3 pt-0.5 space-y-0.5';cats[name].forEach(t=>{const a=document.createElement('a');a.href=t.pageUrl;const icon=t.icon?t.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class=\"w-5 h-5 mr-2\"></span>';a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ${t.id===currentPageId?'active':'text-gray-400'}`;a.innerHTML=icon+`<span>${t.title}</span>`;content.appendChild(a);});btn.addEventListener('click',()=>{content.classList.toggle('expanded');btn.querySelector('svg').classList.toggle('rotate-180');});if(cats[name].some(t=>t.id===currentPageId)){content.classList.add('expanded');btn.querySelector('svg').classList.add('rotate-180');}box.appendChild(btn);box.appendChild(content);dom.sidebar.appendChild(box);}}catch(e){dom.sidebar.innerHTML='<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';}}
+    function setupApiKeyModal(){const html=`<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'><div class='flex justify-between items-center mb-4'><h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2><button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button></div><div class='space-y-3'><div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'><h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3><label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label><div class='flex'><input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'><button id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button></div><p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p></div></div></div>`;dom.apiKeysModal.innerHTML=html;document.getElementById('openApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.remove('hidden'));document.getElementById('closeApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.add('hidden'));document.getElementById('saveGeminiKey')?.addEventListener('click',()=>{const v=document.getElementById('geminiApiKeyInputModal').value.trim();if(v){localStorage.setItem(API_KEY_STORAGE_KEY,v);alert('Chave API salva!');dom.apiKeysModal.classList.add('hidden');}else alert('Insira uma chave.')});}
+    function baseBoot(currentPageId){renderSidebar(currentPageId);setupApiKeyModal();dom.sidebarToggleBtn?.addEventListener('click',()=>{dom.sidebar.classList.toggle('-translate-x-full');dom.sidebarOverlay.classList.toggle('hidden');});dom.sidebarOverlay?.addEventListener('click',()=>{dom.sidebar.classList.add('-translate-x-full');dom.sidebarOverlay.classList.add('hidden');});}
+
+    // ===== CapyPDF Lab =====
+    const pdfState={files:[],selectedIndex:-1}; const $=(s,e=document)=>e.querySelector(s); const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
+    function bytesToReadable(n){const k=1024,sizes=['B','KB','MB','GB'];const i=Math.floor(Math.log(n)/Math.log(k));return (n/Math.pow(k,i)).toFixed(2)+' '+sizes[i];}
+    function renderList(){const list=document.getElementById('pdfList');list.innerHTML='';pdfState.files.forEach((f,idx)=>{const card=document.createElement('div');card.className='glass p-3 border border-zinc-800 hover:border-zinc-700 cursor-pointer '+(idx===pdfState.selectedIndex?'ring-2 ring-purple-500':'');card.innerHTML=`<div class='flex justify-between items-center'><div class='text-sm'><div class='font-semibold text-zinc-100 truncate max-w-[220px]'>${f.name}</div><div class='text-zinc-400 text-xs'>${f.pages??'?'} págs • ${bytesToReadable(f.size)}</div></div><button class='chip text-xs remove'>Remover</button></div>`;card.addEventListener('click',()=>{pdfState.selectedIndex=idx;document.getElementById('currentSel').textContent=f.name+(f.pages?` — ${f.pages} páginas`:'' );renderList();});card.querySelector('.remove').addEventListener('click',(e)=>{e.stopPropagation();pdfState.files.splice(idx,1);if(pdfState.selectedIndex===idx)pdfState.selectedIndex=-1;renderList();});list.appendChild(card);});}
+    async function readPdfMeta(file){try{const bytes=await file.arrayBuffer();const pdf=await PDFLib.PDFDocument.load(bytes);return {pages:pdf.getPageCount()};}catch{return {pages:undefined};}}
+    function addPDFFiles(files){const arr=Array.from(files).filter(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));Promise.all(arr.map(async f=>{const meta=await readPdfMeta(f);pdfState.files.push(Object.assign(f,meta));})).then(renderList);}
+    const drop=document.getElementById('pdfDrop'), input=document.getElementById('pdfInput'); drop.addEventListener('click',()=>input.click());
+    ;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('dragover');}));
+    ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('dragover');}));
+    drop.addEventListener('drop',e=>addPDFFiles(e.dataTransfer.files)); input.addEventListener('change',e=>addPDFFiles(e.target.files));
+    async function downloadBytes(bytes,name){const blob=new Blob([bytes],{type:'application/pdf'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);}
+    function parseRanges(ranges,max){const out=new Set();(ranges||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(tok=>{const m=tok.match(/^(\\d+)-(\\d+)$/);if(m){let a=parseInt(m[1],10),b=parseInt(m[2],10);if(a>b)[a,b]=[b,a];for(let i=a;i<=b;i++)out.add(i);}else{const v=parseInt(tok,10);if(!isNaN(v))out.add(v);}});const arr=[...out].filter(n=>n>=1&&(!max||n<=max));return arr.sort((a,b)=>a-b);}
+    document.getElementById('btnMerge').addEventListener('click',async()=>{if(pdfState.files.length<2)return alert('Adicione 2+ PDFs para juntar.');const merged=await PDFLib.PDFDocument.create();for(const f of pdfState.files){const bytes=await f.arrayBuffer();const doc=await PDFLib.PDFDocument.load(bytes);const pages=await merged.copyPages(doc,doc.getPageIndices());pages.forEach(p=>merged.addPage(p));}const out=await merged.save();downloadBytes(out,'capy-merged.pdf');});
+    document.getElementById('btnExtract').addEventListener('click',async()=>{const idx=pdfState.selectedIndex;if(idx<0)return alert('Selecione um arquivo.');const file=pdfState.files[idx];const srcBytes=await file.arrayBuffer();const src=await PDFLib.PDFDocument.load(srcBytes);const req=parseRanges(document.getElementById('range').value,src.getPageCount());if(!req.length)return alert('Informe páginas (ex: 1-3,5,8).');const outDoc=await PDFLib.PDFDocument.create();const pages=await outDoc.copyPages(src,req.map(n=>n-1));pages.forEach(p=>outDoc.addPage(p));const out=await outDoc.save();downloadBytes(out,file.name.replace(/\\.pdf$/i,'')+`-pages(${req.join('_')}).pdf`);});
+    document.getElementById('btnRotate').addEventListener('click',async()=>{const idx=pdfState.selectedIndex;if(idx<0)return alert('Selecione um arquivo.');const file=pdfState.files[idx];const srcBytes=await file.arrayBuffer();const src=await PDFLib.PDFDocument.load(srcBytes);const req=parseRanges(document.getElementById('range').value,src.getPageCount());if(!req.length)return alert('Informe páginas para rotacionar.');req.forEach(n=>{const page=src.getPage(n-1);page.setRotation(PDFLib.degrees(((page.getRotation().angle||0)+90)%360));});const out=await src.save();downloadBytes(out,file.name.replace(/\\.pdf$/i,'')+`-rot90.pdf`);});
+    document.getElementById('btnRebuild').addEventListener('click',async()=>{const idx=pdfState.selectedIndex;if(idx<0)return alert('Selecione um arquivo.');const file=pdfState.files[idx];const srcBytes=await file.arrayBuffer();const src=await PDFLib.PDFDocument.load(srcBytes);const out=await src.save();downloadBytes(out,file.name.replace(/\\.pdf$/i,'')+`-rebuilt.pdf`);});
+
+    // boot
+    function baseBoot(currentPageId){renderSidebar(currentPageId);setupApiKeyModal();dom.sidebarToggleBtn?.addEventListener('click',()=>{dom.sidebar.classList.toggle('-translate-x-full');dom.sidebarOverlay.classList.toggle('hidden');});dom.sidebarOverlay?.addEventListener('click',()=>{dom.sidebar.classList.add('-translate-x-full');dom.sidebarOverlay.classList.add('hidden');});}
+    baseBoot('CapyPDFLab');
+  </script>
+</body>
+</html>

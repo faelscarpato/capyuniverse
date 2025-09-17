@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CapyUniverse: IA para Inovação Digital</title>
   <meta name="description" content="CapyUniverse, plataforma de IA criada por Rafael Scarpato, oferece soluções criativas, produtivas e educacionais para profissionais e entusiastas da inovação digital.">
   <meta name="keywords" content="CapyUniverse, IA, inteligência artificial, inovação digital, Rafael Scarpato, ferramentas, produtividade, criatividade, educação">
@@ -20,667 +19,279 @@
   <meta name="twitter:image" content="https://faelscarpato.github.io/capyuniverse/img/capyuniverse.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:creator" content="@rafaelscarpato">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#9333ea">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
-  <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#9333ea">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
- <script>
-    const params = new URLSearchParams(window.location.search);
-    if (window.innerWidth <= 768 && !params.has('from')) {
-      window.location.href = "abertura.html";
+
+  <!-- Redireciona mobile para a abertura (mantido) -->
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (window.innerWidth <= 768 && !params.get('from')) {
+      // window.location.href = "abertura.html";
     }
   </script>
-  
+
   <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-      --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      --glow-purple: #8b5cf6;
-      --glow-blue: #06b6d4;
-      --glow-pink: #ec4899;
-      --text-primary: #f8fafc;
-      --text-secondary: #cbd5e1;
-      --text-accent: #fbbf24;
+    :root{
+      --primary-gradient: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
+      --accent-gradient: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+      --dark-gradient: linear-gradient(135deg,#0c0c0c 0%,#1a1a2e 50%,#16213e 100%);
+      --glass-bg: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.1);
+      --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --glow-purple:#8b5cf6; --glow-blue:#06b6d4; --glow-pink:#ec4899;
+      --text-primary:#f8fafc; --text-secondary:#cbd5e1;
     }
+    html{scroll-behavior:smooth;}
+    body{font-family:Inter,sans-serif;background:var(--dark-gradient);color:var(--text-primary);overflow-x:hidden;}
+    .glass-card{background:var(--glass-bg);backdrop-filter:blur(18px);border:1px solid var(--glass-border);box-shadow:var(--card-shadow);}
+    .premium-gradient{background:var(--primary-gradient);}
+    .hover-lift{transition:.3s cubic-bezier(.4,0,.2,1);}
+    .hover-lift:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 20px 40px rgba(0,0,0,.3);}
+    .parallax-bg{background:var(--dark-gradient);min-height:100vh;position:relative;overflow:hidden;}
+    .parallax-bg::before{content:'';position:absolute;inset:0;background:
+      radial-gradient(circle at 20% 80%, rgba(139,92,246,.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(6,182,212,.15) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(236,72,153,.10) 0%, transparent 50%);}
+    .floating-orb{animation:floatingOrb 6s ease-in-out infinite alternate;}
+    @keyframes floatingOrb{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-20px) rotate(180deg)}100%{transform:translateY(-10px) rotate(360deg)}}
+    .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .particle{position:absolute;border-radius:50%;}
+    .particle:nth-child(1){width:4px;height:4px;top:20%;left:10%;background:rgba(139,92,246,.6);animation:floatParticle 8s linear infinite;}
+    .particle:nth-child(2){width:6px;height:6px;top:40%;left:80%;background:rgba(6,182,212,.6);animation:floatParticle 12s linear infinite -3s;}
+    .particle:nth-child(3){width:3px;height:3px;top:70%;left:30%;background:rgba(236,72,153,.6);animation:floatParticle 10s linear infinite -6s;}
+    .particle:nth-child(4){width:5px;height:5px;top:60%;left:70%;background:rgba(251,191,36,.6);animation:floatParticle 15s linear infinite -9s;}
+    .particle:nth-child(5){width:4px;height:4px;top:30%;left:50%;background:rgba(168,85,247,.6);animation:floatParticle 11s linear infinite -12s;}
+    @keyframes floatParticle{0%{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh);opacity:0}}
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--dark-gradient);
-      color: var(--text-primary);
-      overflow-x: hidden;
-    }
+    /* Header fixo */
+    .header{position:fixed;inset:0 0 auto;z-index:50;height:64px;display:flex;align-items:center}
+    .nav-link{position:relative;padding:.5rem .75rem;color:#e5e7eb;transition:color .25s,transform .25s}
+    .nav-link::after{content:'';position:absolute;width:0;height:2px;bottom:-4px;left:50%;transform:translateX(-50%);background:linear-gradient(to right,#a200ff,#fbbf24);transition:width .25s}
+    .nav-link:hover{color:#fbbf24;transform:translateY(-2px)}
+    .nav-link:hover::after,.nav-link.active::after{width:100%}
 
-    .parallax-bg {
-      background: var(--dark-gradient);
-      min-height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
+    /* Carrossel */
+    .carrossel-container{position:relative;max-width:100%;overflow:hidden;border-radius:1.25rem;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04)}
+    .carrossel{position:relative;width:100%;transition:height .35s ease}
+    .carrossel-slide{opacity:0;position:absolute;inset:0;width:100%;padding:1.25rem;pointer-events:none;transition:opacity .5s ease}
+    .carrossel-slide.active{opacity:1;pointer-events:auto;position:relative}
+    .carrossel-dots{position:absolute;bottom:1rem;left:0;right:0;display:flex;justify-content:center;gap:.6rem;z-index:5}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.5);transition:all .2s;cursor:pointer}
+    .dot.active{background:#f59e0b;transform:scale(1.2)}
 
-    .parallax-bg::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
+    /* Modal */
+    .modal-hidden{opacity:0;pointer-events:none}
+    .modal-visible{opacity:1}
+    .modal-overlay-bg{transition:opacity .25s}
+    .modal-content{transition:transform .25s,opacity .25s}
+    .modal-hidden .modal-overlay-bg{opacity:0}
+    .modal-hidden .modal-content{opacity:0;transform:translateY(-8px) scale(.98)}
+    .modal-visible .modal-overlay-bg{opacity:.75}
+    .modal-visible .modal-content{opacity:1;transform:none}
 
-    /*.font-syne { font-family: 'Syne', sans-serif; }*/
+    /* Notifs */
+    #notificationArea{position:fixed;top:1.25rem;right:1.25rem;z-index:60;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:24rem}
+    .notification{padding:1rem;border-radius:.5rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);font-size:.875rem;display:flex;justify-content:space-between;align-items:center;transition:all .25s;opacity:0;transform:translateX(100%)}
+    .notification.show{opacity:1;transform:translateX(0)}
+    .notification-success{background:#10b981;color:#fff}.notification-error{background:#ef4444;color:#fff}.notification-info{background:#3b82f6;color:#fff}.notification-warning{background:#f59e0b;color:#111}
+    .notification button{margin-left:.75rem;font-weight:700;font-size:1.125rem;background:none;border:none;color:inherit;cursor:pointer}
 
-    .modern-glow {
-      box-shadow: 0 0 80px rgba(139, 92, 246, 0.4),
-                  0 0 160px rgba(6, 182, 212, 0.2),
-                  0 0 240px rgba(236, 72, 153, 0.1);
-      filter: blur(1px);
+    /* Mobile tweaks */
+    @media (max-width:768px){
+      .particles{display:none}
     }
-
-    .floating-hero {
-      animation: floatyHero 4s ease-in-out infinite alternate;
-    }
-    @keyframes floatyHero {
-      from { transform: translateY(0px) scale(1); }
-      to   { transform: translateY(-15px) scale(1.02); }
-    }
-
-    .card-float {
-      animation: floatyCard 3s ease-in-out infinite alternate;
-    }
-    @keyframes floatyCard {
-      from { transform: translateY(0px); }
-      to   { transform: translateY(-6px); }
-    }
-
-    .glass-card {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--card-shadow);
-    }
-
-    .premium-gradient {
-      background: var(--primary-gradient);
-    }
-
-    .hover-lift {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .hover-lift:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .floating-orb {
-      animation: floatingOrb 6s ease-in-out infinite alternate;
-    }
-
-    @keyframes floatingOrb {
-      0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-      100% { transform: translateY(-10px) rotate(360deg); }
-    }
-
-    .particles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      background: rgba(139, 92, 246, 0.6);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .particle:nth-child(1) {
-      width: 4px;
-      height: 4px;
-      top: 20%;
-      left: 10%;
-      animation: floatParticle 8s linear infinite;
-    }
-
-    .particle:nth-child(2) {
-      width: 6px;
-      height: 6px;
-      top: 40%;
-      left: 80%;
-      background: rgba(6, 182, 212, 0.6);
-      animation: floatParticle 12s linear infinite;
-      animation-delay: -3s;
-    }
-
-    .particle:nth-child(3) {
-      width: 3px;
-      height: 3px;
-      top: 70%;
-      left: 30%;
-      background: rgba(236, 72, 153, 0.6);
-      animation: floatParticle 10s linear infinite;
-      animation-delay: -6s;
-    }
-
-    .particle:nth-child(4) {
-      width: 5px;
-      height: 5px;
-      top: 60%;
-      left: 70%;
-      background: rgba(251, 191, 36, 0.6);
-      animation: floatParticle 15s linear infinite;
-      animation-delay: -9s;
-    }
-
-    .particle:nth-child(5) {
-      width: 4px;
-      height: 4px;
-      top: 30%;
-      left: 50%;
-      background: rgba(168, 85, 247, 0.6);
-      animation: floatParticle 11s linear infinite;
-      animation-delay: -12s;
-    }
-
-    @keyframes floatParticle {
-      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-    }
-
-    /* Utility classes */
-    .line-clamp-2 {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .text-shadow-lg {
-      text-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Smooth scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* Custom focus styles */
-    input:focus, select:focus, button:focus {
-      outline: none;
-    }
-
-    /* Loading animation */
-    @keyframes shimmer {
-      0% { background-position: -468px 0; }
-      100% { background-position: 468px 0; }
-    }
-
-    .loading-shimmer {
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      background-size: 468px 100%;
-      animation: shimmer 1.5s infinite;
-    }
-
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-      .particles { display: none; }
-      .floating-orb { transform: scale(0.7); }
-      .modern-glow { box-shadow: 0 0 40px rgba(139, 92, 246, 0.3); }
-    }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #1f2937; }
-    ::-webkit-scrollbar-thumb { background: #a200ff; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        padding-right: 2.5rem;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-    }
-    #no-tools-message {
-        text-align: center;
-        font-size: 1.25rem;
-        color: #9ca3af;
-        margin-top: 2rem;
-        padding: 2rem;
-        background-color: #374151;
-        border-radius: 0.75rem;
-    }
-    .modal-overlay-bg {
-        transition: opacity 0.3s ease-in-out;
-    }
-    .modal-content {
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    }
-    .modal-hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-    .modal-hidden .modal-overlay-bg {
-        opacity: 0;
-    }
-    .modal-hidden .modal-content {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-    .modal-visible .modal-overlay-bg {
-        opacity: 0.75;
-    }
-    .modal-visible .modal-content {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-  .logo {
-    width: 100%;
-    height: auto;
-    max-width: 200px;
-    margin: 0 auto;
-  }
-  .carrossel-container {
-    position: relative;
-    max-width: 100%;
-    overflow: hidden;
-    border-radius: 1.5rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-  .carrossel {
-    position: relative;
-    width: 100%;
-    transition: height 0.4s ease-in-out;
-  }
-  .carrossel-slide {
-    transition: opacity 0.7s ease-in-out;
-    opacity: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .carrossel-slide.active {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 2;
-  }
-  .carrossel-dots {
-    position: absolute;
-    bottom: 1.5rem;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    z-index: 10;
-  }
-  .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  .dot.active {
-    background: #f59e0b;
-    transform: scale(1.2);
-  }
-    #notificationArea {
-        position: fixed;
-        top: 1.25rem;
-        right: 1.25rem;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        width: 100%;
-        max-width: 24rem;
-    }
-    .notification {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-        font-size: 0.875rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.3s ease-in-out;
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    .notification.show {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    .notification-success { background-color: #10b981; color: white; }
-    .notification-error { background-color: #ef4444; color: white; }
-    .notification-info { background-color: #3b82f6; color: white; }
-    .notification-warning { background-color: #f59e0b; color: #1f2937; }
-    .notification button {
-        margin-left: 0.75rem;
-        font-weight: bold;
-        font-size: 1.125rem;
-        line-height: 1;
-        background: none;
-        border: none;
-        color: inherit;
-        cursor: pointer;
-    }
-    .tool-card-image {
-        width: auto;
-        height: 100%;
-
-
-    }
-    .loading-placeholder {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 200px;
-        font-size: 1.125rem;
-        color: #a1a1aa;
-    }
-
-    /* Estilos para o cabeçalho fixo e responsivo */
-    .header-gradient {
-        background: linear-gradient(to right, #200229, #18032c);
-    }
-    .nav-link {
-        position: relative;
-        padding: 0.5rem 0.75rem;
-        color: #e5e7eb; /* cor padrão */
-        transition: color 0.3s ease, transform 0.3s ease;
-    }
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: -4px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(to right, #a200ff, #fbbf24); /* Cor de destaque */
-        transition: width 0.3s ease;
-    }
-    .nav-link:hover::after, .nav-link.active::after {
-        width: 100%;
-    }
-    .nav-link:hover {
-        color: #fbbf24; /* Cor ao passar o mouse */
-        transform: translateY(-2px);
-    }
-    /* Menu Hamburguer */
-    .hamburger-icon {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 30px;
-        height: 20px;
-        cursor: pointer;
-    }
-    .hamburger-icon span {
-        display: block;
-        width: 100%;
-        height: 2px;
-        background-color: #e5e7eb;
-        transition: all 0.3s ease;
-    }
-    .hamburger-icon.open span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
-    }
-    .hamburger-icon.open span:nth-child(2) {
-        opacity: 0;
-    }
-    .hamburger-icon.open span:nth-child(3) {
-        transform: rotate(-45deg) translate(5px, -5px);
-    }
-    .mobile-menu {
-        transform: translateX(100%);
-        transition: transform 0.3s ease-out;
-    }
-    .mobile-menu.open {
-        transform: translateX(0);
-    }
-
+    ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#1f2937}::-webkit-scrollbar-thumb{background:#a200ff;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#6b7280}
   </style>
 
-<!-- Google tag (gtag.js) -->
+  <!-- gtag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+    gtag('js', new Date()); gtag('config','G-3FFD7ZEBN1',{page_path:location.pathname});
   </script>
 
-  <script src="https://cdn.amplitude.com/script/923ad9fef9eabc6dd7b7194bc8c91d41.js"></script><script>window.amplitude.add(window.sessionReplay.plugin({sampleRate: 1}));window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41', {"fetchRemoteConfig":true,"autocapture":true});</script>
+  <!-- Amplitude -->
+  <script src="https://cdn.amplitude.com/script/923ad9fef9eabc6dd7b7194bc8c91d41.js"></script>
+  <script>window.amplitude.add(window.sessionReplay.plugin({sampleRate:1}));window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41',{"fetchRemoteConfig":true,"autocapture":true});</script>
 </head>
-<body class="text-gray-100">
 
-  <header class="fixed top-0 left-0 w-full z-50 py-4 px-6 md:px-10 glass-card border-b border-white/10">
-    <div class="flex items-center justify-between max-w-7xl mx-auto">
-      <a href="index.html" class="flex items-center space-x-3 hover-lift group">
-        <div class="glass-card p-2 rounded-xl border border-white/20 group-hover:border-purple-400/50 transition-all duration-300">
-          <img src="img/logo.png" alt="CapyUniverse Logo" class="h-8 w-8 md:h-10 md:w-10 group-hover:scale-110 transition-transform duration-300">
+<body class="text-gray-100 min-h-screen flex flex-col">
+  <!-- HEADER -->
+  <header class="header glass-card border-b border-white/10 px-4 md:px-8">
+    <div class="w-full max-w-7xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 hover-lift group">
+        <div class="glass-card p-2 rounded-xl border border-white/20 group-hover:border-purple-400/50 transition-all">
+          <img src="img/logo.png" alt="CapyUniverse Logo" class="h-9 w-9 md:h-10 md:w-10 group-hover:scale-110 transition-transform">
         </div>
-        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-inter">CapyUniverse</span>
+        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">CapyUniverse</span>
       </a>
 
-      <nav class="hidden md:flex space-x-6 lg:space-x-8">
+      <nav class="hidden md:flex items-center gap-6 lg:gap-8">
         <a href="#contato" class="nav-link">Contato</a>
         <a href="#seja-beta" class="nav-link">Seja Beta</a>
         <a href="#quem-somos" class="nav-link">Quem Somos</a>
         <a href="#faq" class="nav-link">FAQ</a>
+        <button id="openManageApiKeyModalButtonHeader" class="glass-card px-4 py-2 rounded-xl border border-cyan-400/30 text-cyan-300 hover:border-cyan-400/60 hover-lift">Chaves API</button>
       </nav>
 
-      <div class="md:hidden flex items-center">
-        <button id="hamburger-button" class="focus:outline-none p-2 rounded-md">
-          <div class="hamburger-icon">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
-      </div>
+      <button id="hamburger-button" class="md:hidden p-2 rounded-md hover:bg-white/10" aria-label="Abrir menu">
+        <div class="hamburger-icon flex flex-col justify-between w-7 h-4">
+          <span class="block w-full h-0.5 bg-gray-200"></span>
+          <span class="block w-full h-0.5 bg-gray-200"></span>
+          <span class="block w-full h-0.5 bg-gray-200"></span>
+        </div>
+      </button>
     </div>
 
-    <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 shadow-2xl p-6 pt-20 md:hidden">
+    <!-- MENU MOBILE -->
+    <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 shadow-2xl p-6 pt-20 md:hidden translate-x-full">
       <nav class="flex flex-col space-y-6 text-xl">
         <a href="#contato" class="nav-link py-2" onclick="closeMobileMenu()">Contato</a>
         <a href="#seja-beta" class="nav-link py-2" onclick="closeMobileMenu()">Seja Beta</a>
         <a href="#quem-somos" class="nav-link py-2" onclick="closeMobileMenu()">Quem Somos</a>
         <a href="#faq" class="nav-link py-2" onclick="closeMobileMenu()">FAQ</a>
+        <button id="openManageApiKeyModalButtonMobile" class="glass-card px-4 py-3 rounded-xl text-left border border-cyan-400/30 text-cyan-300">🔑 Chaves API</button>
       </nav>
     </div>
   </header>
 
-  <div class="pt-20 md:pt-24"></div>
-
+  <div class="pt-16"></div>
   <div id="notificationArea"></div>
 
-  <div class="parallax-bg flex items-center justify-center relative py-16 px-4 min-h-screen">
-    <!-- Elementos de background modernos -->
-    <div class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-      <div class="floating-orb absolute -top-32 left-1/4 w-80 h-80 md:w-96 md:h-96 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%); opacity: 0.3;"></div>
-      <div class="floating-orb absolute top-1/4 right-1/5 w-64 h-64 md:w-80 md:h-80 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%); opacity: 0.25; animation-delay: -1s;"></div>
-      <div class="floating-orb absolute bottom-1/4 left-1/2 w-72 h-72 md:w-88 md:h-88 rounded-full modern-glow" style="background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%); opacity: 0.2; animation-delay: -2s;"></div>
-
-      <!-- Partículas flutuantes -->
+  <!-- HERO -->
+  <div class="parallax-bg relative py-14 px-4 min-h-[calc(100vh-64px)]">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="floating-orb absolute -top-24 left-1/4 w-72 h-72 rounded-full" style="background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%); opacity:.3;"></div>
+      <div class="floating-orb absolute top-1/4 right-1/5 w-64 h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%); opacity:.25; animation-delay:-1s;"></div>
+      <div class="floating-orb absolute bottom-1/4 left-1/2 w-64 h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%); opacity:.2; animation-delay:-2s;"></div>
       <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
       </div>
     </div>
 
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-4">
-      <div class="flex flex-col lg:flex-row items-center lg:items-stretch gap-12">
-        <div class="w-full lg:w-5/12 flex flex-col justify-center text-center lg:text-left floating-hero">
-          <!-- Logo container modernizado -->
-          <div class="glass-card inline-flex items-center justify-center rounded-3xl p-4 mb-8 lg:mx-0 mx-auto w-28 h-28 md:w-32 md:h-32 hover-lift">
-            <img src="img/logo.png" class="w-full h-full object-contain drop-shadow-2xl" alt="Logo CapyUniverse" onerror="this.onerror=null;this.src='img/logo.png';">
+    <div class="relative z-10 w-full max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-10 items-center min-h-0">
+        <!-- Texto -->
+        <div class="flex flex-col justify-center text-center lg:text-left min-h-0">
+          <div class="glass-card inline-flex items-center justify-center rounded-3xl p-4 mb-8 mx-auto lg:mx-0 w-28 h-28 hover-lift">
+            <img src="img/logo.png" class="w-full h-full object-contain" alt="Logo CapyUniverse">
           </div>
 
-          <!-- Título com gradiente premium -->
-          <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent font-inter leading-tight">
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
             CapyUniverse IA
           </h1>
+          <p class="text-lg sm:text-xl text-slate-300 mb-2">Inteligência Artificial <span class="text-cyan-400 font-semibold">Premium</span> com a</p>
+          <p class="text-base sm:text-lg text-slate-400 mb-6"><span class="text-2xl">🚀</span> simpatia das capivaras mais futuristas do universo</p>
 
-          <!-- Subtítulo modernizado -->
-          <p class="text-xl sm:text-2xl text-slate-300 mb-4 max-w-2xl lg:max-w-none font-light">
-            Inteligência Artificial <span class="text-cyan-400 font-semibold">Premium</span> com a
-          </p>
-          <p class="text-lg sm:text-xl text-slate-400 mb-8 max-w-2xl lg:max-w-none">
-            <span class="text-2xl">🚀</span> simpatia das capivaras mais futuristas do universo
-          </p>
-
-          <!-- Badge de status -->
-          <div class="glass-card inline-flex items-center px-4 py-2 rounded-full mb-8 lg:mx-0 mx-auto">
+          <div class="glass-card inline-flex items-center px-4 py-2 rounded-full mb-8 mx-auto lg:mx-0">
             <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
             <span class="text-sm text-slate-300">Plataforma Ativa • 50+ Ferramentas IA</span>
           </div>
 
-          <!-- Botões modernos -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <a href="#ferramentas" class="group premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift text-center relative overflow-hidden">
               <span class="relative z-10">Explorar Ferramentas</span>
-              <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <span class="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity"></span>
             </a>
-            <button id="openManageApiKeyModalButton" class="glass-card px-8 py-4 rounded-2xl font-semibold text-cyan-400 hover-lift text-center border border-cyan-400/30 hover:border-cyan-400/50 transition-all duration-300">
-              <span class="flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                </svg>
-                Configurar API
-              </span>
+            <button id="openManageApiKeyModalButton" class="glass-card px-8 py-4 rounded-2xl font-semibold text-cyan-400 border border-cyan-400/30 hover:border-cyan-400/60 hover-lift">
+              <span class="flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Configurar API</span>
             </button>
           </div>
         </div>
-        
-        <div class="w-full lg:w-7/12 hidden lg:block"> 
-          <div class="carrossel-container w-full">
-            <div class="carrossel">
+
+        <!-- Carrossel (desktop) -->
+        <div class="hidden lg:block min-h-0">
+          <div class="carrossel-container">
+            <div class="carrossel" id="carrossel">
+              <!-- Slide 1 -->
               <div class="carrossel-slide active">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-blue-900/50 to-sky-900/50 rounded-2xl border border-blue-500/30 shadow-xl">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-blue-900/50 to-sky-900/50 rounded-2xl border border-blue-500/30">
                   <div class="flex-1 text-center md:text-left">
                     <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                      Em Destaque
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Em Destaque
                     </div>
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyResumo</h2>
-                    <p class="text-lg text-gray-300 mb-6">Resuma qualquer texto, artigo ou documento em segundos com nossa IA avançada. Economize tempo e aprenda de forma mais eficiente.</p>
+                    <h2 class="text-3xl font-bold text-white mb-2">CapyResumo</h2>
+                    <p class="text-lg text-gray-300 mb-6">Resuma qualquer texto, artigo ou documento em segundos.</p>
                     <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
                       <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Resumos Rápidos</span>
                       <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Análise de Texto</span>
                       <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">IA Avançada</span>
                     </div>
-                    <a href="capyresumo.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">
-                      Experimentar Agora <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
+                    <a href="capyresumo.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:opacity-90">Experimentar Agora →</a>
                   </div>
-                  <div class="flex-1"><div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700"><div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Exemplo de resumo:</p><p class="text-blue-300 font-medium">"A IA revolucionou a forma como processamos informações, permitindo análises complexas em segundos que antes levariam horas ou dias."</p></div><div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-blue-500 to-sky-500 rounded-full w-3/4"></div></div><p class="text-xs text-gray-400 mt-2 text-right">75% mais conciso</p></div></div>
+                  <div class="flex-1">
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                      <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Exemplo:</p><p class="text-blue-300 font-medium">"A IA revolucionou a forma como processamos informações..."</p></div>
+                      <div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-blue-500 to-sky-500 rounded-full w-3/4"></div></div>
+                      <p class="text-xs text-gray-400 mt-2 text-right">75% mais conciso</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+              <!-- Slide 2 -->
               <div class="carrossel-slide">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-yellow-900/50 to-amber-900/50 rounded-2xl border border-yellow-500/30 shadow-xl">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-yellow-900/50 to-amber-900/50 rounded-2xl border border-yellow-500/30">
                   <div class="flex-1 text-center md:text-left">
                     <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-300 text-sm font-medium">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                      Exclusivo
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Exclusivo
                     </div>
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyExplica</h2>
-                    <p class="text-lg text-gray-300 mb-6">Entenda conceitos complexos de forma simples e didática. Nossa IA explica qualquer tópico com clareza e profundidade.</p>
-                    <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
-                      <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Explicações Claras</span>
-                      <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Didática</span>
-                      <span class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Aprendizado</span>
-                    </div>
-                    <a href="capyexplica.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-gray-900 font-medium rounded-lg hover:opacity-90 transition-opacity">
-                      Explicar Agora <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
+                    <h2 class="text-3xl font-bold text-white mb-2">CapyExplica</h2>
+                    <p class="text-lg text-gray-300 mb-6">Entenda conceitos complexos de forma simples e didática.</p>
+                    <a href="capyexplica.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-gray-900 rounded-lg hover:opacity-90">Explicar Agora →</a>
                   </div>
-                  <div class="flex-1"><div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700"><div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Pergunte:</p><p class="text-yellow-300 font-medium">"O que é inteligência artificial?"</p></div><div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full w-4/5"></div></div><p class="text-xs text-gray-400 mt-2 text-right">Resposta em 2s</p></div></div>
+                  <div class="flex-1">
+                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+                      <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Pergunte:</p><p class="text-yellow-300 font-medium">"O que é inteligência artificial?"</p></div>
+                      <div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full w-4/5"></div></div>
+                      <p class="text-xs text-gray-400 mt-2 text-right">Resposta em 2s</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+              <!-- Slide 3 -->
               <div class="carrossel-slide">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 md:p-8 bg-gradient-to-br from-purple-900/50 to-fuchsia-900/50 rounded-2xl border border-purple-500/30 shadow-xl">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-purple-900/50 to-fuchsia-900/50 rounded-2xl border border-purple-500/30">
                   <div class="flex-1 text-center md:text-left">
-                     <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">
-                       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 15.5L12 18l6-6-3-3-3 3-1.5-1.5L9.5 12l-3 3L9.5 18l-3-3L9.5 12l3 3L18 9l-6 6-2.5-2.5L6 16l3.5-3.5z"></path></svg> Popular
-                    </div>
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">CapyFlashcards</h2>
-                    <p class="text-lg text-gray-300 mb-6">Crie flashcards para estudar qualquer assunto. Nossa IA gera cartões de estudo personalizados para maximizar seu aprendizado.</p>
-                    <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
-                      <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Estudo Ativo</span>
-                      <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Memorização</span>
-                      <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">Revisão Espaçada</span>
-                    </div>
-                    <a href="capyflashcards.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white font-medium rounded-lg hover:opacity-90 transition-opacity">
-                      Criar Flashcards <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                    </a>
+                    <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">Popular</div>
+                    <h2 class="text-3xl font-bold text-white mb-2">CapyFlashcards</h2>
+                    <p class="text-lg text-gray-300 mb-6">Crie flashcards para estudar qualquer assunto.</p>
+                    <a href="capyflashcards.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg hover:opacity-90">Criar Flashcards →</a>
                   </div>
-                  <div class="flex-1"><div class="relative h-64 bg-gray-800/50 rounded-xl border-2 border-dashed border-purple-500/30 flex items-center justify-center p-4"><div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform rotate-2 -translate-y-3 -translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">O que é Machine Learning?</p><p class="text-sm text-gray-400">Clique para ver a resposta</p></div><div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform -rotate-2 translate-y-3 translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">R: Um subcampo da IA que permite aos sistemas aprenderem com dados.</p><div class="flex gap-2 mt-4"><button class="text-xs px-3 py-1 bg-red-500/20 text-red-300 rounded-full">Errei</button><button class="text-xs px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full">Quase</button><button class="text-xs px-3 py-1 bg-green-500/20 text-green-300 rounded-full">Fácil</button></div></div></div></div>
+                  <div class="flex-1">
+                    <div class="relative h-64 bg-gray-800/50 rounded-xl border-2 border-dashed border-purple-500/30 flex items-center justify-center p-4">
+                      <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform rotate-2 -translate-y-3 -translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">O que é Machine Learning?</p><p class="text-sm text-gray-400">Clique para ver a resposta</p></div>
+                      <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform -rotate-2 translate-y-3 translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">R: Sistemas que aprendem com dados.</p></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="carrossel-dots">
-              <span class="dot active" data-slide="0"></span>
-              <span class="dot" data-slide="1"></span>
-              <span class="dot" data-slide="2"></span>
-            </div>
+            <div class="carrossel-dots"><span class="dot active" data-slide="0"></span><span class="dot" data-slide="1"></span><span class="dot" data-slide="2"></span></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Descubra -->
   <section class="max-w-7xl mx-auto px-4 py-10">
-    <div class="glass-card p-8 rounded-3xl mb-12 hover-lift">
+    <div class="glass-card p-6 sm:p-8 rounded-3xl mb-12 hover-lift">
       <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">
-          Descubra sua Ferramenta IA
-        </h2>
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">Descubra sua Ferramenta IA</h2>
         <p class="text-slate-400">Mais de 50 ferramentas inteligentes ao seu alcance</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
         <div class="space-y-2">
-          <label for="search-input" class="block text-sm font-medium text-slate-300">
-            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            Buscar Ferramenta
-          </label>
-          <input type="text" id="search-input" placeholder="Digite o nome, categoria ou funcionalidade..." class="w-full glass-card border border-white/10 text-slate-200 placeholder-slate-500 rounded-xl p-4 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400/50 transition-all duration-300 hover:border-white/20">
+          <label for="search-input" class="block text-sm font-medium text-slate-300">Buscar Ferramenta</label>
+          <input id="search-input" type="text" placeholder="Digite o nome, categoria ou funcionalidade..." class="w-full glass-card border border-white/10 text-slate-200 placeholder-slate-500 rounded-xl p-4 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400/50 hover:border-white/20">
         </div>
         <div class="space-y-2">
-          <label for="category-select" class="block text-sm font-medium text-slate-300">
-            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
-            </svg>
-            Categoria
-          </label>
-          <select id="category-select" class="w-full glass-card border border-white/10 text-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-purple-400 focus:border-purple-400/50 transition-all duration-300 hover:border-white/20">
+          <label for="category-select" class="block text-sm font-medium text-slate-300">Categoria</label>
+          <select id="category-select" class="w-full glass-card border border-white/10 text-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-purple-400 focus:border-purple-400/50 hover:border-white/20">
             <option value="">Todas as Categorias</option>
           </select>
         </div>
@@ -688,162 +299,94 @@
     </div>
   </section>
 
-  <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20">
-    <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-         <div class="loading-placeholder col-span-full">
-            <p>A carregar ferramentas...</p>
-        </div>
+  <!-- Ferramentas -->
+  <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20 min-h-0">
+    <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 min-h-[200px]">
+      <div class="col-span-full text-center text-slate-400">A carregar ferramentas...</div>
     </div>
-    <div id="no-tools-message" class="hidden">Nenhuma ferramenta encontrada com os critérios selecionados.</div>
+    <div id="no-tools-message" class="hidden text-center text-slate-400 mt-6">Nenhuma ferramenta encontrada com os critérios selecionados.</div>
   </section>
 
-  <footer class="relative text-center mt-16 py-12 px-4 glass-card rounded-t-3xl border-t border-white/10">
+  <!-- Footer -->
+  <footer class="text-center mt-16 py-12 px-4 glass-card rounded-t-3xl border-t border-white/10">
     <div class="max-w-4xl mx-auto">
-      <!-- Elemento decorativo -->
-      <div class="flex justify-center mb-6">
-        <div class="glass-card p-4 rounded-2xl border border-white/20">
-          <div class="text-3xl">🚀</div>
-        </div>
-      </div>
-
-      <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-        Transforme suas ideias em realidade
-      </h2>
-      <p class="text-slate-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
-        Junte-se a milhares de usuários que já descobriram o poder da IA com a simpatia das capivaras.
-        <span class="text-cyan-400 font-medium">Comece sua jornada hoje mesmo.</span>
-      </p>
-
+      <div class="flex justify-center mb-6"><div class="glass-card p-4 rounded-2xl border border-white/20"><div class="text-3xl">🚀</div></div></div>
+      <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Transforme suas ideias em realidade</h2>
+      <p class="text-slate-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">Junte-se a milhares de usuários que já descobriram o poder da IA com a simpatia das capivaras. <span class="text-cyan-400 font-medium">Comece sua jornada hoje mesmo.</span></p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
         <a href="#ferramentas" class="premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift group">
-          <span class="flex items-center">
-            Começar de Graça
-            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
+          <span class="flex items-center">Começar de Graça
+            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </span>
         </a>
-
-        <div class="text-slate-400 text-sm">
-          ✨ Sem cadastro necessário • 🚀 Acesso instantâneo
-        </div>
+        <div class="text-slate-400 text-sm">✨ Sem cadastro necessário • 🚀 Acesso instantâneo</div>
       </div>
-
-      <!-- Stats -->
       <div class="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
-        <div class="text-center">
-          <div class="text-2xl font-bold text-cyan-400">50+</div>
-          <div class="text-xs text-slate-500">Ferramentas</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-purple-400">24/7</div>
-          <div class="text-xs text-slate-500">Disponível</div>
-        </div>
-        <div class="text-center">
-          <div class="text-2xl font-bold text-pink-400">Free</div>
-          <div class="text-xs text-slate-500">Para Sempre</div>
-        </div>
+        <div><div class="text-2xl font-bold text-cyan-400">50+</div><div class="text-xs text-slate-500">Ferramentas</div></div>
+        <div><div class="text-2xl font-bold text-purple-400">24/7</div><div class="text-xs text-slate-500">Disponível</div></div>
+        <div><div class="text-2xl font-bold text-pink-400">Free</div><div class="text-xs text-slate-500">Para Sempre</div></div>
       </div>
-
       <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-6"></div>
-
-      <p class="text-slate-600 text-sm">
-        &copy; <span id="current-year"></span> CapyUniverse IA • Construído com ❤️ para inovadores como você
-      </p>
+      <p class="text-slate-600 text-sm">&copy; <span id="current-year"></span> CapyUniverse IA • Construído com ❤️ para inovadores como você</p>
     </div>
   </footer>
 
+  <!-- FAB Chaves API (MOBILE) -->
+  <button id="fabApi" class="md:hidden fixed bottom-4 right-4 premium-gradient text-white font-semibold rounded-full p-4 shadow-2xl z-50" aria-label="Chaves API">🔑</button>
+
+  <!-- MODAL Tool -->
   <div id="toolModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 modal-hidden">
     <div class="absolute inset-0 bg-black modal-overlay-bg opacity-50"></div>
-    <div class="modal-content bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md relative transform transition-all">
-      <button id="closeToolModalButton" class="absolute top-3 right-3 text-gray-400 hover:text-gray-200 transition-colors" aria-label="Fechar modal">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <div class="modal-content bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md relative">
+      <button id="closeToolModalButton" class="absolute top-3 right-3 text-gray-400 hover:text-gray-200" aria-label="Fechar modal">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
       <div class="flex items-center mb-4">
-        <div id="modalIconContainer" class="w-12 h-12 rounded-full flex items-center justify-center  text-3xl shadow-inner"></div>
+        <div id="modalIconContainer" class="w-12 h-12 mr-4 rounded-full flex items-center justify-center text-3xl shadow-inner"></div>
         <h2 id="modalToolName" class="text-2xl font-bold text-gray-100">Nome da Ferramenta</h2>
       </div>
       <p id="modalToolCategory" class="text-sm text-gray-400 mb-1">Categoria</p>
-      <p id="modalToolDescription" class="text-gray-300 mb-6">Descrição detalhada da ferramenta aparecerá aqui.</p>
-      <a id="modalToolLink" href="#" target="_blank" class="w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300">
-        Acessar IA &rarr;
-      </a>
+      <p id="modalToolDescription" class="text-gray-300 mb-6">Descrição detalhada.</p>
+      <a id="modalToolLink" href="#" target="_blank" class="w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform bg-cyan-500">Acessar IA →</a>
     </div>
   </div>
 
+  <!-- MODAL API -->
   <div id="manageApiKeysModal" class="fixed inset-0 flex items-center justify-center z-[51] p-4 modal-hidden">
     <div class="absolute inset-0 bg-black modal-overlay-bg opacity-75"></div>
-    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative transform transition-all max-h-[90vh] overflow-y-auto">
-        <button id="closeManageApiKeysModalButton" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors" aria-label="Fechar modal de gerenciamento de API">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-        <h2 class="text-2xl md:text-3xl font-bold text-sky-400 mb-6 text-center">Gerenciar Chave API e Tutorial</h2>
-        <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
-            <label for="geminiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-2">Sua Chave API Google Gemini:</label>
-            <div class="flex items-center space-x-2 mb-2">
-              <input type="password" id="geminiApiKeyInputModal" placeholder="Cole sua chave API aqui" class="flex-grow p-3 bg-gray-600 text-gray-200 border border-gray-500 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm text-sm">
-              <button id="saveApiKeyButtonModal" class="px-4 py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md text-sm transition-colors">Salvar</button>
-            </div>
-            <p class="text-xs text-gray-400">Sua chave é salva localmente no seu navegador e não é enviada para nossos servidores.</p>
+    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+      <button id="closeManageApiKeysModalButton" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200" aria-label="Fechar modal de gerenciamento de API">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 class="text-2xl md:text-3xl font-bold text-sky-400 mb-6 text-center">Gerenciar Chave API e Tutorial</h2>
+
+      <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
+        <label for="geminiApiKeyInputModal" class="block text-sm font-medium text-gray-300 mb-2">Sua Chave API Google Gemini:</label>
+        <div class="flex items-center gap-2 mb-2">
+          <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="flex-grow p-3 bg-gray-600 text-gray-200 border border-gray-500 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm text-sm">
+          <button id="saveApiKeyButtonModal" class="px-4 py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md text-sm">Salvar</button>
         </div>
-        <div class="space-y-6 text-gray-300 text-sm md:text-base">
-            <h3 class="text-xl font-semibold text-sky-300 mb-3 border-b border-gray-700 pb-2">Como Obter sua Chave API do Google Gemini</h3>
-            <p>Para utilizar todas as funcionalidades do CapyUniverse IA, você precisará de uma Chave API do Google Gemini. O Gemini 1.5 Flash, que usamos, oferece um <strong class="text-yellow-400">nível gratuito generoso</strong>.</p>
-            <div>
-                <h4 class="font-semibold text-sky-300 mb-2 text-md">Passo 1: Acesse o Google AI Studio</h4>
-                <p class="mb-2">Se você ainda não tem uma conta Google, precisará criar uma. Depois, acesse o Google AI Studio:</p>
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-block px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md text-sm transition-colors shadow-md">
-                    Ir para Google AI Studio &rarr;
-                </a>
-                <p class="text-xs text-gray-400 mt-1">(Abrirá em uma nova aba)</p>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sky-300 mb-2 text-md">Passo 2: Crie ou Selecione um Projeto</h4>
-                <p>No Google AI Studio, você pode ser solicitado a criar um novo projeto ou selecionar um existente. Siga as instruções na tela. Geralmente, um projeto padrão é suficiente.</p>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sky-300 mb-2 text-md">Passo 3: Gere sua Chave API</h4>
-                <ul class="list-disc list-inside space-y-2 pl-4">
-                    <li>Procure pela opção <strong class="text-yellow-400">"Get API key"</strong> ou <strong class="text-yellow-400">"Criar chave API"</strong>.</li>
-                    <li>Clique em <strong class="text-yellow-400">"Create API key in new project"</strong> (ou similar, se já tiver um projeto, pode haver uma opção para usar um existente).</li>
-                    <li>Siga as instruções para nomear seu projeto, se necessário.</li>
-                    <li>Após a criação, sua chave API será exibida. Ela será uma longa sequência de letras e números.</li>
-                </ul>
-                <div class="mt-3 p-3 bg-gray-700/50 rounded-md border border-gray-600">
-                    <p class="text-xs text-gray-400">Exemplo de como a chave se parece (NÃO USE ESTA CHAVE):</p>
-                    <code class="block text-yellow-300 text-xs break-all mt-1">AIzaSyB...muitoMaisCaracteres...X0Y1Z2</code>
-                </div>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sky-300 mb-2 text-md">Passo 4: Copie e Cole sua Chave API</h4>
-                <ul class="list-disc list-inside space-y-2 pl-4">
-                    <li>Clique no botão para <strong class="text-yellow-400">copiar sua chave API</strong>.</li>
-                    <li>Volte para esta página do CapyUniverse IA (dentro deste modal).</li>
-                    <li>Cole a chave no campo "Sua Chave API Google Gemini" acima.</li>
-                    <li>Clique em "Salvar".</li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sky-300 mb-2 text-md">Importante:</h4>
-                <ul class="list-disc list-inside space-y-2 pl-4 text-gray-400">
-                    <li>Guarde sua chave API em um local seguro. Não a compartilhe publicamente.</li>
-                    <li>O uso da API está sujeito aos termos de serviço e políticas de uso do Google.</li>
-                </ul>
-            </div>
-            <button id="gotItManageApiKeysButton" class="mt-8 w-full bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg shadow-md hover:scale-105 transition-transform">
-                Entendi, fechar
-            </button>
-        </div>
+        <p class="text-xs text-gray-400">Sua chave é salva localmente no seu navegador.</p>
+      </div>
+
+      <div class="space-y-6 text-gray-300 text-sm md:text-base">
+        <h3 class="text-xl font-semibold text-sky-300">Como obter sua chave</h3>
+        <p>Use o Google AI Studio (Gemini 1.5 Flash possui camada gratuita generosa).</p>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="inline-block px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-md text-sm shadow-md">Abrir Google AI Studio →</a>
+      </div>
+
+      <button id="gotItManageApiKeysButton" class="mt-8 w-full bg-gradient-to-r from-fuchsia-500 to-yellow-400 text-gray-900 font-semibold py-3 px-6 rounded-lg shadow-md hover:scale-105">Entendi, fechar</button>
     </div>
-</div>
+  </div>
 
   <script>
-    // --- DOM Elements ---
+    // --- State/consts ---
     const toolsGrid = document.getElementById('tools-grid');
     const searchInput = document.getElementById('search-input');
     const categorySelect = document.getElementById('category-select');
     const noToolsMessage = document.getElementById('no-tools-message');
-    const currentYearSpan = document.getElementById('current-year');
+    const notificationArea = document.getElementById('notificationArea');
+
     const toolModal = document.getElementById('toolModal');
     const closeToolModalButton = document.getElementById('closeToolModalButton');
     const modalIconContainer = document.getElementById('modalIconContainer');
@@ -851,381 +394,233 @@
     const modalToolCategory = document.getElementById('modalToolCategory');
     const modalToolDescription = document.getElementById('modalToolDescription');
     const modalToolLink = document.getElementById('modalToolLink');
+
     const manageApiKeysModal = document.getElementById('manageApiKeysModal');
     const openManageApiKeyModalButton = document.getElementById('openManageApiKeyModalButton');
+    const openManageApiKeyModalButtonHeader = document.getElementById('openManageApiKeyModalButtonHeader');
+    const openManageApiKeyModalButtonMobile = document.getElementById('openManageApiKeyModalButtonMobile');
     const closeManageApiKeysModalButton = document.getElementById('closeManageApiKeysModalButton');
     const gotItManageApiKeysButton = document.getElementById('gotItManageApiKeysButton');
     const geminiApiKeyInputModal = document.getElementById('geminiApiKeyInputModal');
     const saveApiKeyButtonModal = document.getElementById('saveApiKeyButtonModal');
-    const API_KEY_STORAGE_PREFIX = 'capyUniverseApiKey_';
-    const notificationArea = document.getElementById('notificationArea');
+    const fabApi = document.getElementById('fabApi');
 
-    let allToolsData = []; // Para armazenar os dados do JSON
+    const API_KEY_STORAGE = 'capyUniverseApiKey_gemini';
 
-    // As classes de cor que tinhas antes, mantidas para consistência do modal e botões
     const colorClasses = {
-        fuchsia: { text: 'text-fuchsia-400', hoverShadow: 'hover:shadow-fuchsia-400/30', bg: 'bg-fuchsia-500', bgIcon: 'bg-fuchsia-400/20' },
-        yellow: { text: 'text-yellow-400', hoverShadow: 'hover:shadow-yellow-400/30', bg: 'bg-yellow-500', bgIcon: 'bg-yellow-400/20' },
-        sky: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' },
-        pink: { text: 'text-pink-400', hoverShadow: 'hover:shadow-pink-400/30', bg: 'bg-pink-500', bgIcon: 'bg-pink-400/20' },
-        rose: { text: 'text-rose-400', hoverShadow: 'hover:shadow-rose-400/30', bg: 'bg-rose-500', bgIcon: 'bg-rose-400/20' },
-        teal: { text: 'text-teal-400', hoverShadow: 'hover:shadow-teal-400/30', bg: 'bg-teal-500', bgIcon: 'bg-teal-400/20' },
-        cyan: { text: 'text-cyan-400', hoverShadow: 'hover:shadow-cyan-400/30', bg: 'bg-cyan-500', bgIcon: 'bg-cyan-400/20' },
-        orange: { text: 'text-orange-400', hoverShadow: 'hover:shadow-orange-400/30', bg: 'bg-orange-500', bgIcon: 'bg-orange-400/20' },
-        amber: { text: 'text-amber-400', hoverShadow: 'hover:shadow-amber-400/30', bg: 'bg-amber-500', bgIcon: 'bg-amber-400/20' },
-        blue: { text: 'text-blue-400', hoverShadow: 'hover:shadow-blue-400/30', bg: 'bg-blue-500', bgIcon: 'bg-blue-400/20' },
-        green: { text: 'text-green-400', hoverShadow: 'hover:shadow-green-400/30', bg: 'bg-green-500', bgIcon: 'bg-green-400/20' },
-        indigo: { text: 'text-indigo-400', hoverShadow: 'hover:shadow-indigo-400/30', bg: 'bg-indigo-500', bgIcon: 'bg-indigo-400/20' },
-        purple: { text: 'text-purple-400', hoverShadow: 'hover:shadow-purple-400/30', bg: 'bg-purple-500', bgIcon: 'bg-purple-400/20' },
-        red: { text: 'text-red-400', hoverShadow: 'hover:shadow-red-400/30', bg: 'bg-red-500', bgIcon: 'bg-red-400/20' },
-        lime: { text: 'text-lime-400', hoverShadow: 'hover:shadow-lime-400/30', bg: 'bg-lime-500', bgIcon: 'bg-lime-400/20' },
-        emerald: { text: 'text-emerald-400', hoverShadow: 'hover:shadow-emerald-400/30', bg: 'bg-emerald-500', bgIcon: 'bg-emerald-400/20' },
-        violet: { text: 'text-violet-400', hoverShadow: 'hover:shadow-violet-400/30', bg: 'bg-violet-500', bgIcon: 'bg-violet-400/20' },
-        trueGray: { text: 'text-gray-400', hoverShadow: 'hover:shadow-gray-400/30', bg: 'bg-gray-500', bgIcon: 'bg-gray-400/20' },
-        lightBlue: { text: 'text-sky-400', hoverShadow: 'hover:shadow-sky-400/30', bg: 'bg-sky-500', bgIcon: 'bg-sky-400/20' },
-        warmGray: { text: 'text-stone-400', hoverShadow: 'hover:shadow-stone-400/30', bg: 'bg-stone-500', bgIcon: 'bg-stone-400/20' },
-        coolGray: { text: 'text-slate-400', hoverShadow: 'hover:shadow-slate-400/30', bg: 'bg-slate-500', bgIcon: 'bg-slate-400/20' }
+      fuchsia:{text:'text-fuchsia-400',bg:'bg-fuchsia-500',bgIcon:'bg-fuchsia-400/20'},
+      yellow:{text:'text-yellow-400',bg:'bg-yellow-500',bgIcon:'bg-yellow-400/20'},
+      sky:{text:'text-sky-400',bg:'bg-sky-500',bgIcon:'bg-sky-400/20'},
+      pink:{text:'text-pink-400',bg:'bg-pink-500',bgIcon:'bg-pink-400/20'},
+      teal:{text:'text-teal-400',bg:'bg-teal-500',bgIcon:'bg-teal-400/20'},
+      cyan:{text:'text-cyan-400',bg:'bg-cyan-500',bgIcon:'bg-cyan-400/20'},
+      purple:{text:'text-purple-400',bg:'bg-purple-500',bgIcon:'bg-purple-400/20'},
+      blue:{text:'text-blue-400',bg:'bg-blue-500',bgIcon:'bg-blue-400/20'}
     };
 
-    // --- Funções ---
-    function addNotification(message, type = 'info') {
-        const notificationId = 'notif-' + Date.now();
-        const typeClasses = {
-            error: 'notification-error', success: 'notification-success',
-            info: 'notification-info', warning: 'notification-warning'
-        };
-        const notificationDiv = document.createElement('div');
-        notificationDiv.id = notificationId;
-        notificationDiv.className = `notification ${typeClasses[type] || typeClasses.info}`;
-        notificationDiv.innerHTML = `<span>${message}</span><button onclick="removeNotification('${notificationId}')">&times;</button>`;
-        notificationArea.appendChild(notificationDiv);
-        requestAnimationFrame(() => { notificationDiv.classList.add('show'); });
-        setTimeout(() => removeNotification(notificationId), 6000);
+    let allToolsData = [];
+
+    // --- Utils ---
+    function addNotification(message, type='info'){
+      const id = 'notif-'+Date.now();
+      const typeMap = {error:'notification-error',success:'notification-success',info:'notification-info',warning:'notification-warning'};
+      const div = document.createElement('div');
+      div.id = id; div.className = `notification ${typeMap[type]||typeMap.info}`;
+      div.innerHTML = `<span>${message}</span><button onclick="(function(){const el=document.getElementById('${id}'); if(el){el.classList.remove('show'); setTimeout(()=>el.remove(),300);}})()">×</button>`;
+      notificationArea.appendChild(div);
+      requestAnimationFrame(()=>div.classList.add('show'));
+      setTimeout(()=>{ if(div){div.classList.remove('show'); setTimeout(()=>div.remove(),300);} }, 6000);
     }
-    window.removeNotification = (id) => {
-        const el = document.getElementById(id);
-        if (el) { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }
-    };
 
-    function createToolCard(tool, index) {
+    function createToolCard(tool, index){
       const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
       const card = document.createElement('div');
-
-      card.className = `group glass-card rounded-2xl p-0 hover-lift overflow-hidden flex flex-col border border-white/10 hover:border-white/20 transition-all duration-500 ease-out`;
-      card.style.animationDelay = `${index * 0.08}s`;
-      card.style.setProperty('--hover-glow', colorTheme.text.replace('text-', ''));
-
-      Object.keys(tool).forEach(key => {
-        card.dataset[key] = tool[key];
-      });
+      card.className = 'group glass-card rounded-2xl overflow-hidden flex flex-col border border-white/10 hover:border-white/20 transition-all';
+      card.style.animationDelay = `${index*0.08}s`;
+      Object.keys(tool).forEach(k => card.dataset[k] = tool[k]);
 
       card.innerHTML = `
-        <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder group">
+        <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder">
           <div class="absolute inset-0 bg-gradient-to-br from-slate-800/10 to-slate-900/50 z-10"></div>
-          <img src="${tool.imageUrl || `https://placehold.co/120x90/1e293b/64748b?text=${encodeURIComponent(tool.title.substring(0,3))}`}"
-               alt="Visualização da ferramenta ${tool.title}"
-               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-               onerror="this.onerror=null;this.src='https://placehold.co/120x90/334155/94a3b8?text=IA';">
-
-          <!-- Badge de categoria -->
-          <div class="absolute top-3 left-3 z-20">
-            <span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">
-              ${tool.category}
-            </span>
-          </div>
-
-          <!-- Ícone da ferramenta -->
-          <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">
-            ${tool.icon || '🤖'}
-          </div>
-
-          <!-- Overlay com gradiente -->
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-15"></div>
+          <img src="${tool.imageUrl || `https://placehold.co/640x480/1e293b/94a3b8?text=${encodeURIComponent(tool.title?.slice(0,8)||'IA')}`}" alt="${tool.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/640x480/334155/94a3b8?text=IA';">
+          <div class="absolute top-3 left-3 z-20"><span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">${tool.category}</span></div>
+          <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">${tool.icon || '🤖'}</div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         </div>
-
         <div class="p-5 flex-grow flex flex-col justify-between">
           <div class="mb-4">
-            <h3 class="text-lg font-bold text-slate-100 mb-2 group-hover:text-white transition-colors" title="${tool.title}">
-              ${tool.title}
-            </h3>
-            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
-              ${tool.description || 'Ferramenta de inteligência artificial avançada'}
-            </p>
+            <h3 class="text-lg font-bold text-slate-100 mb-2 group-hover:text-white">${tool.title}</h3>
+            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">${tool.description || ''}</p>
           </div>
-
-          <button class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 open-modal-button glass-card border border-white/10 hover:border-${colorTheme.text.replace('text-', '')}-400/50 text-slate-300 hover:text-white group/btn">
+          <button class="open-modal-button w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-card border border-white/10 text-slate-300 hover:text-white">
             <span>Explorar</span>
-            <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
+            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </button>
-        </div>
-
-        <!-- Efeito de glow no hover -->
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div class="absolute inset-0 rounded-2xl shadow-lg" style="box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);"></div>
-        </div>
-      `;
-
-      card.querySelector('.tool-image-placeholder').addEventListener('click', () => openToolModal(tool));
-      card.querySelector('.open-modal-button').addEventListener('click', () => openToolModal(tool));
+        </div>`;
+      card.querySelector('.tool-image-placeholder').addEventListener('click',()=>openToolModal(tool));
+      card.querySelector('.open-modal-button').addEventListener('click',()=>openToolModal(tool));
       return card;
     }
-    
-    function openToolModal(tool) {
-      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
-      // O ícone do JSON (string SVG ou emoji) é usado diretamente.
-      // Se for SVG, ele já deve ter as classes de cor e tamanho corretas para o modal, ou ajustamos aqui.
-      // Para manter o teu estilo original do modal, vamos usar o emoji/texto do `tool.icon` do JSON.
-      modalIconContainer.innerHTML = `<span class="text-3xl">${tool.icon || '✨'}</span>`; // Usa o emoji/texto do JSON
-      modalIconContainer.className = `w-12 h-12 rounded-full flex items-center justify-center mr-4 text-3xl shadow-inner ${colorTheme.bgIcon} ${colorTheme.text}`;
-      
-      modalToolName.textContent = tool.id; // Usar title do JSON
-      modalToolCategory.textContent = `Categoria: ${tool.category}`;
-      modalToolDescription.textContent = tool.description;
-      modalToolLink.href = tool.pageUrl; // Usar pageUrl do JSON
-      modalToolLink.className = `w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform duration-300 ${colorTheme.bg}`;
-      
-      toolModal.classList.remove('modal-hidden');
-      toolModal.classList.add('modal-visible');
-      document.body.style.overflow = 'hidden';
-    }
 
-    function closeToolModal() {
-      toolModal.classList.add('modal-hidden');
-      toolModal.classList.remove('modal-visible');
-      document.body.style.overflow = '';
-    }
-
-    function openManageApiModal() {
-        loadApiKeyToModal();
-        manageApiKeysModal.classList.remove('modal-hidden');
-        manageApiKeysModal.classList.add('modal-visible');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeManageApiModal() {
-        manageApiKeysModal.classList.add('modal-hidden');
-        manageApiKeysModal.classList.remove('modal-visible');
-        document.body.style.overflow = '';
-    }
-
-    function displayTools(toolsToDisplay) {
-      toolsGrid.innerHTML = ''; // Limpa o placeholder de carregamento ou cards antigos
-      if (toolsToDisplay.length === 0) {
-        noToolsMessage.textContent = searchInput.value ? "Nenhuma ferramenta encontrada para a tua busca." : "Nenhuma ferramenta disponível no momento.";
+    function displayTools(list){
+      toolsGrid.innerHTML = '';
+      if(!list.length){
         noToolsMessage.classList.remove('hidden');
-      } else {
+      }else{
         noToolsMessage.classList.add('hidden');
-        toolsToDisplay.forEach((tool, index) => {
-          const card = createToolCard(tool, index);
-          toolsGrid.appendChild(card);
-        });
+        list.forEach((t,i)=>toolsGrid.appendChild(createToolCard(t,i)));
       }
     }
 
-    function populateCategories(data) { // Recebe os dados do JSON
-      const categories = [...new Set(data.map(tool => tool.category))].sort();
+    function populateCategories(data){
+      const cats = [...new Set(data.map(t=>t.category))].sort();
       categorySelect.innerHTML = '<option value="">Todas as Categorias</option>';
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categorySelect.appendChild(option);
+      cats.forEach(c=>{
+        const opt = document.createElement('option'); opt.value=c; opt.textContent=c; categorySelect.appendChild(opt);
       });
     }
 
-    function filterTools() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const selectedCategory = categorySelect.value;
-      const filtered = allToolsData.filter(tool => { // Filtra a partir de allToolsData
-        const termCondition = tool.title.toLowerCase().includes(searchTerm) || // Usa tool.title
-                              (tool.description && tool.description.toLowerCase().includes(searchTerm)) ||
-                              tool.category.toLowerCase().includes(searchTerm);
-        const categoryCondition = selectedCategory ? tool.category === selectedCategory : true;
-        return termCondition && categoryCondition;
+    function filterTools(){
+      const q = searchInput.value.toLowerCase();
+      const cat = categorySelect.value;
+      const filtered = allToolsData.filter(t=>{
+        const term = (t.title||'').toLowerCase().includes(q) ||
+                     (t.description||'').toLowerCase().includes(q) ||
+                     (t.category||'').toLowerCase().includes(q);
+        const c = cat ? t.category===cat : true;
+        return term && c;
       });
       displayTools(filtered);
     }
 
-    function saveApiKeyFromModal() {
-        const key = geminiApiKeyInputModal.value.trim();
-        if (key) {
-            localStorage.setItem(API_KEY_STORAGE_PREFIX + 'gemini', key);
-            addNotification('Chave API Gemini salva com sucesso!', 'success');
-        } else {
-            localStorage.removeItem(API_KEY_STORAGE_PREFIX + 'gemini');
-            addNotification('Chave API Gemini removida.', 'warning');
-        }
+    // --- Modal Tool ---
+    function openToolModal(tool){
+      const theme = colorClasses[tool.color] || colorClasses.fuchsia;
+      modalIconContainer.innerHTML = `<span class="text-3xl">${tool.icon || '✨'}</span>`;
+      modalIconContainer.className = `w-12 h-12 mr-4 rounded-full flex items-center justify-center text-3xl shadow-inner ${theme.bgIcon} ${theme.text}`;
+      modalToolName.textContent = tool.title || tool.id || 'Ferramenta';
+      modalToolCategory.textContent = `Categoria: ${tool.category || '-'}`;
+      modalToolDescription.textContent = tool.description || '';
+      modalToolLink.href = tool.pageUrl || '#';
+      modalToolLink.className = `w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform ${theme.bg}`;
+      toolModal.classList.remove('modal-hidden'); toolModal.classList.add('modal-visible');
+      document.body.style.overflow='hidden';
+    }
+    function closeToolModal(){
+      toolModal.classList.add('modal-hidden'); toolModal.classList.remove('modal-visible'); document.body.style.overflow='';
     }
 
-    function loadApiKeyToModal() {
-        const storedKey = localStorage.getItem(API_KEY_STORAGE_PREFIX + 'gemini');
-        geminiApiKeyInputModal.value = storedKey || '';
+    // --- Modal API ---
+    function openManageApiModal(){
+      const stored = localStorage.getItem(API_KEY_STORAGE);
+      if (stored) geminiApiKeyInputModal.value = stored;
+      manageApiKeysModal.classList.remove('modal-hidden'); manageApiKeysModal.classList.add('modal-visible'); document.body.style.overflow='hidden';
     }
-
-    async function fetchAndProcessTools() {
-        // Mostra a mensagem de carregamento
-        toolsGrid.innerHTML = '<div class="loading-placeholder col-span-full"><p>A carregar ferramentas...</p></div>';
-        try {
-            const response = await fetch('tools.json'); // Caminho para o teu ficheiro JSON
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            allToolsData = await response.json(); // Preenche allToolsData
-            populateCategories(allToolsData);    // Popula categorias com base nos dados carregados
-            displayTools(allToolsData);         // Exibe todas as ferramentas inicialmente
-        } catch (error) {
-            console.error("Erro ao carregar as ferramentas:", error);
-            toolsGrid.innerHTML = '<p class="text-center text-red-500 col-span-full">Lamentamos, não foi possível carregar as ferramentas. Por favor, tente novamente mais tarde.</p>';
-        }
+    function closeManageApiModal(){
+      manageApiKeysModal.classList.add('modal-hidden'); manageApiKeysModal.classList.remove('modal-visible'); document.body.style.overflow='';
     }
-
-    // --- Event Listeners ---
-    searchInput.addEventListener('input', filterTools);
-    categorySelect.addEventListener('change', filterTools);
-    
-    closeToolModalButton.addEventListener('click', closeToolModal);
-    toolModal.querySelector('.modal-overlay-bg').addEventListener('click', closeToolModal);
-    toolModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
-
-    if(openManageApiKeyModalButton) openManageApiKeyModalButton.addEventListener('click', openManageApiModal);
-    if(closeManageApiKeysModalButton) closeManageApiKeysModalButton.addEventListener('click', closeManageApiModal);
-    if(gotItManageApiKeysButton) gotItManageApiKeysButton.addEventListener('click', closeManageApiModal);
-    if(manageApiKeysModal) {
-        manageApiKeysModal.querySelector('.modal-overlay-bg').addEventListener('click', closeManageApiModal);
-        manageApiKeysModal.querySelector('.modal-content').addEventListener('click', (e) => e.stopPropagation());
-    }
-    if(saveApiKeyButtonModal) saveApiKeyButtonModal.addEventListener('click', saveApiKeyFromModal);
-    
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        if (toolModal.classList.contains('modal-visible')) closeToolModal();
-        if (manageApiKeysModal.classList.contains('modal-visible')) closeManageApiModal();
+    function saveApiKeyFromModal(){
+      const key = (geminiApiKeyInputModal.value||'').trim();
+      if(key){
+        localStorage.setItem(API_KEY_STORAGE, key);
+        addNotification('Chave API Gemini salva com sucesso!','success');
+      }else{
+        localStorage.removeItem(API_KEY_STORAGE);
+        addNotification('Chave API Gemini removida.','warning');
       }
-    });
-    
-    // --- Initial Setup ---
-    if (currentYearSpan) {
-        currentYearSpan.textContent = new Date().getFullYear();
     }
-    fetchAndProcessTools(); // Chama a função para carregar dados do JSON e renderizar
 
-    // Script do Carrossel (mantido como estava)
-    document.addEventListener('DOMContentLoaded', function() {
-      const carrossel = document.querySelector('.carrossel');
-      const slides = document.querySelectorAll('.carrossel-slide');
+    // --- Fetch tools.json ---
+    async function fetchAndProcessTools(){
+      toolsGrid.innerHTML = '<div class="col-span-full text-center text-slate-400">A carregar ferramentas...</div>';
+      try{
+        const res = await fetch('tools.json');
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        allToolsData = await res.json();
+        populateCategories(allToolsData);
+        displayTools(allToolsData);
+      }catch(e){
+        console.error(e);
+        toolsGrid.innerHTML = '<p class="text-center text-red-500 col-span-full">Não foi possível carregar as ferramentas.</p>';
+      }
+    }
+
+    // --- Carrossel com ResizeObserver (não corta) ---
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const carrossel = document.getElementById('carrossel');
+      const slides = carrossel ? [...carrossel.querySelectorAll('.carrossel-slide')] : [];
       const dots = document.querySelectorAll('.dot');
-      
-      let currentSlide = 0;
-      let isAnimating = false;
-      const totalSlides = slides.length;
-      let slideInterval;
-      
-      function initCarrossel() {
-        const carrosselWrapper = document.querySelector('.lg\\:w-7\\/12');
-        if (!carrosselWrapper || getComputedStyle(carrosselWrapper).display === 'none' || !slides || slides.length === 0) {
-          return;
-        }
-        slides[0].classList.add('active');
-        if (dots.length > 0) dots[0].classList.add('active');
+      let current = 0, busy=false, iv;
 
-        requestAnimationFrame(() => {
-          if(slides[0]) { // Verifica se slides[0] existe
-            const initialSlideHeight = slides[0].scrollHeight;
-            if (carrossel) carrossel.style.height = `${initialSlideHeight}px`;
-          }
-        });
-        startAutoPlay();
-        dots.forEach((dot, index) => {
-          dot.addEventListener('click', () => goToSlide(index));
-        });
-        if(carrossel) {
-            carrossel.addEventListener('mouseenter', pauseAutoPlay);
-            carrossel.addEventListener('mouseleave', startAutoPlay);
-        }
+      function setHeight(node){
+        if(!carrossel || !node) return;
+        carrossel.style.height = node.scrollHeight+'px';
       }
-      
-      function updateCarrossel(newSlideIndexOrDirection) {
-        if (isAnimating || !slides || slides.length === 0) return;
-        isAnimating = true;
-        const oldSlideIndex = currentSlide;
-        let newSlideIndex;
-        if (typeof newSlideIndexOrDirection === 'string') {
-          newSlideIndex = (newSlideIndexOrDirection === 'next') ? (oldSlideIndex + 1) % totalSlides : (oldSlideIndex - 1 + totalSlides) % totalSlides;
-        } else {
-          newSlideIndex = newSlideIndexOrDirection;
-        }
-        if (oldSlideIndex === newSlideIndex) { isAnimating = false; return; }
-        const oldSlide = slides[oldSlideIndex];
-        const newSlide = slides[newSlideIndex];
-        if (dots.length > oldSlideIndex) dots[oldSlideIndex].classList.remove('active');
-        if (dots.length > newSlideIndex) dots[newSlideIndex].classList.add('active');
-        newSlide.classList.add('active');
-        oldSlide.classList.remove('active');
-        currentSlide = newSlideIndex;
-        requestAnimationFrame(() => {
-          const newSlideHeight = newSlide.scrollHeight;
-          if (carrossel) carrossel.style.height = `${newSlideHeight}px`;
-        });
-        setTimeout(() => { isAnimating = false; }, 700);
+      const ro = carrossel ? new ResizeObserver(()=>setHeight(slides[current])) : null;
+      if (carrossel && slides[0]) { setHeight(slides[0]); ro.observe(slides[0]); }
+
+      function go(to){
+        if(busy || !slides.length) return; busy=true;
+        const old = current;
+        if (typeof to==='number') current = to;
+        else current = (current+1) % slides.length;
+        if (old===current) { busy=false; return; }
+        slides[old].classList.remove('active');
+        slides[current].classList.add('active');
+        dots[old]?.classList.remove('active'); dots[current]?.classList.add('active');
+
+        ro?.unobserve(slides[old]); ro?.observe(slides[current]);
+        setHeight(slides[current]);
+        setTimeout(()=>busy=false, 500);
       }
-      
-      function nextSlide() { updateCarrossel('next'); resetAutoPlay(); }
-      function goToSlide(index) { if (isAnimating || index === currentSlide) return; updateCarrossel(index); resetAutoPlay(); }
-      function startAutoPlay() {
-        pauseAutoPlay();
-        if (slides.length > 1) {
-            slideInterval = setInterval(() => { if (!document.hidden) { nextSlide(); }}, 7000);
-        }
-      }
-      function pauseAutoPlay() { clearInterval(slideInterval); }
-      function resetAutoPlay() { pauseAutoPlay(); startAutoPlay(); }
-      
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { pauseAutoPlay(); } else { startAutoPlay(); }
-      });
-      // A inicialização do carrossel já está a ser feita, não é preciso chamar initCarrossel() aqui novamente
-      // se já estiver a ser chamada no final do script original.
-      // Se o teu script original do carrossel já o inicializa, esta linha abaixo pode ser redundante.
-      initCarrossel();
+      function start(){ stop(); if (slides.length>1) iv=setInterval(()=>{ if(!document.hidden) go(); }, 7000); }
+      function stop(){ clearInterval(iv); }
+
+      dots.forEach((d,i)=>d.addEventListener('click',()=>{ go(i); start(); }));
+      carrossel?.addEventListener('mouseenter',stop);
+      carrossel?.addEventListener('mouseleave',start);
+      start();
     });
 
-    // Lógica para o menu hamburguer
+    // --- Menu mobile ---
     const hamburgerButton = document.getElementById('hamburger-button');
     const mobileMenu = document.getElementById('mobile-menu');
-
-    function toggleMobileMenu() {
-        mobileMenu.classList.toggle('open');
-        hamburgerButton.querySelector('.hamburger-icon').classList.toggle('open');
-        if (mobileMenu.classList.contains('open')) {
-            document.body.style.overflow = 'hidden'; // Impede scroll do body
-        } else {
-            document.body.style.overflow = ''; // Permite scroll
-        }
+    function toggleMobileMenu(){
+      mobileMenu.classList.toggle('open');
+      mobileMenu.style.transform = mobileMenu.classList.contains('open') ? 'translateX(0)' : 'translateX(100%)';
+      hamburgerButton.querySelector('.hamburger-icon').classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
     }
-
-    function closeMobileMenu() {
-        mobileMenu.classList.remove('open');
-        hamburgerButton.querySelector('.hamburger-icon').classList.remove('open');
-        document.body.style.overflow = ''; // Permite scroll
-    }
-
+    window.closeMobileMenu = function(){ mobileMenu.classList.remove('open'); mobileMenu.style.transform='translateX(100%)'; hamburgerButton.querySelector('.hamburger-icon').classList.remove('open'); document.body.style.overflow=''; }
     hamburgerButton.addEventListener('click', toggleMobileMenu);
+    document.addEventListener('click', (e)=>{ if (mobileMenu.classList.contains('open') && !mobileMenu.contains(e.target) && !hamburgerButton.contains(e.target)) closeMobileMenu(); });
 
-    // Fecha o menu mobile se clicar fora dele, mas não no botão
-    document.addEventListener('click', (event) => {
-        const isClickInsideMobileMenu = mobileMenu.contains(event.target);
-        const isClickOnHamburger = hamburgerButton.contains(event.target);
-        if (mobileMenu.classList.contains('open') && !isClickInsideMobileMenu && !isClickOnHamburger) {
-            closeMobileMenu();
-        }
-    });
+    // --- Listeners ---
+    searchInput.addEventListener('input', filterTools);
+    categorySelect.addEventListener('change', filterTools);
+
+    closeToolModalButton.addEventListener('click', closeToolModal);
+    toolModal.querySelector('.modal-overlay-bg').addEventListener('click', closeToolModal);
+    toolModal.querySelector('.modal-content').addEventListener('click', e=>e.stopPropagation());
+
+    [openManageApiKeyModalButton, openManageApiKeyModalButtonHeader, openManageApiKeyModalButtonMobile, fabApi]
+      .filter(Boolean)
+      .forEach(btn=>btn.addEventListener('click', openManageApiModal));
+
+    document.getElementById('closeManageApiKeysModalButton').addEventListener('click', closeManageApiModal);
+    gotItManageApiKeysButton.addEventListener('click', closeManageApiModal);
+    manageApiKeysModal.querySelector('.modal-overlay-bg').addEventListener('click', closeManageApiModal);
+    manageApiKeysModal.querySelector('.modal-content').addEventListener('click', e=>e.stopPropagation());
+    saveApiKeyButtonModal.addEventListener('click', saveApiKeyFromModal);
+
+    window.addEventListener('keydown', (e)=>{ if (e.key==='Escape'){ if (toolModal.classList.contains('modal-visible')) closeToolModal(); if (manageApiKeysModal.classList.contains('modal-visible')) closeManageApiModal(); }});
+
+    // --- Init ---
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    fetchAndProcessTools();
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker registrado'))
-        .catch(err => console.error('Erro no SW', err));
+      navigator.serviceWorker.register('service-worker.js').catch(console.error);
     }
   </script>
 </body>

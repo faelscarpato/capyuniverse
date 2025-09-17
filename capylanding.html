@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyLanding — CapyUniverse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, .06);
+            --glass-border: rgba(255, 255, 255, .1)
+        }
+
+        html {
+            background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;
+        }
+
+        body {
+            color: #e6edf3;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Noto Sans', sans-serif;
+        }
+
+        .font-syne {
+            font-family: 'Syne', sans-serif
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace
+        }
+
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
+            transition: .2s
+        }
+
+        .glass:hover {
+            transform: translateY(-2px)
+        }
+
+        .sidebar-glass {
+            background: rgba(255, 255, 255, .03);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid var(--glass-border)
+        }
+
+        .sidebar-link.active {
+            background: #6366f1;
+            color: #fff;
+            font-weight: 600
+        }
+
+        .input {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            color: #e4e4e7;
+            border-radius: .5rem
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, .45)
+        }
+
+        .btn {
+            background: #2563eb;
+            color: #fff;
+            border-radius: .5rem;
+            padding: .625rem .9rem;
+            font-weight: 700
+        }
+
+        .btn:hover {
+            background: #1d4ed8
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--glass-border);
+            padding: .35rem .6rem;
+            border-radius: .6rem
+        }
+
+        .codebox {
+            background: #0b0f14;
+            border: 1px dashed #243041;
+            border-radius: .75rem
+        }
+
+        .template-card {
+            border: 1px solid var(--glass-border)
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col text-[15px]">
+    <!-- Header -->
+    <header
+        class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+        <div class="flex items-center">
+            <button id="sidebarToggleBtn"
+                class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i
+                    class="fas fa-bars text-xl"></i></button>
+            <a href="index.html"
+                class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse
+                IA</a>
+        </div>
+        <div class="flex items-center">
+            <button onclick="window.location.href='index.html'"
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+            <button id="openApiKeysModalButton"
+                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves
+                API</button>
+        </div>
+    </header>
+
+    <div class="flex flex-1 pt-16">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4">
+            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+        </aside>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+        <!-- Main -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+            <section class="glass border-zinc-800 p-6">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyLanding 🚀</h1>
+                    <p class="text-zinc-300 mt-1">Gere uma landing page em Tailwind (CDN) — preview ao vivo, copiar
+                        código, baixar HTML e exportar ZIP.</p>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <!-- Form -->
+                    <div class="lg:col-span-1 space-y-4">
+                        <div class="glass p-4 border border-zinc-800">
+                            <h3 class="font-semibold mb-2">Conteúdo</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="text-xs text-zinc-400">Marca/Produto</label>
+                                    <input id="brand" class="input w-full" placeholder="Ex: CapySuite">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-zinc-400">Proposta de Valor</label>
+                                    <textarea id="value" class="input w-full min-h-[70px]"
+                                        placeholder="Frase forte que explica o benefício principal."></textarea>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-zinc-400">Público-alvo</label>
+                                    <input id="audience" class="input w-full"
+                                        placeholder="Ex: PMEs, criadores, devs...">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="text-xs text-zinc-400">Tom</label>
+                                        <select id="tone" class="input w-full">
+                                            <option>Profissional</option>
+                                            <option>Amigável</option>
+                                            <option>Direto</option>
+                                            <option>Inspirador</option>
+                                            <option>Descontraído</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-zinc-400">Idioma</label>
+                                        <select id="lang" class="input w-full">
+                                            <option>pt-BR</option>
+                                            <option>en</option>
+                                            <option>es</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-zinc-400">Imagem/Ilustração (URL opcional)</label>
+                                    <input id="heroImg" class="input w-full" placeholder="https://...">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-zinc-400">Features (1 por linha)</label>
+                                    <textarea id="features" class="input w-full min-h-[90px]"
+                                        placeholder="Rápido de usar\nSem código\nSeguro e privado"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass p-4 border border-zinc-800">
+                            <h3 class="font-semibold mb-2">Aparência</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-zinc-400">Tema</label>
+                                    <select id="theme" class="input w-full">
+                                        <option value="violet">Violeta</option>
+                                        <option value="indigo">Índigo</option>
+                                        <option value="sky">Sky</option>
+                                        <option value="emerald">Esmeralda</option>
+                                        <option value="amber">Âmbar</option>
+                                        <option value="rose">Rose</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-zinc-400">Template</label>
+                                    <select id="tpl" class="input w-full">
+                                        <option value="minimal">Minimal</option>
+                                        <option value="gradient">Gradient Glow</option>
+                                        <option value="cards">Cards</option>
+                                        <option value="split">Split Hero</option>
+                                        <option value="centered">Centered</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <label class="chip text-xs flex items-center gap-2"><input id="secTestimonials"
+                                        type="checkbox" class="accent-indigo-500" checked>Testemunhos</label>
+                                <label class="chip text-xs flex items-center gap-2"><input id="secPricing"
+                                        type="checkbox" class="accent-indigo-500">Preços</label>
+                                <label class="chip text-xs flex items-center gap-2"><input id="secFAQ" type="checkbox"
+                                        class="accent-indigo-500" checked>FAQ</label>
+                                <label class="chip text-xs flex items-center gap-2"><input id="secFooter"
+                                        type="checkbox" class="accent-indigo-500" checked>Rodapé</label>
+                            </div>
+                        </div>
+
+                        <div class="glass p-4 border border-zinc-800">
+                            <h3 class="font-semibold mb-2">Ações</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="btnGenLocal" class="btn"><i class="fa-solid fa-bolt mr-2"></i>Gerar
+                                    (local)</button>
+                                <button id="btnGenAI" class="btn bg-sky-600 hover:bg-sky-700"><i
+                                        class="fa-solid fa-wand-magic-sparkles mr-2"></i>Gerar (IA)</button>
+                                <button id="btnCopy" class="btn bg-amber-600 hover:bg-amber-700"><i
+                                        class="fa-regular fa-copy mr-2"></i>Copiar Código</button>
+                                <button id="btnDownload" class="btn bg-emerald-600 hover:bg-emerald-700"><i
+                                        class="fa-solid fa-file-arrow-down mr-2"></i>Baixar HTML</button>
+                                <button id="btnZip" class="btn bg-zinc-700 hover:bg-zinc-600"><i
+                                        class="fa-solid fa-box-archive mr-2"></i>Exportar ZIP</button>
+                            </div>
+                            <p class="text-xs text-zinc-400 mt-2">Dica: use (IA) para gerar headline, subtítulo,
+                                features e FAQ automaticamente (necessita chave Gemini).</p>
+                        </div>
+                    </div>
+
+                    <!-- Preview + Código -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="glass p-4 border border-zinc-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold">Preview</h3>
+                                <span class="text-xs text-zinc-400">Renderiza o HTML final com Tailwind CDN</span>
+                            </div>
+                            <iframe id="preview" class="w-full h-[540px] rounded-xl bg-white"></iframe>
+                        </div>
+
+                        <div class="glass p-4 border border-zinc-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-semibold">HTML Gerado</h3>
+                                <span id="sizeInfo" class="text-xs text-zinc-400"></span>
+                            </div>
+                            <textarea id="code" class="input codebox w-full font-mono text-sm min-h-[260px]"
+                                spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Chaves API -->
+    <div id="apiKeysModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+    <script>
+        // ===== Base (sidebar + modal chaves) =====
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        const dom = { sidebar: document.getElementById('sidebar'), sidebarToggleBtn: document.getElementById('sidebarToggleBtn'), sidebarOverlay: document.getElementById('sidebarOverlay'), apiKeysModal: document.getElementById('apiKeysModal'), openApiKeysModalButton: document.getElementById('openApiKeysModalButton') };
+
+        async function renderSidebar(currentPageId) {
+            try {
+                const r = await fetch('tools.json'); const data = await r.json(); const cats = {};
+                data.forEach(t => { let c = t.category; if (typeof c === 'string') c = [c]; (c || []).forEach(cat => { (cats[cat] = cats[cat] || []).push(t); }); });
+                dom.sidebar.innerHTML = '';
+                const home = document.createElement('a');
+                home.href = 'index.html';
+                home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+                home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+                dom.sidebar.appendChild(home);
+                for (const name in cats) {
+                    const box = document.createElement('div'); box.className = 'mb-1';
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+                    // build innerHTML without template literal to avoid parsing issues
+                    btn.innerHTML = '<span class="font-semibold text-sm">' + name + '</span>' +
+                        '<svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+                    const content = document.createElement('div'); content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    cats[name].forEach(t => {
+                        const a = document.createElement('a'); a.href = t.pageUrl;
+                        const icon = t.icon ? t.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+                        a.className = 'sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ' + (t.id === currentPageId ? 'active' : 'text-gray-400');
+                        // avoid template literal here
+                        a.innerHTML = icon + '<span>' + t.title + '</span>';
+                        content.appendChild(a);
+                    });
+                    btn.addEventListener('click', () => { content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+                    if (cats[name].some(t => t.id === currentPageId)) { content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+                    box.appendChild(btn); box.appendChild(content); dom.sidebar.appendChild(box);
+                }
+            } catch (e) {
+                dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+            }
+        }
+
+        function setupApiKeyModal() {
+            // build HTML using string concatenation to avoid nested backtick confusion
+            var html = '';
+            html += '<div class="glass border-zinc-800 p-7 rounded-2xl w-full max-w-md">';
+            html += '  <div class="flex justify-between items-center mb-4">';
+            html += '    <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>';
+            html += '    <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl">&times;</button>';
+            html += '  </div>';
+            html += '  <div class="space-y-3">';
+            html += '    <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">';
+            html += '      <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>';
+            html += '      <label class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>';
+            html += '      <div class="flex">';
+            html += '        <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input w-full rounded-r-none">';
+            html += '        <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>';
+            html += '      </div>';
+            html += '      <p class="text-xs text-zinc-400 mt-2">Chave salva localmente no seu navegador.</p>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '</div>';
+            dom.apiKeysModal.innerHTML = html;
+            dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+            document.getElementById('closeApiKeysModalButton')?.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+            document.getElementById('saveGeminiKey')?.addEventListener('click', () => {
+                const v = document.getElementById('geminiApiKeyInputModal').value.trim();
+                if (v) { localStorage.setItem(API_KEY_STORAGE_KEY, v); alert('Chave API salva!'); dom.apiKeysModal.classList.add('hidden'); }
+                else alert('Insira uma chave.');
+            });
+        }
+
+        function baseBoot(currentPageId) {
+            renderSidebar(currentPageId); setupApiKeyModal();
+            dom.sidebarToggleBtn?.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+            dom.sidebarOverlay?.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+        }
+
+        // ===== CapyLanding =====
+        const $ = (s, e = document) => e.querySelector(s);
+        const preview = $('#preview');
+        const codeEl = $('#code');
+        const sizeInfo = $('#sizeInfo');
+
+        function getThemeClasses(theme) {
+            const map = {
+                violet: { from: 'from-violet-500', to: 'to-fuchsia-600', btn: 'bg-violet-600 hover:bg-violet-700', ring: 'ring-violet-500/30' },
+                indigo: { from: 'from-indigo-500', to: 'to-blue-600', btn: 'bg-indigo-600 hover:bg-indigo-700', ring: 'ring-indigo-500/30' },
+                sky: { from: 'from-sky-500', to: 'to-cyan-500', btn: 'bg-sky-600 hover:bg-sky-700', ring: 'ring-sky-500/30' },
+                emerald: { from: 'from-emerald-500', to: 'to-teal-600', btn: 'bg-emerald-600 hover:bg-emerald-700', ring: 'ring-emerald-500/30' },
+                amber: { from: 'from-amber-400', to: 'to-orange-600', btn: 'bg-amber-600 hover:bg-amber-700', ring: 'ring-amber-500/30' },
+                rose: { from: 'from-rose-500', to: 'to-pink-600', btn: 'bg-rose-600 hover:bg-rose-700', ring: 'ring-rose-500/30' },
+            };
+            return map[theme] || map.violet;
+        }
+
+        function heroIllustration(url) {
+            if (url) return '<img src="' + url + '" alt="" class="w-full max-w-xl rounded-2xl shadow-2xl ring-1 ring-black/10">';
+            // placeholder SVG
+            return '\
+      <svg class="w-full max-w-xl rounded-2xl shadow-2xl ring-1 ring-black/10" viewBox="0 0 900 600" fill="none" xmlns="http://www.w3.org/2000/svg">\
+        <defs>\
+          <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#06b6d4"/></linearGradient>\
+        </defs>\
+        <rect width="900" height="600" rx="24" fill="#0b0f14"/>\
+        <circle cx="220" cy="220" r="120" fill="url(#g1)" opacity="0.35"/>\
+        <rect x="300" y="160" width="360" height="280" rx="16" stroke="#334155" fill="#0f172a"/>\
+        <rect x="330" y="200" width="300" height="16" rx="8" fill="#374151"/>\
+        <rect x="330" y="240" width="260" height="12" rx="6" fill="#475569"/>\
+        <rect x="330" y="270" width="280" height="12" rx="6" fill="#475569"/>\
+        <rect x="330" y="300" width="240" height="12" rx="6" fill="#475569"/>\
+        <rect x="330" y="350" width="120" height="40" rx="8" fill="#7c3aed"/>\
+      </svg>';
+        }
+
+        function buildLandingHTML(cfg) {
+            const th = getThemeClasses(cfg.theme);
+            const feats = (cfg.features || []).filter(Boolean).slice(0, 9);
+            const showTestimonials = cfg.secTestimonials;
+            const showPricing = cfg.secPricing;
+            const showFAQ = cfg.secFAQ;
+            const showFooter = cfg.secFooter;
+
+            const tplHero = {
+                minimal: '\
+<section class="relative py-16 sm:py-24">\
+  <div class="absolute inset-0 bg-gradient-to-br ' + th.from + ' ' + th.to + ' opacity-10 blur-3xl -z-10"></div>\
+  <div class="mx-auto max-w-6xl px-4">\
+    <div class="grid lg:grid-cols-2 gap-8 items-center">\
+      <div>\
+        <h1 class="font-syne text-4xl sm:text-5xl font-extrabold tracking-tight text-white">' + cfg.brand + '</h1>\
+        <p class="mt-3 text-zinc-300 text-lg">' + cfg.value + '</p>\
+        <div class="mt-6 flex flex-wrap gap-3">\
+          <a href="#" class="inline-flex items-center ' + th.btn + ' text-white px-5 py-3 rounded-lg shadow">\
+            <i class="fa-solid fa-rocket mr-2"></i>' + (cfg.ctaPrimary || 'Começar agora') + '\
+          </a>\
+          <a href="#" class="inline-flex items-center px-5 py-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-inset ' + th.ring + '">\
+            <i class="fa-regular fa-circle-play mr-2"></i>' + (cfg.ctaSecondary || 'Ver demo') + '\
+          </a>\
+        </div>\
+        ' + (feats.length ? ('<dl class="mt-8 grid sm:grid-cols-2 gap-3">' + feats.map(f => '<div class="flex items-start gap-3 p-3 rounded-xl bg-white/5 ring-1 ring-white/10"><i class="fa-solid fa-check mt-0.5 text-emerald-400"></i><dt class="text-zinc-200">' + f + '</dt></div>').join('') + '</dl>') : '') + '\
+      </div>\
+      <div class="flex justify-center">' + heroIllustration(cfg.heroImg) + '</div>\
+    </div>\
+  </div>\
+</section>',
+                gradient: '\
+<section class="relative isolate overflow-hidden">\
+  <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu blur-3xl opacity-40">\
+    <div class="aspect-[1155/678] w-[72rem] bg-gradient-to-tr ' + th.from + ' ' + th.to + '"></div>\
+  </div>\
+  <div class="mx-auto max-w-6xl px-4 py-24 text-center">\
+    <h1 class="font-syne text-5xl font-extrabold">' + cfg.brand + '</h1>\
+    <p class="mt-4 text-zinc-300 text-lg max-w-2xl mx-auto">' + cfg.value + '</p>\
+    <div class="mt-6 flex items-center justify-center gap-3">\
+      <a href="#" class="' + th.btn + ' text-white px-5 py-3 rounded-lg shadow"><i class="fa-solid fa-bolt mr-2"></i>' + (cfg.ctaPrimary || 'Experimentar') + '</a>\
+      <a href="#" class="px-5 py-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-inset ' + th.ring + '">' + (cfg.ctaSecondary || 'Saiba mais') + '</a>\
+    </div>\
+    <div class="mt-10 flex justify-center">' + heroIllustration(cfg.heroImg) + '</div>\
+  </div>\
+</section>',
+                cards: '\
+<section class="py-20">\
+  <div class="mx-auto max-w-6xl px-4">\
+    <div class="grid lg:grid-cols-2 gap-10 items-center">\
+      <div>\
+        <h1 class="font-syne text-5xl font-extrabold">' + cfg.brand + '</h1>\
+        <p class="mt-3 text-zinc-300 text-lg">' + cfg.value + '</p>\
+        <div class="mt-6 flex gap-3">\
+          <a href="#" class="' + th.btn + ' text-white px-5 py-3 rounded-lg shadow">' + (cfg.ctaPrimary || 'Começar') + '</a>\
+          <a href="#" class="px-5 py-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-inset ' + th.ring + '">' + (cfg.ctaSecondary || 'Ver planos') + '</a>\
+        </div>\
+      </div>\
+      <div class="grid sm:grid-cols-2 gap-3">\
+        ' + feats.map(f => '<div class="p-4 rounded-xl bg-white/5 ring-1 ring-white/10"><div class="text-zinc-200 font-medium">' + f + '</div><div class="text-xs text-zinc-400 mt-1">Benefício para ' + (cfg.audience || 'seu público') + '.</div></div>').join('') + '\
+      </div>\
+    </div>\
+  </div>\
+</section>',
+                split: '\
+<section class="py-16 sm:py-24">\
+  <div class="mx-auto max-w-6xl px-4">\
+    <div class="grid lg:grid-cols-2 gap-10 items-center">\
+      <div class="order-2 lg:order-1">' + heroIllustration(cfg.heroImg) + '</div>\
+      <div class="order-1 lg:order-2">\
+        <span class="inline-flex items-center text-xs px-2 py-1 rounded-md bg-gradient-to-r ' + th.from + ' ' + th.to + ' text-white/90">Feito para ' + (cfg.audience || 'equipes modernas') + '</span>\
+        <h1 class="font-syne text-5xl font-extrabold mt-3">' + cfg.brand + '</h1>\
+        <p class="mt-3 text-zinc-300 text-lg">' + cfg.value + '</p>\
+        <div class="mt-6 flex flex-wrap gap-2">' + feats.map(f => '<span class="text-xs px-2 py-1 rounded-full bg-white/5 ring-1 ring-white/10">' + f + '</span>').join('') + '</div>\
+        <div class="mt-6 flex gap-3">\
+          <a href="#" class="' + th.btn + ' text-white px-5 py-3 rounded-lg shadow">' + (cfg.ctaPrimary || 'Testar grátis') + '</a>\
+          <a href="#" class="px-5 py-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-inset ' + th.ring + '">' + (cfg.ctaSecondary || 'Documentação') + '</a>\
+        </div>\
+      </div>\
+    </div>\
+  </div>\
+</section>',
+                centered: '\
+<section class="py-24 text-center">\
+  <div class="mx-auto max-w-3xl px-4">\
+    <h1 class="font-syne text-5xl font-extrabold">' + cfg.brand + '</h1>\
+    <p class="mt-3 text-zinc-300 text-lg">' + cfg.value + '</p>\
+    <div class="mt-6 flex items-center justify-center gap-3">\
+      <a href="#" class="' + th.btn + ' text-white px-5 py-3 rounded-lg shadow">' + (cfg.ctaPrimary || 'Começar') + '</a>\
+      <a href="#" class="px-5 py-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-inset ' + th.ring + '">' + (cfg.ctaSecondary || 'Tour guiado') + '</a>\
+    </div>\
+    <div class="mt-10 flex justify-center">' + heroIllustration(cfg.heroImg) + '</div>\
+  </div>\
+</section>'
+            }[cfg.tpl || 'minimal'];
+
+            const testimonials = !showTestimonials ? '' : '\
+<section class="py-14 bg-white/5 ring-1 ring-white/10">\
+  <div class="mx-auto max-w-6xl px-4">\
+    <h2 class="font-syne text-2xl font-bold mb-6">O que dizem</h2>\
+    <div class="grid md:grid-cols-3 gap-4">\
+      ' + [1, 2, 3].map(i => '\n      <div class="p-4 rounded-xl bg-zinc-900/60 ring-1 ring-white/10">\
+        <div class="text-zinc-200">"Produto excelente, simples e poderoso."</div>\
+        <div class="text-xs text-zinc-500 mt-2">Cliente #' + i + '</div>\
+      </div>').join('') + '\
+    </div>\
+  </div>\
+</section>';
+
+            const pricing = !showPricing ? '' : '\
+<section class="py-16">\
+  <div class="mx-auto max-w-6xl px-4">\
+    <h2 class="font-syne text-2xl font-bold text-center">Planos</h2>\
+    <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">\
+      ' + [
+                { name: 'Starter', price: 'R$ 0', desc: 'Para começar', btn: 'Começar' },
+                { name: 'Pro', price: 'R$ 49/mês', desc: 'Para equipes', btn: 'Assinar' },
+                { name: 'Business', price: 'R$ 149/mês', desc: 'Escala', btn: 'Falar com vendas' }
+            ].map(p => '\n        <div class="p-5 rounded-2xl bg-white/5 ring-1 ring-white/10 flex flex-col">\
+          <div class="font-semibold text-zinc-200">' + p.name + '</div>\
+          <div class="text-3xl font-syne mt-2">' + p.price + '</div>\
+          <div class="text-sm text-zinc-400 mt-1">' + p.desc + '</div>\
+          <a href="#" class="mt-5 ' + th.btn + ' text-center rounded-lg py-2">' + p.btn + '</a>\
+        </div>').join('') + '\
+    </div>\
+  </div>\
+</section>';
+
+            const faq = !showFAQ ? '' : '\
+<section class="py-14">\
+  <div class="mx-auto max-w-6xl px-4">\
+    <h2 class="font-syne text-2xl font-bold">Perguntas frequentes</h2>\
+    <div class="mt-6 grid sm:grid-cols-2 gap-4">\
+      ' + [
+                ['Como começo?', 'Crie sua conta e use o plano Starter.'],
+                ['Existe teste grátis?', 'Sim, 14 dias no plano Pro.'],
+                ['Tenho suporte?', 'Suporte por e-mail em todos os planos.'],
+                ['Posso cancelar?', 'A qualquer momento, sem burocracia.']
+            ].map(([q, a]) => '\n      <div class="p-4 rounded-xl bg-white/5 ring-1 ring-white/10">\
+        <div class="font-medium text-zinc-200">' + q + '</div>\
+        <div class="text-sm text-zinc-400 mt-1">' + a + '</div>\
+      </div>').join('') + '\
+    </div>\
+  </div>\
+</section>';
+
+            const footer = !showFooter ? '' : '\
+<footer class="py-10 bg-zinc-900/60 ring-1 ring-white/10">\
+  <div class="mx-auto max-w-6xl px-4 flex flex-col sm:flex-row items-center justify-between gap-3">\
+    <div class="text-sm text-zinc-400">© ' + new Date().getFullYear() + ' ' + cfg.brand + '. Todos os direitos reservados.</div>\
+    <div class="flex gap-3 text-zinc-400">\
+      <a href="#" class="hover:text-white">Privacidade</a>\
+      <a href="#" class="hover:text-white">Termos</a>\
+      <a href="#" class="hover:text-white">Contato</a>\
+    </div>\
+  </div>\
+</footer>';
+
+            return `<!DOCTYPE html>
+<html lang="\${cfg.lang || 'pt-BR'}" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>\${cfg.brand} — \${cfg.tagline || 'Landing Page'}</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        :root {
+            --bg: #0b0f14
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), var(--bg);
+            color: #e6edf3;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Noto Sans', sans-serif;
+        }
+
+        .font-syne {
+            font-family: 'Syne', sans-serif
+        }
+    </style>
+    </head>
+
+    <body>
+        <header class="sticky top-0 z-30 backdrop-blur bg-zinc-900/50 ring-1 ring-white/10">
+            <div class="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-gradient-to-br ${th.from} ${th.to} grid place-items-center shadow">
+                        <i class="fa-solid fa-otter text-white"></i></div>
+                    <span class="font-syne font-extrabold">${cfg.brand}</span>
+                </div>
+                <nav class="hidden sm:flex items-center gap-5 text-sm text-zinc-300">
+                    <a href="#features" class="hover:text-white">Recursos</a>
+                    ${showPricing ? '<a href="#pricing" class="hover:text-white">Preços</a>' : ''}
+                    ${showFAQ ? '<a href="#faq" class="hover:text-white">FAQ</a>' : ''}
+                    <a href="#" class="${th.btn} text-white px-3 py-1.5 rounded-md">Começar</a>
+                </nav>
+            </div>
+        </header>
+        ${tplHero}
+        <section id="features" class="py-16">
+            <div class="mx-auto max-w-6xl px-4">
+                <h2 class="font-syne text-2xl font-bold mb-6">Feito para ${cfg.audience || 'você'}</h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${feats.length ? feats.map(f => `<div class="p-4 rounded-xl bg-white/5 ring-1 ring-white/10">
+                        <div class="text-zinc-200 font-medium">${f}</div>
+                        <div class="text-xs text-zinc-400 mt-1">Ganhe tempo e resultado real.</div>
+                    </div>`).join('') : `<div class="text-zinc-400">Adicione features ao gerar novamente.</div>`}
+                </div>
+            </div>
+        </section>
+        ${showTestimonials ? (`<section class="py-4">${testimonials}</section>`) : ''}
+        ${showPricing ? (`<section id="pricing" class="py-4">${pricing}</section>`) : ''}
+        ${showFAQ ? (`<section id="faq" class="py-4">${faq}</section>`) : ''}
+        ${showFooter ? footer : ''}
+    </body>
+
+</html>`;
+        }
+
+        function getFormCfg() {
+            const features = ($('#features').value || '').split('\n').map(s => s.trim()).filter(Boolean);
+            return {
+                brand: $('#brand').value.trim() || 'Sua Marca',
+                value: $('#value').value.trim() || 'Proposta de valor clara e objetiva para seu público.',
+                audience: $('#audience').value.trim(),
+                tone: $('#tone').value,
+                lang: $('#lang').value,
+                theme: $('#theme').value,
+                tpl: $('#tpl').value,
+                features,
+                heroImg: $('#heroImg').value.trim(),
+                ctaPrimary: 'Começar agora',
+                ctaSecondary: 'Ver demo',
+                secTestimonials: $('#secTestimonials').checked,
+                secPricing: $('#secPricing').checked,
+                secFAQ: $('#secFAQ').checked,
+                secFooter: $('#secFooter').checked
+            };
+        }
+
+        function render() {
+            const cfg = getFormCfg();
+            const html = buildLandingHTML(cfg);
+            codeEl.value = html;
+            sizeInfo.textContent = `${(new Blob([html]).size / 1024).toFixed(1)} KB`;
+            preview.srcdoc = html;
+        }
+
+        // IA (opcional com Gemini)
+        function getApiKey() { return localStorage.getItem(API_KEY_STORAGE_KEY) || ''; }
+        async function genWithAI() {
+            const apiKey = getApiKey(); if (!apiKey) { alert("Chave API Gemini não configurada. Abra 'Chaves API'."); return; }
+            const cfg = getFormCfg();
+            const prompt = `Gere copy curta e objetiva para uma landing page.
+Contexto:
+- Marca: ${cfg.brand}
+- Proposta de valor (se houver): ${cfg.value}
+- Público: ${cfg.audience || '(não informado)'}
+- Tom: ${cfg.tone}
+- Idioma: ${cfg.lang}
+
+Responda APENAS JSON:
+{
+"headline": "...",
+"subheadline": "...", 
+"features": ["...","...","..."],
+"ctaPrimary": "...",
+"ctaSecondary": "...",
+"faq": [{"q":"...","a":"..."}]
+}`.trim();
+
+            try {
+                const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+                const res = await
+                    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    });
+                if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err?.error?.message || ('HTTP ' + res.status)); }
+                const data = await res.json();
+                try {
+                    const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!txt) throw new Error('Resposta vazia');
+                    const j = JSON.parse(txt);
+
+                    // Preenche campos
+                    $('#value').value = j.subheadline || cfg.value;
+                    $('#features').value = (j.features || cfg.features || []).join('\n');
+                    // CTA
+                    // Mantém brand; headline irá para brand se fizer sentido
+                    if (j.headline) $('#brand').value = j.headline;
+                    // Renderiza com CTAs
+                    const merged = { ...getFormCfg(), ctaPrimary: j.ctaPrimary || 'Começar', ctaSecondary: j.ctaSecondary || 'Saiba mais' };
+                    const html = buildLandingHTML(merged);
+                    codeEl.value = html; preview.srcdoc = html; sizeInfo.textContent = `${(new Blob([html]).size / 1024).toFixed(1)} KB`;
+                } catch (e) {
+                    alert('Falha ao gerar com IA: ' + e.message);
+                }
+            } catch (e) {
+                alert('Erro ao chamar API: ' + e.message);
+            }
+        }
+
+        // Utils
+        function downloadFile(name, content, type = 'text/html') {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], { type }));
+            a.download = name; a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        }
+
+        async function exportZip() {
+            const zip = new JSZip();
+            const html = codeEl.value;
+            zip.file('index.html', html);
+            const blob = await zip.generateAsync({ type: 'blob' });
+            downloadFile('capylanding.zip', blob, 'application/zip');
+        }
+
+        // Eventos
+        document.getElementById('btnGenLocal').addEventListener('click', render);
+        document.getElementById('btnGenAI').addEventListener('click', genWithAI);
+        document.getElementById('btnCopy').addEventListener('click', async () => { await
+            navigator.clipboard.writeText(codeEl.value || ''); alert('HTML copiado!'); });
+        document.getElementById('btnDownload').addEventListener('click', () => downloadFile('index.html', codeEl.value || ''));
+        document.getElementById('btnZip').addEventListener('click', exportZip);
+
+        // Boot
+        baseBoot('CapyLanding');
+        // Geração inicial
+        render();
+    </script>
+</body>
+
+</html>

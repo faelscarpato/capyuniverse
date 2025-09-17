@@ -37,16 +37,16 @@
             font-family: 'Inter', sans-serif;
             color: #e5e7eb;
             /* zinc-200 */
-            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
+           /* background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');*/
             background-repeat: repeat;
             background-size: 300px;
             background-color: #18181b;
             /* zinc-900 */
         }
 
-        .font-syne {
+       /* .font-syne {
             font-family: 'Syne', sans-serif;
-        }
+        }*/
 
         .font-jetbrains {
             font-family: 'JetBrains Mono', monospace;
@@ -1300,6 +1300,14 @@
     else initOtherPages();
   });
 })();
+</script>
+<script>
+  window.capyAutomation?.emitAction({
+    toolId:'CapyAudiencias',
+    tag:'analysis_complete',
+    category:'Jurídico',
+    message:'Ata analisada. Continuar com Resumo, Prazos ou Acordo?'
+  });
 </script>
 
 

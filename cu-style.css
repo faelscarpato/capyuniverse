@@ -1,0 +1,222 @@
+/*
+ * CapyUniverse Shared Styles
+ *
+ * This stylesheet centralizes the look and feel used across the
+ * CapyUniverse tools. It is based on the custom theme originally
+ * defined for CapyIMG and exposes a set of CSS variables and
+ * reusable utility classes. By including this file in your
+ * HTML documents, you inherit a cohesive dark aesthetic with
+ * subtle gradients, glassy panels and colourful accents. The
+ * variables are prefixed with `--cu` and can be reused within
+ * inline styles if needed.
+ *
+ * In addition, the `.font-syne` class has been overridden to
+ * fallback to Inter or the system sans-serif fonts. This allows
+ * existing markup to remain unchanged while removing any
+ * dependency on the Syne typeface.
+ */
+
+:root{
+  --cu-bg-0:#0b0b14;
+  --cu-bg-1:#0f1024;
+  --cu-grid:#2a2e63;
+  --cu-card:#0f0f22cc;
+  --cu-cyan:#22d3ee;
+  --cu-magenta:#f472d0;
+  --cu-amber:#f59e0b;
+  --cu-text:#e6e6f0;
+  --cu-text-dim:#aab;
+  --cu-radius:16px;
+  --cu-radius-lg:22px;
+  --cu-blur:12px;
+  --cu-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+}
+
+html{
+  background:var(--cu-bg-0);
+}
+
+body{
+  font-family:Inter,system-ui,sans-serif;
+  color:var(--cu-text);
+  background:
+    radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
+    radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+    var(--cu-bg-0);
+}
+
+/* Decorative starfield used on some pages. To activate it, place
+ * `<div class="cu-stars"></div>` somewhere near the top of your body. */
+.cu-stars{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,.12) 0 1px, transparent 2px) 0 0/180px 180px,
+    radial-gradient(circle at 75% 35%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/220px 220px,
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,.08) 0 1px, transparent 2px) 0 0/260px 260px;
+}
+
+/* Stage grid that fades into the background. */
+.cu-stage{
+  position:fixed;
+  inset:auto 0 0 0;
+  height:38vh;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    linear-gradient(to top, rgba(10,10,22,.65), transparent 70%),
+    repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+    repeating-linear-gradient(to top,   transparent 0 38px, var(--cu-grid) 38px 39px);
+  /* fade the stage into nothing */
+  mask: linear-gradient(to top, black, transparent 80%);
+}
+
+/* Header component styling. See CapyIMG for an example. */
+.cu-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:0 .9rem;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.cu-brand{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+
+.cu-appname{
+  font-family:Inter,system-ui,sans-serif;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.cu-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.25rem .6rem;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(120deg, rgba(34,211,238,.16), rgba(139,92,246,.16));
+}
+
+/* Panels are translucent cards used for grouping content. */
+.cu-panel{
+  background:var(--cu-card);
+  backdrop-filter: blur(var(--cu-blur));
+  border-radius:var(--cu-radius-lg);
+  box-shadow:var(--cu-shadow);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+/* Buttons with subtle glassmorphism. */
+.cu-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.6rem .9rem;
+  border-radius:14px;
+  font-weight:600;
+  border:1px solid rgba(255,255,255,.10);
+  background:linear-gradient(130deg, rgba(34,211,238,.18), rgba(244,114,208,.18));
+  box-shadow:var(--cu-shadow);
+  backdrop-filter: blur(6px);
+  transition:.2s transform, .2s filter;
+}
+.cu-btn:hover{
+  transform: translateY(-1px);
+  filter: drop-shadow(0 0 10px rgba(34,211,238,.45)) drop-shadow(0 0 24px rgba(244,114,208,.35));
+}
+.cu-btn.primary{
+  background: linear-gradient(140deg, #0ea5e9 0%, #22d3ee 40%, #a855f7 78%, #f59e0b 100%);
+  color:white;
+  border-color:transparent;
+}
+
+/* Form elements share a consistent look. */
+.cu-input,
+.cu-select,
+.cu-textarea{
+  width:100%;
+  background:rgba(15,15,40,.6);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:.75rem .9rem;
+  color:var(--cu-text);
+  outline:none;
+}
+.cu-input:focus,
+.cu-select:focus,
+.cu-textarea:focus{
+  border-color: var(--cu-cyan);
+  box-shadow: 0 0 0 3px rgba(34,211,238,.18);
+}
+
+/* Sidebar styling to achieve a frosted glass effect. */
+.sidebar-glass{
+  background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+  backdrop-filter: blur(15px);
+  border-right:1px solid rgba(255,255,255,.06);
+}
+
+/* Simple card component often used for galleries. */
+.card{
+  position:relative;
+  overflow:hidden;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0f1024;
+}
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:#0b0b14;
+}
+.card .toolbar{
+  position:absolute;
+  bottom:.5rem;
+  left:.5rem;
+  right:.5rem;
+  display:flex;
+  justify-content:space-between;
+  gap:.5rem;
+}
+.badge{
+  padding:.25rem .6rem;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  font-size:.75rem;
+}
+
+/* Thin custom scrollbars for webkit browsers. */
+.scrollbar-thin::-webkit-scrollbar{
+  width:8px;
+  height:8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb{
+  background:linear-gradient(120deg,#22d3ee,#8b5cf6);
+  border-radius:999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.06);
+}
+
+/* Override for .font-syne to avoid loading the Syne typeface. */
+.font-syne{
+  font-family:Inter,system-ui,sans-serif !important;
+}

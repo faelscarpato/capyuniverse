@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <title>CapySub — CapyUniverse</title>
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif}.font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700}.btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.35rem .6rem;border-radius:.6rem}
+    .cue{border:1px solid var(--glass-border)}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+<header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+  <div class="flex items-center">
+    <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+    <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+  </div>
+  <div class="flex items-center">
+    <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+    <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+  </div>
+</header>
+
+<div class="flex flex-1 pt-16">
+  <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4">
+    <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+  </aside>
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+    <section class="glass border-zinc-800 p-6">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold font-syne text-amber-400">CapySub 🎬</h1>
+        <p class="text-zinc-300 mt-1">Converta SRT/VTT, traduza (IA), ajuste tempo e gere legendas a partir de texto.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-5">
+        <div class="lg:col-span-2 space-y-4">
+          <div class="glass p-4 border border-zinc-800">
+            <div class="grid md:grid-cols-2 gap-3">
+              <div class="md:col-span-2">
+                <label class="text-xs text-zinc-400">SRT/VTT/TXT</label>
+                <div class="flex gap-2">
+                  <input id="fileInput" type="file" accept=".srt,.vtt,.txt" class="input w-full">
+                  <button id="btnLoad" class="btn"><i class="fa-solid fa-upload mr-2"></i>Carregar</button>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Deslocar (ms, pode negativo)</label>
+                <input id="shiftMs" type="number" class="input w-full" value="0">
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Alvo tradução</label>
+                <select id="langTarget" class="input w-full"><option value="">—</option><option value="pt-BR">pt-BR</option><option value="en">en</option><option value="es">es</option></select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-xs text-zinc-400">Texto → gerar SRT (1 sentença = 3s)</label>
+                <textarea id="plainText" class="input w-full min-h-[100px]" placeholder="Cole texto simples (uma ou várias frases)…"></textarea>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button id="btnShift" class="btn bg-amber-600 hover:bg-amber-700"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Deslocar tempo</button>
+              <button id="btnToVTT" class="btn bg-zinc-700 hover:bg-zinc-600"><i class="fa-solid fa-arrows-rotate mr-2"></i>SRT ⇄ VTT</button>
+              <button id="btnTranslate" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-language mr-2"></i>Traduzir (IA)</button>
+              <button id="btnFromText" class="btn"><i class="fa-solid fa-file-lines mr-2"></i>Gerar de Texto</button>
+            </div>
+          </div>
+
+          <div class="glass p-4 border border-zinc-800">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold text-zinc-200">Legendas</h3>
+              <div class="flex gap-2">
+                <button id="btnDownloadSRT" class="chip text-xs"><i class="fa-solid fa-download mr-1"></i>Baixar .srt</button>
+                <button id="btnDownloadVTT" class="chip text-xs"><i class="fa-solid fa-download mr-1"></i>Baixar .vtt</button>
+              </div>
+            </div>
+            <div id="preview" class="grid sm:grid-cols-2 gap-2"></div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-2 text-zinc-200">Resumo</h3>
+            <p id="summary" class="text-sm text-zinc-300">Nenhum arquivo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+<script>
+  // ===== Sidebar + API modal =====
+  const API_KEY_STORAGE_KEY='capyUniverseApiKey_gemini';
+  const dom={sidebar:document.getElementById('sidebar'),sidebarToggleBtn:document.getElementById('sidebarToggleBtn'),sidebarOverlay:document.getElementById('sidebarOverlay'),apiKeysModal:document.getElementById('apiKeysModal'),openApiKeysModalButton:document.getElementById('openApiKeysModalButton')};
+  async function renderSidebar(currentPageId){try{const r=await fetch('tools.json');const data=await r.json();const cats={};data.forEach(t=>{let c=t.category;if(typeof c==='string')c=[c];(c||[]).forEach(cat=>{(cats[cat]=cats[cat]||[]).push(t);});});dom.sidebar.innerHTML='';const home=document.createElement('a');home.href='index.html';home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';home.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';dom.sidebar.appendChild(home);for(const name in cats){const box=document.createElement('div');box.className='mb-1';const btn=document.createElement('button');btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';btn.innerHTML=`<span class='font-semibold text-sm'>${name}</span><svg class='w-4 h-4 transform transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'></path></svg>`;const content=document.createElement('div');content.className='category-content pl-3 pt-0.5 space-y-0.5';cats[name].forEach(t=>{const a=document.createElement('a');a.href=t.pageUrl;const icon=t.icon?t.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class="w-5 h-5 mr-2"></span>';a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ${t.id===currentPageId?'active':'text-gray-400'}`;a.innerHTML=icon+`<span>${t.title}</span>`;content.appendChild(a);});btn.addEventListener('click',()=>{content.classList.toggle('expanded');btn.querySelector('svg').classList.toggle('rotate-180');});if(cats[name].some(t=>t.id===currentPageId)){content.classList.add('expanded');btn.querySelector('svg').classList.add('rotate-180');}box.appendChild(btn);box.appendChild(content);dom.sidebar.appendChild(box);}}catch(e){dom.sidebar.innerHTML='<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';}}
+
+  function setupApiKeyModal(){const html=`<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'><div class='flex justify-between items-center mb-4'><h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2><button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button></div><div class='space-y-3'><div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'><h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3><label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label><div class='flex'><input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'><button id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button></div><p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p></div></div></div>`;dom.apiKeysModal.innerHTML=html;dom.openApiKeysModalButton?.addEventListener('click',()=>dom.apiKeysModal.classList.remove('hidden'));document.getElementById('closeApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.add('hidden'));document.getElementById('saveGeminiKey')?.addEventListener('click',()=>{const v=document.getElementById('geminiApiKeyInputModal').value.trim();if(v){localStorage.setItem(API_KEY_STORAGE_KEY,v);alert('Chave API salva!');dom.apiKeysModal.classList.add('hidden');}else alert('Insira uma chave.')});}
+
+  // ===== CapySub =====
+  const $=(s,e=document)=>e.querySelector(s);
+  let cues=[]; // {i, start, end, text}
+
+  function msToSRT(ms){const z=n=>String(n).padStart(2,'0'); const h=Math.floor(ms/3600000); ms%=3600000; const m=Math.floor(ms/60000); ms%=60000; const s=Math.floor(ms/1000); const ms2=ms%1000; return `${z(h)}:${z(m)}:${z(s)},${String(ms2).padStart(3,'0')}`;}
+  function srtToMs(str){const m=str.match(/(\d+):(\d+):(\d+)[.,](\d{1,3})/); if(!m) return 0; const [h,mi,s,ms]=m.slice(1).map(Number); return (((h*60+mi)*60+s)*1000)+(ms<100?ms*10:ms);}
+  function parseSRT(text){
+    const blocks=text.replace(/\r/g,'').split(/\n\s*\n/); const out=[];
+    blocks.forEach(b=>{
+      const lines=b.split('\n').filter(Boolean);
+      if(lines.length>=2){
+        // split on the literal arrow string to avoid using a regex literal with '-->' which can cause parsing issues
+        const parts = lines[1].split('-->');
+        if(parts.length === 2){
+          const start = parts[0].trim();
+          const end = parts[1].trim();
+          out.push({ i:out.length+1, start:start, end:end, text: lines.slice(2).join('\n') });
+        }
+      }
+    });
+  function parseVTT(text){
+    const lines=text.replace(/\r/g,'').split('\n').filter(l=>!l.startsWith('WEBVTT') && l.trim()!=='');
+    const out=[]; let buf=null;
+    lines.forEach(l=>{
+      // use indexOf/split on the literal arrow to avoid regex literal containing '-->'
+      const idx = l.indexOf('-->');
+      if(idx !== -1){
+        if(buf) out.push(buf);
+        const s = l.slice(0, idx).trim();
+        const e = l.slice(idx + 3).trim();
+        buf = { i:out.length+1, start:s.replace('.',','), end:e.replace('.',','), text:'' };
+      }
+      else if(buf){ buf.text += (buf.text? '\n':'') + l; }
+    });
+    if(buf) out.push(buf);
+    return out;
+  }
+    return out;
+  }
+ 
+  function toVTT(cs){
+    const head='WEBVTT\n\n';
+    const body=cs.map(c=>`${c.start.replace(',', '.')} --> ${c.end.replace(',', '.')}\\n${c.text}`).join('\n\n');
+    return head+body;
+  }
+
+  function render(){
+    const prev=document.getElementById('preview'); prev.innerHTML='';
+    cues.forEach(c=>{
+      const card=document.createElement('div');
+      card.className='glass cue p-3 rounded-xl';
+      card.innerHTML=`<div class="text-xs text-zinc-400 mb-1">${c.start} → ${c.end}</div><div class="text-sm whitespace-pre-wrap">${c.text}</div>`;
+      prev.appendChild(card);
+    });
+    document.getElementById('summary').textContent = cues.length? `${cues.length} blocos de legenda.` : 'Nenhum arquivo.';
+  }
+
+  async function loadFile(){
+    const f=document.getElementById('fileInput').files[0]; if(!f) return alert('Selecione um arquivo .srt/.vtt/.txt');
+    const txt=await f.text();
+    if(/WEBVTT/i.test(txt)) cues=parseVTT(txt);
+    else if(/-->/.test(txt)) cues=parseSRT(txt);
+    else {
+      // TXT: gerar SRT rápido (3s por sentença)
+      document.getElementById('plainText').value = txt;
+      genFromText();
+      return;
+    }
+    render();
+  }
+
+  function shift(ms){
+    cues=cues.map(c=>{
+      const ns = Math.max(0, srtToMs(c.start)+ms);
+      const ne = Math.max(ns+500, srtToMs(c.end)+ms);
+      return {...c, start: msToSRT(ns), end: msToSRT(ne)};
+    });
+    render();
+  }
+
+  function swapFormat(){
+    // se maior parte tiver vírgula => SRT, senão VTT
+    const isSRT = cues.some(c=>c.start.includes(','));
+    const out = isSRT ? toVTT(cues) : toSRT(cues);
+    const name = isSRT ? 'converted.vtt' : 'converted.srt';
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([out],{type:'text/plain'})); a.download=name; a.click();
+  }
+
+  function downloadSRT(){ if(!cues.length) return; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([toSRT(cues)],{type:'text/plain'})); a.download='captions.srt'; a.click(); }
+  function downloadVTT(){ if(!cues.length) return; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([toVTT(cues)],{type:'text/vtt'})); a.download='captions.vtt'; a.click(); }
+
+  function sentenceSplit(t){ return t.split(/(?<=[.!?])\s+/).filter(Boolean); }
+  function genFromText(){
+    const t=document.getElementById('plainText').value.trim(); if(!t) return alert('Cole algum texto.');
+    const parts=sentenceSplit(t); let time=0; const dur=3000;
+    cues = parts.map(s=>{ const st=msToSRT(time); const en=msToSRT(time+dur); time+=dur; return {i:0,start:st,end:en,text:s}; });
+    render();
+  }
+
+  function getApiKey(){ return localStorage.getItem(API_KEY_STORAGE_KEY)||''; }
+  async function translate(){
+    const lang=$('#langTarget').value; if(!lang) return alert('Escolha o idioma alvo.');
+    if(!cues.length) return alert('Carregue/gerar legendas primeiro.');
+    const apiKey=getApiKey(); if(!apiKey){ alert("Chave API Gemini não configurada. Abra 'Chaves API'."); return; }
+    const lines=cues.map(c=>c.text);
+    const prompt=`
+Traduza cada item do array mantendo a posição. Responda APENAS com JSON {"out":[ "...", "..."]}.
+Alvo: ${lang}
+Fonte:
+${JSON.stringify(lines)}
+    `.trim();
+    try{
+      const payload={contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:"application/json"}};
+      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err?.error?.message||('HTTP '+res.status)); }
+      const data=await res.json(); const txt=data?.candidates?.[0]?.content?.parts?.[0]?.text; if(!txt) throw new Error('Resposta vazia');
+      const json=JSON.parse(txt); const out=json.out||[];
+      cues=cues.map((c,i)=> ({...c, text: out[i]||c.text}));
+      render();
+    }catch(e){ alert('Falha na tradução: '+e.message); }
+  }
+
+  document.getElementById('btnLoad').addEventListener('click', loadFile);
+  document.getElementById('btnShift').addEventListener('click', ()=> shift(parseInt(document.getElementById('shiftMs').value||'0',10)));
+  document.getElementById('btnToVTT').addEventListener('click', swapFormat);
+  document.getElementById('btnTranslate').addEventListener('click', translate);
+  document.getElementById('btnFromText').addEventListener('click', genFromText);
+  document.getElementById('btnDownloadSRT').addEventListener('click', downloadSRT);
+  document.getElementById('btnDownloadVTT').addEventListener('click', downloadVTT);
+
+  // boot (única definição)
+  function baseBoot(currentPageId){renderSidebar(currentPageId);setupApiKeyModal();dom.sidebarToggleBtn?.addEventListener('click',()=>{dom.sidebar.classList.toggle('-translate-x-full');dom.sidebarOverlay.classList.toggle('hidden');});dom.sidebarOverlay?.addEventListener('click',()=>{dom.sidebar.classList.add('-translate-x-full');dom.sidebarOverlay.classList.add('hidden');});}
+  baseBoot('CapySub');
+</script>
+</body>
+</html>

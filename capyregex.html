@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <title>CapyRegex — CapyUniverse</title>
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif}.font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700}.btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.4rem .6rem;border-radius:.6rem}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass border-zinc-800 p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold font-syne text-indigo-400">CapyRegex ✨</h1>
+          <p class="text-zinc-300 mt-1">Teste, depure e destaque expressões regulares com visual amigável.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <label class="text-sm text-zinc-400">Expressão</label>
+              <div class="flex gap-2 mt-1">
+                <input id="pattern" class="input w-full font-mono" placeholder="Ex: (\\w+)@(\\w+)\\.(\\w+)">
+                <input id="flags" class="input w-28 font-mono" placeholder="gim" value="g">
+                <button id="run" class="btn"><i class="fa-solid fa-play mr-2"></i>Executar</button>
+              </div>
+            </div>
+            <div class="glass p-4 border border-zinc-800">
+              <label class="text-sm text-zinc-400">Texto de teste</label>
+              <textarea id="sample" class="input w-full h-48 mt-1"></textarea>
+            </div>
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Resultado</h3>
+              <div id="result" class="prose prose-invert max-w-none text-sm"></div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Padrões comuns</h3>
+              <div id="common" class="flex flex-wrap gap-2 text-xs">
+                <button class="chip paste" data-val="\\d+">Números</button>
+                <button class="chip paste" data-val="[a-zA-Z]+">Letras</button>
+                <button class="chip paste" data-val="\\w+@\\w+\\.\\w+">Email simples</button>
+                <button class="chip paste" data-val="https?:\\/\\/[^\\s]+">URL</button>
+                <button class="chip paste" data-val="\\b\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}\\b">CPF</button>
+                <button class="chip paste" data-val="\\(\\d{2}\\)\\s?\\d{4,5}-\\d{4}">Telefone BR</button>
+              </div>
+            </div>
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Grupos</h3>
+              <ul id="groups" class="text-sm text-zinc-300 space-y-1"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+  <script>
+    // Sidebar + modal (mesmo padrão)
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton')
+    };
+
+    async function renderSidebar(currentPageId) {
+      try {
+        const r = await fetch('tools.json');
+        const data = await r.json();
+        const cats = {};
+        data.forEach(t => {
+          let c = t.category;
+          if (typeof c === 'string') c = [c];
+          (c || []).forEach(cat => {
+            (cats[cat] = cats[cat] || []).push(t);
+          });
+        });
+
+        dom.sidebar.innerHTML = '';
+
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+        home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+        dom.sidebar.appendChild(home);
+
+        for (const name in cats) {
+          const box = document.createElement('div');
+          box.className = 'mb-1';
+
+          const btn = document.createElement('button');
+          btn.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+          btn.innerHTML = `<span class='font-semibold text-sm'>${name}</span><svg class='w-4 h-4 transform transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'></path></svg>`;
+
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+          cats[name].forEach(t => {
+            const a = document.createElement('a');
+            a.href = t.pageUrl;
+            const icon = t.icon ? t.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+            a.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ${t.id === currentPageId ? 'active' : 'text-gray-400'}`;
+            a.innerHTML = icon + `<span>${t.title}</span>`;
+            content.appendChild(a);
+          });
+
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('svg').classList.toggle('rotate-180');
+          });
+
+          if (cats[name].some(t => t.id === currentPageId)) {
+            content.classList.add('expanded');
+            btn.querySelector('svg').classList.add('rotate-180');
+          }
+
+          box.appendChild(btn);
+          box.appendChild(content);
+          dom.sidebar.appendChild(box);
+        }
+      } catch (e) {
+        dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+      }
+    }
+
+    function setupApiKeyModal() {
+      const html = `<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'>
+        <div class='flex justify-between items-center mb-4'>
+          <h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2>
+          <button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button>
+        </div>
+        <div class='space-y-3'>
+          <div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'>
+            <h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3>
+            <label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label>
+            <div class='flex'>
+              <input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'>
+              <button id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button>
+            </div>
+            <p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p>
+          </div>
+        </div>
+      </div>`;
+
+      dom.apiKeysModal.innerHTML = html;
+
+      document.getElementById('openApiKeysModalButton')?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.remove('hidden');
+      });
+
+      document.getElementById('closeApiKeysModalButton')?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.add('hidden');
+      });
+
+      document.getElementById('saveGeminiKey')?.addEventListener('click', () => {
+        const v = document.getElementById('geminiApiKeyInputModal').value.trim();
+        if (v) {
+          localStorage.setItem(API_KEY_STORAGE_KEY, v);
+          alert('Chave API salva!');
+          dom.apiKeysModal.classList.add('hidden');
+        } else {
+          alert('Insira uma chave.');
+        }
+      });
+    }
+
+    function baseBoot(currentPageId) {
+      renderSidebar(currentPageId);
+      setupApiKeyModal();
+
+      dom.sidebarToggleBtn?.addEventListener('click', () => {
+        dom.sidebar.classList.toggle('-translate-x-full');
+        dom.sidebarOverlay.classList.toggle('hidden');
+      });
+
+      dom.sidebarOverlay?.addEventListener('click', () => {
+        dom.sidebar.classList.add('-translate-x-full');
+        dom.sidebarOverlay.classList.add('hidden');
+      });
+    }
+
+    // ===== CapyRegex =====
+    const $ = (s, e = document) => e.querySelector(s);
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, m => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[m]));
+    }
+
+    function highlight(text, re) {
+      let out = '';
+      let last = 0;
+      let m;
+      const src = text;
+      if (!re.global) {
+        re = new RegExp(re.source, re.flags + 'g');
+      }
+      while ((m = re.exec(src)) !== null) {
+        const st = m.index;
+        const en = m.index + m[0].length;
+        out += escapeHtml(src.slice(last, st)) + '<mark class="bg-purple-600/40 rounded px-1">' + escapeHtml(m[0]) + '</mark>';
+        last = en;
+      }
+      out += escapeHtml(src.slice(last));
+      return out;
+    }
+
+    document.getElementById('run').addEventListener('click', () => {
+      const pat = $('#pattern').value;
+      const flags = $('#flags').value;
+      const sample = $('#sample').value || '';
+
+      try {
+        const re = new RegExp(pat, flags);
+        const html = highlight(sample, re);
+        document.getElementById('result').innerHTML = html;
+
+        const m = sample.match(re);
+        const list = document.getElementById('groups');
+        list.innerHTML = '';
+
+        if (m) {
+          // when RegExp has capture groups, match() returns an array where index 1..N are groups
+          for (let i = 1; i < m.length; i++) {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class='chip'>Grupo ${i}</span> <span class='text-zinc-400 text-xs'>${escapeHtml(m[i] || '')}</span>`;
+            list.appendChild(li);
+          }
+        } else {
+          document.getElementById('groups').innerHTML = '<li class="text-zinc-400 text-xs">Sem grupos capturados.</li>';
+        }
+      } catch (e) {
+        document.getElementById('result').innerHTML = `<p class='text-red-400 text-sm'>Regex inválida: ${e.message}</p>`;
+      }
+    });
+
+    Array.from(document.querySelectorAll('.paste')).forEach(b =>
+      b.addEventListener('click', () => {
+        document.getElementById('pattern').value = b.dataset.val;
+      })
+    );
+
+    baseBoot('CapyRegex');
+  </script>
+</body>
+</html>

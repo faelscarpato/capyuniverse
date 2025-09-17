@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <title>CapyWatermark — CapyUniverse</title>
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif}.font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700}.btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.4rem .6rem;border-radius:.6rem}
+    .dropzone{position:relative;border:2px dashed rgba(71,85,105,.5);border-radius:1.25rem;padding:2rem;text-align:center;cursor:pointer}
+    .dropzone.dragover{outline:2px dashed #7c5cff;outline-offset:-6px}
+    .hidden-input{position:absolute;inset:0;opacity:0}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass border-zinc-800 p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold font-syne text-cyan-400">CapyWatermark 💧</h1>
+          <p class="text-zinc-300 mt-1">Aplique marca d'água e redimensione imagens em lote.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <div id="imgDrop" class="dropzone">
+                <input id="imgInput" type="file" accept="image/*" multiple class="hidden-input">
+                <p class="text-zinc-300"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste imagens aqui ou <span class="underline">clique para selecionar</span>.</p>
+              </div>
+            </div>
+            <div id="imgGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="glass p-4 border border-zinc-800 space-y-3">
+              <h3 class="font-semibold text-zinc-200">Configurações</h3>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="col-span-2">
+                  <label class="text-xs text-zinc-400">Texto</label>
+                  <input id="wmText" class="input w-full" placeholder="Ex: © Rafael Scarpato">
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Tamanho</label>
+                  <input id="wmSize" type="number" class="input w-full" value="24">
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Opacidade</label>
+                  <input id="wmOpacity" type="range" min="0" max="1" step="0.05" value="0.4" class="w-full">
+                </div>
+                <div class="col-span-2">
+                  <label class="text-xs text-zinc-400">Posição</label>
+                  <select id="wmPos" class="input w-full">
+                    <option value="se">Inferior direita</option>
+                    <option value="sd">Superior direita</option>
+                    <option value="ie">Inferior esquerda</option>
+                    <option value="id">Superior esquerda</option>
+                    <option value="cc">Centro</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label class="text-xs text-zinc-400">Preset de tamanho</label>
+                  <select id="preset" class="input w-full">
+                    <option value="0">Manter</option>
+                    <option value="1080x1080">Quadrado 1080x1080</option>
+                    <option value="1920x1080">Paisagem 1920x1080</option>
+                    <option value="1080x1920">Retrato 1080x1920</option>
+                    <option value="1080x1350">4:5 1080x1350</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                <button id="btnApply" class="btn w-full"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Aplicar</button>
+                <button id="btnDownloadAll" class="btn bg-sky-600 hover:bg-sky-700 w-full"><i class="fa-solid fa-download mr-2"></i>Baixar todos</button>
+              </div>
+            </div>
+            <p class="text-[12px] text-zinc-400">Marca d'água por texto (fonte monoespaçada). Futuro: imagem como watermark.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+  <script>
+    // Sidebar + modal
+    var API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    var dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton')
+    };
+
+    async function renderSidebar(currentPageId) {
+      try {
+        var r = await fetch('tools.json');
+        var data = await r.json();
+        var cats = {};
+        data.forEach(function (t) {
+          var c = t.category;
+          if (typeof c === 'string') c = [c];
+          (c || []).forEach(function (cat) {
+            cats[cat] = cats[cat] || [];
+            cats[cat].push(t);
+          });
+        });
+
+        if (dom.sidebar) {
+          dom.sidebar.innerHTML = '';
+          var home = document.createElement('a');
+          home.href = 'index.html';
+          home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+          home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+          dom.sidebar.appendChild(home);
+
+          for (var name in cats) {
+            var box = document.createElement('div');
+            box.className = 'mb-1';
+            var btn = document.createElement('button');
+            btn.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+            btn.innerHTML = '<span class="font-semibold text-sm">' + name + '</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+
+            var content = document.createElement('div');
+            content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+            (cats[name] || []).forEach(function (t) {
+              var a = document.createElement('a');
+              a.href = t.pageUrl || '#';
+              var icon = t.icon ? t.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+              a.className = 'sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ' + (t.id === currentPageId ? 'active' : 'text-gray-400');
+              a.innerHTML = icon + '<span>' + (t.title || '') + '</span>';
+              content.appendChild(a);
+            });
+
+            btn.addEventListener('click', (function (contentRef, btnRef) {
+              return function () {
+                if (contentRef.classList) contentRef.classList.toggle('expanded');
+                var svg = btnRef.querySelector('svg');
+                if (svg && svg.classList) svg.classList.toggle('rotate-180');
+              };
+            })(content, btn));
+
+            if ((cats[name] || []).some(function (t) { return t.id === currentPageId; })) {
+              if (content.classList) content.classList.add('expanded');
+              var svg0 = btn.querySelector('svg');
+              if (svg0 && svg0.classList) svg0.classList.add('rotate-180');
+            }
+
+            box.appendChild(btn);
+            box.appendChild(content);
+            dom.sidebar.appendChild(box);
+          }
+        }
+      } catch (e) {
+        if (dom.sidebar) {
+          dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+        }
+      }
+    }
+
+    function setupApiKeyModal() {
+      var html = '<div class="glass border-zinc-800 p-7 rounded-2xl w-full max-w-md">' +
+        '<div class="flex justify-between items-center mb-4">' +
+        '<h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>' +
+        '<button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl">&times;</button>' +
+        '</div>' +
+        '<div class="space-y-3">' +
+        '<div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">' +
+        '<h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>' +
+        '<label class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>' +
+        '<div class="flex">' +
+        '<input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input w-full rounded-r-none">' +
+        '<button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>' +
+        '</div>' +
+        '<p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente.</p>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+      if (dom.apiKeysModal) dom.apiKeysModal.innerHTML = html;
+
+      var openBtn = document.getElementById('openApiKeysModalButton');
+      if (openBtn && dom.apiKeysModal) {
+        openBtn.addEventListener('click', function () {
+          dom.apiKeysModal.classList.remove('hidden');
+        });
+      }
+
+      var closeBtn = document.getElementById('closeApiKeysModalButton');
+      if (closeBtn && dom.apiKeysModal) {
+        closeBtn.addEventListener('click', function () {
+          dom.apiKeysModal.classList.add('hidden');
+        });
+      }
+
+      var saveBtn = document.getElementById('saveGeminiKey');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function () {
+          var input = document.getElementById('geminiApiKeyInputModal');
+          var v = input ? (input.value || '').trim() : '';
+          if (v) {
+            try {
+              localStorage.setItem(API_KEY_STORAGE_KEY, v);
+              alert('Chave API salva!');
+              if (dom.apiKeysModal) dom.apiKeysModal.classList.add('hidden');
+            } catch (err) {
+              alert('Não foi possível salvar a chave.');
+            }
+          } else {
+            alert('Insira uma chave.');
+          }
+        });
+      }
+    }
+
+    function baseBoot(currentPageId) {
+      renderSidebar(currentPageId);
+      setupApiKeyModal();
+      if (dom.sidebarToggleBtn) {
+        dom.sidebarToggleBtn.addEventListener('click', function () {
+          if (dom.sidebar) dom.sidebar.classList.toggle('-translate-x-full');
+          if (dom.sidebarOverlay) dom.sidebarOverlay.classList.toggle('hidden');
+        });
+      }
+      if (dom.sidebarOverlay) {
+        dom.sidebarOverlay.addEventListener('click', function () {
+          if (dom.sidebar) dom.sidebar.classList.add('-translate-x-full');
+          dom.sidebarOverlay.classList.add('hidden');
+        });
+      }
+    }
+
+    // ===== CapyWatermark =====
+    var $ = function (s, e) { e = e || document; return e.querySelector(s); };
+    var $$ = function (s, e) { e = e || document; return Array.from(e.querySelectorAll(s)); };
+
+    var state = { files: [], outputs: new Map() };
+
+    function readFileAsDataURL(file) {
+      return new Promise(function (res, rej) {
+        var r = new FileReader();
+        r.onload = function () { res(r.result); };
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+    }
+
+    function draw(img, W, H) {
+      var c = document.createElement('canvas');
+      c.width = W;
+      c.height = H;
+      var ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, W, H);
+      return { c: c, ctx: ctx };
+    }
+
+    function posCoords(pos, W, H, text, size, pad) {
+      pad = typeof pad === 'undefined' ? 16 : pad;
+      var metrics = { w: text.length * size * 0.6, h: size };
+      var map = {
+        'se': [W - metrics.w - pad, H - pad],
+        'sd': [W - metrics.w - pad, metrics.h + pad],
+        'ie': [pad, H - pad],
+        'id': [pad, metrics.h + pad],
+        'cc': [(W - metrics.w) / 2, (H + metrics.h) / 2]
+      };
+      return map[pos] || map['se'];
+    }
+
+    function parsePreset(v) {
+      if (v === '0') return null;
+      var parts = v.split('x').map(function (n) { return parseInt(n, 10); });
+      return { w: parts[0], h: parts[1] };
+    }
+
+    function createCard(file) {
+      var tpl = document.createElement('template');
+      tpl.innerHTML = '<div class="glass overflow-hidden border border-zinc-800 flex flex-col">' +
+        '<div class="aspect-video bg-black/30 grid place-items-center overflow-hidden"><img class="preview max-h-full" alt="preview"></div>' +
+        '<div class="p-3 text-sm space-y-1">' +
+        '<div class="flex items-center justify-between"><div class="truncate text-zinc-300 filename">arquivo</div><span class="text-xs chip font-mono">—</span></div>' +
+        '<div class="text-xs text-zinc-400 dims">—</div>' +
+        '<div class="flex items-center gap-2 pt-1"><a class="btnDownload chip text-xs" download><i class="fa-solid fa-download mr-1"></i>Baixar</a></div>' +
+        '</div></div>';
+
+      var node = tpl.content.firstElementChild.cloneNode(true);
+      var filenameEl = $('.filename', node);
+      if (filenameEl) filenameEl.textContent = file.name;
+      var chipEl = $('.chip', node);
+      if (chipEl) chipEl.textContent = file.type || 'imagem';
+
+      var imgEl = $('.preview', node);
+      var dimsEl = $('.dims', node);
+      var btnDown = $('.btnDownload', node);
+
+      readFileAsDataURL(file).then(function (data) {
+        if (imgEl) imgEl.src = data;
+        createImageBitmap(file).then(function (bmp) {
+          if (dimsEl) dimsEl.textContent = bmp.width + '×' + bmp.height;
+        }).catch(function () { /* ignore */ });
+      });
+
+      if (btnDown) {
+        btnDown.addEventListener('click', function (e) {
+          var out = state.outputs.get(file.name);
+          if (!out) {
+            e.preventDefault();
+            alert('Aplique primeiro.');
+            return;
+          }
+          btnDown.href = out.url;
+          btnDown.download = out.name;
+        });
+      }
+
+      return node;
+    }
+
+    function addFiles(list) {
+      var imgs = Array.from(list).filter(function (f) { return f.type && f.type.indexOf('image/') === 0; });
+      var grid = document.getElementById('imgGrid');
+      imgs.forEach(function (f) {
+        state.files.push(f);
+        if (grid) grid.appendChild(createCard(f));
+      });
+    }
+
+    var drop = document.getElementById('imgDrop');
+    var input = document.getElementById('imgInput');
+    if (drop && input) {
+      drop.addEventListener('click', function () { input.click(); });
+
+      ['dragenter', 'dragover'].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('dragover'); });
+      });
+
+      drop.addEventListener('drop', function (e) {
+        addFiles(e.dataTransfer.files);
+      });
+
+      input.addEventListener('change', function (e) {
+        addFiles(e.target.files);
+      });
+    }
+
+    var btnApply = document.getElementById('btnApply');
+    if (btnApply) {
+      btnApply.addEventListener('click', async function () {
+        var textEl = document.getElementById('wmText');
+        var sizeEl = document.getElementById('wmSize');
+        var opacityEl = document.getElementById('wmOpacity');
+        var posEl = document.getElementById('wmPos');
+        var presetEl = document.getElementById('preset');
+
+        var text = textEl ? (textEl.value || '') : '';
+        var size = sizeEl ? parseInt(sizeEl.value || '24', 10) : 24;
+        var opacity = opacityEl ? parseFloat(opacityEl.value || '0.4') : 0.4;
+        var pos = posEl ? posEl.value : 'se';
+        var preset = presetEl ? parsePreset(presetEl.value) : null;
+
+        for (var i = 0; i < state.files.length; i++) {
+          var f = state.files[i];
+          try {
+            var img = await createImageBitmap(f);
+            var W = img.width, H = img.height;
+            if (preset) { W = preset.w; H = preset.h; }
+            var drew = draw(img, W, H);
+            var c = drew.c, ctx = drew.ctx;
+            if (text) {
+              ctx.globalAlpha = opacity;
+              ctx.font = size + "px 'JetBrains Mono', monospace";
+              ctx.fillStyle = 'white';
+              ctx.textBaseline = 'bottom';
+              var coords = posCoords(pos, W, H, text, size);
+              ctx.fillText(text, coords[0], coords[1]);
+              ctx.globalAlpha = 1;
+            }
+            /* create blob and store output */
+            /* ensure callback for toBlob */
+            var blob = await new Promise(function (res) {
+              var mime = f.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+              c.toBlob(function (b) { res(b); }, mime, 0.92);
+            });
+            var url = URL.createObjectURL(blob);
+            var name = f.name.replace(/\.[^.]+$/, '') + '-wm.' + (f.type === 'image/jpeg' ? 'jpg' : 'png');
+            state.outputs.set(f.name, { url: url, name: name });
+          } catch (err) {
+            console.error('Erro processando arquivo', f.name, err);
+          }
+        }
+        alert("Marca d'água aplicada! Use 'Baixar' em cada card ou 'Baixar todos'.");
+      });
+    }
+
+    var btnDownloadAll = document.getElementById('btnDownloadAll');
+    if (btnDownloadAll) {
+      btnDownloadAll.addEventListener('click', function () {
+        var links = Array.from(document.querySelectorAll('#imgGrid .btnDownload'));
+        var i = 0;
+        (function next() {
+          if (i >= links.length) return;
+          links[i++].click();
+          setTimeout(next, 150);
+        })();
+      });
+    }
+
+    baseBoot('CapyWatermark');
+  </script>
+</body>
+</html>

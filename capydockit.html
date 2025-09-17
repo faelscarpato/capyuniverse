@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapyDocKit — CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <!-- libs -->
+  <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif}.font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700}.btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.35rem .6rem;border-radius:.6rem}
+    .page-card{border:1px solid var(--glass-border)}
+    .dragging{opacity:.5}
+    .badge{font-size:.7rem;border:1px solid var(--glass-border);background:rgba(255,255,255,.06);padding:.15rem .4rem;border-radius:.4rem}
+    .marker{position:absolute;transform:translate(-50%,-50%);border:2px solid #22d3ee;border-radius:8px;width:24px;height:24px;background-color:rgba(34,211,238,.15)}
+    .mini-toolbar{position:absolute;top:.35rem;right:.35rem}
+    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}.scrollbar-thin::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:60px}.scrollbar-thin::-webkit-scrollbar-track{background:rgba(24,24,27,.1)}
+    .category-content{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+    .category-content.expanded{max-height:500px}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <!-- Header -->
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <!-- Main -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass border-zinc-800 p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold font-syne text-emerald-400">CapyDocKit 📄</h1>
+          <p class="text-zinc-300 mt-1">Junte, separe, reordene, comprima e assine PDFs — tudo no seu navegador.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-[330px_1fr] gap-6">
+          <!-- Painel esquerdo -->
+          <div class="space-y-4">
+            <!-- Upload -->
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2">Arquivos</h3>
+              <div id="drop" class="p-4 rounded-xl bg-white/5 border border-dashed border-zinc-700 text-center cursor-pointer hover:bg-white/10 transition">
+                <input id="fileInput" type="file" accept="application/pdf" multiple class="hidden">
+                <p class="text-sm text-zinc-300"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste PDFs aqui ou <span class="underline">clique para selecionar</span></p>
+                <p class="text-xs text-zinc-500 mt-1">Dica: você pode adicionar mais arquivos a qualquer momento.</p>
+                <div id="loadingStatus" class="text-xs text-amber-400 mt-2 hidden">Carregando PDF...</div>
+              </div>
+              <div class="text-xs text-zinc-400 mt-2">
+                <span class="badge" id="fileCount">0 arquivos</span>
+                <span class="badge" id="pageCount">0 páginas</span>
+              </div>
+            </div>
+
+            <!-- Seleção & Ações -->
+            <div class="glass p-4 border border-zinc-800 space-y-3">
+              <h3 class="font-semibold">Seleção</h3>
+              <div class="flex flex-wrap gap-2">
+                <button id="btnSelectAll" class="chip text-xs">Selecionar tudo</button>
+                <button id="btnClearSelection" class="chip text-xs">Limpar seleção</button>
+                <button id="btnInvertSelection" class="chip text-xs">Inverter</button>
+              </div>
+              <h3 class="font-semibold mt-4">Ações</h3>
+              <div class="grid grid-cols-1 gap-2">
+                <button id="btnMerge" class="btn"><i class="fa-solid fa-layer-group mr-2"></i>Mesclar & Baixar</button>
+                <button id="btnExportSelected" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-scissors mr-2"></i>Exportar selecionadas</button>
+                <button id="btnZipEach" class="btn bg-zinc-700 hover:bg-zinc-600"><i class="fa-solid fa-box-archive mr-2"></i>Uma página por PDF (ZIP)</button>
+              </div>
+            </div>
+
+            <!-- Compressão -->
+            <div class="glass p-4 border border-zinc-800 space-y-3">
+              <h3 class="font-semibold">Compressão</h3>
+              <label class="text-xs text-zinc-400">Modo</label>
+              <select id="compressMode" class="input w-full">
+                <option value="smart">Padrão (vetores, melhor qualidade)</option>
+                <option value="raster">Rasterizar páginas (tamanho menor)</option>
+              </select>
+              <div id="rasterOpts" class="hidden">
+                <label class="text-xs text-zinc-400">DPI (rasterização)</label>
+                <input id="dpi" type="range" min="72" max="150" step="6" value="96" class="w-full">
+                <div class="text-xs text-zinc-500">Atual: <span id="dpiVal">96</span> DPI</div>
+              </div>
+              <p class="text-xs text-zinc-500">Obs: “Rasterizar” converte páginas em imagens — reduz tamanho mas perde nitidez em textos/vetores.</p>
+            </div>
+
+            <!-- Assinatura -->
+            <div class="glass p-4 border border-zinc-800 space-y-3">
+              <h3 class="font-semibold">Assinatura</h3>
+              <div class="space-y-2">
+                <div class="rounded-xl bg-white/5 p-2 ring-1 ring-white/10">
+                  <canvas id="signPad" class="w-full h-32 bg-zinc-950 rounded-lg"></canvas>
+                </div>
+                <div class="flex gap-2">
+                  <button id="btnClearSign" class="chip text-xs"><i class="fa-regular fa-trash-can mr-1"></i>Limpar</button>
+                  <button id="btnPlaceSign" class="chip text-xs bg-emerald-600/20 border-emerald-500/40"><i class="fa-solid fa-pen-nib mr-1"></i>Posicionar nas páginas (clique no preview)</button>
+                </div>
+                <label class="text-xs text-zinc-400">Escala da assinatura</label>
+                <input id="signScale" type="range" min="0.2" max="1.2" step="0.05" value="0.45" class="w-full">
+                <div class="text-xs text-zinc-500">Use o botão “Posicionar…” e clique nos previews para marcar a posição. Clique no “x” do marcador para remover.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid de páginas -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-zinc-400">Arraste para reordenar. Clique para selecionar.</div>
+              <div class="text-sm text-zinc-400">Total: <span id="totalCount">0</span> páginas</div>
+            </div>
+            <div id="grid" class="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+            <p id="hint" class="text-center text-zinc-500 text-sm hidden">Adicione PDFs para começar.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Chaves API (mesmo padrão do ecossistema, não usado aqui) -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+<script>
+    // ===== Sidebar & Modal (padrão CapyUniverse)
+    const API_KEY_STORAGE_KEY='capyUniverseApiKey_gemini';
+    const dom={sidebar:document.getElementById('sidebar'),sidebarToggleBtn:document.getElementById('sidebarToggleBtn'),sidebarOverlay:document.getElementById('sidebarOverlay'),apiKeysModal:document.getElementById('apiKeysModal'),openApiKeysModalButton:document.getElementById('openApiKeysModalButton')};
+
+    async function renderSidebar(currentPageId){
+      try{
+        const r=await fetch('tools.json'); const data=await r.json(); const cats={};
+        data.forEach(t=>{ let c=t.category; if(typeof c==='string') c=[c]; (c||[]).forEach(cat=>{ (cats[cat]=cats[cat]||[]).push(t); });});
+        dom.sidebar.innerHTML='';
+        const home=document.createElement('a'); home.href='index.html';
+        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+        home.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+        dom.sidebar.appendChild(home);
+        for(const name in cats){
+          const box=document.createElement('div'); box.className='mb-1';
+          const btn=document.createElement('button');
+          btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+          btn.innerHTML='<span class="font-semibold text-sm">' + name + '</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+          const content=document.createElement('div'); content.className='category-content pl-3 pt-0.5 space-y-0.5';
+          cats[name].forEach(t=>{
+            const a=document.createElement('a'); a.href=t.pageUrl;
+            const icon=t.icon?t.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class="w-5 h-5 mr-2"></span>';
+            a.className='sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ' + (t.id===currentPageId?'active':'text-gray-400');
+            a.innerHTML=icon+'<span>'+t.title+'</span>'; content.appendChild(a);
+          });
+          btn.addEventListener('click',()=>{ content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+          if(cats[name].some(t=>t.id===currentPageId)){ content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+          box.appendChild(btn); box.appendChild(content); dom.sidebar.appendChild(box);
+        }
+      }catch(e){ dom.sidebar.innerHTML='<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>'; }
+    }
+    function setupApiKeyModal(){
+      const html=`<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'><div class='flex justify-between items-center mb-4'><h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2><button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button></div><div class='space-y-3'><div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'><h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3><label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label><form class='flex'><input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'><button type='button' id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button></form><p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p></div></div></div>`;
+      dom.apiKeysModal.innerHTML=html;
+      dom.openApiKeysModalButton?.addEventListener('click',()=>dom.apiKeysModal.classList.remove('hidden'));
+      document.getElementById('closeApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.add('hidden'));
+      document.getElementById('saveGeminiKey')?.addEventListener('click',()=>{const v=document.getElementById('geminiApiKeyInputModal').value.trim(); if(v){localStorage.setItem(API_KEY_STORAGE_KEY,v); alert('Chave API salva!'); dom.apiKeysModal.classList.add('hidden');} else alert('Insira uma chave.');});
+    }
+    function baseBoot(currentPageId){
+      renderSidebar(currentPageId); setupApiKeyModal();
+      dom.sidebarToggleBtn?.addEventListener('click',()=>{ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+      dom.sidebarOverlay?.addEventListener('click',()=>{ dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+    }
+
+    // ===== CapyDocKit =====
+    const $=(s,e=document)=>e.querySelector(s);
+    const grid=$("#grid"), hint=$("#hint");
+    const fileInput=$("#fileInput"), drop=$("#drop");
+    const fileCount=$("#fileCount"), pageCount=$("#pageCount"), totalCount=$("#totalCount");
+    const btnSelectAll=$("#btnSelectAll"), btnClear=$("#btnClearSelection"), btnInvert=$("#btnInvertSelection");
+    const btnMerge=$("#btnMerge"), btnExportSelected=$("#btnExportSelected"), btnZipEach=$("#btnZipEach");
+    const compressMode=$("#compressMode"), dpi=$("#dpi"), dpiVal=$("#dpiVal"), rasterOpts=$("#rasterOpts");
+    const signCanvas=$("#signPad"), signScale=$("#signScale"), btnPlaceSign=$("#btnPlaceSign"), btnClearSign=$("#btnClearSign");
+
+    let signaturePad = null;
+    let placingSign = false;
+    let signaturePNGDataUrl = null;
+
+    // Representa cada página na área de trabalho
+    // { id, srcIndex, pageNumber, fileName, bytes(ArrayBuffer), selected, thumbCanvas, width, height, markers:[{xN,yN,scale}] }
+    const pages = [];
+    // Guardar bytes por arquivo (para copyPages com pdf-lib)
+    const filesStore = []; // [{name, bytes, pdfjsDoc}]
+
+    function updateCounters(){
+      const filesN = filesStore.length;
+      const pagesN = pages.length;
+      fileCount.textContent = filesN + (filesN===1?' arquivo':' arquivos');
+      pageCount.textContent = pagesN + (pagesN===1?' página':' páginas');
+      totalCount.textContent = pagesN;
+      hint.classList.toggle('hidden', pagesN>0);
+    }
+
+    // ===== Upload / leitura =====
+    drop.addEventListener('click', ()=> fileInput.click());
+    ;['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('ring','ring-emerald-500/40'); }));
+    ;['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('ring','ring-emerald-500/40'); }));
+    drop.addEventListener('drop', e=>{ const files=e.dataTransfer.files; if(files?.length) requestAnimationFrame(() => handleFiles(files)); });
+    fileInput.addEventListener('change', e=> {
+      if(e.target.files?.length) {
+        requestAnimationFrame(() => handleFiles(e.target.files));
+      }
+    });
+
+    async function handleFiles(fileList){
+      const loadingStatus = document.getElementById('loadingStatus');
+      loadingStatus.classList.remove('hidden');
+      
+      if (typeof pdfjsLib === 'undefined') {
+        loadingStatus.textContent = 'Erro: PDF.js não carregou';
+        alert('PDF.js não carregou. Recarregue a página.');
+        return;
+      }
+      const pdfs = Array.from(fileList).filter(f=> f.type==='application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
+      
+      if(!pdfs.length){
+        loadingStatus.classList.add('hidden');
+        alert('Nenhum arquivo PDF encontrado.');
+        return;
+      }
+      
+      for(const f of pdfs){
+        try{
+          console.log('Carregando PDF:', f.name);
+          const bytes = await f.arrayBuffer();
+          const pdfjsDoc = await pdfjsLib.getDocument({data: bytes}).promise;
+        const srcIndex = filesStore.push({name:f.name, bytes, pdfjsDoc}) - 1;
+
+        // Process pages in batches to avoid blocking
+        const batchSize = 3;
+        for(let start = 1; start <= pdfjsDoc.numPages; start += batchSize){
+          const end = Math.min(start + batchSize - 1, pdfjsDoc.numPages);
+          
+          for(let p = start; p <= end; p++){
+            const page = await pdfjsDoc.getPage(p);
+            const viewport = page.getViewport({scale: .25}); // smaller scale for faster rendering
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', {willReadFrequently: false});
+            canvas.width = Math.floor(viewport.width);
+            canvas.height = Math.floor(viewport.height);
+            await page.render({canvasContext:ctx, viewport}).promise;
+
+            pages.push({
+              id: crypto.randomUUID(),
+              srcIndex, pageNumber: p,
+              fileName: f.name,
+              bytes,
+              selected: false,
+              thumbCanvas: canvas,
+              width: viewport.width, height: viewport.height,
+              markers: []
+            });
+          }
+          
+          // Allow UI to update between batches
+          if(end < pdfjsDoc.numPages){
+            await new Promise(resolve => setTimeout(resolve, 10));
+            updateCounters();
+          }
+        }
+        } catch(error){
+          console.error('Erro ao carregar PDF:', f.name, error);
+          alert(`Erro ao carregar ${f.name}: ${error.message}`);
+        }
+      }
+      loadingStatus.classList.add('hidden');
+      renderGrid();
+      updateCounters();
+    }
+
+    // ===== Render Grid =====
+    function renderGrid(){
+      grid.innerHTML='';
+      pages.forEach((pg, idx)=>{
+        const card=document.createElement('div');
+        card.className='relative glass page-card rounded-xl overflow-hidden p-2 select-none';
+        card.draggable = true;
+        card.dataset.index = idx;
+
+        const wrap=document.createElement('div');
+        wrap.className='relative bg-black/40 rounded-lg overflow-hidden';
+        wrap.style.aspectRatio = (pg.width/pg.height).toFixed(3);
+
+        // canvas preview
+        const prev=document.createElement('canvas');
+        prev.width = pg.thumbCanvas.width; prev.height = pg.thumbCanvas.height;
+        prev.getContext('2d').drawImage(pg.thumbCanvas,0,0);
+        prev.className='block w-full h-auto';
+        wrap.appendChild(prev);
+
+        // click para selecionar / posicionar assinatura
+        wrap.addEventListener('click', (e)=>{
+          if(placingSign && signaturePNGDataUrl){
+            const rect = prev.getBoundingClientRect();
+            const xN = (e.clientX - rect.left) / rect.width;
+            const yN = (e.clientY - rect.top) / rect.height;
+            const sc = parseFloat(signScale.value);
+            // adiciona marcador
+            pg.markers.push({xN,yN,scale:sc});
+            drawMarkers(wrap, pg);
+          }else{
+            pg.selected = !pg.selected;
+            card.classList.toggle('ring', pg.selected);
+            card.classList.toggle('ring-sky-500/40', pg.selected);
+          }
+        });
+
+        // mini toolbar (nome + seleção)
+        const toolbar=document.createElement('div');
+        toolbar.className='mini-toolbar flex gap-1';
+        const nameTag=document.createElement('span');
+        nameTag.className='badge'; nameTag.textContent = `${pg.fileName.split('/').pop().slice(0,18)} · p.${pg.pageNumber}`;
+        const selTag=document.createElement('span');
+        selTag.className='badge'; selTag.textContent='selecionar';
+        selTag.addEventListener('click', (ev)=>{ ev.stopPropagation(); pg.selected=!pg.selected; card.classList.toggle('ring', pg.selected); card.classList.toggle('ring-sky-500/40', pg.selected); });
+        toolbar.appendChild(nameTag); toolbar.appendChild(selTag);
+        wrap.appendChild(toolbar);
+
+        // markers (assinatura)
+        drawMarkers(wrap, pg);
+
+        // Rodapé do card
+        const footer=document.createElement('div');
+        footer.className='mt-2 flex items-center justify-between text-xs text-zinc-400';
+        footer.innerHTML=`<span>Ordem: ${idx+1}</span><span>${pg.width|0}×${pg.height|0}</span>`;
+
+        card.addEventListener('dragstart', e=>{ card.classList.add('dragging'); e.dataTransfer.setData('text/plain', idx); });
+        card.addEventListener('dragend', ()=> card.classList.remove('dragging'));
+        card.addEventListener('dragover', e=> e.preventDefault());
+        card.addEventListener('drop', e=>{
+          e.preventDefault();
+          const from = parseInt(e.dataTransfer.getData('text/plain'),10);
+          const to = parseInt(card.dataset.index,10);
+          if(isNaN(from) || isNaN(to) || from===to) return;
+          const [moved]=pages.splice(from,1);
+          pages.splice(to,0,moved);
+          renderGrid();
+        });
+
+        card.appendChild(wrap);
+        card.appendChild(footer);
+        grid.appendChild(card);
+
+        if(pg.selected){ card.classList.add('ring','ring-sky-500/40'); }
+      });
+    }
+
+    function drawMarkers(container, pg){
+      Array.from(container.querySelectorAll('.marker, .marker-close')).forEach(n=>n.remove());
+      // desenha atuais
+      pg.markers.forEach((m,i)=>{
+        const mk=document.createElement('div'); mk.className='marker'; mk.style.left=(m.xN*100)+'%'; mk.style.top=(m.yN*100)+'%';
+        const close=document.createElement('button');
+        close.textContent='×'; close.title='remover';
+        close.className='marker-close absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-600 text-white text-xs leading-5';
+        close.addEventListener('click', (e)=>{ e.stopPropagation(); pg.markers.splice(i,1); drawMarkers(container, pg); });
+        container.appendChild(mk); container.appendChild(close);
+      });
+    }
+
+    // ===== Seleção
+    btnSelectAll.addEventListener('click', ()=>{ pages.forEach(p=>p.selected=true); renderGrid(); });
+    btnClear.addEventListener('click', ()=>{ pages.forEach(p=>p.selected=false); renderGrid(); });
+    btnInvert.addEventListener('click', ()=>{ pages.forEach(p=>p.selected=!p.selected); renderGrid(); });
+
+    // ===== Compress UI
+    compressMode.addEventListener('change', ()=> rasterOpts.classList.toggle('hidden', compressMode.value!=='raster'));
+    dpi.addEventListener('input', ()=> dpiVal.textContent=dpi.value);
+
+    // ===== Assinatura
+    function initSignPad(){
+      if (typeof SignaturePad === 'undefined') {
+        console.error('SignaturePad not loaded');
+        return;
+      }
+      signaturePad = new SignaturePad(signCanvas, {backgroundColor:'#0b0f14', penColor:'#e6edf3', minWidth:1.2, maxWidth:2.4});
+      const resize=()=>{ // manter resolução nítida
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        const rect = signCanvas.getBoundingClientRect();
+        signCanvas.width = rect.width * ratio; signCanvas.height = rect.height * ratio;
+        const ctx=signCanvas.getContext('2d'); ctx.scale(ratio, ratio);
+        signaturePad.clear();
+      };
+      resize(); window.addEventListener('resize', resize);
+    }
+    window.addEventListener('load', () => {
+      setTimeout(initSignPad, 100);
+    });
+
+    btnClearSign.addEventListener('click', ()=> signaturePad?.clear());
+    btnPlaceSign.addEventListener('click', ()=>{
+      if(!signaturePad || signaturePad.isEmpty()){ alert('Desenhe a assinatura no quadro primeiro.'); return; }
+      signaturePNGDataUrl = signaturePad.toDataURL('image/png');
+      placingSign = !placingSign;
+      btnPlaceSign.classList.toggle('bg-emerald-600/20');
+      btnPlaceSign.classList.toggle('border-emerald-500/40');
+      btnPlaceSign.classList.toggle('bg-emerald-600');
+      btnPlaceSign.classList.toggle('text-white');
+      btnPlaceSign.textContent = placingSign? 'Modo: clicando posiciona assinatura' : 'Posicionar nas páginas (clique no preview)';
+    });
+
+    // ===== Ações (Mesclar / Exportar / ZIP)
+    btnMerge.addEventListener('click', async ()=>{
+      if(!pages.length) return alert('Adicione páginas primeiro.');
+      const raster = (compressMode.value==='raster');
+      try{
+        const outBytes = raster ? await exportRasterized(pages) : await exportMergedWithEdits(pages);
+        downloadBlob(outBytes, 'capydockit.pdf', 'application/pdf');
+      }catch(e){ console.error(e); alert('Falha ao mesclar: '+e.message); }
+    });
+
+    btnExportSelected.addEventListener('click', async ()=>{
+      const sel = pages.filter(p=>p.selected);
+      if(!sel.length) return alert('Selecione páginas.');
+      try{
+        const raster = (compressMode.value==='raster');
+        const out = raster ? await exportRasterized(sel) : await exportMergedWithEdits(sel);
+        downloadBlob(out, 'capydockit_selected.pdf', 'application/pdf');
+      }catch(e){ alert('Falha ao exportar: '+e.message); }
+    });
+
+    btnZipEach.addEventListener('click', async ()=>{
+      const sel = pages.filter(p=>p.selected);
+      if(!sel.length) return alert('Selecione páginas.');
+      const zip=new JSZip();
+      for(const pg of sel){
+        const doc = await PDFLib.PDFDocument.create();
+        const src = await PDFLib.PDFDocument.load(pg.bytes);
+        const [cp] = await doc.copyPages(src, [pg.pageNumber-1]);
+        // assinatura por página (se houver marcador)
+        await applyMarkersToPage(cp, doc, pg);
+        doc.addPage(cp);
+        const bytes = await doc.save({useObjectStreams:true});
+        const safe = (pg.fileName.replace(/[^a-z0-9._-]+/gi,'_')+`_p${pg.pageNumber}.pdf`);
+        zip.file(safe, bytes);
+      }
+      const blob = await zip.generateAsync({type:'blob'});
+      downloadBlob(blob, 'capydockit_pages.zip', 'application/zip');
+    });
+
+    // ===== Export helpers
+    async function exportMergedWithEdits(pgs){
+      const out = await PDFLib.PDFDocument.create();
+      const signPNG = signaturePNGDataUrl ? await out.embedPng(signaturePNGDataUrl) : null;
+
+      // cache documentos PDFLib por arquivo
+      const cache = new Map(); // key: bytes -> PDFDocument
+      for(const pg of pgs){
+        let srcDoc = cache.get(pg.bytes);
+        if(!srcDoc){ srcDoc = await PDFLib.PDFDocument.load(pg.bytes); cache.set(pg.bytes, srcDoc); }
+        const [cp] = await out.copyPages(srcDoc, [pg.pageNumber-1]);
+        // aplicar marcadores (assinaturas)
+        if(signPNG && pg.markers?.length){
+          applyMarkersToPageWithImage(cp, signPNG, pg);
+        }
+        out.addPage(cp);
+      }
+      return await out.save({ useObjectStreams: true });
+    }
+
+    async function exportRasterized(pgs){
+      // Renderiza cada página (pdf.js) em um canvas de acordo com DPI e incorpora como imagem no PDF final
+      const out = await PDFLib.PDFDocument.create();
+      const dpiVal = parseInt(dpi.value,10);
+      for(const pg of pgs){
+        const pdfjsDoc = filesStore[pg.srcIndex].pdfjsDoc;
+        if (!pdfjsDoc) continue;
+        const page = await pdfjsDoc.getPage(pg.pageNumber);
+        const scale = dpiVal/72; // 72dpi base
+        const viewport = page.getViewport({scale});
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d',{willReadFrequently:false});
+        canvas.width = Math.floor(viewport.width); canvas.height = Math.floor(viewport.height);
+        await page.render({canvasContext:ctx, viewport}).promise;
+
+        const png = canvas.toDataURL('image/png');
+        const embedded = await out.embedPng(png);
+        const pageOut = out.addPage([canvas.width, canvas.height]);
+        pageOut.drawImage(embedded, {x:0,y:0,width:canvas.width,height:canvas.height});
+
+        // adicionar assinatura raster também (sobre a imagem) — mapeando markers da miniatura
+        if(pg.markers?.length && signaturePNGDataUrl){
+          const signPNG = await out.embedPng(signaturePNGDataUrl);
+          const { width, height } = pageOut.getSize();
+          for(const m of pg.markers){
+            const w = Math.min(width, height) * 0.25 * (m.scale||0.45);
+            const h = w * (signPNG.height/signPNG.width);
+            const x = m.xN * width - w/2;
+            const y = (1 - m.yN) * height - h/2;
+            pageOut.drawImage(signPNG, {x,y,width:w,height:h, opacity:0.98});
+          }
+        }
+      }
+      return await out.save({ useObjectStreams: true });
+    }
+
+    // assinatura em páginas copiadas (modo vetorial)
+    async function applyMarkersToPage(page, doc, pg){
+      if(!signaturePNGDataUrl || !(pg.markers?.length)) return;
+      const signPNG = await doc.embedPng(signaturePNGDataUrl);
+      applyMarkersToPageWithImage(page, signPNG, pg);
+    }
+    function applyMarkersToPageWithImage(page, signPNG, pg){
+      const { width, height } = page.getSize();
+      for(const m of pg.markers){
+        const w = Math.min(width, height) * 0.25 * (m.scale||0.45);
+        const h = w * (signPNG.height/signPNG.width);
+        const x = m.xN * width - w/2;
+        const y = (1 - m.yN) * height - h/2; // topo->base
+        page.drawImage(signPNG, {x,y,width:w,height:h, opacity:0.98});
+      }
+    }
+
+    function downloadBlob(bytesOrBlob, name, type){
+      const blob = bytesOrBlob instanceof Blob ? bytesOrBlob : new Blob([bytesOrBlob], {type});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+    }
+
+    // Boot - wait for PDF.js to load
+    function initApp(){
+      if(typeof pdfjsLib !== 'undefined'){
+        baseBoot('CapyDocKit');
+        updateCounters();
+        console.log('CapyDocKit inicializado com PDF.js');
+      } else {
+        setTimeout(initApp, 100);
+      }
+    }
+    initApp();
+  </script>
+</body>
+</html>
+

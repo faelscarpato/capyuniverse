@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CapyAdv — Plataforma Jurídica</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+  <style>
+    html{background:#0b0f14}
+    body{font-family:Inter,system-ui,sans-serif;color:#e6edf3;
+      background:radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14}
+    .font-syne{font-family:Syne,Inter,sans-serif}
+    .glass{background:rgba(24,24,27,.65);backdrop-filter:blur(14px);
+      border:1px solid rgba(63,63,70,.4);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+    .sidebar-glass{background:rgba(39,39,42,.7);backdrop-filter:blur(15px);border-right:1px solid rgba(63,63,70,.3)}
+    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:60px}
+    .badge{border:1px solid rgba(99,102,241,.35);color:#c7d2fe;background:rgba(99,102,241,.08)}
+    .card{transition:transform .2s ease, box-shadow .2s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <!-- Header -->
+  <header class="w-full fixed top-0 left-0 right-0 z-40 py-1 bg-[#0b0b10cc] backdrop-blur-md border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-[64px]">
+      <div class="flex items-center">
+        <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-indigo-400 transition-colors font-syne">CapyUniverse IA</a>
+        <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyAdv (Jurídica)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnApi" class="text-sm px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700">
+          <i class="fa fa-key mr-2"></i>Chaves API
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <!-- Sidebar opcional (pode carregar menu global) -->
+    <aside class="hidden lg:block sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <div class="text-xs text-zinc-500 p-2">CapyAdv — Atalhos</div>
+      <nav class="space-y-1 text-sm">
+        <a href="#suite" class="block px-3 py-2 rounded-md hover:bg-zinc-700/40">Suite Jurídica</a>
+        <a href="#extras" class="block px-3 py-2 rounded-md hover:bg-zinc-700/40">Ferramentas Extras</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 w-full px-4 sm:px-6 lg:px-8 lg:ml-64">
+      <!-- HERO -->
+      <section class="max-w-7xl mx-auto mt-6">
+        <div class="glass p-6 sm:p-8">
+          <div class="flex items-start sm:items-center gap-4 flex-col sm:flex-row">
+            <div class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/40 grid place-items-center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M3 21h18"/><path d="M3 7h18"/><path d="M12 3v18"/><path d="M7 12h10"/></svg>
+            </div>
+            <div class="flex-1">
+              <h1 class="font-syne font-extrabold text-2xl sm:text-3xl tracking-tight text-indigo-300">CapyAdv — Plataforma Jurídica</h1>
+              <p class="text-zinc-300 mt-1">Mobile-first, capy-style dark: organize audiências, prazos e acordos com IA — rápido, clínico, sem frescura.</p>
+              <div class="mt-3 inline-flex items-center gap-2 text-xs badge px-2.5 py-1 rounded-full">Jurídico</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GRID: ferramentas da categoria -->
+      <section id="suite" class="max-w-7xl mx-auto mt-6">
+        <h2 class="font-syne font-bold text-lg text-zinc-200 mb-3">Suite Jurídica</h2>
+        <div id="gridJur" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- GRID: extras úteis -->
+      <section id="extras" class="max-w-7xl mx-auto mt-8 mb-16">
+        <h2 class="font-syne font-bold text-lg text-zinc-200 mb-3">Ferramentas Extras</h2>
+        <div id="gridExtra" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Automação (toast/bottom-sheet) -->
+  <script src="capy-automation.js"></script>
+  <!-- Icons (opcional) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+
+  <script>
+    const CATEGORY = 'Jurídico';
+    const JUR_IDS_WISHLIST = ['CapyAudiencias','CapyCLT','CapyConciliaFacil','CapyCronosLegal']; // exibe mesmo se faltar no tools.json
+    const EXTRA_IDS = ['CapyDoc','CapyResumo','CapyPDF','CapyPrompt'];
+
+    const $jur = document.getElementById('gridJur');
+    const $ext = document.getElementById('gridExtra');
+
+    function chipColor(tool){
+      const c = (tool?.color||'indigo-400').split('-')[0];
+      const map = {indigo:'#6366f1', blue:'#60a5fa', emerald:'#34d399', violet:'#8b5cf6', cyan:'#22d3ee', pink:'#f472b6', amber:'#f59e0b', sky:'#38bdf8', purple:'#a78bfa'};
+      return map[c] || '#6366f1';
+    }
+
+    function card(tool){
+      const clr = chipColor(tool);
+      const el = document.createElement('article');
+      el.className = 'card glass p-4 border border-zinc-800';
+      el.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl" style="background:${clr}1a;border:1px solid ${clr}50;display:grid;place-items:center">
+            <span style="width:8px;height:8px;border-radius:50%;background:${clr};display:inline-block"></span>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-syne font-bold text-zinc-100">${tool.title || tool.id}</h3>
+            <p class="text-sm text-zinc-400 mt-1">${tool.description || 'Ferramenta da suíte jurídica.'}</p>
+            <div class="mt-3 flex gap-2">
+              <a href="${tool.pageUrl || '#'}" class="px-3 py-2 text-sm rounded-lg text-white" style="background:${clr}">Abrir</a>
+              <button class="px-3 py-2 text-sm rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700">Detalhes</button>
+            </div>
+          </div>
+        </div>`;
+      return el;
+    }
+
+    async function load(){
+      try{
+        const res = await fetch('tools.json', { cache: 'no-store' });
+        const tools = await res.json();
+
+        const byId = Object.fromEntries(tools.map(t=>[t.id,t]));
+        const jur = tools.filter(t => (t.category||'').toLowerCase() === CATEGORY.toLowerCase());
+
+        // Garante wishlist (se faltar no JSON, cria um placeholder)
+        const ensure = (id, fallback)=> byId[id] || ({ id, title: fallback.title, description: fallback.description, category: CATEGORY, pageUrl: fallback.pageUrl, color: fallback.color });
+        const wishlist = [
+          ensure('CapyAudiencias', { title:'Analisador de Atas de Audiência', description:'Analise, destaque e resuma atas de audiência com precisão.', pageUrl:'CapyAudiencias.html', color:'indigo-400' }),
+          ensure('CapyCLT', { title:'CapyCLT (Consulta Rápida)', description:'Pesquise e explique artigos e súmulas da CLT.', pageUrl:'CapyCLT.html', color:'amber-400' }),
+          ensure('CapyConciliaFacil', { title:'Conciliador de Acordos', description:'Gere propostas de acordo e minuta automática.', pageUrl:'CapyConciliaFacil.html', color:'indigo-400' }),
+          ensure('CapyCronosLegal', { title:'Gestor de Prazos', description:'Detecte e controle prazos processuais.', pageUrl:'CapyCronosLegal.html', color:'amber-400' })
+        ];
+
+        // Render suite jurídica
+        const suite = [...wishlist, ...jur.filter(t=>!JUR_IDS_WISHLIST.includes(t.id))];
+        suite.forEach(t => $jur.appendChild(card(t)));
+
+        // Extras
+        const extras = EXTRA_IDS.map(id => byId[id]).filter(Boolean);
+        extras.forEach(t => $ext.appendChild(card(t)));
+      }catch(e){
+        console.error(e);
+      }
+
+      // Se vier de querystring (ex: ?from=CapyAudiencias&tag=analysis_complete) => dispara toast
+      const usp = new URLSearchParams(location.search);
+      const from = usp.get('from');
+      const tag  = usp.get('tag');
+      if (from && tag){
+        window.capyAutomation?.emitAction({
+          toolId: from,
+          tag,
+          category: CATEGORY,
+          message: 'Deseja continuar a jornada jurídica com prazos, acordo ou documentação?'
+        });
+      }
+    }
+    load();
+  </script>
+</body>
+</html>

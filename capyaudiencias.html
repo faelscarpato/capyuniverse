@@ -96,6 +96,7 @@
       gtag('js', new Date());
       gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
     </script>
+  <script src="cu-init.js"></script>
 </head>
 
 <body class="dark min-h-screen flex flex-col text-[15px]">
@@ -838,7 +839,14 @@
   });
 })();
 </script>
-
+<script>
+  window.capyAutomation?.emitAction({
+    toolId:'CapyAudiencias',
+    tag:'analysis_complete',
+    category:'Jurídico',
+    message:'Ata analisada. Continuar com Resumo, Prazos ou Acordo?'
+  });
+</script>
 
 </body>
 </html>

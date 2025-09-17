@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <title>CapySQL Coach — CapyUniverse</title>
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
+    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
+    .font-syne{font-family:'Syne',sans-serif}.font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
+    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
+    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
+    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
+    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700}.btn:hover{background:#1d4ed8}
+    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.35rem .6rem;border-radius:.6rem}
+    .area{min-height:160px}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sql-formatter@15.3.2/dist/sql-formatter.min.js"></script>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    </div>
+    <div class="flex items-center">
+      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
+      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-16">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass border-zinc-800 p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold font-syne text-blue-400">CapySQL Coach 🐾</h1>
+          <p class="text-zinc-300 mt-1">Do briefing em linguagem natural para SQL formatado — com explicação e casos de teste.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <div class="lg:col-span-2 space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs text-zinc-400">Dialeto</label>
+                  <select id="dialect" class="input w-full">
+                    <option value="postgresql">PostgreSQL</option>
+                    <option value="mysql">MySQL</option>
+                    <option value="sqlite">SQLite</option>
+                    <option value="mssql">SQL Server</option>
+                    <option value="bigquery">BigQuery</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Nº de linhas esperadas (opcional)</label>
+                  <input id="expectedRows" class="input w-full" placeholder="ex: ~100">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-xs text-zinc-400">Briefing (linguagem natural)</label>
+                  <textarea id="brief" class="input area w-full" placeholder="Ex: listar os 10 produtos com maior receita no último trimestre, com nome, receita e margem."></textarea>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-xs text-zinc-400">Schema (tabelas/colunas)</label>
+                  <textarea id="schema" class="input area font-mono w-full" placeholder="users(id, name, created_at)\norders(id, user_id, total, status, created_at)\norder_items(id, order_id, product_id, qty, unit_price)\nproducts(id, name, category)"></textarea>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <button id="btnGenSQL" class="btn"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Gerar SQL (IA)</button>
+                <button id="btnFormat" class="btn bg-amber-600 hover:bg-amber-700"><i class="fa-solid fa-align-left mr-2"></i>Formatar</button>
+                <button id="btnExplain" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-circle-question mr-2"></i>Explicar (IA)</button>
+                <button id="btnTests" class="btn bg-emerald-600 hover:bg-emerald-700"><i class="fa-solid fa-vial mr-2"></i>Casos de Teste (IA)</button>
+              </div>
+            </div>
+
+            <div class="glass p-4 border border-zinc-800">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-semibold text-zinc-200">SQL</h3>
+                <div class="flex gap-2">
+                  <button id="btnCopySQL" class="chip text-xs"><i class="fa-regular fa-copy mr-1"></i>Copiar</button>
+                  <button id="btnDownloadSQL" class="chip text-xs"><i class="fa-solid fa-download mr-1"></i>Baixar .sql</button>
+                </div>
+              </div>
+              <textarea id="sqlOut" class="input font-mono w-full min-h-[220px]"></textarea>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Explicação</h3>
+              <div id="explain" class="text-sm text-zinc-300 space-y-1"></div>
+            </div>
+            <div class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2 text-zinc-200">Casos de Teste</h3>
+              <ul id="tests" class="text-sm text-zinc-300 list-disc pl-5 space-y-1"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+  <script>
+    // ===== Sidebar + API modal =====
+const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+const dom = {
+  sidebar: document.getElementById('sidebar'),
+  sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+  sidebarOverlay: document.getElementById('sidebarOverlay'),
+  apiKeysModal: document.getElementById('apiKeysModal'),
+  openApiKeysModalButton: document.getElementById('openApiKeysModalButton')
+};
+
+async function renderSidebar(currentPageId) {
+  try {
+    const r = await fetch('tools.json');
+    const data = await r.json();
+    const cats = {};
+    data.forEach(t => {
+      let c = t.category;
+      if (typeof c === 'string') c = [c];
+      (c || []).forEach(cat => {
+        (cats[cat] = cats[cat] || []).push(t);
+      });
+    });
+
+    dom.sidebar.innerHTML = '';
+
+    const home = document.createElement('a');
+    home.href = 'index.html';
+    home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+    home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+    dom.sidebar.appendChild(home);
+
+    for (const name in cats) {
+      const box = document.createElement('div');
+      box.className = 'mb-1';
+
+      const btn = document.createElement('button');
+      btn.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+      btn.innerHTML = `<span class='font-semibold text-sm'>${name}</span><svg class='w-4 h-4 transform transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'></path></svg>`;
+
+      const content = document.createElement('div');
+      content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+      cats[name].forEach(t => {
+        const a = document.createElement('a');
+        a.href = t.pageUrl;
+        const icon = t.icon ? t.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+        a.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ${t.id === currentPageId ? 'active' : 'text-gray-400'}`;
+        a.innerHTML = icon + `<span>${t.title}</span>`;
+        content.appendChild(a);
+      });
+
+      btn.addEventListener('click', () => {
+        content.classList.toggle('expanded');
+        btn.querySelector('svg').classList.toggle('rotate-180');
+      });
+
+      if (cats[name].some(t => t.id === currentPageId)) {
+        content.classList.add('expanded');
+        btn.querySelector('svg').classList.add('rotate-180');
+      }
+
+      box.appendChild(btn);
+      box.appendChild(content);
+      dom.sidebar.appendChild(box);
+    }
+  } catch (e) {
+    dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+  }
+}
+
+function setupApiKeyModal() {
+  const html = `
+<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'>
+  <div class='flex justify-between items-center mb-4'>
+    <h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2>
+    <button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button>
+  </div>
+  <div class='space-y-3'>
+    <div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'>
+      <h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3>
+      <label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label>
+      <div class='flex'>
+        <input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'>
+        <button id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button>
+      </div>
+      <p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p>
+    </div>
+  </div>
+</div>
+  `.trim();
+
+  dom.apiKeysModal.innerHTML = html;
+  dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+  document.getElementById('closeApiKeysModalButton')?.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
+  document.getElementById('saveGeminiKey')?.addEventListener('click', () => {
+    const v = document.getElementById('geminiApiKeyInputModal').value.trim();
+    if (v) {
+      localStorage.setItem(API_KEY_STORAGE_KEY, v);
+      alert('Chave API salva!');
+      dom.apiKeysModal.classList.add('hidden');
+    } else {
+      alert('Insira uma chave.');
+    }
+  });
+}
+
+function baseBoot(currentPageId) {
+  renderSidebar(currentPageId);
+  setupApiKeyModal();
+  dom.sidebarToggleBtn?.addEventListener('click', () => {
+    dom.sidebar.classList.toggle('-translate-x-full');
+    dom.sidebarOverlay.classList.toggle('hidden');
+  });
+  dom.sidebarOverlay?.addEventListener('click', () => {
+    dom.sidebar.classList.add('-translate-x-full');
+    dom.sidebarOverlay.classList.add('hidden');
+  });
+}
+
+// ===== CapySQL Coach =====
+const $ = (s, e = document) => e.querySelector(s);
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+}
+
+function dialectToFormatter() {
+  const map = {
+    postgresql: 'postgresql',
+    mysql: 'mysql',
+    sqlite: 'sqlite',
+    mssql: 'transactsql',
+    bigquery: 'sql'
+  };
+  return map[$('#dialect').value] || 'sql';
+}
+
+async function callGeminiJSON(systemPrompt) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    alert("Chave API Gemini não configurada. Abra 'Chaves API'.");
+    throw new Error('sem_api');
+  }
+
+  const payload = {
+    contents: [{ parts: [{ text: systemPrompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  };
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || ('HTTP ' + res.status));
+  }
+
+  const data = await res.json();
+  const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!txt) throw new Error('Resposta vazia da IA');
+  return JSON.parse(txt);
+}
+
+function setExplain(html) {
+  $('#explain').innerHTML = html || '<span class="text-zinc-500 text-sm">—</span>';
+}
+
+function setTests(arr) {
+  const ul = $('#tests');
+  ul.innerHTML = '';
+  (arr || []).forEach(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+  if (!arr?.length) ul.innerHTML = '<li class="text-zinc-500">—</li>';
+}
+
+document.getElementById('btnGenSQL').addEventListener('click', async () => {
+  const brief = $('#brief').value.trim();
+  const schema = $('#schema').value.trim();
+  const dialect = $('#dialect').value;
+  const expected = $('#expectedRows').value.trim();
+  if (!brief || !schema) { alert('Informe briefing e schema.'); return; }
+
+  const prompt = `
+Você é um assistente SQL experiente no dialeto ${dialect}. Com base no SCHEMA abaixo e no BRIEFING, gere um SQL seguro e eficiente.
+- Use apenas tabelas/colunas existentes.
+- Prefira nomes qualificados e aliases claros.
+- Adicione filtros de período quando aplicável.
+- Se o briefing sugerir agregações, inclua GROUP BY apropriado.
+- Não insira dados fictícios.
+
+Responda APENAS com JSON:
+{
+  "sql": "…",
+  "explicacao": ["bullet 1", "bullet 2"],
+  "cuidado": ["armadilha 1", "armadilha 2"]
+}
+
+SCHEMA:
+${schema}
+
+BRIEFING:
+${brief}
+
+METADADOS:
+${expected ? `Linhas esperadas: ${expected}` : "(sem expectativa informada)"}
+  `.trim();
+
+  try {
+    const out = await callGeminiJSON(prompt);
+    $('#sqlOut').value = out.sql || '';
+    setExplain((out.explicacao || []).map(i => `<div>• ${i}</div>`).join(''));
+    setTests((out.cuidado || []).map(i => 'Verificar: ' + i));
+  } catch (e) {
+    alert('Falha ao gerar SQL: ' + e.message);
+  }
+});
+
+document.getElementById('btnFormat').addEventListener('click', () => {
+  const sql = $('#sqlOut').value || '';
+  if (!sql) return;
+  try {
+    $('#sqlOut').value = sqlFormatter.format(sql, { language: dialectToFormatter() });
+  } catch (e) {
+    alert('Erro ao formatar: ' + e.message);
+  }
+});
+
+document.getElementById('btnExplain').addEventListener('click', async () => {
+  const sql = $('#sqlOut').value.trim();
+  if (!sql) return alert('Cole ou gere um SQL primeiro.');
+  const schema = $('#schema').value.trim();
+  const dialect = $('#dialect').value;
+
+  const prompt = `
+Explique passo a passo a consulta SQL a seguir no dialeto ${dialect}, considerando o schema. Responda APENAS com JSON {"explicacao": ["…","…"]}.
+SCHEMA:
+${schema}
+
+SQL:
+${sql}
+  `.trim();
+
+  try {
+    const out = await callGeminiJSON(prompt);
+    setExplain((out.explicacao || []).map(i => `<div>• ${i}</div>`).join(''));
+  } catch (e) {
+    alert('Falha ao explicar: ' + e.message);
+  }
+});
+
+document.getElementById('btnTests').addEventListener('click', async () => {
+  const sql = $('#sqlOut').value.trim();
+  if (!sql) return alert('Gere um SQL primeiro.');
+
+  const prompt = `
+Dado este SQL, proponha 6 casos de teste concisos (texto curto) para validar corretamente a consulta. Responda APENAS com JSON {"tests": ["…"]}.
+SQL:
+${sql}
+  `.trim();
+
+  try {
+    const out = await callGeminiJSON(prompt);
+    setTests(out.tests || []);
+  } catch (e) {
+    alert('Falha ao gerar testes: ' + e.message);
+  }
+});
+
+document.getElementById('btnCopySQL').addEventListener('click', async () => {
+  const sql = $('#sqlOut').value;
+  if (!sql) return;
+  await navigator.clipboard.writeText(sql);
+  alert('SQL copiado!');
+});
+
+document.getElementById('btnDownloadSQL').addEventListener('click', () => {
+  const sql = $('#sqlOut').value || '';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([sql], { type: 'text/sql' }));
+  a.download = 'query.sql';
+  a.click();
+});
+
+// boot
+baseBoot('CapySQLCoach');
+  </script>
+</body>
+</html>

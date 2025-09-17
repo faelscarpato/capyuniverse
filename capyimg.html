@@ -1,182 +1,248 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-
+<html lang="pt-BR" data-theme="capyuniverse">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CapyIMG — Gerar Imagens com IA</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
+  <!-- Tema CapyUniverse -->
   <style>
-    html { background: #121217; }
-    body { font-family: 'Inter', sans-serif; color: #e5e7eb; background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png'); background-repeat: repeat; background-size: 400px; background-color: #18181b; }
-    main { background: rgba(24, 24, 27, 0.8); backdrop-filter: blur(3px); border-radius: 1.2rem; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); border: 1px solid rgba(63, 63, 70, 0.4); }
-    .glass { background: rgba(24,24,27,0.233); backdrop-filter: blur(8px); border-radius: 1.2rem; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); border: 1px solid rgba(63,63,70,0.4); }
-    .sidebar-glass { background: rgba(39,39,42,0.7); backdrop-filter: blur(15px); border-right: 1px solid rgba(63,63,70,0.3); }
-    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
-    .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00; }
-    .category-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
-    .category-content.expanded { max-height: 1500px; }
-    .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
-    .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    :root{
+      --cu-bg-0:#0b0b14; --cu-bg-1:#0f1024; --cu-grid:#2a2e63; --cu-card:#0f0f22cc;
+      --cu-cyan:#22d3ee; --cu-magenta:#f472d0; --cu-amber:#f59e0b; --cu-text:#e6e6f0; --cu-text-dim:#aab;
+      --cu-radius:16px; --cu-radius-lg:22px; --cu-blur:12px;
+      --cu-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    html{ background:var(--cu-bg-0); }
+    body{
+      font-family:Inter,system-ui,sans-serif; color:var(--cu-text);
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
+        radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+        var(--cu-bg-0);
+    }
+    .cu-stars{ position:fixed; inset:0; pointer-events:none; z-index:-2;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 75% 35%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 70%, rgba(255,255,255,.08) 0 1px, transparent 2px) 0 0/260px 260px; }
+    .cu-stage{ position:fixed; inset:auto 0 0 0; height:38vh; pointer-events:none; z-index:-1;
+      background: linear-gradient( to top, rgba(10,10,22,.65), transparent 70%),
+        repeating-linear-gradient( to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+        repeating-linear-gradient( to top,   transparent 0 38px, var(--cu-grid) 38px 39px);
+      mask: linear-gradient(to top, black, transparent 80%); }
+
+    /* Header */
+    .cu-header{ position:fixed; top:0; left:0; right:0; z-index:40; height:64px;
+      display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:0 .9rem;
+      backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
+      border-bottom:1px solid rgba(255,255,255,.06); }
+    .cu-brand{ display:flex; align-items:center; gap:.6rem; }
+    .cu-appname{ font-family:Syne,Inter,sans-serif; font-weight:800; letter-spacing:.4px; }
+    .cu-chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .6rem; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12); background:linear-gradient(120deg, rgba(34,211,238,.16), rgba(139,92,246,.16)); }
+
+    /* Componentes */
+    .cu-panel{ background:var(--cu-card); backdrop-filter: blur(var(--cu-blur));
+      border-radius:var(--cu-radius-lg); box-shadow:var(--cu-shadow); border:1px solid rgba(255,255,255,.06); }
+    .cu-btn{ display:inline-flex; align-items:center; gap:.55rem; padding:.6rem .9rem; border-radius:14px; font-weight:600;
+      border:1px solid rgba(255,255,255,.10);
+      background:linear-gradient(130deg, rgba(34,211,238,.18), rgba(244,114,208,.18));
+      box-shadow:var(--cu-shadow); backdrop-filter: blur(6px); transition:.2s transform, .2s filter; }
+    .cu-btn:hover{ transform: translateY(-1px);
+      filter: drop-shadow(0 0 10px rgba(34,211,238,.45)) drop-shadow(0 0 24px rgba(244,114,208,.35)); }
+    .cu-btn.primary{ background: linear-gradient(140deg, #0ea5e9 0%, #22d3ee 40%, #a855f7 78%, #f59e0b 100%); color:white; border-color:transparent; }
+    .cu-input, .cu-select, .cu-textarea{ width:100%; background:rgba(15,15,40,.6);
+      border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:.75rem .9rem; color:var(--cu-text); outline:none; }
+    .cu-input:focus, .cu-select:focus, .cu-textarea:focus{ border-color: var(--cu-cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+
+    /* Sidebar */
+    .sidebar-glass{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right:1px solid rgba(255,255,255,.06);
+    }
+
+    /* Grid/galeria */
+    .card{ position:relative; overflow:hidden; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:#0f1024; }
+    .card img{ width:100%; height:100%; object-fit:contain; display:block; background:#0b0b14; }
+    .card .toolbar{ position:absolute; bottom:.5rem; left:.5rem; right:.5rem; display:flex; justify-content:space-between; gap:.5rem; }
+    .badge{ padding:.25rem .6rem; border-radius:999px; background:rgba(0,0,0,.55); font-size:.75rem; }
+
+    /* Scrollbar */
+    .scrollbar-thin::-webkit-scrollbar{ width:8px; height:8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb{ background:linear-gradient(120deg,#22d3ee,#8b5cf6); border-radius:999px; }
+    .scrollbar-thin::-webkit-scrollbar-track{ background:rgba(255,255,255,.06); }
   </style>
+  <script src="cu-init.js"></script>
 </head>
 
-<body class="bg-gray-900 text-white flex flex-col min-h-screen">
-  <!-- HEADER (mantido) -->
-  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-    <div class="flex items-center">
-      <button id="sidebarToggleBtn" class="mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
+<body class="min-h-screen flex flex-col">
+  <div class="cu-stars"></div><div class="cu-stage"></div>
+
+  <!-- HEADER -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
         <i class="fas fa-bars text-xl"></i>
       </button>
-      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-inter">CapyUniverse IA</a>
+      <div class="flex items-center gap-2">
+        <svg class="w-7 h-7" viewBox="0 0 64 64" aria-hidden="true">
+          <defs><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#f472d0"/></linearGradient></defs>
+          <circle cx="32" cy="32" r="30" fill="url(#g2)" opacity=".25"/>
+          <path d="M18 40c7 6 21 6 28 0 2-2 2-6-1-8l-4-3c-1-5-5-9-9-9s-8 4-9 9l-4 3c-3 2-3 6-1 8z" fill="url(#g2)"/>
+          <rect x="23" y="28" rx="4" ry="4" width="18" height="14" fill="#0b0b14"/>
+          <text x="32" y="39" text-anchor="middle" font-size="9" font-family="Syne, Inter, sans-serif" fill="#fff">IMG</text>
+        </svg>
+        <span class="cu-appname text-xl">CapyIMG</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
     </div>
-    <div class="flex items-center">
-      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary hidden sm:inline-flex">Chaves API</button>
     </div>
   </header>
 
-  <div id="notificationArea"></div>
-
-  <div class="flex flex-1 pt-16">
-    <!-- SIDEBAR (mantido) -->
-    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+  <div class="flex flex-1 pt-16 min-h-0">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
     </aside>
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden font-inter"></div>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
 
-    <!-- MAIN BODY: CapyIMG -->
-    <main class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br py-12 px-4 sm:px-6 lg:px-10 mx-auto w-full">
-      <h1 class="text-4xl font-extrabold font-inter text-purple-400 mb-2 text-center tracking-tight drop-shadow">CapyIMG 🖼️</h1>
-      <p class="text-md text-zinc-300 mb-8 text-center max-w-2xl">Gere imagens com IA direto do navegador. Sem edição, sem TTS, sem feeds. Usa provedor público (<span class="font-jetbrains">flux</span>).</p>
+    <!-- MAIN -->
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8">
+        <div class="text-center mb-6 sm:mb-8">
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color:#a78bfa;">CapyIMG 🖼️</h1>
+          <p class="text-zinc-300 mt-1">Gere imagens com IA direto do navegador (modelo público <span class="font-mono">flux</span>).</p>
+        </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[420px,1fr] gap-6 w-full max-w-6xl">
-        <!-- CONTROLES -->
-        <aside class="glass p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <i class="fas fa-image text-zinc-300"></i>
-            <h2 class="text-lg font-semibold">Briefing</h2>
-          </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[380px,1fr] gap-6 min-h-0">
+          <!-- CONTROLES -->
+          <aside class="cu-panel p-4 sm:p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fas fa-image text-zinc-300"></i>
+              <h2 class="text-lg font-semibold">Briefing</h2>
+            </div>
 
-          <label class="block text-sm text-zinc-300">Descrição</label>
-          <textarea id="prompt" rows="5" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-3 placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-purple-600" placeholder="Ex: ilustração digital de uma capivara astronauta minimalista, fundo branco, iluminação suave"></textarea>
+            <label class="block text-sm text-zinc-300">Descrição</label>
+            <textarea id="prompt" rows="5" class="cu-textarea mt-1" placeholder="Ex: ilustração digital de capivara astronauta, fundo branco, iluminação suave"></textarea>
 
-          <div class="mt-3 grid grid-cols-2 gap-3">
+            <div class="mt-3 grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm text-zinc-300">Negativo (evitar)</label>
+                <input id="negative" class="cu-input mt-1" placeholder="granulado, arte borrada, texto" />
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300">Quantidade</label>
+                <input id="count" type="number" min="1" max="4" value="1" class="cu-input mt-1" />
+              </div>
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-3">
+              <div>
+                <label class="block text-sm text-zinc-300">Proporção</label>
+                <select id="ratio" class="cu-select mt-1">
+                  <option value="1:1">1:1</option><option value="16:9">16:9</option>
+                  <option value="9:16">9:16</option><option value="4:3">4:3</option>
+                  <option value="3:4">3:4</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300">Lado maior</label>
+                <select id="longSide" class="cu-select mt-1">
+                  <option>1024</option><option>768</option><option>1536</option><option>2048</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300">Seed (opcional)</label>
+                <input id="seed" class="cu-input mt-1" placeholder="ex: 42" />
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <span class="block text-sm text-zinc-300 mb-1">Estilo rápido</span>
+              <div id="styleChips" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <label class="inline-flex items-center gap-2 text-sm text-zinc-200">
+                <input id="transparent" type="checkbox" class="rounded border-zinc-600 bg-transparent" /> Fundo transparente
+              </label>
+              <div class="text-xs text-zinc-400" id="sizeInfo">1024×1024</div>
+            </div>
+
+            <button id="btnGenerate" class="mt-4 w-full cu-btn primary justify-center">
+              <i class="fas fa-wand-magic-sparkles"></i> Gerar Imagem
+            </button>
+
+            <hr class="my-5 border-white/10" />
             <div>
-              <label class="block text-sm text-zinc-300">Negativo (evitar)</label>
-              <input id="negative" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-2.5 placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-purple-600" placeholder="granulado, arte borrada, texto" />
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-clock text-zinc-300"></i>
+                <h3 class="font-medium">Histórico rápido</h3>
+              </div>
+              <div id="history" class="flex flex-wrap gap-2 text-xs"></div>
+              <button id="clearHistory" class="mt-2 text-xs text-zinc-400 hover:text-white underline">Limpar histórico</button>
             </div>
-            <div>
-              <label class="block text-sm text-zinc-300">Quantidade</label>
-              <input id="count" type="number" min="1" max="4" value="1" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-2.5 outline-none focus:ring-2 focus:ring-purple-600" />
-            </div>
-          </div>
+          </aside>
 
-          <div class="mt-3 grid grid-cols-3 gap-3">
-            <div>
-              <label class="block text-sm text-zinc-300">Proporção</label>
-              <select id="ratio" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-2.5 outline-none focus:ring-2 focus:ring-purple-600">
-                <option value="1:1">1:1</option>
-                <option value="16:9">16:9</option>
-                <option value="9:16">9:16</option>
-                <option value="4:3">4:3</option>
-                <option value="3:4">3:4</option>
-              </select>
+          <!-- GALERIA -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-images text-zinc-300"></i>
+                <h2 class="text-lg font-semibold">Resultado</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btnDownloadAll" class="cu-btn px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                  <i class="fas fa-download"></i> Baixar tudo
+                </button>
+              </div>
             </div>
-            <div>
-              <label class="block text-sm text-zinc-300">Lado maior</label>
-              <select id="longSide" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-2.5 outline-none focus:ring-2 focus:ring-purple-600">
-                <option>1024</option>
-                <option>768</option>
-                <option>1536</option>
-                <option>2048</option>
-              </select>
+            <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[200px] overflow-y-auto scrollbar-thin flex-1">
+              <!-- cards entram aqui -->
             </div>
-            <div>
-              <label class="block text-sm text-zinc-300">Seed (opcional)</label>
-              <input id="seed" class="mt-1 w-full rounded-xl bg-zinc-900/70 border border-zinc-700 p-2.5 placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-purple-600" placeholder="ex: 42" />
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <span class="block text-sm text-zinc-300 mb-1">Estilo rápido</span>
-            <div id="styleChips" class="flex flex-wrap gap-2"></div>
-          </div>
-
-          <div class="mt-4 flex items-center justify-between gap-3">
-            <label class="inline-flex items-center gap-2 text-sm text-zinc-200">
-              <input id="transparent" type="checkbox" class="rounded border-zinc-600 bg-transparent" /> Fundo transparente
-            </label>
-            <div class="text-xs text-zinc-400" id="sizeInfo">1024×1024</div>
-          </div>
-
-          <button id="btnGenerate" class="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-2xl inline-flex items-center justify-center gap-2">
-            <i class="fas fa-wand-magic-sparkles"></i>
-            Gerar Imagem
-          </button>
-
-          <hr class="my-5 border-zinc-700" />
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <i class="fas fa-clock text-zinc-300"></i>
-              <h3 class="font-medium">Histórico rápido</h3>
-            </div>
-            <div id="history" class="flex flex-wrap gap-2 text-xs"></div>
-            <button id="clearHistory" class="mt-2 text-xs text-zinc-400 hover:text-white underline">Limpar histórico</button>
-          </div>
-        </aside>
-
-        <!-- GALERIA -->
-        <section class="glass p-6">
-          <div class="flex items-center justify-between gap-3 mb-3">
-            <div class="flex items-center gap-2">
-              <i class="fas fa-images text-zinc-300"></i>
-              <h2 class="text-lg font-semibold">Resultado</h2>
-            </div>
-            <div class="flex items-center gap-2">
-              <button id="btnDownloadAll" class="text-sm px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 inline-flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
-                <i class="fas fa-download"></i> Baixar tudo
-              </button>
-            </div>
-          </div>
-          <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[220px]"></div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </section>
     </main>
   </div>
 
-  <!-- MODAL: API Gemini (mantida) -->
+  <!-- FAB Chaves API (mobile) -->
+  <button id="fabApiImg" class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50" title="Chaves API">🔑</button>
+
+  <!-- MODAL: API Gemini -->
   <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
 
-  <!-- Template para cards da galeria -->
+  <!-- Template card -->
   <template id="tplCard">
-    <div class="relative overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-900">
-      <div class="aspect-square bg-zinc-800 animate-pulse"></div>
-      <img class="hidden w-full h-full object-contain" />
-      <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2 text-xs">
-        <span class="px-2 py-1 rounded-full bg-black/60">IA</span>
+    <div class="card">
+      <div class="w-full h-full aspect-square bg-[#12122a] animate-pulse"></div>
+      <img class="hidden" alt="geração IA"/>
+      <div class="toolbar">
+        <span class="badge">IA</span>
         <div class="flex items-center gap-1">
-          <button class="btn-open px-2 py-1 rounded-xl bg-black/60 hover:bg-black/70" title="Abrir"><i class="fas fa-up-right-and-down-left-from-center"></i></button>
-          <button class="btn-dl px-2 py-1 rounded-xl bg-black/60 hover:bg-black/70" title="Baixar"><i class="fas fa-download"></i></button>
+          <button class="btn-open cu-btn px-2 py-1" title="Abrir"><i class="fas fa-up-right-and-down-left-from-center"></i></button>
+          <button class="btn-dl cu-btn px-2 py-1" title="Baixar"><i class="fas fa-download"></i></button>
         </div>
       </div>
     </div>
   </template>
 
   <script>
-    // ====== NAV/CONTEXTO DA PÁGINA ======
     const currentPageId = 'capyimg';
     let apiKey = '';
-    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini'; // Mantido (para o modal)
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
 
     const dom = {
       sidebar: document.getElementById('sidebar'),
@@ -184,131 +250,106 @@
       sidebarOverlay: document.getElementById('sidebarOverlay'),
       apiKeysModal: document.getElementById('apiKeysModal'),
       openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApiImg'),
     };
 
-    // ====== Sidebar dinâmico (mantido) ======
+    /* Sidebar dinâmica */
     async function renderSidebar() {
       if (!dom.sidebar) return;
       try {
-        const response = await fetch('tools.json');
-        if (!response.ok) throw new Error('Falha ao carregar tools.json');
-        const toolsData = await response.json();
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json();
+
         const categories = {};
-        toolsData.forEach(tool => { (categories[tool.category] ??= []).push(tool); });
+        toolsData.forEach(tool => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          (cats||[]).forEach(cat => (categories[cat] ??= []).push(tool));
+        });
+
         dom.sidebar.innerHTML = '';
+        const home = document.createElement('a');
+        home.href='index.html';
+        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+        home.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
 
-        const homeLinkSidebar = document.createElement('a');
-        homeLinkSidebar.href = 'index.html';
-        homeLinkSidebar.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
-        homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-        dom.sidebar.appendChild(homeLinkSidebar);
+        for (const cat in categories){
+          const wrap = document.createElement('div'); wrap.className='mb-1';
+          const btn = document.createElement('button');
+          btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+          btn.innerHTML=`<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div');
+          content.className='category-content pl-3 pt-0.5 space-y-0.5';
 
-        for (const categoryName in categories) {
-          const categoryDiv = document.createElement('div');
-          categoryDiv.className = 'mb-1';
-          const categoryButton = document.createElement('button');
-          categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-          categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-          const categoryContent = document.createElement('div');
-          categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-
-          categories[categoryName].forEach(tool => {
-            const link = document.createElement('a');
-            link.href = tool.pageUrl;
-            const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-            link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-            categoryContent.appendChild(link);
+          categories[cat].forEach(tool=>{
+            const a=document.createElement('a'); a.href=tool.pageUrl;
+            const icon=tool.icon?tool.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class="w-5 h-5 mr-2"></span>';
+            a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id===currentPageId?'active':'text-gray-400'}`;
+            a.innerHTML=icon+`<span>${tool.title}</span>`;
+            content.appendChild(a);
           });
 
-          categoryButton.addEventListener('click', () => {
-            categoryContent.classList.toggle('expanded');
-            categoryButton.querySelector('svg').classList.toggle('rotate-180');
-          });
-
-          if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-            categoryContent.classList.add('expanded');
-            categoryButton.querySelector('svg').classList.add('rotate-180');
-          }
-
-          categoryDiv.appendChild(categoryButton);
-          categoryDiv.appendChild(categoryContent);
-          dom.sidebar.appendChild(categoryDiv);
+          btn.addEventListener('click',()=>{ content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+          if (categories[cat].some(t=>t.id===currentPageId)){ content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+          wrap.appendChild(btn); wrap.appendChild(content); dom.sidebar.appendChild(wrap);
         }
-      } catch (error) {
-        console.error('Erro ao carregar ferramentas:', error);
-        dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
       }
     }
 
-    // ====== Modal de Chaves (mantido) ======
-    function setupApiKeyModal() {
-      const modalHTML = `
-        <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-purple-400 font-inter">Gerenciar Chaves de API</h2>
-            <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-          </div>
-          <div class="space-y-3">
-            <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-              <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-              <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
-              <div class="flex">
-                <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700" />
-                <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
-              </div>
-              <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada pelas ferramentas que a exigem.</p>
+    /* Modal Chaves API (para manter padrão do ecossistema) */
+    function setupApiKeyModal(){
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
             </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">Salva localmente (localStorage). O CapyIMG não usa a chave, mas outras ferramentas sim.</p>
           </div>
         </div>`;
-      if (dom.apiKeysModal) dom.apiKeysModal.innerHTML = modalHTML;
+      dom.apiKeysModal.innerHTML = html;
 
-      const closeBtn = document.getElementById('closeApiKeysModalButton');
-      const saveBtn = document.getElementById('saveGeminiKey');
-      const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
+      const close = ()=>dom.apiKeysModal.classList.add('hidden');
+      dom.openApiKeysModalButton?.addEventListener('click', ()=>dom.apiKeysModal.classList.remove('hidden'));
+      dom.fabApi?.addEventListener('click', ()=>dom.apiKeysModal.classList.remove('hidden'));
+      dom.apiKeysModal.addEventListener('click',(e)=>{ if(e.target===dom.apiKeysModal) close(); });
+      dom.apiKeysModal.querySelector('#closeApiKeysModalButton').addEventListener('click', close);
+      dom.apiKeysModal.querySelector('#saveGeminiKey').addEventListener('click', ()=>{
+        const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+        const key = (input.value||'').trim();
+        if(!key){ alert('Insira uma chave válida.'); return; }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        alert('Chave API salva!'); close();
+      });
 
-      if (dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-      if (closeBtn) closeBtn.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-      if (saveBtn && apiKeyInput) {
-        saveBtn.addEventListener('click', () => {
-          const key = apiKeyInput.value.trim();
-          if (key) {
-            localStorage.setItem(API_KEY_STORAGE_KEY, key);
-            apiKey = key;
-            alert('Chave API do Gemini salva!');
-            dom.apiKeysModal.classList.add('hidden');
-          } else {
-            alert('Por favor, insira uma chave API.');
-          }
-        });
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) dom.apiKeysModal.querySelector('#geminiApiKeyInputModal').value = saved;
+    }
+
+    /* Sidebar toggle */
+    function initSidebarToggle(){
+      function toggle(show){
+        if (show===undefined){ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); return; }
+        if (show){ dom.sidebar.classList.remove('-translate-x-full'); dom.sidebarOverlay.classList.remove('hidden'); }
+        else { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); }
       }
+      dom.sidebarToggleBtn?.addEventListener('click', ()=>toggle());
+      dom.sidebarOverlay?.addEventListener('click', ()=>toggle(false));
+      toggle(false);
     }
 
-    function loadApiKey() {
-      const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-      if (savedKey) apiKey = savedKey;
-    }
-
-    // ====== Sidebar toggle ======
-    function initSidebarToggle() {
-      function toggleSidebar(show) {
-        if (show === undefined) {
-          dom.sidebar.classList.toggle('-translate-x-full');
-          dom.sidebarOverlay.classList.toggle('hidden');
-        } else if (show) {
-          dom.sidebar.classList.remove('-translate-x-full');
-          dom.sidebarOverlay.classList.remove('hidden');
-        } else {
-          dom.sidebar.classList.add('-translate-x-full');
-          dom.sidebarOverlay.classList.add('hidden');
-        }
-      }
-      dom.sidebarToggleBtn?.addEventListener('click', () => toggleSidebar());
-      dom.sidebarOverlay?.addEventListener('click', () => toggleSidebar(false));
-      toggleSidebar(false);
-    }
-
-    // ====== CapyIMG (lógica de geração) ======
+    /* ===== Lógica CapyIMG ===== */
     const el = {
       prompt: document.getElementById('prompt'),
       negative: document.getElementById('negative'),
@@ -327,133 +368,106 @@
       downloadAll: document.getElementById('btnDownloadAll'),
     };
 
-    const STYLES = [
-      'ilustração digital',
-      'fotorrealista',
-      '3D render',
-      'flat minimalista',
-      'neon futurista',
-      'aquarela suave',
-      'pixel art',
-      'low poly',
-      'estúdio, fundo branco'
-    ];
+    const STYLES = ['ilustração digital','fotorrealista','3D render','flat minimalista','neon futurista','aquarela suave','pixel art','low poly','estúdio, fundo branco'];
     const HIST_KEY = 'capyimg_history';
 
-    function ratioToWH(ratio, longSide) {
-      const [a,b] = ratio.split(':').map(Number);
-      if (a >= b) { const w = Number(longSide); const h = Math.round(w * (b/a)); return [w,h]; }
-      const h = Number(longSide); const w = Math.round(h * (a/b)); return [w,h];
+    function ratioToWH(ratio, longSide){
+      const [a,b]=ratio.split(':').map(Number);
+      if(a>=b){ const w=Number(longSide); const h=Math.round(w*(b/a)); return [w,h]; }
+      const h=Number(longSide); const w=Math.round(h*(a/b)); return [w,h];
     }
-    function updateSizeInfo() { const [w,h] = ratioToWH(el.ratio.value, el.longSide.value); el.sizeInfo.textContent = `${w}×${h}`; }
+    function updateSizeInfo(){ const [w,h]=ratioToWH(el.ratio.value, el.longSide.value); el.sizeInfo.textContent = `${w}×${h}`; }
 
-    function addHistoryItem(text) {
-      if (!text?.trim()) return;
-      const arr = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-      const next = [text, ...arr.filter(x => x !== text)].slice(0, 12);
+    function addHistoryItem(text){
+      if(!text?.trim()) return;
+      const arr = JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+      const next = [text, ...arr.filter(x=>x!==text)].slice(0,12);
       localStorage.setItem(HIST_KEY, JSON.stringify(next));
       renderHistory();
     }
-    function renderHistory() {
-      const arr = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
-      el.history.innerHTML = '';
-      for (const item of arr) {
-        const b = document.createElement('button');
-        b.className = 'px-3 py-1 rounded-full border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 text-zinc-300';
-        b.textContent = item.length > 40 ? item.slice(0, 40) + '…' : item;
-        b.title = item; b.onclick = () => { el.prompt.value = item; };
+    function renderHistory(){
+      const arr = JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+      el.history.innerHTML='';
+      for(const item of arr){
+        const b=document.createElement('button');
+        b.className='px-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300';
+        b.textContent=item.length>40?item.slice(0,40)+'…':item; b.title=item;
+        b.onclick=()=>{ el.prompt.value=item; };
         el.history.appendChild(b);
       }
-      el.clearHistory.classList.toggle('hidden', arr.length === 0);
+      el.clearHistory.classList.toggle('hidden', arr.length===0);
     }
-    function renderStyleChips() {
-      el.styleChips.innerHTML = '';
-      for (const s of STYLES) {
-        const b = document.createElement('button');
-        b.className = 'px-3 py-1 rounded-full border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 text-zinc-300';
-        b.textContent = s;
-        b.onclick = () => { const base = el.prompt.value.trim(); el.prompt.value = base ? `${base}, ${s}` : s; };
+    function renderStyleChips(){
+      el.styleChips.innerHTML='';
+      STYLES.forEach(s=>{
+        const b=document.createElement('button');
+        b.className='px-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300';
+        b.textContent=s; b.onclick=()=>{ const base=el.prompt.value.trim(); el.prompt.value = base?`${base}, ${s}`:s; };
         el.styleChips.appendChild(b);
-      }
+      });
     }
 
-    function createCardSkeleton() {
-      const node = el.cardTpl.content.firstElementChild.cloneNode(true);
-      return node;
-    }
-    function fillCard(node, dataUrl, idx) {
-      const img = node.querySelector('img');
-      const sk = node.querySelector('.animate-pulse');
-      img.src = dataUrl; img.classList.remove('hidden'); if (sk) sk.classList.add('hidden');
-      node.querySelector('.btn-open').onclick = () => window.open(dataUrl, '_blank');
-      node.querySelector('.btn-dl').onclick = () => downloadDataUrl(dataUrl, `capyimg_${Date.now()}_${idx+1}.png`);
-    }
-    function downloadDataUrl(dataUrl, filename) { const a = document.createElement('a'); a.href = dataUrl; a.download = filename; a.click(); }
-    async function downloadAllVisible() {
-      const imgs = [...el.grid.querySelectorAll('img')].map(im => im.src); if (!imgs.length) return;
-      for (let i = 0; i < imgs.length; i++) { downloadDataUrl(imgs[i], `capyimg_${String(i+1).padStart(2,'0')}.png`); await new Promise(r => setTimeout(r, 150)); }
+    function createCardSkeleton(){ return el.cardTpl.content.firstElementChild.cloneNode(true); }
+    function fillCard(node, dataUrl, idx){
+      const img=node.querySelector('img'); const sk=node.querySelector('.animate-pulse');
+      img.src=dataUrl; img.classList.remove('hidden'); if(sk) sk.classList.add('hidden');
+      node.querySelector('.btn-open').onclick=()=>window.open(dataUrl,'_blank');
+      node.querySelector('.btn-dl').onclick=()=>{ const a=document.createElement('a'); a.href=dataUrl; a.download=`capyimg_${Date.now()}_${idx+1}.png`; a.click(); };
     }
 
-    async function generateWithPollinations(prompt, { count, size, transparent, negative, seed }) {
-      const [w, h] = size.split('x').map(Number);
-      const merged = negative ? `${prompt}, negative prompt: ${negative}` : prompt;
-      const out = [];
-      for (let i = 0; i < count; i++) {
-        const u = new URL('https://image.pollinations.ai/prompt/' + encodeURIComponent(merged));
-        u.searchParams.set('model', 'flux');
-        u.searchParams.set('width', String(w));
-        u.searchParams.set('height', String(h));
-        u.searchParams.set('safe', 'true');
-        if (seed) u.searchParams.set('seed', String(seed));
-        try {
-          const res = await fetch(u.toString(), { cache: 'no-store', mode: 'cors' });
-          if (!res.ok) throw new Error('status ' + res.status);
-          const blob = await res.blob();
+    async function generateWithPollinations(prompt, {count,size,negative,seed}){
+      const [w,h]=size.split('x').map(Number);
+      const merged = negative?`${prompt}, negative prompt: ${negative}`:prompt;
+      const out=[];
+      for(let i=0;i<count;i++){
+        const u=new URL('https://image.pollinations.ai/prompt/'+encodeURIComponent(merged));
+        u.searchParams.set('model','flux'); u.searchParams.set('width',String(w)); u.searchParams.set('height',String(h)); u.searchParams.set('safe','true');
+        if(seed) u.searchParams.set('seed',String(seed));
+        try{
+          const res=await fetch(u.toString(),{cache:'no-store',mode:'cors'});
+          if(!res.ok) throw new Error('status '+res.status);
+          const blob=await res.blob();
           out.push(URL.createObjectURL(blob));
-        } catch (e) {
-          out.push(u.toString());
-        }
+        }catch(e){ out.push(u.toString()); }
       }
       return out;
     }
-    async function chooseProvider() { return generateWithPollinations; }
+    async function chooseProvider(){ return generateWithPollinations; }
 
-    async function onGenerate() {
-      const prompt = el.prompt.value.trim(); if (!prompt) { el.prompt.focus(); return; }
+    async function onGenerate(){
+      const prompt=el.prompt.value.trim(); if(!prompt){ el.prompt.focus(); return; }
       addHistoryItem(prompt);
-      const count = Math.max(1, Math.min(4, Number(el.count.value)||1));
-      const [w,h] = ratioToWH(el.ratio.value, el.longSide.value); const size = `${w}x${h}`;
-      const negative = el.negative.value.trim(); const seed = el.seed.value.trim(); const transparent = el.transparent.checked;
+      const count=Math.max(1, Math.min(4, Number(el.count.value)||1));
+      const [w,h]=ratioToWH(el.ratio.value, el.longSide.value); const size=`${w}x${h}`;
+      const negative=el.negative.value.trim(); const seed=el.seed.value.trim();
 
-      el.grid.innerHTML = '';
-      const items = Array.from({ length: count }, () => createCardSkeleton()); items.forEach(n => el.grid.appendChild(n));
-      el.downloadAll.disabled = true;
-      try {
-        const runner = await chooseProvider();
-        const urls = await runner(prompt, { count, size, transparent, negative, seed });
-        urls.forEach((url, i) => fillCard(items[i], url, i));
-        el.downloadAll.disabled = false;
-      } catch (err) {
+      el.grid.innerHTML=''; const nodes=Array.from({length:count},()=>createCardSkeleton()); nodes.forEach(n=>el.grid.appendChild(n));
+      el.downloadAll.disabled=true;
+      try{
+        const runner=await chooseProvider();
+        const urls=await runner(prompt,{count,size,negative,seed});
+        urls.forEach((u,i)=>fillCard(nodes[i],u,i));
+        el.downloadAll.disabled=false;
+      }catch(err){
         console.error(err);
-        el.grid.innerHTML = `<div class='text-red-300'>Erro: ${String(err.message||err)}</div>`;
+        el.grid.innerHTML = `<div class="text-red-300">Erro: ${String(err.message||err)}</div>`;
       }
     }
+    async function downloadAllVisible(){
+      const imgs=[...el.grid.querySelectorAll('img')].map(im=>im.src); if(!imgs.length) return;
+      for(let i=0;i<imgs.length;i++){ const a=document.createElement('a'); a.href=imgs[i]; a.download=`capyimg_${String(i+1).padStart(2,'0')}.png`; a.click(); await new Promise(r=>setTimeout(r,120)); }
+    }
 
-    // ====== Boot ======
-    document.addEventListener('DOMContentLoaded', () => {
-      renderSidebar();
-      setupApiKeyModal();
-      loadApiKey();
-      initSidebarToggle();
+    /* Boot */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      renderSidebar(); setupApiKeyModal(); initSidebarToggle();
+      renderHistory(); renderStyleChips();
 
       el.generate.addEventListener('click', onGenerate);
       el.downloadAll.addEventListener('click', downloadAllVisible);
-      el.clearHistory.addEventListener('click', () => { localStorage.removeItem(HIST_KEY); renderHistory(); });
+      el.clearHistory.addEventListener('click', ()=>{ localStorage.removeItem('capyimg_history'); renderHistory(); });
       el.ratio.addEventListener('change', updateSizeInfo);
       el.longSide.addEventListener('change', updateSizeInfo);
-
-      renderHistory();
-      renderStyleChips();
       updateSizeInfo();
     });
   </script>
