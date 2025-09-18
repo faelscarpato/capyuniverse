@@ -25,7 +25,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 
-  <!-- Redireciona mobile para a abertura (mantido) -->
   <script>
     const params = new URLSearchParams(location.search);
     if (window.innerWidth <= 768 && !params.get('from')) {
@@ -67,14 +66,12 @@
     .particle:nth-child(5){width:4px;height:4px;top:30%;left:50%;background:rgba(168,85,247,.6);animation:floatParticle 11s linear infinite -12s;}
     @keyframes floatParticle{0%{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh);opacity:0}}
 
-    /* Header fixo */
     .header{position:fixed;inset:0 0 auto;z-index:50;height:64px;display:flex;align-items:center}
     .nav-link{position:relative;padding:.5rem .75rem;color:#e5e7eb;transition:color .25s,transform .25s}
     .nav-link::after{content:'';position:absolute;width:0;height:2px;bottom:-4px;left:50%;transform:translateX(-50%);background:linear-gradient(to right,#a200ff,#fbbf24);transition:width .25s}
     .nav-link:hover{color:#fbbf24;transform:translateY(-2px)}
     .nav-link:hover::after,.nav-link.active::after{width:100%}
 
-    /* Carrossel */
     .carrossel-container{position:relative;max-width:100%;overflow:hidden;border-radius:1.25rem;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04)}
     .carrossel{position:relative;width:100%;transition:height .35s ease}
     .carrossel-slide{opacity:0;position:absolute;inset:0;width:100%;padding:1.25rem;pointer-events:none;transition:opacity .5s ease}
@@ -83,7 +80,6 @@
     .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.5);transition:all .2s;cursor:pointer}
     .dot.active{background:#f59e0b;transform:scale(1.2)}
 
-    /* Modal */
     .modal-hidden{opacity:0;pointer-events:none}
     .modal-visible{opacity:1}
     .modal-overlay-bg{transition:opacity .25s}
@@ -93,18 +89,60 @@
     .modal-visible .modal-overlay-bg{opacity:.75}
     .modal-visible .modal-content{opacity:1;transform:none}
 
-    /* Notifs */
     #notificationArea{position:fixed;top:1.25rem;right:1.25rem;z-index:60;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:24rem}
     .notification{padding:1rem;border-radius:.5rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);font-size:.875rem;display:flex;justify-content:space-between;align-items:center;transition:all .25s;opacity:0;transform:translateX(100%)}
     .notification.show{opacity:1;transform:translateX(0)}
     .notification-success{background:#10b981;color:#fff}.notification-error{background:#ef4444;color:#fff}.notification-info{background:#3b82f6;color:#fff}.notification-warning{background:#f59e0b;color:#111}
     .notification button{margin-left:.75rem;font-weight:700;font-size:1.125rem;background:none;border:none;color:inherit;cursor:pointer}
 
-    /* Mobile tweaks */
-    @media (max-width:768px){
-      .particles{display:none}
-    }
+    @media (max-width:768px){ .particles{display:none} }
     ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#1f2937}::-webkit-scrollbar-thumb{background:#a200ff;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#6b7280}
+
+/* === Hamburger animado (CapyUniverse) === */
+#hamburger-button .hamburger-icon{
+  position: relative;
+  width: 30px;             /* mesmo tamanho do snippet */
+  height: 22px;            /* altura suficiente p/ 3 barras */
+  transition: transform .5s ease-in-out;
+}
+
+#hamburger-button .hamburger-icon span{
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #e5e7eb;     /* linhas claras p/ dark UI */
+  border-radius: 5px;
+  transition: transform .5s ease-in-out, opacity .35s ease-in-out, top .5s ease-in-out, background .25s;
+  transform-origin: center;
+}
+
+/* posições das 3 barras */
+#hamburger-button .hamburger-icon span:nth-child(1){ top: 0; }
+#hamburger-button .hamburger-icon span:nth-child(2){ top: 9.5px; }
+#hamburger-button .hamburger-icon span:nth-child(3){ bottom: 0; }
+
+/* hover de leve */
+#hamburger-button:hover .hamburger-icon span{ background: #fff; }
+
+/* estado aberto (classe .open já é aplicada no seu JS) */
+#hamburger-button .hamburger-icon.open span:nth-child(1){
+  transform: translateY(9.5px) rotate(45deg);
+}
+#hamburger-button .hamburger-icon.open span:nth-child(2){
+  opacity: 0;
+  transform: scaleX(0);
+}
+#hamburger-button .hamburger-icon.open span:nth-child(3){
+  transform: translateY(-9.5px) rotate(-45deg);
+}
+
+/* acessibilidade: reduzir animação se o usuário preferir */
+@media (prefers-reduced-motion: reduce){
+  #hamburger-button .hamburger-icon span{
+    transition: none;
+  }
+}
   </style>
 
   <!-- gtag -->
@@ -131,10 +169,11 @@
       </a>
 
       <nav class="hidden md:flex items-center gap-6 lg:gap-8">
-        <a href="#contato" class="nav-link">Contato</a>
-        <a href="#seja-beta" class="nav-link">Seja Beta</a>
-        <a href="#quem-somos" class="nav-link">Quem Somos</a>
-        <a href="#faq" class="nav-link">FAQ</a>
+        <!-- atualizados para abrir modais -->
+        <a href="#" class="nav-link" data-open="contato">Contato</a>
+        <a href="#" class="nav-link" data-open="como">Como Funciona</a>
+        <a href="#" class="nav-link" data-open="quem">Quem Somos</a>
+        <a href="#" class="nav-link" data-open="faq">FAQ</a>
         <button id="openManageApiKeyModalButtonHeader" class="glass-card px-4 py-2 rounded-xl border border-cyan-400/30 text-cyan-300 hover:border-cyan-400/60 hover-lift">Chaves API</button>
       </nav>
 
@@ -150,10 +189,10 @@
     <!-- MENU MOBILE -->
     <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 shadow-2xl p-6 pt-20 md:hidden translate-x-full">
       <nav class="flex flex-col space-y-6 text-xl">
-        <a href="#contato" class="nav-link py-2" onclick="closeMobileMenu()">Contato</a>
-        <a href="#seja-beta" class="nav-link py-2" onclick="closeMobileMenu()">Seja Beta</a>
-        <a href="#quem-somos" class="nav-link py-2" onclick="closeMobileMenu()">Quem Somos</a>
-        <a href="#faq" class="nav-link py-2" onclick="closeMobileMenu()">FAQ</a>
+        <a href="#" class="nav-link py-2" data-open="contato" onclick="closeMobileMenu()">Contato</a>
+        <a href="#" class="nav-link py-2" data-open="como" onclick="closeMobileMenu()">Como Funciona</a>
+        <a href="#" class="nav-link py-2" data-open="quem" onclick="closeMobileMenu()">Quem Somos</a>
+        <a href="#" class="nav-link py-2" data-open="faq" onclick="closeMobileMenu()">FAQ</a>
         <button id="openManageApiKeyModalButtonMobile" class="glass-card px-4 py-3 rounded-xl text-left border border-cyan-400/30 text-cyan-300">🔑 Chaves API</button>
       </nav>
     </div>
@@ -304,7 +343,6 @@
     <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 min-h-[200px]">
       <div class="col-span-full text-center text-slate-400">A carregar ferramentas...</div>
     </div>
-    <div id="no-tools-message" class="hidden text-center text-slate-400 mt-6">Nenhuma ferramenta encontrada com os critérios selecionados.</div>
   </section>
 
   <!-- Footer -->
@@ -333,6 +371,119 @@
 
   <!-- FAB Chaves API (MOBILE) -->
   <button id="fabApi" class="md:hidden fixed bottom-4 right-4 premium-gradient text-white font-semibold rounded-full p-4 shadow-2xl z-50" aria-label="Chaves API">🔑</button>
+
+  <!-- ============ MODAIS NOVOS ============ -->
+  <!-- CONTATO -->
+  <div id="modalContato" class="fixed inset-0 flex items-center justify-center z-[51] p-4 modal-hidden">
+    <div class="absolute inset-0 bg-black modal-overlay-bg opacity-75"></div>
+    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-200" data-close="modalContato" aria-label="Fechar">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 class="text-2xl md:text-3xl font-bold text-sky-400 mb-2">Contato</h2>
+      <p class="text-slate-300 mb-4">Minhas informações públicas do GitHub.</p>
+      <div id="ghCard" class="p-4 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-300">Carregando perfil…</div>
+      <p class="text-xs text-slate-500 mt-3">Dica: dados públicos via API do GitHub. Nada é salvo pelo CapyUniverse.</p>
+    </div>
+  </div>
+
+  <!-- COMO FUNCIONA -->
+  <div id="modalComo" class="fixed inset-0 flex items-center justify-center z-[51] p-4 modal-hidden">
+    <div class="absolute inset-0 bg-black modal-overlay-bg opacity-75"></div>
+    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-200" data-close="modalComo" aria-label="Fechar">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-4">Como funciona</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 class="font-semibold text-sky-300">1) Processamento no navegador</h3>
+          <p class="text-sm text-slate-300 mt-1">Sempre que possível, as ferramentas rodam 100% <strong>client-side</strong> (PDF, imagens, áudio, planilhas). Nada sai do seu dispositivo.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 class="font-semibold text-sky-300">2) IA opcional com API gratuita</h3>
+          <p class="text-sm text-slate-300 mt-1">Recurso de IA usa <strong>Google AI Studio (Gemini)</strong>. Você insere sua <em>chave gratuita</em> no modal “Chaves API”. A chamada vai <strong>direto do seu navegador</strong> para o Google.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10 md:col-span-2">
+          <h3 class="font-semibold text-sky-300">3) Privacidade por padrão</h3>
+          <ul class="list-disc pl-6 text-sm text-slate-300 space-y-1 mt-1">
+            <li><strong>Zero coleta de dados</strong> pelo CapyUniverse.</li>
+            <li><strong>Sem logs de conteúdo</strong> dos seus arquivos.</li>
+            <li>IA é sempre <strong>opt-in</strong> e explícita.</li>
+          </ul>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10 md:col-span-2">
+          <h3 class="font-semibold text-sky-300">4) Uso livre</h3>
+          <p class="text-sm text-slate-300 mt-1">Ferramentas gratuitas para uso pessoal/estudo. Para IA, valem as quotas do seu Google AI Studio.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUEM SOMOS -->
+  <div id="modalQuem" class="fixed inset-0 flex items-center justify-center z-[51] p-4 modal-hidden">
+    <div class="absolute inset-0 bg-black modal-overlay-bg opacity-75"></div>
+    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-200" data-close="modalQuem" aria-label="Fechar">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 class="text-2xl md:text-3xl font-bold text-purple-400 mb-4">Quem somos</h2>
+      <div class="space-y-4">
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 class="font-semibold text-sky-300">O que é o CapyUniverse?</h3>
+          <p class="text-sm text-slate-300 mt-1">Ecossistema de ferramentas web rápidas, bonitas e <strong>privativas</strong>, rodando no seu navegador. Resolve tarefas do dia a dia (documentos, mídia, dados, dev) sem expor seus dados.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 class="font-semibold text-sky-300">O que são as ferramentas?</h3>
+          <p class="text-sm text-slate-300 mt-1">Cada ferramenta é um módulo (.html) com cabeçalho + grid unificados. Exemplos: PDF, conversor de imagens, copy, apresentações, análise de dados e muito mais.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 class="font-semibold text-sky-300">Benefícios</h3>
+          <ul class="list-disc pl-6 text-sm text-slate-300 space-y-1 mt-1">
+            <li><strong>Privacidade total</strong> (preferência por processamento local).</li>
+            <li><strong>Velocidade</strong> (sem uploads grandes).</li>
+            <li><strong>Design consistente</strong> e produtivo.</li>
+            <li><strong>Modular</strong> (adicionar/remover sem quebrar).</li>
+            <li><strong>IA opcional</strong> via Gemini.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div id="modalFaq" class="fixed inset-0 flex items-center justify-center z-[51] p-4 modal-hidden">
+    <div class="absolute inset-0 bg-black modal-overlay-bg opacity-75"></div>
+    <div class="modal-content bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
+      <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-200" data-close="modalFaq" aria-label="Fechar">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <h2 class="text-2xl md:text-3xl font-bold text-amber-300 mb-4">FAQ</h2>
+      <div class="space-y-3">
+        <details class="p-3 rounded-lg bg-white/5 border border-white/10">
+          <summary class="cursor-pointer font-semibold text-sm">O CapyUniverse guarda meus arquivos?</summary>
+          <p class="text-sm text-slate-300 mt-1">Não. As ferramentas priorizam processamento <strong>local</strong> no navegador. Nada é enviado a servidores do CapyUniverse.</p>
+        </details>
+        <details class="p-3 rounded-lg bg-white/5 border border-white/10">
+          <summary class="cursor-pointer font-semibold text-sm">Como funciona a IA (Gemini)?</summary>
+          <p class="text-sm text-slate-300 mt-1">Você usa sua <strong>chave do Google AI Studio</strong> no modal “Chaves API”. As requisições vão direto do seu navegador para o Google; o CapyUniverse não intercepta nem armazena as chaves.</p>
+        </details>
+        <details class="p-3 rounded-lg bg-white/5 border border-white/10">
+          <summary class="cursor-pointer font-semibold text-sm">Tem custo?</summary>
+          <p class="text-sm text-slate-300 mt-1">Uso local é gratuito. Para IA, valem as quotas/limites da sua conta do Google AI Studio (há camada gratuita).</p>
+        </details>
+        <details class="p-3 rounded-lg bg-white/5 border border-white/10">
+          <summary class="cursor-pointer font-semibold text-sm">Quais navegadores são compatíveis?</summary>
+          <p class="text-sm text-slate-300 mt-1">Chrome/Chromium, Edge, Brave e Firefox modernos. Safari recente também funciona; alguns formatos (ex.: AVIF) dependem do suporte do navegador.</p>
+        </details>
+        <details class="p-3 rounded-lg bg-white/5 border border-white/10">
+          <summary class="cursor-pointer font-semibold text-sm">Meus dados treinam modelos?</summary>
+          <p class="text-sm text-slate-300 mt-1">Não pelo CapyUniverse. Sobre o provedor (Google), siga as políticas do Google AI Studio. O CapyUniverse não armazena seu conteúdo.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+  <!-- ============ FIM MODAIS ============ -->
 
   <!-- MODAL Tool -->
   <div id="toolModal" class="fixed inset-0 flex items-center justify-center z-50 p-4 modal-hidden">
@@ -465,9 +616,9 @@
     function displayTools(list){
       toolsGrid.innerHTML = '';
       if(!list.length){
-        noToolsMessage.classList.remove('hidden');
+        noToolsMessage?.classList.remove('hidden');
       }else{
-        noToolsMessage.classList.add('hidden');
+        noToolsMessage?.classList.add('hidden');
         list.forEach((t,i)=>toolsGrid.appendChild(createToolCard(t,i)));
       }
     }
@@ -613,7 +764,100 @@
     manageApiKeysModal.querySelector('.modal-content').addEventListener('click', e=>e.stopPropagation());
     saveApiKeyButtonModal.addEventListener('click', saveApiKeyFromModal);
 
-    window.addEventListener('keydown', (e)=>{ if (e.key==='Escape'){ if (toolModal.classList.contains('modal-visible')) closeToolModal(); if (manageApiKeysModal.classList.contains('modal-visible')) closeManageApiModal(); }});
+    window.addEventListener('keydown', (e)=>{ if (e.key==='Escape'){
+      if (toolModal.classList.contains('modal-visible')) closeToolModal();
+      if (manageApiKeysModal.classList.contains('modal-visible')) closeManageApiModal();
+      // fecha qualquer um dos novos modais
+      ['modalContato','modalComo','modalQuem','modalFaq'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el && el.classList.contains('modal-visible')) el.classList.add('modal-hidden'), el.classList.remove('modal-visible');
+      });
+      document.body.style.overflow='';
+    }});
+
+    // --- Abrir/fechar NOVOS modais via data-open / data-close ---
+    function openInfoModal(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.remove('modal-hidden'); el.classList.add('modal-visible');
+      document.body.style.overflow='hidden';
+      if(id==='modalContato') loadGitHubCard(); // puxa dados do GitHub on-demand
+    }
+    function closeInfoModal(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.add('modal-hidden'); el.classList.remove('modal-visible');
+      document.body.style.overflow='';
+    }
+
+    const mapOpen = { contato:'modalContato', como:'modalComo', quem:'modalQuem', faq:'modalFaq' };
+    document.querySelectorAll('[data-open]').forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        const key = el.getAttribute('data-open');
+        const id = mapOpen[key];
+        if(id){ e.preventDefault(); openInfoModal(id); }
+      });
+    });
+    document.querySelectorAll('[data-close]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const id = el.getAttribute('data-close');
+        closeInfoModal(id);
+      });
+    });
+    // fecha clicando no overlay dos modais novos
+    ['modalContato','modalComo','modalQuem','modalFaq'].forEach(id=>{
+      const modal = document.getElementById(id);
+      modal?.querySelector('.modal-overlay-bg')?.addEventListener('click', ()=>closeInfoModal(id));
+      modal?.querySelector('.modal-content')?.addEventListener('click', e=>e.stopPropagation());
+    });
+
+    // --- GitHub Card (Contato) ---
+    const GITHUB_USER = 'faelscarpato'; // troque se necessário
+    async function loadGitHubCard(){
+      const box = document.getElementById('ghCard');
+      if(!box) return;
+      box.innerHTML = `<div class="text-slate-300 text-sm">Carregando perfil de <span class="font-mono">${GITHUB_USER}</span>…</div>`;
+      try{
+        const r = await fetch(`https://api.github.com/users/${GITHUB_USER}`);
+        if(!r.ok) throw new Error('Usuário não encontrado ou limite da API atingido');
+        const u = await r.json();
+        const name = u.name || u.login;
+        const bio = u.bio ? `<p class="text-sm text-slate-300 mt-2">${u.bio}</p>` : '';
+        const loc = u.location ? `<span class="px-2 py-1 text-xs rounded-md glass-card border border-white/10"><i class="inline-block w-4 text-center mr-1">📍</i>${u.location}</span>` : '';
+        const blog = u.blog ? `<a class="px-2 py-1 text-xs rounded-md glass-card border border-white/10 underline decoration-dotted" href="${u.blog}" target="_blank" rel="noopener">🌐 Site</a>` : '';
+        const mail = u.email ? `<a class="px-2 py-1 text-xs rounded-md glass-card border border-white/10 underline decoration-dotted" href="mailto:${u.email}">✉️ ${u.email}</a>` : '';
+        const twitter = u.twitter_username ? `<a class="px-2 py-1 text-xs rounded-md glass-card border border-white/10 underline decoration-dotted" href="https://twitter.com/${u.twitter_username}" target="_blank" rel="noopener">𝕏 @${u.twitter_username}</a>` : '';
+        const stats = `
+          <div class="flex flex-wrap gap-2 text-xs mt-3">
+            <span class="px-2 py-1 rounded-md glass-card border border-white/10">Repos: ${u.public_repos}</span>
+            <span class="px-2 py-1 rounded-md glass-card border border-white/10">Seguidores: ${u.followers}</span>
+            <span class="px-2 py-1 rounded-md glass-card border border-white/10">Seguindo: ${u.following}</span>
+          </div>
+        `;
+        box.innerHTML = `
+          <div class="flex gap-4 items-start">
+            <img src="${u.avatar_url}" alt="${name}" class="w-20 h-20 rounded-2xl border border-white/10 object-cover">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-xl font-bold">${name}</h3>
+                <span class="text-slate-400">@${u.login}</span>
+              </div>
+              ${bio}
+              <div class="flex flex-wrap gap-2 mt-3">
+                ${loc||''}
+                <a class="px-2 py-1 text-xs rounded-md glass-card border border-white/10 underline decoration-dotted" href="${u.html_url}" target="_blank" rel="noopener">🐙 GitHub</a>
+                ${blog||''}
+                ${mail||''}
+                ${twitter||''}
+              </div>
+              ${stats}
+            </div>
+          </div>
+        `;
+      }catch(e){
+        box.innerHTML = `<div class="text-sm text-rose-300">Não foi possível carregar o GitHub. Verifique o usuário <span class="font-mono">${GITHUB_USER}</span> ou tente mais tarde.</div>`;
+      }
+    }
 
     // --- Init ---
     document.getElementById('current-year').textContent = new Date().getFullYear();
