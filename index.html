@@ -866,6 +866,10 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').catch(console.error);
     }
+
+      // redireciona se for mobile (evita index.html)
+       if (/Mobi|Android|iPad|Tablet/i.test(navigator.userAgent)) location.href = 'index-mobile.html';
+    
   </script>
 </body>
 </html>
