@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>CapyUniverse — Mobile</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+  <style>
+    :root{ --bg:#0b0f14; --text:#e6edf3; --glass:rgba(255,255,255,.06); --glass-b:rgba(255,255,255,.12) }
+    html,body{background:#0b0f14}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;color:var(--text)}
+    .font-syne{font-family:'Syne',sans-serif}
+    .glass{background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--glass-b)}
+    .header{background:#0b0b10cc;backdrop-filter:blur(10px);border-bottom:1px solid #1f2937}
+    .tabbar{backdrop-filter:blur(10px);background:#0b0b10cc;border-top:1px solid #1f2937}
+    .tab-btn[aria-current="true"]{color:#a78bfa}
+    .safebottom{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+    .safeinset{padding-bottom:env(safe-area-inset-bottom)}
+    .api-dot{width:10px;height:10px;border-radius:999px}
+    .api-ok{background:#22c55e}.api-warn{background:#f59e0b}
+.scrollbar-thin::-webkit-scrollbar{height:6px;width:6px}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:#303441;border-radius:999px}
+    
+    /* ===== Card quadrado (fixo) ===== */
+.tool-card{
+  position: relative; display:flex; flex-direction:column;
+  width:100%; aspect-ratio:1/1; border:1px solid #27272a; overflow:hidden;
+  border-radius: 16px; background:#0b0f14;}
+.tool-img{flex:1; width:100%; height:100%; object-fit:cover}
+    .tool-info{padding:8px; background:rgba(0,0,0,.35)}
+.tool-title{
+  font-size:13px; font-weight:800; line-height:1.15;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  color:#fff; margin-bottom:6px; min-height:32px;}
+    .tool-actions{display:flex; gap:6px}
+.tool-actions a{font-size:12px}
+.tool-badge{font-size:10px; color:#cbd5e1; margin-bottom:6px}
+    .tool-overlay{
+  position:absolute; left:0; right:0; bottom:0; padding:10px;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(10,10,12,.85) 38%, rgba(10,10,12,.95) 100%);
+}
+
+    /* ===== Carrossel ===== */
+.carousel{position:relative; padding:6px 0}
+  .carousel-track{
+  display:flex; gap:10px; overflow-x:auto; scroll-behavior:smooth; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; padding:2px 6px 10px;
+  scrollbar-width:none; -ms-overflow-style:none;
+  touch-action: pan-y; /* <= importante */
+}
+.carousel-track::-webkit-scrollbar{display:none}
+
+/* fades nas bordas para indicar conteúdo extra */
+.carousel::before,.carousel::after{
+  content:""; position:absolute; top:0; bottom:0; width:28px; z-index:10; pointer-events:none;
+}
+.carousel::before{left:0; background:linear-gradient(90deg,#0b0f14,transparent)}
+.carousel::after{right:0; background:linear-gradient(270deg,#0b0f14,transparent)}
+
+
+    .carousel-item{scroll-snap-align:start; flex:0 0 auto}
+   /* botões flutuantes */
+.carousel-btn{
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:#0b0b10e6; border:1px solid #1f2937; width:36px; height:36px;
+  border-radius:12px; display:grid; place-items:center; z-index:10; color:#e5e7eb;
+  box-shadow:0 4px 18px rgba(0,0,0,.35);
+}
+.carousel-btn:hover{background:#11111ae6}
+
+  .carousel-btn[disabled]{opacity:.35}
+.btn-prev{left:-6px} .btn-next{right:-6px}
+
+
+    /* Chips menores abaixo do search */
+    .chip{font-size:11px;
+        margin-bottom: 4px;
+     scrollbar-width:none; -ms-overflow-style:none;}
+
+    
+
+    /* Grids */
+    .grid-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.grid-cards-2{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
+
+    /* Categoria card (mantém seu layout) */
+    .cat-card{padding:18px 10px}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="header fixed top-0 inset-x-0 z-40">
+    <div class="px-4 py-3 flex items-center gap-3">
+      <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" alt="Capy" class="w-7 h-7 rounded-md">
+      <h1 class="font-syne text-lg tracking-tight">CapyUniverse</h1>
+      <span class="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-purple-600/20 border border-purple-500/30">Mobile</span>
+      <div class="ml-auto flex items-center gap-3">
+        <button id="btnFavHeader" class="text-zinc-300 hover:text-white text-xl" title="Favoritos">⭐</button>
+        <div id="apiDot" class="api-dot api-warn" title="API Gemini não definida"></div>
+        <button id="btnConfig" class="text-zinc-300 hover:text-white text-xl" aria-label="Configurações">⚙️</button>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="px-4 pb-3">
+      <label class="relative block">
+        <input id="searchInput" class="w-full rounded-xl bg-zinc-900/70 border border-zinc-700 py-3 pl-10 pr-10 text-[15px] placeholder:text-zinc-400 outline-none focus:ring-2 focus:ring-purple-600" placeholder="Pesquisar capys, categorias…">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <button id="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hidden">limpar</button>
+      </label>
+
+      <!-- Chips menores -->
+      <div id="searchChips" class="mt-2 flex gap-2 overflow-x-auto scrollbar-thin"></div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main id="main" class="pt-[250px] pb-24 safebottom space-y-6">
+    <!-- PARA VOCÊ (carrossel 3 por vez) -->
+    <section class="px-4" id="secForYou">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-syne text-[18px]">Para você</h2>
+      </div>
+      <div class="carousel" data-name="forYou">
+        <button class="carousel-btn btn-prev" aria-label="voltar">◀</button>
+        <div id="forYouTrack" class="carousel-track"></div>
+        <button class="carousel-btn btn-next" aria-label="avançar">▶</button>
+      </div>
+    </section>
+
+    <!-- EM ALTA (carrossel 3 por vez) -->
+    <section class="px-4" id="secHot">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-syne text-[18px]">Em alta</h2>
+        <button id="btnShuffle" class="text-xs text-zinc-400">atualizar</button>
+      </div>
+      <div class="carousel" data-name="hot">
+        <button class="carousel-btn btn-prev" aria-label="voltar">◀</button>
+        <div id="hotTrack" class="carousel-track"></div>
+        <button class="carousel-btn btn-next" aria-label="avançar">▶</button>
+      </div>
+    </section>
+
+    <!-- CATEGORIAS (lista principal) -->
+    <section class="px-4" id="secCategories">
+      <h2 class="font-syne text-[18px] mb-2">Categorias</h2>
+      <div id="catGrid" class="grid grid-cols-3 gap-2"></div>
+    </section>
+
+    <!-- VIEW DE CATEGORIA (apenas a escolhida) -->
+    <section class="px-4 hidden" id="secCategoryView">
+      <div class="flex items-center gap-2 mb-2">
+        <button id="btnBackCats" class="px-3 py-2 rounded-lg bg-zinc-800">← Voltar</button>
+        <h2 id="catTitle" class="font-syne text-[18px] ml-1"></h2>
+      </div>
+      <div id="catToolsGrid" class="grid-cards-2"></div>
+    </section>
+
+    <!-- RESULTADOS PESQUISA -->
+    <section class="px-4 hidden" id="searchResults">
+      <h2 class="font-syne text-[18px] mb-2">Resultados</h2>
+      <div id="searchGrid" class="grid-cards-2"></div>
+    </section>
+
+    <!-- FAVORITOS -->
+    <section class="px-4 hidden" id="favoritesSec">
+      <div class="flex items-center gap-2 mb-2">
+        <button id="btnCloseFav" class="px-3 py-2 rounded-lg bg-zinc-800">Fechar</button>
+        <h2 class="font-syne text-[18px] ml-1">Favoritos ⭐</h2>
+      </div>
+      <div id="favGrid" class="grid-cards-2"></div>
+    </section>
+  </main>
+
+  <!-- TAB BAR (básico) -->
+  <nav class="tabbar fixed bottom-0 inset-x-0 z-40 safeinset">
+    <div class="grid grid-cols-3 text-[12px] text-zinc-400">
+      <button class="tab-btn py-3 flex flex-col items-center gap-1" data-tab="home" aria-current="true">🏠<span>Início</span></button>
+      <button class="tab-btn py-3 flex flex-col items-center gap-1" data-tab="cats">🗂️<span>Categorias</span></button>
+      <button class="tab-btn py-3 flex flex-col items-center gap-1" data-tab="search">🔎<span>Pesquisa</span></button>
+    </div>
+  </nav>
+
+  <!-- MODAL CONFIG (simples) -->
+  <div id="cfgModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-6">
+    <div class="absolute inset-0 bg-black/70" data-close></div>
+    <div class="glass w-full sm:w-[460px] sm:rounded-2xl bg-zinc-900/70 border-zinc-800 rounded-t-2xl">
+      <div class="p-4 border-b border-zinc-800 flex items-center justify-between">
+        <h3 class="font-syne text-[18px]">Configurações</h3>
+        <button data-close class="text-zinc-400 text-2xl leading-none">&times;</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <label class="block text-[12px] text-zinc-400">Google Gemini API Key (global)</label>
+        <div class="flex">
+          <input id="inpApi" type="password" class="flex-1 rounded-l-lg bg-zinc-900/70 border border-zinc-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-600" placeholder="cole sua API key">
+          <button id="btnSaveApi" class="px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-r-lg text-sm">Salvar</button>
+        </div>
+      </div>
+      <div class="p-4 border-t border-zinc-800 text-right">
+        <button data-close class="px-4 py-2 text-sm bg-zinc-800 rounded-lg">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ========= Estado ========= */
+    const LS = { api:'capyUniverseApiKey_gemini', fav:'capy_favorites_v1', usage:'capy_usage_counts_v1' };
+    let TOOLS = [];
+    let FAVORITES = new Set(JSON.parse(localStorage.getItem(LS.fav) || '[]'));
+    let USAGE = JSON.parse(localStorage.getItem(LS.usage) || '{}');
+
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+    const setApiDot = ()=>{ const dot=$('#apiDot'); dot.classList.remove('api-ok','api-warn'); dot.classList.add(localStorage.getItem(LS.api)?'api-ok':'api-warn'); };
+
+    /* ========= Ícones de categorias ========= */
+    const CAT_ICONS = {
+      'Jurídico':'⚖️','Documentos e PDFs':'📄','Análise de Dados':'📊','Chatbots Especializados':'🤖',
+      'Mídia & Marketing':'📣','Carreira e RH':'🧑‍💼','Aprendizagem e Educação':'🎓','Produtividade e Organização':'🗂️',
+      'Análise e Compreensão':'🔎','Diagnóstico e Suporte Avançado':'🛠️','Saúde e Bem-Estar':'💊','Desenvolvimento e TI':'💻'
+    };
+
+ function toolCard(t){
+  const fav = FAVORITES.has(t.id);
+  return `
+    <article class="tool-card glass">
+      <img class="tool-img" src="${t.imageUrl||''}" alt="">
+      <div class="tool-overlay">
+        <div class="tool-badge">${t.category||'Geral'}</div>
+        <h3 class="tool-title">${t.title}</h3>
+        <div class="tool-actions">
+          <a data-open="${t.id}" href="${t.pageUrl}"
+             class="flex-1 text-center py-1.5 bg-purple-600 hover:bg-purple-700 rounded-lg">Abrir</a>
+          <button data-like="${t.id}" class="px-2.5 py-1.5 bg-zinc-800 rounded-lg text-[15px]">
+            ${fav ? '⭐' : '☆'}
+          </button>
+        </div>
+      </div>
+    </article>`;
+}
+const compactCard = toolCard; // mantém o mesmo visual nos grids
+
+    /* ========= Carrossel (3 por vez + swipe) ========= */
+  function makeCarousel(trackEl){
+  const wrapper = trackEl.parentElement;
+  const prev = wrapper.querySelector('.btn-prev');
+  const next = wrapper.querySelector('.btn-next');
+
+  // 3 cards visíveis – calcula largura
+  function resize(){
+    const gap = 10, visible = 3;
+    const cardW = Math.floor((trackEl.clientWidth - gap*(visible-1)) / visible);
+    [...trackEl.children].forEach(ch => ch.style.width = cardW + 'px');
+  }
+  const ro = new ResizeObserver(resize); ro.observe(trackEl);
+
+  function updateBtns(){
+    const max = trackEl.scrollWidth - trackEl.clientWidth - 2;
+    prev.disabled = trackEl.scrollLeft <= 4;
+    next.disabled = trackEl.scrollLeft >= max;
+  }
+  function step(dir){
+    const card = trackEl.querySelector('.carousel-item');
+    const delta = card ? (card.getBoundingClientRect().width + 10) * 3 : trackEl.clientWidth;
+    trackEl.scrollBy({ left: dir*delta, behavior: 'smooth' });
+  }
+  prev.onclick = ()=> step(-1);
+  next.onclick = ()=> step(+1);
+  trackEl.addEventListener('scroll', updateBtns);
+
+  // ===== gesto com limiar (não engole cliques) =====
+  let dragging = false, down = false, startX = 0, startLeft = 0, pid = null;
+  const THRESH = 6; // px para virar arraste
+
+  trackEl.addEventListener('pointerdown', e=>{
+    down = true; dragging = false; startX = e.clientX; startLeft = trackEl.scrollLeft; pid = e.pointerId;
+  });
+  trackEl.addEventListener('pointermove', e=>{
+    if(!down) return;
+    const dx = e.clientX - startX;
+    if(!dragging && Math.abs(dx) > THRESH){
+      dragging = true;
+      try{ trackEl.setPointerCapture(pid); }catch(_){}
+    }
+    if(dragging){
+      trackEl.scrollLeft = startLeft - dx;
+    }
+  });
+  function endDrag(){
+    if(pid!=null){ try{ trackEl.releasePointerCapture(pid); }catch(_){ } }
+    down = false; pid = null;
+    // espera próximo frame para estados de botão
+    requestAnimationFrame(updateBtns);
+  }
+  trackEl.addEventListener('pointerup', endDrag);
+  trackEl.addEventListener('pointercancel', endDrag);
+
+  // Cancela cliques em filhos se houve drag
+  trackEl.addEventListener('click', e=>{
+    if(dragging){
+      e.preventDefault();
+      e.stopPropagation();
+      dragging = false; // reseta para próximos cliques funcionarem
+    }
+  }, true);
+
+  // primeira atualização
+  setTimeout(()=>{ resize(); updateBtns(); }, 0);
+}
+
+
+    function mountCarousel(trackId, items){
+  const track = document.getElementById(trackId);
+  track.innerHTML = items.map(t=>`<div class="carousel-item">${toolCard(t)}</div>`).join('');
+  makeCarousel(track);
+}
+
+
+    /* ========= Render ========= */
+    function renderHome(){
+      const byUse = [...TOOLS].sort((a,b)=>(USAGE[b.id]||0)-(USAGE[a.id]||0));
+      mountCarousel('forYouTrack', (byUse.length?byUse:TOOLS).slice(0,12));
+      mountCarousel('hotTrack', [...TOOLS].sort(()=>Math.random()-0.5).slice(0,12));
+    }
+
+    function renderFavorites(){
+      const fav = TOOLS.filter(t=>FAVORITES.has(t.id));
+      $('#favGrid').innerHTML = fav.length? fav.map(compactCard).join('') : `<p class="text-sm text-zinc-400">Sem favoritos ainda.</p>`;
+    }
+
+    function renderChips(byCat){
+      $('#searchChips').innerHTML = Object.entries(byCat)
+        .map(([c,arr])=>`<button class="chip px-2.5 py-1.5 rounded-lg bg-zinc-900/70 border border-zinc-700" data-cat="${c}">${CAT_ICONS[c]||'🔹'} ${c} <span class="text-zinc-500">(${arr.length})</span></button>`).join('');
+    }
+
+    function renderCategories(byCat){
+      $('#catGrid').innerHTML = Object.keys(byCat).sort().map(c=>`
+        <button data-cat="${c}" class="glass rounded-xl border border-zinc-800 cat-card flex flex-col items-center gap-2">
+          <span class="text-2xl">${CAT_ICONS[c]||'🔹'}</span>
+          <span class="text-[13px] text-center">${c}</span>
+        </button>`).join('');
+    }
+
+    function openCategoryView(cat, items){
+      $('#secCategories').classList.add('hidden');
+      $('#secForYou').classList.add('hidden');
+      $('#secHot').classList.add('hidden');
+      $('#searchResults').classList.add('hidden');
+      $('#favoritesSec').classList.add('hidden');
+      $('#secCategoryView').classList.remove('hidden');
+      $('#catTitle').textContent = `${CAT_ICONS[cat]||'🔹'} ${cat}`;
+      $('#catToolsGrid').innerHTML = items.map(compactCard).join('');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function backToCategories(){
+      $('#secCategoryView').classList.add('hidden');
+      $('#favoritesSec').classList.add('hidden');
+      $('#searchResults').classList.add('hidden');
+      $('#secCategories').classList.remove('hidden');
+      $('#secForYou').classList.remove('hidden');
+      $('#secHot').classList.remove('hidden');
+    }
+
+    function renderSearch(list){
+      $('#searchGrid').innerHTML = list.map(compactCard).join('');
+      $('#searchResults').classList.toggle('hidden', list.length===0);
+      $('#secCategories').classList.add('hidden');
+      $('#secForYou').classList.add('hidden');
+      $('#secHot').classList.add('hidden');
+      $('#secCategoryView').classList.add('hidden');
+      $('#favoritesSec').classList.add('hidden');
+    }
+
+    /* ========= Interações ========= */
+    function attachEvents(byCat){
+      document.body.addEventListener('click',(ev)=>{
+        const like = ev.target.closest('[data-like]');
+        if(like){
+          const id = like.getAttribute('data-like');
+          if(FAVORITES.has(id)) FAVORITES.delete(id); else FAVORITES.add(id);
+          localStorage.setItem(LS.fav, JSON.stringify([...FAVORITES]));
+          renderFavorites();
+          return;
+        }
+        const open = ev.target.closest('[data-open]');
+        if(open){
+          const id = open.getAttribute('data-open');
+          USAGE[id] = (USAGE[id]||0)+1; localStorage.setItem(LS.usage, JSON.stringify(USAGE));
+          return; // segue o link
+        }
+        const catBtn = ev.target.closest('[data-cat]');
+        if(catBtn){
+          const cat = catBtn.getAttribute('data-cat');
+          openCategoryView(cat, byCat[cat]||[]);
+          return;
+        }
+        if(ev.target.id==='btnBackCats'){ backToCategories(); return; }
+        if(ev.target.id==='btnFavHeader'){ // abrir favoritos
+          renderFavorites();
+          $('#favoritesSec').classList.remove('hidden');
+          $('#secCategories').classList.add('hidden');
+          $('#secForYou').classList.add('hidden');
+          $('#secHot').classList.add('hidden');
+          $('#searchResults').classList.add('hidden');
+          $('#secCategoryView').classList.add('hidden');
+          window.scrollTo({top:0,behavior:'smooth'});
+        }
+        if(ev.target.id==='btnCloseFav'){ backToCategories(); }
+        if(ev.target.dataset.close!==undefined){ $('#cfgModal').classList.add('hidden'); }
+      });
+
+      // busca
+      const search=$('#searchInput'), clearBtn=$('#clearSearch');
+      const doSearch=()=>{
+        const q = search.value.trim().toLowerCase();
+        clearBtn.classList.toggle('hidden', q.length===0);
+        if(!q){ backToCategories(); $('#searchResults').classList.add('hidden'); return; }
+        const list = TOOLS.filter(t =>
+          (t.title||'').toLowerCase().includes(q) ||
+          (t.description||'').toLowerCase().includes(q) ||
+          (t.category||'').toLowerCase().includes(q)
+        );
+        renderSearch(list);
+      };
+      search.addEventListener('input',doSearch);
+      clearBtn.addEventListener('click',()=>{ search.value=''; doSearch(); });
+
+      // tabs
+      $$('.tab-btn').forEach(b=> b.addEventListener('click',()=>{
+        $$('.tab-btn').forEach(x=>x.setAttribute('aria-current','false'));
+        b.setAttribute('aria-current','true');
+        const tab=b.dataset.tab;
+        if(tab==='home'){ backToCategories(); $('#searchResults').classList.add('hidden'); window.scrollTo({top:0,behavior:'smooth'}); }
+        if(tab==='cats'){ backToCategories(); window.scrollTo({top:0,behavior:'smooth'}); }
+        if(tab==='search'){ $('#searchInput').focus(); }
+      }));
+
+      // config
+      $('#btnConfig').addEventListener('click', ()=>{ $('#cfgModal').classList.remove('hidden'); $('#cfgModal').classList.add('flex'); });
+      $('#btnSaveApi').addEventListener('click', ()=>{
+        const v = $('#inpApi').value.trim(); if(v){ localStorage.setItem(LS.api, v); setApiDot(); }
+        $('#cfgModal').classList.add('hidden');
+      });
+
+      // refresh em alta
+      $('#btnShuffle').addEventListener('click', renderHome);
+    }
+
+    /* ========= Boot ========= */
+    async function boot(){
+      setApiDot();
+      let byCat = {};
+      try{
+        const res = await fetch('tools.json',{cache:'no-cache'});
+        TOOLS = await res.json();
+      }catch(e){ TOOLS=[]; }
+      TOOLS.forEach(t => { (byCat[t.category] = byCat[t.category] || []).push(t) });
+
+      renderChips(byCat);
+      renderCategories(byCat);
+      renderHome();
+      attachEvents(byCat);
+    }
+    boot();
+
+    // redireciona se for mobile (evita index.html)
+       if (/Mobi|Android|iPad|Tablet/i.test(navigator.userAgent)) location.href = 'index-mobile.html';
+    
+  </script>
+</body>
+</html>
