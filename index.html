@@ -867,9 +867,22 @@
       navigator.serviceWorker.register('service-worker.js').catch(console.error);
     }
 
-      // redireciona se for mobile (evita index.html)
-       if (/Mobi|Android|iPad|Tablet/i.test(navigator.userAgent)) location.href = 'index-mobile.html';
-    
+      
   </script>
+<script>
+(function () {
+  const isMobileUA = /Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent);
+  const onMobilePage = /index-mobile\.html$/i.test(location.pathname);
+  const already = sessionStorage.getItem('capy_mobile_redirect') === '1';
+
+  if (isMobileUA && !onMobilePage && !already) {
+    sessionStorage.setItem('capy_mobile_redirect', '1');
+    // preserva query/hash e evita loop no histórico
+    const dest = (location.pathname.replace(/index\.html?$/i, 'index-mobile.html') || 'index-mobile.html')
+                + location.search + location.hash;
+    location.replace(dest);
+  }
+})();
+</script>
 </body>
 </html>
