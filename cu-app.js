@@ -39,7 +39,7 @@
     return 'CapyUniverse';
   }
 
-  function ensureBrand(header, name) {
+  function ensureBrand(header, toolName) {
     if (!header) return;
     header.classList.add('cu-header');
 
@@ -68,58 +68,66 @@
       if (!info) {
         info = document.createElement('div');
         info.className = 'flex items-center gap-2 cu-brand-info';
-        const toMove = Array.from(brandWrap.childNodes).filter(node => {
-          if (node === toggleBtn) return false;
-          if (node === info) return false;
-          return true;
-        });
-        toMove.forEach(node => info.appendChild(node));
-        brandWrap.appendChild(info);
+        if (toggleBtn?.nextSibling) {
+          brandWrap.insertBefore(info, toggleBtn.nextSibling);
+        } else {
+          brandWrap.appendChild(info);
+        }
       }
 
       Array.from(info.querySelectorAll('.cu-logo')).forEach(el => el.remove());
 
+      const showNavTag = !!toolName && toolName !== 'CapyUniverse';
       let navTag = info.querySelector('.cu-navtag');
-      if (!navTag) {
-        navTag = document.createElement('span');
-        info.insertBefore(navTag, info.firstChild || null);
-      }
-      navTag.textContent = 'Ferramentas';
-      navTag.className = 'cu-navtag hidden sm:inline-flex';
-      if (name) {
-        navTag.title = name;
-      }
-
-      let brandNameEl = info.querySelector('.cu-appname');
-      if (!brandNameEl) {
-        brandNameEl = info.querySelector('a, span, strong, h1');
-        if (!brandNameEl) {
-          brandNameEl = document.createElement('span');
-          info.appendChild(brandNameEl);
+      if (showNavTag) {
+        if (!navTag) {
+          navTag = document.createElement('span');
+          info.insertBefore(navTag, info.firstChild || null);
         }
-      }
-      brandNameEl.textContent = 'CapyUniverse';
-      brandNameEl.classList.add('cu-appname', 'text-xl');
-      if (brandNameEl.tagName === 'A') {
-        brandNameEl.href = 'index.html';
-        brandNameEl.style.textDecoration = 'none';
-        brandNameEl.style.color = 'inherit';
+        navTag.textContent = toolName;
+        navTag.className = 'cu-navtag hidden sm:inline-flex';
+        navTag.title = toolName;
+      } else if (navTag) {
+        navTag.remove();
+        navTag = null;
       }
 
-      const keepNodes = new Set([navTag, brandNameEl]);
+      let brandNameEl = info.querySelector('.cu-brand-name');
+      if (!brandNameEl) {
+        brandNameEl = document.createElement('a');
+        info.appendChild(brandNameEl);
+      }
+
+      brandNameEl.textContent = 'CapyUniverse';
+      brandNameEl.classList.add('cu-brand-name', 'cu-appname', 'text-xl');
+
+      if (brandNameEl.tagName !== 'A') {
+        const link = document.createElement('a');
+        link.className = brandNameEl.className;
+        link.textContent = 'CapyUniverse';
+        brandNameEl.replaceWith(link);
+        brandNameEl = link;
+      }
+
+      brandNameEl.href = 'index.html';
+      brandNameEl.style.textDecoration = 'none';
+      brandNameEl.style.color = 'inherit';
+
+      const keepNodes = new Set([brandNameEl]);
+      if (navTag) keepNodes.add(navTag);
+
       Array.from(info.childNodes).forEach(node => {
         if (keepNodes.has(node)) return;
         if (node.nodeType === Node.TEXT_NODE) {
-          if (!node.textContent.trim()) {
-            node.remove();
-          } else {
-            node.textContent = '';
-          }
-          return;
-        }
-        if (node.nodeType === Node.ELEMENT_NODE) {
+          node.remove();
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
           node.remove();
         }
+      });
+
+      Array.from(brandWrap.childNodes).forEach(node => {
+        if (node === toggleBtn || node === info) return;
+        node.remove();
       });
     }
 
