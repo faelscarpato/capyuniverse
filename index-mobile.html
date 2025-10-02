@@ -2,7 +2,7 @@
 <html lang="pt-BR" class="dark">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CapyUniverse — Mobile</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -98,7 +98,7 @@
   <!-- HEADER -->
   <header class="header fixed top-0 inset-x-0 z-40">
     <div class="px-4 py-3 flex items-center gap-3">
-      <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" alt="Capy" class="w-7 h-7 rounded-md">
+      <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" alt="Capy" width="28" height="28" decoding="async" class="w-7 h-7 rounded-md">
       <h1 class="font-syne text-lg tracking-tight">CapyUniverse</h1>
       <span class="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-purple-600/20 border border-purple-500/30">Mobile</span>
       <div class="ml-auto flex items-center gap-3">
@@ -231,7 +231,7 @@
   const fav = FAVORITES.has(t.id);
   return `
     <article class="tool-card glass">
-      <img class="tool-img" src="${t.imageUrl||''}" alt="">
+      <img class="tool-img" src="${t.imageUrl||''}" alt="" loading="lazy" decoding="async">
       <div class="tool-overlay">
         <div class="tool-badge">${t.category||'Geral'}</div>
         <h3 class="tool-title">${t.title}</h3>

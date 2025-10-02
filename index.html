@@ -23,7 +23,7 @@
   <meta name="theme-color" content="#9333ea">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet"/>
 
   <script>
     const params = new URLSearchParams(location.search);
@@ -152,9 +152,25 @@
     gtag('js', new Date()); gtag('config','G-3FFD7ZEBN1',{page_path:location.pathname});
   </script>
 
-  <!-- Amplitude -->
-  <script src="https://cdn.amplitude.com/script/923ad9fef9eabc6dd7b7194bc8c91d41.js"></script>
-  <script>window.amplitude.add(window.sessionReplay.plugin({sampleRate:1}));window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41',{"fetchRemoteConfig":true,"autocapture":true});</script>
+  <!-- Amplitude (adiado para pós-load/idle) -->
+  <script>
+    window.addEventListener('load', () => {
+      const loadAmplitude = () => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.amplitude.com/script/923ad9fef9eabc6dd7b7194bc8c91d41.js';
+        s.async = true;
+        s.onload = () => {
+          try {
+            window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 0.25 }));
+            window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41', { fetchRemoteConfig: true, autocapture: true });
+          } catch (e) {}
+        };
+        document.head.appendChild(s);
+      };
+      if ('requestIdleCallback' in window) requestIdleCallback(loadAmplitude, { timeout: 3000 });
+      else setTimeout(loadAmplitude, 1500);
+    });
+  </script>
 </head>
 
 <body class="text-gray-100 min-h-screen flex flex-col">
@@ -163,7 +179,7 @@
     <div class="w-full max-w-7xl mx-auto flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-3 hover-lift group">
         <div class="glass-card p-2 rounded-xl border border-white/20 group-hover:border-purple-400/50 transition-all">
-          <img src="img/logo.png" alt="CapyUniverse Logo" class="h-9 w-9 md:h-10 md:w-10 group-hover:scale-110 transition-transform">
+          <img src="img/logo.png" alt="CapyUniverse Logo" width="40" height="40" decoding="async" class="h-9 w-9 md:h-10 md:w-10 group-hover:scale-110 transition-transform">
         </div>
         <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">CapyUniverse</span>
       </a>
@@ -199,7 +215,7 @@
   </header>
 
   <div class="pt-16"></div>
-  <div id="notificationArea"></div>
+  <div id="notificationArea" aria-live="polite" aria-atomic="true" role="status"></div>
 
   <!-- HERO -->
   <div class="parallax-bg relative py-14 px-4 min-h-[calc(100vh-64px)]">
@@ -593,7 +609,7 @@
       card.innerHTML = `
         <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder">
           <div class="absolute inset-0 bg-gradient-to-br from-slate-800/10 to-slate-900/50 z-10"></div>
-          <img src="${tool.imageUrl || `https://placehold.co/640x480/1e293b/94a3b8?text=${encodeURIComponent(tool.title?.slice(0,8)||'IA')}`}" alt="${tool.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/640x480/334155/94a3b8?text=IA';">
+          <img src="${tool.imageUrl || `https://placehold.co/640x480/1e293b/94a3b8?text=${encodeURIComponent(tool.title?.slice(0,8)||'IA')}`}" alt="${tool.title}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/640x480/334155/94a3b8?text=IA';">
           <div class="absolute top-3 left-3 z-20"><span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">${tool.category}</span></div>
           <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">${tool.icon || '🤖'}</div>
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
