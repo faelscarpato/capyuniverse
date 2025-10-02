@@ -393,6 +393,7 @@
     gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
 </script>
   <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
@@ -716,7 +717,7 @@
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
             const payload = { contents: chatHistory };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -816,7 +817,7 @@
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
             const payload = { contents: chatHistory };
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
