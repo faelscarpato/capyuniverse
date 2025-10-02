@@ -166,6 +166,8 @@
 
   gtag('config', 'G-3FFD7ZEBN1');
 </script>
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
@@ -321,7 +323,7 @@
 
         let apiKeys = { gemini: '', openai: '', claude: '', perplexity: '' };
         let apiKey = ''; 
-        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
+        const GEMINI_API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
         const currentPageId = 'CapyDoc'; 
         let extractedTexts = { 
             doc: '' 
