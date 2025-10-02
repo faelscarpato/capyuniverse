@@ -43,6 +43,11 @@ body{
     radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
     radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
     var(--cu-bg-0);
+  position:relative;
+}
+
+body::before{
+  content:none !important;
 }
 
 /* Decorative starfield used on some pages. To activate it, place
@@ -146,6 +151,25 @@ body{
   border-color:transparent;
 }
 
+.cu-logo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:1.9rem;
+  height:1.9rem;
+  border-radius:999px;
+  font-size:.8rem;
+  font-weight:700;
+  letter-spacing:.4px;
+  color:white;
+  background:linear-gradient(140deg, rgba(14,165,233,.9) 0%, rgba(34,211,238,.9) 45%, rgba(168,85,247,.9) 80%, rgba(245,158,11,.95) 100%);
+  box-shadow:0 8px 22px rgba(15,23,42,.35), inset 0 0 0 1px rgba(255,255,255,.18);
+}
+
+.cu-header-actions .cu-btn{
+  box-shadow:var(--cu-shadow);
+}
+
 /* Form elements share a consistent look. */
 .cu-input,
 .cu-select,
@@ -170,6 +194,40 @@ body{
   background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
   backdrop-filter: blur(15px);
   border-right:1px solid rgba(255,255,255,.06);
+}
+
+.sidebar-link{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.45rem .6rem;
+  border-radius:12px;
+  color:var(--cu-text-dim) !important;
+  transition:color .2s ease, background .2s ease, transform .2s ease;
+  border:1px solid transparent;
+}
+
+.sidebar-link:hover{
+  background:rgba(255,255,255,.08) !important;
+  color:var(--cu-text) !important;
+  transform:translateX(2px);
+}
+
+.sidebar-link.active{
+  background:linear-gradient(130deg, rgba(34,211,238,.2), rgba(244,114,208,.2));
+  border-color:rgba(255,255,255,.18);
+  color:white !important;
+  box-shadow:0 10px 20px rgba(15,23,42,.35);
+}
+
+.category-content{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .35s ease;
+}
+
+.category-content.expanded{
+  max-height:1600px;
 }
 
 /* Simple card component often used for galleries. */
@@ -219,4 +277,8 @@ body{
 /* Override for .font-syne to avoid loading the Syne typeface. */
 .font-syne{
   font-family:Inter,system-ui,sans-serif !important;
+}
+
+#apiKeysModal .cu-btn.primary{
+  box-shadow:none;
 }
