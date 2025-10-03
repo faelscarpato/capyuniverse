@@ -46,6 +46,12 @@ body{
   position:relative;
 }
 
+/* Offset page content to avoid overlap with fixed headers on
+ * CapyUniverse-themed pages. Matches the 64px header height. */
+html[data-theme="capyuniverse"] body{
+  padding-top:64px;
+}
+
 body::before{
   content:none !important;
 }
