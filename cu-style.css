@@ -96,6 +96,34 @@ body::before{
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 
+/* Ensure legacy headers adopt the unified style automatically when
+ * the CapyUniverse theme is active. This keeps existing HTML intact
+ * across tools while producing a consistent header look-and-feel. */
+html[data-theme="capyuniverse"] body > header:not(.cu-header){
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:40;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:0 .9rem;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+/* Backwards-compatibility for pages using "global-header" or a plain
+ * "header" class. Scoped by data-theme to avoid touching the homepage. */
+html[data-theme="capyuniverse"] header.global-header,
+html[data-theme="capyuniverse"] header.header{
+  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
 .cu-brand{
   display:flex;
   align-items:center;
