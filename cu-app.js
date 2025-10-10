@@ -1,5 +1,6 @@
 (() => {
   const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+  let toolsDataPromise = null;
 
   function shouldSkip() {
     const body = document.body;
@@ -44,26 +45,99 @@
     return (letters || 'CU').toUpperCase();
   }
 
-  //function createLogoEl(abbr) {
-    //const span = document.createElement('span');
-    //span.className = 'cu-logo';
-   // span.textContent = abbr;
-    //return span;
- // }
+  function createLogoEl(abbr) {
+    const span = document.createElement('span');
+    span.className = 'cu-logo';
+    span.textContent = abbr;
+    return span;
+  }
+
+  const HOME_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10.5 9-7 9 7V20a1.5 1.5 0 0 1-1.5 1.5h-3a1.5 1.5 0 0 1-1.5-1.5v-4.5h-6V20A1.5 1.5 0 0 1 7.5 21.5h-3A1.5 1.5 0 0 1 3 20Z"></path><path d="M9.75 21.5v-6h4.5v6"></path></svg>';
+  const CLOSE_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+  function bindHomeButton(btn) {
+    if (!btn) return;
+    btn.dataset.cuAction = 'home';
+    btn.type = 'button';
+    btn.className = 'cu-btn cu-iconbtn hidden sm:inline-flex';
+    btn.setAttribute('aria-label', 'Ir para a página inicial');
+    btn.innerHTML = HOME_ICON;
+    if (!btn.dataset.cuBound) {
+      btn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+      btn.dataset.cuBound = '1';
+    }
+  }
 
   function ensureBrand(header, name) {
-    if (!header) return;
-    header.classList.add('cu-header');
+    const displayName = (name ?? '').toString().trim() || deriveToolName();
+    const doc = document;
+    if (!header) {
+      header = doc.querySelector('body > header');
+    }
+    if (!header) {
+      header = doc.createElement('header');
+      doc.body.insertBefore(header, doc.body.firstChild || null);
+    }
 
-    const headerChildren = Array.from(header.children);
+    header.classList.add('cu-header');
+    header.dataset.cuToolLabel = displayName;
+
     let brandWrap = header.querySelector('.cu-brand');
-    if (!brandWrap) {
-      brandWrap = headerChildren.find(child => child.querySelector?.('#sidebarToggleBtn')) || headerChildren[0];
-      if (brandWrap) {
-        brandWrap.classList.add('cu-brand');
+    let actionsWrap = header.querySelector('.cu-header-actions');
+    const needsBuild = !brandWrap || !brandWrap.dataset.cuRendered || !actionsWrap;
+
+    if (needsBuild) {
+      header.innerHTML = '';
+
+      brandWrap = doc.createElement('div');
+      brandWrap.className = 'cu-brand';
+      brandWrap.dataset.cuRendered = '1';
+
+      const toggleBtn = doc.createElement('button');
+      toggleBtn.id = 'sidebarToggleBtn';
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none';
+      toggleBtn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+      brandWrap.appendChild(toggleBtn);
+
+      const info = doc.createElement('div');
+      info.className = 'flex items-center gap-2 cu-brand-info';
+
+      const logo = createLogoEl(toolAbbr(displayName));
+      info.appendChild(logo);
+
+      const nameEl = doc.createElement('span');
+      nameEl.className = 'cu-appname text-xl';
+      nameEl.textContent = displayName;
+      info.appendChild(nameEl);
+
+      const chip = doc.createElement('span');
+      chip.className = 'cu-chip hidden sm:inline-flex';
+      chip.textContent = 'CapyUniverse';
+      info.appendChild(chip);
+
+      brandWrap.appendChild(info);
+      header.appendChild(brandWrap);
+
+      actionsWrap = doc.createElement('div');
+      actionsWrap.className = 'flex items-center gap-2 cu-header-actions';
+
+      const homeBtn = doc.createElement('button');
+      bindHomeButton(homeBtn);
+      actionsWrap.appendChild(homeBtn);
+
+      if (doc.getElementById('apiKeysModal')) {
+        const apiBtn = doc.createElement('button');
+        apiBtn.id = 'openApiKeysModalButton';
+        apiBtn.type = 'button';
+        apiBtn.className = 'cu-btn primary hidden sm:inline-flex';
+        apiBtn.textContent = 'Chaves API';
+        actionsWrap.appendChild(apiBtn);
       }
-    } else {
-      brandWrap.classList.add('cu-brand');
+
+      header.appendChild(actionsWrap);
     }
 
     const toggleBtn = header.querySelector('#sidebarToggleBtn');
@@ -71,50 +145,28 @@
       toggleBtn.className = 'lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none';
     }
 
-    if (brandWrap) {
-      let info = brandWrap.querySelector('.cu-brand-info');
-      if (!info) {
-        info = document.createElement('div');
-        info.className = 'flex items-center gap-2 cu-brand-info';
-        const toMove = Array.from(brandWrap.childNodes).filter(node => {
-          if (node === toggleBtn) return false;
-          if (node === info) return false;
-          return true;
-        });
-        toMove.forEach(node => info.appendChild(node));
-        brandWrap.appendChild(info);
-      }
+    const logoEl = header.querySelector('.cu-logo');
+    if (logoEl) {
+      logoEl.textContent = toolAbbr(displayName);
+    }
 
-      if (!info.querySelector('.cu-logo')) {
-        info.insertBefore(createLogoEl(toolAbbr(name)), info.firstChild);
+    const nameEl = header.querySelector('.cu-appname');
+    if (nameEl) {
+      nameEl.textContent = displayName;
+      if (nameEl.tagName === 'A') {
+        nameEl.href = 'index.html';
+        nameEl.style.textDecoration = 'none';
+        nameEl.style.color = 'inherit';
       }
+    }
 
-      let brandNameEl = info.querySelector('.cu-appname');
-      if (!brandNameEl) {
-        brandNameEl = info.querySelector('a, span, strong, h1');
-        if (!brandNameEl) {
-          brandNameEl = document.createElement('span');
-          info.appendChild(brandNameEl);
-        }
-      }
-      brandNameEl.textContent = name;
-      brandNameEl.classList.add('cu-appname', 'text-xl');
-      if (brandNameEl.tagName === 'A') {
-        brandNameEl.href = 'index.html';
-        brandNameEl.style.textDecoration = 'none';
-        brandNameEl.style.color = 'inherit';
-      }
-
-      let chip = info.querySelector('.cu-chip');
-      if (!chip) {
-        chip = document.createElement('span');
-        info.appendChild(chip);
-      }
+    const chip = header.querySelector('.cu-chip');
+    if (chip) {
       chip.textContent = 'CapyUniverse';
       chip.className = 'cu-chip hidden sm:inline-flex';
     }
 
-    const actions = headerChildren.find(child => child !== brandWrap) || headerChildren[1];
+    const actions = header.querySelector('.cu-header-actions');
     if (actions) {
       actions.className = 'flex items-center gap-2 cu-header-actions';
     }
@@ -124,19 +176,13 @@
     const actions = document.querySelector('.cu-header-actions');
     if (!actions) return;
 
-    const homeBtn = Array.from(actions.querySelectorAll('button')).find(btn => /in[ií]cio/i.test(btn.textContent || ''));
+    let homeBtn = actions.querySelector('button[data-cu-action="home"]');
     if (homeBtn) {
-      homeBtn.className = 'cu-btn hidden sm:inline-flex';
-      if (!homeBtn.getAttribute('onclick')) {
-        homeBtn.onclick = () => { window.location.href = 'index.html'; };
-      }
+      bindHomeButton(homeBtn);
     } else {
-      const btn = document.createElement('button');
-      btn.className = 'cu-btn hidden sm:inline-flex';
-      btn.type = 'button';
-      btn.textContent = 'Início';
-      btn.addEventListener('click', () => { window.location.href = 'index.html'; });
-      actions.insertBefore(btn, actions.firstChild);
+      homeBtn = document.createElement('button');
+      bindHomeButton(homeBtn);
+      actions.insertBefore(homeBtn, actions.firstChild);
     }
 
     const hasModal = !!document.getElementById('apiKeysModal');
@@ -150,13 +196,20 @@
     }
     if (apiBtn) {
       apiBtn.className = 'cu-btn primary hidden sm:inline-flex';
+      if (!apiBtn.dataset.cuBound) {
+        apiBtn.addEventListener('click', () => {
+          const modal = ensureApiModal();
+          modal?.classList.remove('hidden');
+        });
+        apiBtn.dataset.cuBound = '1';
+      }
     }
   }
 
   function stylizeLayout() {
     const layout = Array.from(document.querySelectorAll('body > div')).find(div => div.querySelector('main') && div.querySelector('#sidebar'));
     if (layout) {
-      layout.className = 'flex flex-1 pt-16 min-h-0';
+      layout.className = 'flex flex-1 min-h-0';
     }
 
     const sidebar = document.getElementById('sidebar');
@@ -164,7 +217,13 @@
       sidebar.className = 'sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin';
     }
 
-    const overlay = document.getElementById('sidebarOverlay');
+    let overlay = document.getElementById('sidebarOverlay');
+    if (!overlay && sidebar) {
+      overlay = document.createElement('div');
+      overlay.id = 'sidebarOverlay';
+      overlay.dataset.cuGenerated = '1';
+      sidebar.insertAdjacentElement('afterend', overlay);
+    }
     if (overlay) {
       overlay.className = 'fixed inset-0 bg-black/60 z-20 hidden lg:hidden';
     }
@@ -185,7 +244,7 @@
       }
     }
 
-    primaryPanels.forEach((panel, idx) => {
+    primaryPanels.forEach((panel) => {
       panel.classList.add('cu-panel');
       panel.classList.remove('glass');
       if (!panel.classList.contains('cu-panel-padded')) {
@@ -195,8 +254,40 @@
     });
   }
 
+  function ensureApiModal() {
+    const doc = document;
+    if (!doc?.body) return null;
+    let modal = doc.getElementById('apiKeysModal');
+    if (!modal) {
+      modal = doc.createElement('div');
+      modal.id = 'apiKeysModal';
+      modal.dataset.cuGenerated = '1';
+      modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4';
+      modal.innerHTML = `
+        <div class="cu-panel p-6 w-full max-w-md space-y-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 id="apiKeysModalTitle" class="text-lg font-semibold">Configurar chave API</h2>
+            <button id="closeApiKeysModalButton" type="button" class="cu-iconbtn" aria-label="Fechar modal" data-cu-generated="1">${CLOSE_ICON}</button>
+          </div>
+          <p class="text-sm text-gray-300 leading-relaxed">Informe sua chave da API Gemini para habilitar todos os recursos das ferramentas CapyUniverse.</p>
+          <div class="flex gap-2 flex-col sm:flex-row">
+            <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave Gemini" class="cu-input flex-1 sm:rounded-r-none" data-cu-generated="1">
+            <button id="saveGeminiKey" type="button" class="cu-btn primary sm:rounded-l-none" data-cu-generated="1">Salvar</button>
+          </div>
+        </div>`;
+      doc.body.appendChild(modal);
+    }
+    if (modal.dataset.cuGenerated === '1') {
+      modal.setAttribute('role', 'dialog');
+      modal.setAttribute('aria-modal', 'true');
+      modal.setAttribute('aria-labelledby', 'apiKeysModalTitle');
+    }
+    return modal;
+  }
+
   function ensureFabButton() {
-    if (!document.getElementById('apiKeysModal')) return;
+    ensureApiModal();
+    if (!document.body) return;
     let fab = document.getElementById('fabApi');
     if (!fab) {
       fab = document.createElement('button');
@@ -205,8 +296,9 @@
       fab.textContent = '🔑';
       document.body.appendChild(fab);
     }
-    fab.className = 'sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50';
+    fab.className = 'fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50 flex items-center justify-center text-xl';
     fab.title = 'Chaves API';
+    fab.setAttribute('aria-label', 'Abrir configurações da chave API');
   }
 
   function stylizeApiModal() {
@@ -220,9 +312,16 @@
     }
     const closeBtn = document.getElementById('closeApiKeysModalButton');
     if (closeBtn) {
-      closeBtn.className = 'cu-btn';
+      closeBtn.classList.add('cu-btn');
       closeBtn.type = 'button';
-      if (!closeBtn.textContent?.trim()) closeBtn.textContent = '✕';
+      if (closeBtn.dataset.cuGenerated === '1') {
+        closeBtn.classList.add('cu-iconbtn');
+        if (!closeBtn.innerHTML.trim()) {
+          closeBtn.innerHTML = CLOSE_ICON;
+        }
+      } else if (!closeBtn.textContent?.trim()) {
+        closeBtn.textContent = '✕';
+      }
     }
     const saveBtn = document.getElementById('saveGeminiKey');
     if (saveBtn) {
@@ -242,31 +341,230 @@
   }
 
   function attachFabBehaviour() {
-    const modal = document.getElementById('apiKeysModal');
+    const modal = ensureApiModal();
     if (!modal) return;
     const fab = document.getElementById('fabApi');
     const openBtn = document.getElementById('openApiKeysModalButton');
     const closeBtn = document.getElementById('closeApiKeysModalButton');
-    if (fab && openBtn) {
-      if (!fab.dataset.cuBound) {
-        fab.addEventListener('click', () => {
-          modal.classList.remove('hidden');
-        });
-        fab.dataset.cuBound = '1';
-      }
+    const saveBtn = document.getElementById('saveGeminiKey');
+    const showModal = () => modal.classList.remove('hidden');
+    const hideModal = () => modal.classList.add('hidden');
+
+    if (fab && !fab.dataset.cuBound) {
+      fab.addEventListener('click', showModal);
+      fab.dataset.cuBound = '1';
+    }
+    if (openBtn && !openBtn.dataset.cuBound) {
+      openBtn.addEventListener('click', showModal);
+      openBtn.dataset.cuBound = '1';
     }
     if (modal && !modal.dataset.cuBound) {
       modal.addEventListener('click', (ev) => {
         if (ev.target === modal) {
-          modal.classList.add('hidden');
+          hideModal();
         }
       });
       modal.dataset.cuBound = '1';
     }
     if (closeBtn && !closeBtn.dataset.cuBound) {
-      closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+      closeBtn.addEventListener('click', hideModal);
       closeBtn.dataset.cuBound = '1';
     }
+    if (saveBtn && saveBtn.dataset.cuGenerated === '1' && !saveBtn.dataset.cuBound) {
+      saveBtn.addEventListener('click', () => {
+        const input = document.getElementById('geminiApiKeyInputModal');
+        const value = input?.value?.trim();
+        if (!value) return;
+        try {
+          localStorage.setItem(API_KEY_STORAGE_KEY, value);
+          alert('Chave API do Gemini salva!');
+        } catch (err) {
+          console.warn('cu-app: falha ao salvar chave API', err);
+        }
+        hideModal();
+      });
+      saveBtn.dataset.cuBound = '1';
+    }
+  }
+
+  function normaliseSidebarIconMarkup(tool) {
+    if (tool && typeof tool.icon === 'string') {
+      return tool.icon
+        .replace(/w-10/g, 'w-5')
+        .replace(/h-10/g, 'h-5')
+        .replace(/mb-2/g, 'mr-2')
+        .replace(/text-2xl/g, 'text-base');
+    }
+    if (tool && typeof tool.iconUrl === 'string') {
+      const url = tool.iconUrl;
+      return `<img src="${url}" alt="" class="w-5 h-5 object-contain mr-2 opacity-90" loading="lazy">`;
+    }
+    return '<span class="w-5 h-5 mr-2"></span>';
+  }
+
+  async function fetchToolsData() {
+    if (!toolsDataPromise) {
+      toolsDataPromise = fetch('tools.json', { cache: 'no-store' })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`tools.json request failed with ${res.status}`);
+          }
+          return res.json();
+        })
+        .catch(err => {
+          toolsDataPromise = null;
+          throw err;
+        });
+    }
+    return toolsDataPromise;
+  }
+
+  function determineToolContext(tools) {
+    const path = window.location.pathname.split('/').pop() || 'index.html';
+    if (!Array.isArray(tools)) {
+      return { path };
+    }
+    const match = tools.find(tool => {
+      const page = (tool?.pageUrl || '').split('/').pop();
+      return page === path;
+    });
+    if (match) {
+      return {
+        id: match.id || match.title || match.pageUrl,
+        displayName: match.title || match.id || deriveToolName(),
+        path,
+        tool: match,
+      };
+    }
+    return { path };
+  }
+
+  async function renderSidebarFromTools() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    try {
+      const tools = await fetchToolsData();
+      const context = determineToolContext(tools);
+
+      if (context) {
+        const headerLabel = context?.tool?.id || context?.id || context?.displayName || deriveToolName();
+        ensureBrand(document.querySelector('body > header'), headerLabel);
+      }
+      if (context?.id && document.body) {
+        document.body.dataset.cuToolId = context.id;
+      }
+
+      const categories = new Map();
+      if (Array.isArray(tools)) {
+        tools.forEach(tool => {
+          let cats = tool?.category;
+          if (!cats || (Array.isArray(cats) && cats.length === 0)) {
+            cats = ['Outros'];
+          }
+          if (!Array.isArray(cats)) {
+            cats = [cats];
+          }
+          cats.filter(Boolean).forEach(cat => {
+            if (!categories.has(cat)) {
+              categories.set(cat, []);
+            }
+            categories.get(cat).push(tool);
+          });
+        });
+      }
+
+      sidebar.innerHTML = '';
+
+      const home = document.createElement('a');
+      home.href = 'index.html';
+      home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+      home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>';
+      sidebar.appendChild(home);
+
+      categories.forEach((toolsInCategory, categoryName) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-1';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+        button.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+
+        const content = document.createElement('div');
+        content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+        toolsInCategory
+          .slice()
+          .sort((a, b) => (a?.title || '').localeCompare(b?.title || '', 'pt-BR', { sensitivity: 'base' }))
+          .forEach(tool => {
+            const link = document.createElement('a');
+            link.href = tool?.pageUrl || '#';
+            const currentPage = (tool?.pageUrl || '').split('/').pop();
+            const isActive = !!currentPage && currentPage === context.path;
+            const iconMarkup = normaliseSidebarIconMarkup(tool);
+            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${isActive ? 'active' : 'text-gray-400'}`;
+            link.innerHTML = `${iconMarkup}<span>${tool?.title || tool?.id || tool?.pageUrl || 'Ferramenta'}</span>`;
+            content.appendChild(link);
+          });
+
+        button.addEventListener('click', () => {
+          content.classList.toggle('expanded');
+          const icon = button.querySelector('svg');
+          if (icon) {
+            icon.classList.toggle('rotate-180');
+          }
+        });
+
+        if (toolsInCategory.some(tool => (tool?.pageUrl || '').split('/').pop() === context.path)) {
+          content.classList.add('expanded');
+          const icon = button.querySelector('svg');
+          if (icon) {
+            icon.classList.add('rotate-180');
+          }
+        }
+
+        wrapper.appendChild(button);
+        wrapper.appendChild(content);
+        sidebar.appendChild(wrapper);
+      });
+    } catch (err) {
+      console.error('cu-app: sidebar load error', err);
+      sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+    }
+  }
+
+  function setupSidebarToggle() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    if (!sidebar || !overlay || !toggleBtn) return;
+
+    const toggle = (show) => {
+      if (typeof show === 'boolean') {
+        if (show) {
+          sidebar.classList.remove('-translate-x-full');
+          overlay.classList.remove('hidden');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        }
+        return;
+      }
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    };
+
+    if (!toggleBtn.dataset.cuBound) {
+      toggleBtn.addEventListener('click', () => toggle());
+      toggleBtn.dataset.cuBound = '1';
+    }
+    if (!overlay.dataset.cuBound) {
+      overlay.addEventListener('click', () => toggle(false));
+      overlay.dataset.cuBound = '1';
+    }
+
+    toggle(false);
   }
 
   function highlightSidebar() {
@@ -295,19 +593,25 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     if (shouldSkip()) return;
-    try {
-      const toolName = deriveToolName();
-      applyBackground();
-      ensureBrand(document.querySelector('body > header'), toolName);
-      ensureHeaderButtons();
-      stylizeLayout();
-      ensureFabButton();
-      stylizeApiModal();
-      attachFabBehaviour();
-      highlightSidebar();
-      loadApiKeyIntoModal();
-    } catch (err) {
-      console.error('cu-app init error:', err);
-    }
+    (async () => {
+      try {
+        const fallbackName = deriveToolName();
+        applyBackground();
+        ensureApiModal();
+        ensureBrand(document.querySelector('body > header'), fallbackName);
+        stylizeLayout();
+        ensureFabButton();
+        stylizeApiModal();
+        attachFabBehaviour();
+        await renderSidebarFromTools();
+      } catch (err) {
+        console.error('cu-app init error:', err);
+      } finally {
+        ensureHeaderButtons();
+        setupSidebarToggle();
+        highlightSidebar();
+        loadApiKeyIntoModal();
+      }
+    })();
   });
 })();
