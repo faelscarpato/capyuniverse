@@ -44,12 +44,12 @@
     return (letters || 'CU').toUpperCase();
   }
 
-  function createLogoEl(abbr) {
-    const span = document.createElement('span');
-    span.className = 'cu-logo';
-    span.textContent = abbr;
-    return span;
-  }
+  //function createLogoEl(abbr) {
+    //const span = document.createElement('span');
+    //span.className = 'cu-logo';
+   // span.textContent = abbr;
+    //return span;
+ // }
 
   function ensureBrand(header, name) {
     if (!header) return;
