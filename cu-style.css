@@ -47,8 +47,18 @@ body{
 }
 
 /* Offset page content to avoid overlap with fixed headers on
- * CapyUniverse-themed pages. Matches the 64px header height. */
+ * CapyUniverse-themed pages. Matches the 64px header height and
+ * reapplies the CapyIMG background palette even when legacy pages
+ * define their own colours. */
 html[data-theme="capyuniverse"] body{
+  font-family:Inter,system-ui,sans-serif !important;
+  color:var(--cu-text) !important;
+  background:
+    radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
+    radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+    var(--cu-bg-0) !important;
+  position:relative;
+  min-height:100vh;
   padding-top:64px;
 }
 
@@ -161,6 +171,15 @@ html[data-theme="capyuniverse"] header.header{
   border:1px solid rgba(255,255,255,.06);
 }
 
+/* Legacy pages rely on a `.glass` utility. Mirror the new visual. */
+html[data-theme="capyuniverse"] .glass{
+  background:var(--cu-card) !important;
+  border-radius:var(--cu-radius-lg) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  box-shadow:var(--cu-shadow) !important;
+  backdrop-filter: blur(var(--cu-blur)) !important;
+}
+
 /* Buttons with subtle glassmorphism. */
 .cu-btn{
   display:inline-flex;
@@ -221,6 +240,27 @@ html[data-theme="capyuniverse"] header.header{
 .cu-textarea:focus{
   border-color: var(--cu-cyan);
   box-shadow: 0 0 0 3px rgba(34,211,238,.18);
+}
+
+/* Map legacy field classes to the unified look. */
+html[data-theme="capyuniverse"] .input-field,
+html[data-theme="capyuniverse"] .input-select,
+html[data-theme="capyuniverse"] .input-textarea,
+html[data-theme="capyuniverse"] textarea.input-field,
+html[data-theme="capyuniverse"] select.input-field{
+  background:rgba(15,15,40,.6) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  border-radius:12px !important;
+  padding:.75rem .9rem !important;
+  color:var(--cu-text) !important;
+  outline:none !important;
+}
+
+html[data-theme="capyuniverse"] .input-field:focus,
+html[data-theme="capyuniverse"] .input-select:focus,
+html[data-theme="capyuniverse"] .input-textarea:focus{
+  border-color: var(--cu-cyan) !important;
+  box-shadow: 0 0 0 3px rgba(34,211,238,.18) !important;
 }
 
 /* Sidebar styling to achieve a frosted glass effect. */
