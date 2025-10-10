@@ -1,5 +1,6 @@
 (() => {
   const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+  let toolsDataPromise = null;
 
   function shouldSkip() {
     const body = document.body;
@@ -44,26 +45,82 @@
     return (letters || 'CU').toUpperCase();
   }
 
-  //function createLogoEl(abbr) {
-    //const span = document.createElement('span');
-    //span.className = 'cu-logo';
-   // span.textContent = abbr;
-    //return span;
- // }
+  function createLogoEl(abbr) {
+    const span = document.createElement('span');
+    span.className = 'cu-logo';
+    span.textContent = abbr;
+    return span;
+  }
 
   function ensureBrand(header, name) {
-    if (!header) return;
+    const doc = document;
+    if (!header) {
+      header = doc.querySelector('body > header');
+    }
+    if (!header) {
+      header = doc.createElement('header');
+      doc.body.insertBefore(header, doc.body.firstChild || null);
+    }
+
     header.classList.add('cu-header');
 
-    const headerChildren = Array.from(header.children);
     let brandWrap = header.querySelector('.cu-brand');
-    if (!brandWrap) {
-      brandWrap = headerChildren.find(child => child.querySelector?.('#sidebarToggleBtn')) || headerChildren[0];
-      if (brandWrap) {
-        brandWrap.classList.add('cu-brand');
+    let actionsWrap = header.querySelector('.cu-header-actions');
+    const needsBuild = !brandWrap || !brandWrap.dataset.cuRendered || !actionsWrap;
+
+    if (needsBuild) {
+      header.innerHTML = '';
+
+      brandWrap = doc.createElement('div');
+      brandWrap.className = 'cu-brand';
+      brandWrap.dataset.cuRendered = '1';
+
+      const toggleBtn = doc.createElement('button');
+      toggleBtn.id = 'sidebarToggleBtn';
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none';
+      toggleBtn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+      brandWrap.appendChild(toggleBtn);
+
+      const info = doc.createElement('div');
+      info.className = 'flex items-center gap-2 cu-brand-info';
+
+      const logo = createLogoEl(toolAbbr(name));
+      info.appendChild(logo);
+
+      const nameEl = doc.createElement('span');
+      nameEl.className = 'cu-appname text-xl';
+      nameEl.textContent = name;
+      info.appendChild(nameEl);
+
+      const chip = doc.createElement('span');
+      chip.className = 'cu-chip hidden sm:inline-flex';
+      chip.textContent = 'CapyUniverse';
+      info.appendChild(chip);
+
+      brandWrap.appendChild(info);
+      header.appendChild(brandWrap);
+
+      actionsWrap = doc.createElement('div');
+      actionsWrap.className = 'flex items-center gap-2 cu-header-actions';
+
+      const homeBtn = doc.createElement('button');
+      homeBtn.className = 'cu-btn hidden sm:inline-flex';
+      homeBtn.type = 'button';
+      homeBtn.textContent = 'Início';
+      homeBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
+      actionsWrap.appendChild(homeBtn);
+
+      if (doc.getElementById('apiKeysModal')) {
+        const apiBtn = doc.createElement('button');
+        apiBtn.id = 'openApiKeysModalButton';
+        apiBtn.type = 'button';
+        apiBtn.className = 'cu-btn primary hidden sm:inline-flex';
+        apiBtn.textContent = 'Chaves API';
+        actionsWrap.appendChild(apiBtn);
       }
-    } else {
-      brandWrap.classList.add('cu-brand');
+
+      header.appendChild(actionsWrap);
     }
 
     const toggleBtn = header.querySelector('#sidebarToggleBtn');
@@ -71,50 +128,28 @@
       toggleBtn.className = 'lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none';
     }
 
-    if (brandWrap) {
-      let info = brandWrap.querySelector('.cu-brand-info');
-      if (!info) {
-        info = document.createElement('div');
-        info.className = 'flex items-center gap-2 cu-brand-info';
-        const toMove = Array.from(brandWrap.childNodes).filter(node => {
-          if (node === toggleBtn) return false;
-          if (node === info) return false;
-          return true;
-        });
-        toMove.forEach(node => info.appendChild(node));
-        brandWrap.appendChild(info);
-      }
+    const logoEl = header.querySelector('.cu-logo');
+    if (logoEl) {
+      logoEl.textContent = toolAbbr(name);
+    }
 
-      if (!info.querySelector('.cu-logo')) {
-        info.insertBefore(createLogoEl(toolAbbr(name)), info.firstChild);
+    const nameEl = header.querySelector('.cu-appname');
+    if (nameEl) {
+      nameEl.textContent = name;
+      if (nameEl.tagName === 'A') {
+        nameEl.href = 'index.html';
+        nameEl.style.textDecoration = 'none';
+        nameEl.style.color = 'inherit';
       }
+    }
 
-      let brandNameEl = info.querySelector('.cu-appname');
-      if (!brandNameEl) {
-        brandNameEl = info.querySelector('a, span, strong, h1');
-        if (!brandNameEl) {
-          brandNameEl = document.createElement('span');
-          info.appendChild(brandNameEl);
-        }
-      }
-      brandNameEl.textContent = name;
-      brandNameEl.classList.add('cu-appname', 'text-xl');
-      if (brandNameEl.tagName === 'A') {
-        brandNameEl.href = 'index.html';
-        brandNameEl.style.textDecoration = 'none';
-        brandNameEl.style.color = 'inherit';
-      }
-
-      let chip = info.querySelector('.cu-chip');
-      if (!chip) {
-        chip = document.createElement('span');
-        info.appendChild(chip);
-      }
+    const chip = header.querySelector('.cu-chip');
+    if (chip) {
       chip.textContent = 'CapyUniverse';
       chip.className = 'cu-chip hidden sm:inline-flex';
     }
 
-    const actions = headerChildren.find(child => child !== brandWrap) || headerChildren[1];
+    const actions = header.querySelector('.cu-header-actions');
     if (actions) {
       actions.className = 'flex items-center gap-2 cu-header-actions';
     }
@@ -164,7 +199,13 @@
       sidebar.className = 'sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin';
     }
 
-    const overlay = document.getElementById('sidebarOverlay');
+    let overlay = document.getElementById('sidebarOverlay');
+    if (!overlay && sidebar) {
+      overlay = document.createElement('div');
+      overlay.id = 'sidebarOverlay';
+      overlay.dataset.cuGenerated = '1';
+      sidebar.insertAdjacentElement('afterend', overlay);
+    }
     if (overlay) {
       overlay.className = 'fixed inset-0 bg-black/60 z-20 hidden lg:hidden';
     }
@@ -269,6 +310,185 @@
     }
   }
 
+  function normaliseSidebarIconMarkup(tool) {
+    if (tool && typeof tool.icon === 'string') {
+      return tool.icon
+        .replace(/w-10/g, 'w-5')
+        .replace(/h-10/g, 'h-5')
+        .replace(/mb-2/g, 'mr-2')
+        .replace(/text-2xl/g, 'text-base');
+    }
+    if (tool && typeof tool.iconUrl === 'string') {
+      const url = tool.iconUrl;
+      return `<img src="${url}" alt="" class="w-5 h-5 object-contain mr-2 opacity-90" loading="lazy">`;
+    }
+    return '<span class="w-5 h-5 mr-2"></span>';
+  }
+
+  async function fetchToolsData() {
+    if (!toolsDataPromise) {
+      toolsDataPromise = fetch('tools.json', { cache: 'no-store' })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`tools.json request failed with ${res.status}`);
+          }
+          return res.json();
+        })
+        .catch(err => {
+          toolsDataPromise = null;
+          throw err;
+        });
+    }
+    return toolsDataPromise;
+  }
+
+  function determineToolContext(tools) {
+    const path = window.location.pathname.split('/').pop() || 'index.html';
+    if (!Array.isArray(tools)) {
+      return { path };
+    }
+    const match = tools.find(tool => {
+      const page = (tool?.pageUrl || '').split('/').pop();
+      return page === path;
+    });
+    if (match) {
+      return {
+        id: match.id || match.title || match.pageUrl,
+        displayName: match.title || match.id || deriveToolName(),
+        path,
+        tool: match,
+      };
+    }
+    return { path };
+  }
+
+  async function renderSidebarFromTools() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    try {
+      const tools = await fetchToolsData();
+      const context = determineToolContext(tools);
+
+      if (context?.displayName) {
+        ensureBrand(document.querySelector('body > header'), context.displayName);
+      }
+      if (context?.id && document.body) {
+        document.body.dataset.cuToolId = context.id;
+      }
+
+      const categories = new Map();
+      if (Array.isArray(tools)) {
+        tools.forEach(tool => {
+          let cats = tool?.category;
+          if (!cats || (Array.isArray(cats) && cats.length === 0)) {
+            cats = ['Outros'];
+          }
+          if (!Array.isArray(cats)) {
+            cats = [cats];
+          }
+          cats.filter(Boolean).forEach(cat => {
+            if (!categories.has(cat)) {
+              categories.set(cat, []);
+            }
+            categories.get(cat).push(tool);
+          });
+        });
+      }
+
+      sidebar.innerHTML = '';
+
+      const home = document.createElement('a');
+      home.href = 'index.html';
+      home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+      home.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>';
+      sidebar.appendChild(home);
+
+      categories.forEach((toolsInCategory, categoryName) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-1';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+        button.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+
+        const content = document.createElement('div');
+        content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+        toolsInCategory
+          .slice()
+          .sort((a, b) => (a?.title || '').localeCompare(b?.title || '', 'pt-BR', { sensitivity: 'base' }))
+          .forEach(tool => {
+            const link = document.createElement('a');
+            link.href = tool?.pageUrl || '#';
+            const currentPage = (tool?.pageUrl || '').split('/').pop();
+            const isActive = !!currentPage && currentPage === context.path;
+            const iconMarkup = normaliseSidebarIconMarkup(tool);
+            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${isActive ? 'active' : 'text-gray-400'}`;
+            link.innerHTML = `${iconMarkup}<span>${tool?.title || tool?.id || tool?.pageUrl || 'Ferramenta'}</span>`;
+            content.appendChild(link);
+          });
+
+        button.addEventListener('click', () => {
+          content.classList.toggle('expanded');
+          const icon = button.querySelector('svg');
+          if (icon) {
+            icon.classList.toggle('rotate-180');
+          }
+        });
+
+        if (toolsInCategory.some(tool => (tool?.pageUrl || '').split('/').pop() === context.path)) {
+          content.classList.add('expanded');
+          const icon = button.querySelector('svg');
+          if (icon) {
+            icon.classList.add('rotate-180');
+          }
+        }
+
+        wrapper.appendChild(button);
+        wrapper.appendChild(content);
+        sidebar.appendChild(wrapper);
+      });
+    } catch (err) {
+      console.error('cu-app: sidebar load error', err);
+      sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+    }
+  }
+
+  function setupSidebarToggle() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    if (!sidebar || !overlay || !toggleBtn) return;
+
+    const toggle = (show) => {
+      if (typeof show === 'boolean') {
+        if (show) {
+          sidebar.classList.remove('-translate-x-full');
+          overlay.classList.remove('hidden');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        }
+        return;
+      }
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    };
+
+    if (!toggleBtn.dataset.cuBound) {
+      toggleBtn.addEventListener('click', () => toggle());
+      toggleBtn.dataset.cuBound = '1';
+    }
+    if (!overlay.dataset.cuBound) {
+      overlay.addEventListener('click', () => toggle(false));
+      overlay.dataset.cuBound = '1';
+    }
+
+    toggle(false);
+  }
+
   function highlightSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
@@ -295,19 +515,24 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     if (shouldSkip()) return;
-    try {
-      const toolName = deriveToolName();
-      applyBackground();
-      ensureBrand(document.querySelector('body > header'), toolName);
-      ensureHeaderButtons();
-      stylizeLayout();
-      ensureFabButton();
-      stylizeApiModal();
-      attachFabBehaviour();
-      highlightSidebar();
-      loadApiKeyIntoModal();
-    } catch (err) {
-      console.error('cu-app init error:', err);
-    }
+    (async () => {
+      try {
+        const fallbackName = deriveToolName();
+        applyBackground();
+        ensureBrand(document.querySelector('body > header'), fallbackName);
+        stylizeLayout();
+        ensureFabButton();
+        stylizeApiModal();
+        attachFabBehaviour();
+        await renderSidebarFromTools();
+      } catch (err) {
+        console.error('cu-app init error:', err);
+      } finally {
+        ensureHeaderButtons();
+        setupSidebarToggle();
+        highlightSidebar();
+        loadApiKeyIntoModal();
+      }
+    })();
   });
 })();
