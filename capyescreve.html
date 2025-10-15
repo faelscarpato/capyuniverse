@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyEscreve — Escrita Assistida</title>
+
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
+    type="image/png"
+  />
+
+  <!-- CapyUniverse Theme Overrides -->
+  <style>
+    :root {
+      --cu-bg-0: #0b0b14;
+      --cu-bg-1: #0f1024;
+      --cu-grid: #2a2e63;
+      --cu-card: #0f0f22cc;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #f59e0b;
+      --cu-text: #e6e6f0;
+      --cu-text-dim: #aab;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-blur: 12px;
+      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+    html {
+      background: var(--cu-bg-0);
+    }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(139, 92, 246, 0.25), transparent 60%),
+        radial-gradient(900px 600px at -10% 20%, rgba(34, 211, 238, 0.18), transparent 60%),
+        var(--cu-bg-0);
+    }
+    .cu-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.12) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.1) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px) 0 0/260px 260px;
+    }
+    .cu-stage {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 38vh;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
+        repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+        repeating-linear-gradient(to top, transparent 0 38px, var(--cu-grid) 38px 39px);
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+      border-radius: 999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  </style>
+
+  <!-- CapyUniverse Shared Styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <!-- Decorative background elements -->
+  <div class="cu-stars"></div>
+  <div class="cu-stage"></div>
+
+  <!-- Header -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button
+        id="sidebarToggleBtn"
+        class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none"
+      >
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyEscreve</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-4 min-h-0">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin"
+    >
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+
+    <!-- Main content area -->
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full" style="padding-top: 1rem;">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col space-y-6">
+        <div class="text-center">
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color: #38bdf8;">CapyEscreve ✍️</h1>
+          <p class="text-zinc-300 mt-1">Crie textos incríveis com auxílio de IA: dite, gere seções e revise seu conteúdo.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-6 min-h-0">
+          <!-- Painel de Controle -->
+          <aside class="cu-panel p-4 sm:p-5 flex flex-col">
+            <div class="mb-4">
+              <label class="block text-sm text-zinc-300 mb-1" for="writeInput">Esboço atual</label>
+              <textarea id="writeInput" rows="7" class="cu-textarea" placeholder="Digite ou dite suas ideias aqui"></textarea>
+            </div>
+            <div class="flex items-center gap-3 mb-4">
+              <button id="btnWriteRecord" class="cu-btn flex-1"><i class="fas fa-microphone"></i> Dictar</button>
+              <button id="btnWriteClear" class="cu-btn"><i class="fas fa-eraser"></i> Limpar</button>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm text-zinc-300 mb-1" for="writeCommand">Comando IA personalizado</label>
+              <input id="writeCommand" class="cu-input" placeholder="Ex: gere 3 títulos sobre capivaras" />
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+              <button id="btnWriteTitles" class="cu-btn px-3 py-1 text-sm">3 Títulos</button>
+              <button id="btnWriteIntro" class="cu-btn px-3 py-1 text-sm">Introdução</button>
+              <button id="btnWriteSection" class="cu-btn px-3 py-1 text-sm">Seção</button>
+              <button id="btnWriteConclusion" class="cu-btn px-3 py-1 text-sm">Conclusão</button>
+              <button id="btnWriteReview" class="cu-btn px-3 py-1 text-sm">Revisão</button>
+            </div>
+            <button id="btnWriteCustom" class="cu-btn primary w-full"><i class="fas fa-magic"></i> Executar Comando</button>
+          </aside>
+          <!-- Resultado -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <label class="block text-sm text-zinc-300 mb-1" for="writeResult">Resultado</label>
+            <textarea id="writeResult" rows="12" class="cu-textarea flex-1" readonly placeholder="Aguardando geração..."></textarea>
+            <div class="flex items-center gap-3 mt-4">
+              <button id="btnWriteOuvir" class="cu-btn" disabled><i class="fas fa-volume-high"></i> Ouvir</button>
+              <button id="btnWriteCopy" class="cu-btn" disabled><i class="fas fa-copy"></i> Copiar</button>
+              <button id="btnWriteExport" class="cu-btn" disabled><i class="fas fa-download"></i> Exportar</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating API Key button (mobile) -->
+  <button id="fabApi" class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50" title="Chaves API">🔑</button>
+
+  <!-- API Keys Modal -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"></div>
+
+  <script>
+    const currentPageId = 'CapyEscreve';
+    let apiKey = '';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi')
+    };
+
+    /** Configura o modal de chave API */
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A chave é armazenada localmente e utilizada pelas ferramentas que requerem IA.</p>
+          </div>
+        </div>`;
+      dom.apiKeysModal.innerHTML = html;
+      const close = () => dom.apiKeysModal.classList.add('hidden');
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+      dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.fabApi?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.apiKeysModal.addEventListener('click', (e) => { if (e.target === dom.apiKeysModal) close(); });
+      closeBtn?.addEventListener('click', close);
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim();
+        if (!key) { alert('Insira uma chave válida.'); return; }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!');
+        close();
+      });
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) { input.value = saved; apiKey = saved; }
+    }
+
+    /** Renderiza o menu lateral a partir de tools.json */
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json();
+        const categories = {};
+        toolsData.forEach(tool => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          (cats || []).forEach(cat => { (categories[cat] ??= []).push(tool); });
+        });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className = 'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+        home.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
+        for (const cat in categories) {
+          const wrap = document.createElement('div'); wrap.className = 'mb-1';
+          const btn = document.createElement('button');
+          btn.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+          btn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach(tool => {
+            const a = document.createElement('a');
+            a.href = tool.pageUrl;
+            const iconHtml = tool.icon ? tool.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+            a.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+            a.innerHTML = iconHtml + `<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('svg').classList.toggle('rotate-180');
+          });
+          if (categories[cat].some(t => t.id === currentPageId)) {
+            content.classList.add('expanded');
+            btn.querySelector('svg').classList.add('rotate-180');
+          }
+          wrap.appendChild(btn);
+          wrap.appendChild(content);
+          dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+
+    /** Inicializa o toggle da barra lateral */
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) {
+          dom.sidebar.classList.toggle('-translate-x-full');
+          dom.sidebarOverlay.classList.toggle('hidden');
+          return;
+        }
+        if (show) {
+          dom.sidebar.classList.remove('-translate-x-full');
+          dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+          dom.sidebar.classList.add('-translate-x-full');
+          dom.sidebarOverlay.classList.add('hidden');
+        }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+    /** ===== Lógica CapyEscreve ===== */
+    let recog;
+    let recording = false;
+
+    // Atualiza o estado dos botões com base nas entradas
+    function updateWriteButtons() {
+      const mainText = dom.writeInput.value.trim();
+      const cmdText = dom.writeCommand.value.trim();
+      // Habilita botões de ação se houver texto no esboço ou comando
+      const hasSubject = mainText.length > 0 || cmdText.length > 0;
+      dom.btnWriteTitles.disabled = !hasSubject;
+      dom.btnWriteIntro.disabled = !hasSubject;
+      dom.btnWriteSection.disabled = !hasSubject;
+      dom.btnWriteConclusion.disabled = !hasSubject;
+      // Revisão requer texto no esboço
+      dom.btnWriteReview.disabled = mainText.length === 0;
+      // Comando personalizado requer texto no comando
+      dom.btnWriteCustom.disabled = cmdText.length === 0;
+      // Botões de resultado
+      const hasResult = dom.writeResult.value.trim().length > 0;
+      dom.btnWriteOuvir.disabled = !hasResult;
+      dom.btnWriteCopy.disabled = !hasResult;
+      dom.btnWriteExport.disabled = !hasResult;
+    }
+
+    // Inicia o ditado e escreve no esboço
+    function startWriteRecord() {
+      if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        alert('Reconhecimento de fala não suportado neste navegador.');
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recog = new SpeechRecognition();
+      recog.lang = 'pt-BR';
+      recog.interimResults = false;
+      recog.maxAlternatives = 1;
+      recog.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        // acrescenta ao texto existente
+        const current = dom.writeInput.value;
+        dom.writeInput.value = current ? (current + ' ' + transcript) : transcript;
+        updateWriteButtons();
+      };
+      recog.onerror = (e) => {
+        console.error('Erro de fala', e.error);
+        alert('Erro no reconhecimento de fala: ' + e.error);
+      };
+      recog.onend = () => {
+        recording = false;
+        dom.btnWriteRecord.innerHTML = '<i class="fas fa-microphone"></i> Dictar';
+      };
+      recog.start();
+      recording = true;
+      dom.btnWriteRecord.innerHTML = '<i class="fas fa-stop"></i> Parar';
+    }
+
+    function stopWriteRecord() {
+      if (recog) {
+        recog.stop();
+      }
+      recording = false;
+      dom.btnWriteRecord.innerHTML = '<i class="fas fa-microphone"></i> Dictar';
+    }
+
+    async function handleGenerateWrite(type) {
+      if (!apiKey) {
+        alert('Configure a chave da API primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const mainText = dom.writeInput.value.trim();
+      const cmdText = dom.writeCommand.value.trim();
+      let subject = cmdText || mainText;
+      if (!subject && type !== 'review') {
+        alert('Insira texto ou comando.');
+        return;
+      }
+      // desativa botões enquanto processa
+      dom.btnWriteTitles.disabled = true;
+      dom.btnWriteIntro.disabled = true;
+      dom.btnWriteSection.disabled = true;
+      dom.btnWriteConclusion.disabled = true;
+      dom.btnWriteReview.disabled = true;
+      dom.btnWriteCustom.disabled = true;
+      // limpa o resultado anterior
+      dom.writeResult.value = '';
+      let prompt;
+      if (type === 'titles') {
+        prompt = `Gere três títulos criativos e atraentes sobre o seguinte tema ou texto:\n\n${subject}`;
+      } else if (type === 'intro') {
+        prompt = `Escreva uma introdução concisa e envolvente para o seguinte tema ou texto:\n\n${subject}`;
+      } else if (type === 'section') {
+        prompt = `Desenvolva um parágrafo ou seção expandindo o seguinte tópico ou ideia:\n\n${subject}`;
+      } else if (type === 'conclusion') {
+        prompt = `Escreva uma conclusão clara e eficaz para o seguinte tema ou texto:\n\n${subject}`;
+      } else if (type === 'review') {
+        // Revisão usa o esboço inteiro
+        if (!mainText) {
+          alert('Digite ou dite o texto a ser revisado.');
+          return;
+        }
+        prompt = `Revise o texto a seguir, corrigindo erros gramaticais, melhorando a fluidez e o estilo, mas mantendo o conteúdo original:\n\n${mainText}`;
+      } else if (type === 'custom') {
+        prompt = subject;
+      }
+      const payload = { contents: [ { parts: [ { text: prompt } ] } ] };
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const errTxt = await res.text();
+          dom.writeResult.value = 'Erro: ' + errTxt;
+        } else {
+          const data = await res.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.writeResult.value = result;
+        }
+      } catch (err) {
+        dom.writeResult.value = 'Falha: ' + err.message;
+      }
+      // reabilita botões
+      updateWriteButtons();
+    }
+
+    function speakWrite() {
+      const text = dom.writeResult.value.trim();
+      if (!text) { alert('Nenhum resultado para ouvir.'); return; }
+      const ut = new SpeechSynthesisUtterance(text);
+      ut.lang = 'pt-BR';
+      speechSynthesis.speak(ut);
+    }
+
+    function copyWrite() {
+      const text = dom.writeResult.value.trim();
+      if (!text) { alert('Nada para copiar.'); return; }
+      navigator.clipboard.writeText(text).then(() => { alert('Resultado copiado!'); });
+    }
+
+    function exportWrite() {
+      const text = dom.writeResult.value.trim();
+      if (!text) { alert('Nada para exportar.'); return; }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ts = new Date().toISOString().replace(/[:.-]/g, '').slice(0, 15);
+      a.download = `capyescreve_${ts}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /** Configura elementos do DOM para CapyEscreve */
+    function initWriteDomRefs() {
+      dom.writeInput = document.getElementById('writeInput');
+      dom.writeCommand = document.getElementById('writeCommand');
+      dom.writeResult = document.getElementById('writeResult');
+      dom.btnWriteRecord = document.getElementById('btnWriteRecord');
+      dom.btnWriteClear = document.getElementById('btnWriteClear');
+      dom.btnWriteTitles = document.getElementById('btnWriteTitles');
+      dom.btnWriteIntro = document.getElementById('btnWriteIntro');
+      dom.btnWriteSection = document.getElementById('btnWriteSection');
+      dom.btnWriteConclusion = document.getElementById('btnWriteConclusion');
+      dom.btnWriteReview = document.getElementById('btnWriteReview');
+      dom.btnWriteCustom = document.getElementById('btnWriteCustom');
+      dom.btnWriteOuvir = document.getElementById('btnWriteOuvir');
+      dom.btnWriteCopy = document.getElementById('btnWriteCopy');
+      dom.btnWriteExport = document.getElementById('btnWriteExport');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      setupApiKeyModal();
+      initSidebarToggle();
+      initWriteDomRefs();
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) apiKey = saved;
+      // Eventos de texto
+      dom.writeInput.addEventListener('input', updateWriteButtons);
+      dom.writeCommand.addEventListener('input', updateWriteButtons);
+      // Botão limpar
+      dom.btnWriteClear.addEventListener('click', () => {
+        dom.writeInput.value = '';
+        updateWriteButtons();
+      });
+      // Voz
+      dom.btnWriteRecord.addEventListener('click', () => {
+        if (recording) stopWriteRecord(); else startWriteRecord();
+      });
+      // Ações rápidas
+      dom.btnWriteTitles.addEventListener('click', () => handleGenerateWrite('titles'));
+      dom.btnWriteIntro.addEventListener('click', () => handleGenerateWrite('intro'));
+      dom.btnWriteSection.addEventListener('click', () => handleGenerateWrite('section'));
+      dom.btnWriteConclusion.addEventListener('click', () => handleGenerateWrite('conclusion'));
+      dom.btnWriteReview.addEventListener('click', () => handleGenerateWrite('review'));
+      dom.btnWriteCustom.addEventListener('click', () => handleGenerateWrite('custom'));
+      dom.btnWriteOuvir.addEventListener('click', speakWrite);
+      dom.btnWriteCopy.addEventListener('click', copyWrite);
+      dom.btnWriteExport.addEventListener('click', exportWrite);
+      // Inicializa estado
+      updateWriteButtons();
+    });
+  </script>
+</body>
+</html>

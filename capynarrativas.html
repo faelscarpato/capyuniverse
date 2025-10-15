@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyNarrativas — Narrativas de Dados</title>
+
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
+    type="image/png"
+  />
+
+  <!-- Chart.js para visualizações -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- CapyUniverse Theme Overrides -->
+  <style>
+    :root {
+      --cu-bg-0: #0b0b14;
+      --cu-bg-1: #0f1024;
+      --cu-grid: #2a2e63;
+      --cu-card: #0f0f22cc;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #f59e0b;
+      --cu-text: #e6e6f0;
+      --cu-text-dim: #aab;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-blur: 12px;
+      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+    html { background: var(--cu-bg-0); }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(139, 92, 246, 0.25), transparent 60%),
+        radial-gradient(900px 600px at -10% 20%, rgba(34, 211, 238, 0.18), transparent 60%),
+        var(--cu-bg-0);
+    }
+    .cu-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.12) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.1) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px) 0 0/260px 260px;
+    }
+    .cu-stage {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 38vh;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
+        repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+        repeating-linear-gradient(to top, transparent 0 38px, var(--cu-grid) 38px 39px);
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+      border-radius: 999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  </style>
+
+  <!-- Shared Styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <div class="cu-stars"></div>
+  <div class="cu-stage"></div>
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyNarrativas</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+  <div class="flex flex-1 pt-4 min-h-0">
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full" style="padding-top: 1rem;">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col space-y-6">
+        <div class="text-center">
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color: #f59e0b;">CapyNarrativas 📈</h1>
+          <p class="text-zinc-300 mt-1">Gere dashboards interativos e narrativas de dados com IA.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[420px,1fr] gap-6 min-h-0">
+          <!-- Painel de controle -->
+          <aside class="cu-panel p-4 sm:p-5 flex flex-col space-y-4">
+            <div>
+              <label class="block text-sm text-zinc-300 mb-1" for="narrFile">Fonte de dados (CSV)</label>
+              <input id="narrFile" type="file" accept=".csv,.txt,.tsv" class="cu-input" />
+              <p class="text-xs text-zinc-400 mt-1">Faça upload de uma planilha com cabeçalho.</p>
+            </div>
+            <div class="flex flex-col">
+              <label class="block text-sm text-zinc-300 mb-1" for="narrColumn">Coluna para gráfico</label>
+              <select id="narrColumn" class="cu-select" disabled></select>
+            </div>
+            <div class="flex flex-col">
+              <label class="block text-sm text-zinc-300 mb-1" for="narrChartType">Tipo de gráfico</label>
+              <select id="narrChartType" class="cu-select">
+                <option value="bar">Barra</option>
+                <option value="line">Linha</option>
+                <option value="pie">Pizza</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-zinc-300 mb-1" for="narrQuestion">Pergunta ou objetivo</label>
+              <input id="narrQuestion" class="cu-input" placeholder="Ex: Qual a distribuição de vendas por região?" />
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btnNarrDashboard" class="cu-btn px-3 py-1 text-sm">Gerar Dashboard</button>
+              <button id="btnNarrNarrativa" class="cu-btn px-3 py-1 text-sm">Gerar Narrativa</button>
+            </div>
+          </aside>
+          <!-- Área de resultado e gráfico -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <div class="mb-4">
+              <canvas id="narrChart" class="bg-[#0b0b14] rounded-md" style="max-height:300px;"></canvas>
+            </div>
+            <label class="block text-sm text-zinc-300 mb-1" for="narrResult">Narrativa</label>
+            <textarea id="narrResult" rows="10" class="cu-textarea flex-1" readonly placeholder="Aguardando geração..."></textarea>
+            <div class="flex items-center gap-3 mt-4">
+              <button id="btnNarrOuvir" class="cu-btn" disabled><i class="fas fa-volume-high"></i> Ouvir</button>
+              <button id="btnNarrCopy" class="cu-btn" disabled><i class="fas fa-copy"></i> Copiar</button>
+              <button id="btnNarrExport" class="cu-btn" disabled><i class="fas fa-download"></i> Exportar</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <button id="fabApi" class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50" title="Chaves API">🔑</button>
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"></div>
+  <script>
+    const currentPageId = 'CapyNarrativas';
+    let apiKey = '';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi')
+    };
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A chave é armazenada localmente e usada pelas ferramentas de IA.</p>
+          </div>
+        </div>`;
+      dom.apiKeysModal.innerHTML = html;
+      const close = () => dom.apiKeysModal.classList.add('hidden');
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+      dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.fabApi?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.apiKeysModal.addEventListener('click', (e) => { if (e.target === dom.apiKeysModal) close(); });
+      closeBtn?.addEventListener('click', close);
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim(); if (!key) { alert('Insira uma chave válida.'); return; }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!'); close();
+      });
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) { input.value = saved; apiKey = saved; }
+    }
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json'); if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json(); const categories = {};
+        toolsData.forEach(tool => {
+          let cats = tool.category; if (typeof cats === 'string') cats = [cats]; (cats || []).forEach(cat => { (categories[cat] ??= []).push(tool); });
+        });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a'); home.href='index.html'; home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300'; home.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
+        for (const cat in categories) {
+          const wrap = document.createElement('div'); wrap.className='mb-1';
+          const btn = document.createElement('button'); btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150'; btn.innerHTML=`<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div'); content.className='category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach(tool => {
+            const a=document.createElement('a'); a.href=tool.pageUrl;
+            const iconHtml=tool.icon ? tool.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+            a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id===currentPageId?'active':'text-gray-400'}`;
+            a.innerHTML=iconHtml+`<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+          btn.addEventListener('click', () => { content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+          if (categories[cat].some(t => t.id===currentPageId)) { content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+          wrap.appendChild(btn); wrap.appendChild(content); dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML='<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) {
+          dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); return;
+        }
+        if (show) {
+          dom.sidebar.classList.remove('-translate-x-full'); dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+          dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden');
+        }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+
+    /** ===== Lógica CapyNarrativas ===== */
+    let narrData = '';
+    let parsedData = [];
+    let chartInstance;
+
+    // Atualiza botões conforme dados/características
+    function updateNarrButtons() {
+      const hasData = narrData && narrData.length > 0;
+      const colSelected = dom.narrColumn && dom.narrColumn.value;
+      const questionFilled = dom.narrQuestion?.value?.trim().length > 0;
+      dom.btnNarrDashboard.disabled = !(hasData && colSelected);
+      dom.btnNarrNarrativa.disabled = !(hasData && questionFilled);
+      const hasResult = dom.narrResult.value.trim().length > 0;
+      dom.btnNarrOuvir.disabled = !hasResult;
+      dom.btnNarrCopy.disabled = !hasResult;
+      dom.btnNarrExport.disabled = !hasResult;
+    }
+
+    // Função simples para parsear CSV
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return [];
+      const header = lines[0].split(/,|;|\t/).map(h => h.trim());
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/,|;|\t/);
+        const row = {};
+        header.forEach((h, idx) => {
+          row[h] = cols[idx] !== undefined ? cols[idx].trim() : '';
+        });
+        rows.push(row);
+      }
+      return { header, rows };
+    }
+
+    async function handleNarrFiles(file) {
+      narrData = '';
+      parsedData = [];
+      if (!file) { updateNarrButtons(); return; }
+      try {
+        const text = await file.text();
+        // salva texto original para IA (limitado)
+        narrData = text.slice(0, 8000);
+        const parsed = parseCsv(text);
+        parsedData = parsed;
+        populateNarrColumns(parsed.header, parsed.rows);
+      } catch (err) {
+        console.error('Erro lendo CSV', err);
+      }
+      updateNarrButtons();
+    }
+
+    function populateNarrColumns(headers, rows) {
+      // Detecta colunas numéricas
+      const select = dom.narrColumn;
+      select.innerHTML = '';
+      let hasOption = false;
+      headers.forEach(h => {
+        // check if numeric column
+        let numericCount = 0;
+        let total = 0;
+        for (const r of rows) {
+          const val = r[h];
+          if (val === undefined || val === '') continue;
+          total++;
+          if (!isNaN(parseFloat(val))) numericCount++;
+        }
+        // We'll include all columns; numeric flagged for special treatment
+        const opt = document.createElement('option');
+        opt.value = h;
+        opt.textContent = h;
+        opt.setAttribute('data-numeric', numericCount === total && total > 0 ? 'true' : 'false');
+        select.appendChild(opt);
+        hasOption = true;
+      });
+      select.disabled = !hasOption;
+    }
+
+    function generateNarrChart() {
+      const col = dom.narrColumn.value;
+      if (!parsedData || !parsedData.rows || parsedData.rows.length === 0 || !col) return;
+      // Prepara dados
+      const values = parsedData.rows.map(r => r[col]).filter(v => v !== undefined && v !== '');
+      const isNumeric = dom.narrColumn.selectedOptions[0].getAttribute('data-numeric') === 'true';
+      let labels = [];
+      let data = [];
+      let type = dom.narrChartType.value;
+      if (isNumeric) {
+        // converte para números e cria histograma simples (10 bins)
+        const nums = values.map(v => parseFloat(v)).filter(n => !isNaN(n));
+        if (!nums.length) return;
+        const min = Math.min(...nums);
+        const max = Math.max(...nums);
+        const bins = 10;
+        const step = (max - min) / bins;
+        const counts = new Array(bins).fill(0);
+        nums.forEach(n => {
+          let index = Math.floor((n - min) / step);
+          if (index >= bins) index = bins - 1;
+          counts[index]++;
+        });
+        labels = counts.map((_, i) => {
+          const start = (min + i * step).toFixed(1);
+          const end = (min + (i + 1) * step).toFixed(1);
+          return `${start} – ${end}`;
+        });
+        data = counts;
+        if (type === 'pie') type = 'bar';
+      } else {
+        // agrupa categorias e pega top 10
+        const counts = {};
+        values.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        labels = entries.map(e => e[0]);
+        data = entries.map(e => e[1]);
+      }
+      // destrói gráfico antigo
+      if (chartInstance) chartInstance.destroy();
+      const ctx = document.getElementById('narrChart').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: type,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: col,
+            data: data,
+            backgroundColor: type === 'pie' ? labels.map((_, i) => `hsl(${(i * 36) % 360},70%,55%)`) : 'rgba(139, 92, 246, 0.6)',
+            borderColor: type === 'pie' ? 'transparent' : 'rgba(139, 92, 246, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: type === 'pie' } }
+        }
+      });
+    }
+
+    async function generateNarrative() {
+      if (!apiKey) {
+        alert('Configure a chave da API primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      if (!narrData) {
+        alert('Carregue um arquivo de dados.');
+        return;
+      }
+      const question = dom.narrQuestion.value.trim();
+      if (!question) {
+        alert('Digite uma pergunta ou objetivo.');
+        return;
+      }
+      dom.btnNarrNarrativa.disabled = true;
+      dom.narrResult.value = '';
+      const prompt = `Você é um analista de dados. Com base nos dados abaixo, gere uma narrativa em linguagem natural explicando as principais tendências, padrões e insights relacionados à seguinte pergunta ou objetivo: ${question}. Utilize um tom acessível para não especialistas. Dados:\n\n${narrData}`;
+      const payload = { contents: [ { parts: [ { text: prompt } ] } ] };
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const errTxt = await res.text();
+          dom.narrResult.value = 'Erro: ' + errTxt;
+        } else {
+          const data = await res.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.narrResult.value = result;
+        }
+      } catch (err) {
+        dom.narrResult.value = 'Falha: ' + err.message;
+      }
+      dom.btnNarrNarrativa.disabled = false;
+      updateNarrButtons();
+    }
+
+    function speakNarr() {
+      const text = dom.narrResult.value.trim();
+      if (!text) { alert('Nada para ouvir.'); return; }
+      const ut = new SpeechSynthesisUtterance(text);
+      ut.lang = 'pt-BR';
+      speechSynthesis.speak(ut);
+    }
+
+    function copyNarr() {
+      const text = dom.narrResult.value.trim();
+      if (!text) { alert('Nada para copiar.'); return; }
+      navigator.clipboard.writeText(text).then(() => { alert('Resultado copiado!'); });
+    }
+
+    function exportNarr() {
+      const text = dom.narrResult.value.trim();
+      if (!text) { alert('Nada para exportar.'); return; }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ts = new Date().toISOString().replace(/[:.-]/g, '').slice(0, 15);
+      a.download = `capynarrativas_${ts}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Inicializa referências DOM específicas
+    function initNarrDomRefs() {
+      dom.narrFile = document.getElementById('narrFile');
+      dom.narrColumn = document.getElementById('narrColumn');
+      dom.narrChartType = document.getElementById('narrChartType');
+      dom.narrQuestion = document.getElementById('narrQuestion');
+      dom.narrResult = document.getElementById('narrResult');
+      dom.btnNarrDashboard = document.getElementById('btnNarrDashboard');
+      dom.btnNarrNarrativa = document.getElementById('btnNarrNarrativa');
+      dom.btnNarrOuvir = document.getElementById('btnNarrOuvir');
+      dom.btnNarrCopy = document.getElementById('btnNarrCopy');
+      dom.btnNarrExport = document.getElementById('btnNarrExport');
+    }
+
+    // Substitui DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar(); setupApiKeyModal(); initSidebarToggle(); initNarrDomRefs(); const saved=localStorage.getItem(API_KEY_STORAGE_KEY); if (saved) apiKey=saved;
+      dom.narrFile.addEventListener('change', (e) => handleNarrFiles(e.target.files[0]));
+      dom.narrColumn.addEventListener('change', updateNarrButtons);
+      dom.narrChartType.addEventListener('change', () => { if (narrData) generateNarrChart(); });
+      dom.narrQuestion.addEventListener('input', updateNarrButtons);
+      dom.btnNarrDashboard.addEventListener('click', () => generateNarrChart());
+      dom.btnNarrNarrativa.addEventListener('click', () => generateNarrative());
+      dom.btnNarrOuvir.addEventListener('click', speakNarr);
+      dom.btnNarrCopy.addEventListener('click', copyNarr);
+      dom.btnNarrExport.addEventListener('click', exportNarr);
+      updateNarrButtons();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyFocal — Ponto Focal de Marketing</title>
+  <!-- Tailwind e fontes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png" />
+  <!-- Tema CapyUniverse -->
+  <style>
+    :root {
+      --cu-bg-0: #0b0b14;
+      --cu-bg-1: #0f1024;
+      --cu-grid: #2a2e63;
+      --cu-card: #0f0f22cc;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #f59e0b;
+      --cu-text: #e6e6f0;
+      --cu-text-dim: #aab;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-blur: 12px;
+      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+    html { background: var(--cu-bg-0); }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(239, 68, 68, 0.18), transparent 60%),
+        radial-gradient(900px 600px at -10% 20%, rgba(252, 211, 77, 0.18), transparent 60%),
+        var(--cu-bg-0);
+    }
+    .cu-stars { position: fixed; inset: 0; pointer-events: none; z-index: -2; background:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 75% 35%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 70%, rgba(255,255,255,.08) 0 1px, transparent 2px) 0 0/260px 260px;
+    }
+    .cu-stage { position: fixed; inset:auto 0 0 0; height:38vh; pointer-events:none; z-index:-1;
+      background: linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
+        repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+        repeating-linear-gradient(to top, transparent 0 38px, var(--cu-grid) 38px 39px);
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .scrollbar-thin::-webkit-scrollbar { width:8px; height:8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: linear-gradient(120deg,#f97316,#f59e0b); border-radius:999px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: rgba(255,255,255,0.06); }
+  </style>
+  <!-- Shared styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <div class="cu-stars"></div><div class="cu-stage"></div>
+  <!-- Header -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyFocal</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+  <div class="flex flex-1 pt-4 min-h-0">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+    <!-- Conteúdo principal -->
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full" style="padding-top: 1rem;">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col space-y-6">
+        <div class="text-center">
+          <h1 class="text-2xl sm:text-3xl font-bold" style="color:#f97316;">CapyFocal 📣</h1>
+          <p class="text-zinc-300 mt-1">Crie campanhas e visuais marcantes com inteligência artificial.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[420px,1fr] gap-6 min-h-0">
+          <!-- Painel de entrada -->
+          <aside class="cu-panel p-4 sm:p-5 flex flex-col space-y-4">
+            <div>
+              <label class="block text-sm text-zinc-300 mb-1" for="focalObjective">Objetivo da campanha</label>
+              <textarea id="focalObjective" rows="4" class="cu-textarea" placeholder="Descreva a mensagem ou objetivo da campanha"></textarea>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btnFocalCopy" class="cu-btn px-3 py-1 text-sm">Gerar Copy</button>
+              <button id="btnFocalImage" class="cu-btn px-3 py-1 text-sm">Gerar Imagem</button>
+              <button id="btnFocalPlan" class="cu-btn px-3 py-1 text-sm">Plano de Automação</button>
+              <button id="btnFocalFull" class="cu-btn px-3 py-1 text-sm">Completo</button>
+            </div>
+          </aside>
+          <!-- Resultados -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <div class="flex flex-col gap-3 mb-4">
+              <label class="block text-sm text-zinc-300" for="focalResult">Resultado textual</label>
+              <textarea id="focalResult" rows="8" class="cu-textarea flex-1" readonly placeholder="Aguardando geração..."></textarea>
+              <div class="flex items-center gap-3">
+                <button id="btnFocalOuvir" class="cu-btn" disabled><i class="fas fa-volume-high"></i> Ouvir</button>
+                <button id="btnFocalCopyResult" class="cu-btn" disabled><i class="fas fa-copy"></i> Copiar</button>
+                <button id="btnFocalExport" class="cu-btn" disabled><i class="fas fa-download"></i> Exportar</button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3">
+              <label class="block text-sm text-zinc-300">Visual gerado</label>
+              <div id="focalImageContainer" class="w-full aspect-square bg-[#12122a] rounded-lg flex items-center justify-center overflow-hidden">
+                <span class="text-zinc-500">Nenhuma imagem gerada</span>
+              </div>
+              <button id="btnFocalDownloadImage" class="cu-btn" disabled><i class="fas fa-download"></i> Baixar Imagem</button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+  <!-- Botão flutuante de chave API -->
+  <button id="fabApi" class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50" title="Chaves API">🔑</button>
+  <!-- Modal de Chave API -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"></div>
+  <script>
+    const currentPageId = 'CapyFocal';
+    let apiKey = '';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi')
+    };
+    /* Modal de API key */
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A chave é armazenada localmente e utilizada pelas ferramentas de IA.</p>
+          </div>
+        </div>`;
+      dom.apiKeysModal.innerHTML = html;
+      const close = () => dom.apiKeysModal.classList.add('hidden');
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+      dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.fabApi?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.apiKeysModal.addEventListener('click', (e) => { if (e.target === dom.apiKeysModal) close(); });
+      closeBtn?.addEventListener('click', close);
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim();
+        if (!key) { alert('Insira uma chave válida.'); return; }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!');
+        close();
+      });
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) { input.value = saved; apiKey = saved; }
+    }
+    /* Menu lateral dinâmico */
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json'); if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json(); const categories = {};
+        toolsData.forEach(tool => {
+          let cats = tool.category; if (typeof cats === 'string') cats = [cats]; (cats || []).forEach(cat => { (categories[cat] ??= []).push(tool); });
+        });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a'); home.href='index.html'; home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300'; home.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
+        for (const cat in categories) {
+          const wrap = document.createElement('div'); wrap.className='mb-1';
+          const btn = document.createElement('button'); btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150'; btn.innerHTML=`<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div'); content.className='category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach(tool => {
+            const a=document.createElement('a'); a.href=tool.pageUrl;
+            const iconHtml=tool.icon ? tool.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+            a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id===currentPageId?'active':'text-gray-400'}`;
+            a.innerHTML=iconHtml+`<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+          btn.addEventListener('click', () => { content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+          if (categories[cat].some(t => t.id===currentPageId)) { content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+          wrap.appendChild(btn); wrap.appendChild(content); dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML='<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+    /* Toggle do menu lateral */
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); return; }
+        if (show) { dom.sidebar.classList.remove('-translate-x-full'); dom.sidebarOverlay.classList.remove('hidden'); }
+        else { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+    /* ===== Lógica CapyFocal ===== */
+    let imageUrl = '';
+
+    function updateFocalButtons() {
+      const obj = dom.focalObjective.value.trim();
+      const hasObj = obj.length > 0;
+      dom.btnFocalCopy.disabled = !hasObj;
+      dom.btnFocalImage.disabled = !hasObj;
+      dom.btnFocalPlan.disabled = !hasObj;
+      dom.btnFocalFull.disabled = !hasObj;
+      const hasResult = dom.focalResult.value.trim().length > 0;
+      dom.btnFocalOuvir.disabled = !hasResult;
+      dom.btnFocalCopyResult.disabled = !hasResult;
+      dom.btnFocalExport.disabled = !hasResult;
+      dom.btnFocalDownloadImage.disabled = !imageUrl;
+    }
+
+    async function generateFocalText(type) {
+      if (!apiKey) {
+        alert('Configure a chave da API primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const objective = dom.focalObjective.value.trim();
+      if (!objective) { alert('Descreva o objetivo da campanha.'); return; }
+      dom.btnFocalCopy.disabled = true;
+      dom.btnFocalPlan.disabled = true;
+      dom.btnFocalFull.disabled = true;
+      dom.focalResult.value = '';
+      let prompt;
+      if (type === 'copy') {
+        prompt = `Crie um texto persuasivo para uma campanha de marketing com o seguinte objetivo: ${objective}. Inclua um título criativo, descrição e chamada para ação.`;
+      } else if (type === 'plan') {
+        prompt = `Elabore um plano de automação de marketing para a seguinte campanha, com etapas, cronograma e recomendações: ${objective}.`;
+      } else if (type === 'full') {
+        prompt = `Crie um pacote completo de marketing para o seguinte objetivo: ${objective}. O pacote deve conter: um título atraente, descrição da campanha, chamada para ação e um plano de automação com etapas, prazos e recomendações.`;
+      }
+      const payload = { contents: [ { parts: [ { text: prompt } ] } ] };
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(apiUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const errTxt = await res.text(); dom.focalResult.value = 'Erro: '+errTxt;
+        } else {
+          const data = await res.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.focalResult.value = result;
+        }
+      } catch (err) {
+        dom.focalResult.value = 'Falha: '+err.message;
+      }
+      updateFocalButtons();
+    }
+
+    async function generateFocalImage() {
+      const objective = dom.focalObjective.value.trim();
+      if (!objective) { alert('Descreva o objetivo da campanha para gerar uma imagem.'); return; }
+      // configura prompt para Pollinations
+      const merged = objective;
+      const u = new URL('https://image.pollinations.ai/prompt/'+encodeURIComponent(merged));
+      u.searchParams.set('model','flux'); u.searchParams.set('width','768'); u.searchParams.set('height','768'); u.searchParams.set('safe','true');
+      try {
+        const res = await fetch(u.toString(), { cache:'no-store', mode:'cors' });
+        if (!res.ok) throw new Error('status '+res.status);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        imageUrl = url;
+        // Atualiza container
+        const cont = dom.focalImageContainer;
+        cont.innerHTML = '';
+        const img = document.createElement('img'); img.src = url; img.className='w-full h-full object-cover';
+        cont.appendChild(img);
+      } catch(err) {
+        console.error(err);
+        dom.focalImageContainer.innerHTML = '<span class="text-red-400">Erro ao gerar imagem</span>';
+        imageUrl = '';
+      }
+      updateFocalButtons();
+    }
+
+    function speakFocal() {
+      const text = dom.focalResult.value.trim(); if (!text) { alert('Nada para ouvir.'); return; }
+      const ut = new SpeechSynthesisUtterance(text); ut.lang='pt-BR'; speechSynthesis.speak(ut);
+    }
+    function copyFocal() {
+      const text = dom.focalResult.value.trim(); if (!text) { alert('Nada para copiar.'); return; }
+      navigator.clipboard.writeText(text).then(() => { alert('Resultado copiado!'); });
+    }
+    function exportFocal() {
+      const text = dom.focalResult.value.trim(); if (!text) { alert('Nada para exportar.'); return; }
+      const blob = new Blob([text], { type:'text/plain;charset=utf-8' }); const url = URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; const ts=new Date().toISOString().replace(/[:.-]/g,'').slice(0,15); a.download=`capyfocal_${ts}.txt`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function downloadFocalImage() {
+      if (!imageUrl) { alert('Nenhuma imagem disponível.'); return; }
+      const a = document.createElement('a'); a.href = imageUrl; const ts=new Date().toISOString().replace(/[:.-]/g,'').slice(0,15); a.download=`capyfocal_img_${ts}.png`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    /* Inicializa referências específicas */
+    function initFocalDomRefs() {
+      dom.focalObjective = document.getElementById('focalObjective');
+      dom.focalResult = document.getElementById('focalResult');
+      dom.focalImageContainer = document.getElementById('focalImageContainer');
+      dom.btnFocalCopy = document.getElementById('btnFocalCopy');
+      dom.btnFocalImage = document.getElementById('btnFocalImage');
+      dom.btnFocalPlan = document.getElementById('btnFocalPlan');
+      dom.btnFocalFull = document.getElementById('btnFocalFull');
+      dom.btnFocalOuvir = document.getElementById('btnFocalOuvir');
+      dom.btnFocalCopyResult = document.getElementById('btnFocalCopyResult');
+      dom.btnFocalExport = document.getElementById('btnFocalExport');
+      dom.btnFocalDownloadImage = document.getElementById('btnFocalDownloadImage');
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar(); setupApiKeyModal(); initSidebarToggle(); initFocalDomRefs(); const saved=localStorage.getItem(API_KEY_STORAGE_KEY); if (saved) apiKey=saved;
+      dom.focalObjective.addEventListener('input', updateFocalButtons);
+      dom.btnFocalCopy.addEventListener('click', () => generateFocalText('copy'));
+      dom.btnFocalPlan.addEventListener('click', () => generateFocalText('plan'));
+      dom.btnFocalFull.addEventListener('click', () => generateFocalText('full'));
+      dom.btnFocalImage.addEventListener('click', generateFocalImage);
+      dom.btnFocalOuvir.addEventListener('click', speakFocal);
+      dom.btnFocalCopyResult.addEventListener('click', copyFocal);
+      dom.btnFocalExport.addEventListener('click', exportFocal);
+      dom.btnFocalDownloadImage.addEventListener('click', downloadFocalImage);
+      updateFocalButtons();
+    });
+  </script>
+</body>
+</html>

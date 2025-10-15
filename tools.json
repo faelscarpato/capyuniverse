@@ -736,5 +736,45 @@
     "pageUrl": "capyprofa.html",
     "icon": "<i class='fa-solid fa-chalkboard-user w-5 h-5 mr-2 text-emerald-400'></i>",
     "color": "emerald-400"
+  },
+  {
+    "id": "CapyTrama",
+    "title": "CapyTrama",
+    "icon": "<i class='fa-solid fa-chart-line w-5 h-5 mr-2 text-violet-400'></i>",
+    "imageUrl": "img/capytrama.webp",
+    "description": "Narrador de dados: converta bases em narrativas e relatórios impactantes.",
+    "category": "Análise de Dados",
+    "pageUrl": "capytrama.html",
+    "color": "violet-400"
+  },
+  {
+    "id": "CapyNarrativas",
+    "title": "CapyNarrativas",
+    "icon": "<i class='fa-solid fa-chart-pie w-5 h-5 mr-2 text-amber-400'></i>",
+    "imageUrl": "img/capynarrativas.webp",
+    "description": "Narrativas de dados: gere dashboards e textos explicativos de seus dados.",
+    "category": "Análise de Dados",
+    "pageUrl": "capynarrativas.html",
+    "color": "amber-400"
+  },
+  {
+    "id": "CapyEscreve",
+    "title": "CapyEscreve",
+    "icon": "<i class='fa-solid fa-pen-nib w-5 h-5 mr-2 text-sky-400'></i>",
+    "imageUrl": "img/capyescreve.webp",
+    "description": "Ferramenta de escrita assistida: ditar ideias, gerar seções, revisões e títulos com IA.",
+    "category": "Produtividade",
+    "pageUrl": "capyescreve.html",
+    "color": "sky-400"
+  },
+  {
+    "id": "CapyFocal",
+    "title": "CapyFocal",
+    "icon": "<i class='fa-solid fa-bullseye w-5 h-5 mr-2 text-orange-400'></i>",
+    "imageUrl": "img/capyfocal.webp",
+    "description": "Plataforma de marketing data-driven: gera campanhas, textos, visuais e planos de automação.",
+    "category": "Marketing",
+    "pageUrl": "capyfocal.html",
+    "color": "orange-400"
   }
 ] 
