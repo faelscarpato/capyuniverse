@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyRelato — Relator Inteligente</title>
+
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
+    type="image/png"
+  />
+
+  <!-- CapyUniverse Theme Overrides -->
+  <style>
+    :root {
+      --cu-bg-0: #0b0b14;
+      --cu-bg-1: #0f1024;
+      --cu-grid: #2a2e63;
+      --cu-card: #0f0f22cc;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #f59e0b;
+      --cu-text: #e6e6f0;
+      --cu-text-dim: #aab;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-blur: 12px;
+      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+    html {
+      background: var(--cu-bg-0);
+    }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(
+          1200px 700px at 70% -10%,
+          rgba(139, 92, 246, 0.25),
+          transparent 60%
+        ),
+        radial-gradient(
+          900px 600px at -10% 20%,
+          rgba(34, 211, 238, 0.18),
+          transparent 60%
+        ),
+        var(--cu-bg-0);
+    }
+    .cu-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(
+          circle at 15% 20%,
+          rgba(255, 255, 255, 0.12) 0 1px,
+          transparent 2px
+        )
+          0 0/180px 180px,
+        radial-gradient(
+          circle at 75% 35%,
+          rgba(255, 255, 255, 0.1) 0 1px,
+          transparent 2px
+        )
+          0 0/220px 220px,
+        radial-gradient(
+          circle at 40% 70%,
+          rgba(255, 255, 255, 0.08) 0 1px,
+          transparent 2px
+        )
+          0 0/260px 260px;
+    }
+    .cu-stage {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 38vh;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
+        repeating-linear-gradient(
+          to right,
+          transparent 0 38px,
+          var(--cu-grid) 38px 39px
+        ),
+        repeating-linear-gradient(
+          to top,
+          transparent 0 38px,
+          var(--cu-grid) 38px 39px
+        );
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+      border-radius: 999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  </style>
+
+  <!-- CapyUniverse Shared Styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <!-- Decorative background elements -->
+  <div class="cu-stars"></div>
+  <div class="cu-stage"></div>
+
+  <!-- Header -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button
+        id="sidebarToggleBtn"
+        class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none"
+      >
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyRelato</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button
+        onclick="location.href='index.html'"
+        class="cu-btn hidden sm:inline-flex"
+      >
+        Início
+      </button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-4 min-h-0">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin"
+    >
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"
+    ></div>
+
+    <!-- Main content area -->
+    <main
+      class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"
+      style="padding-top: 1rem;"
+    >
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col">
+        <div class="text-center mb-6 sm:mb-8">
+          <h1
+            class="text-2xl sm:text-3xl font-bold"
+            style="color: #f472d0;"
+          >
+            CapyRelato 📑
+          </h1>
+          <p class="text-zinc-300 mt-1">
+            Transforme documentos complexos em resumos, ementas e atas com IA.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[380px,1fr] gap-6 min-h-0">
+          <!-- Control panel -->
+          <aside class="cu-panel p-4 sm:p-5 space-y-4">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fas fa-file-alt text-zinc-300"></i>
+              <h2 class="text-lg font-semibold">Documentos</h2>
+            </div>
+            <label class="block text-sm text-zinc-300"
+              >Selecione arquivos (imagens ou PDFs)</label
+            >
+            <input
+              id="fileUpload"
+              type="file"
+              class="cu-input mt-1"
+              multiple
+              accept="image/*,application/pdf"
+            />
+            <button
+              id="btnExtractText"
+              class="mt-3 w-full cu-btn primary justify-center"
+            >
+              <i class="fas fa-eye"></i> Extrair Texto
+            </button>
+            <hr class="my-4 border-white/10" />
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-magic text-zinc-300"></i>
+                <h3 class="font-medium">Gerar com IA</h3>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <button
+                  id="btnResumo"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-align-left"></i> Resumo
+                </button>
+                <button
+                  id="btnEmenta"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-list-ul"></i> Ementa
+                </button>
+                <button
+                  id="btnAta"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-handshake"></i> Ata
+                </button>
+              </div>
+              <button
+                id="btnOuvir"
+                class="mt-3 w-full cu-btn justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-volume-up"></i> Ouvir Resultado
+              </button>
+            </div>
+          </aside>
+          <!-- Output area -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <div class="flex flex-col gap-4 flex-1">
+              <div>
+                <h3 class="text-lg font-semibold text-zinc-200">
+                  Texto Extraído
+                </h3>
+                <textarea
+                  id="extractedText"
+                  class="cu-textarea mt-1 h-40"
+                  placeholder="O texto extraído aparecerá aqui..."
+                  readonly
+                ></textarea>
+              </div>
+              <div class="mt-2">
+                <h3 class="text-lg font-semibold text-zinc-200">Resultado</h3>
+                <textarea
+                  id="resultText"
+                  class="cu-textarea mt-1 h-40"
+                  placeholder="O resultado do resumo/ementa/ata aparecerá aqui..."
+                  readonly
+                ></textarea>
+              </div>
+            </div>
+            <div class="flex gap-4 mt-4">
+              <button
+                id="btnCopy"
+                class="cu-btn disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-copy"></i> Copiar
+              </button>
+              <button
+                id="btnExport"
+                class="cu-btn disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-file-export"></i> Exportar
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating API Key button (mobile) -->
+  <button
+    id="fabApi"
+    class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50"
+    title="Chaves API"
+  >
+    🔑
+  </button>
+
+  <!-- API Keys Modal -->
+  <div
+    id="apiKeysModal"
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"
+  ></div>
+
+  <script>
+    const currentPageId = 'CapyRelato';
+    let apiKey = '';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi'),
+      fileUpload: document.getElementById('fileUpload'),
+      extractedText: document.getElementById('extractedText'),
+      resultText: document.getElementById('resultText'),
+      btnExtractText: document.getElementById('btnExtractText'),
+      btnResumo: document.getElementById('btnResumo'),
+      btnEmenta: document.getElementById('btnEmenta'),
+      btnAta: document.getElementById('btnAta'),
+      btnOuvir: document.getElementById('btnOuvir'),
+      btnCopy: document.getElementById('btnCopy'),
+      btnExport: document.getElementById('btnExport')
+    };
+
+    /**
+     * Cria o conteúdo do modal de chaves de API e adiciona eventos
+     */
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A chave é armazenada localmente (localStorage) e é utilizada pelas ferramentas de IA.</p>
+          </div>
+        </div>`;
+      dom.apiKeysModal.innerHTML = html;
+      const close = () => {
+        dom.apiKeysModal.classList.add('hidden');
+      };
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+      dom.openApiKeysModalButton?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.remove('hidden');
+      });
+      dom.fabApi?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.remove('hidden');
+      });
+      dom.apiKeysModal.addEventListener('click', (e) => {
+        if (e.target === dom.apiKeysModal) close();
+      });
+      closeBtn?.addEventListener('click', close);
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim();
+        if (!key) {
+          alert('Insira uma chave válida.');
+          return;
+        }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!');
+        close();
+      });
+      // preencher campo com chave salva
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) {
+        input.value = saved;
+        apiKey = saved;
+      }
+    }
+
+    /**
+     * Renderiza o menu lateral dinamicamente a partir de tools.json
+     */
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json();
+        const categories = {};
+        toolsData.forEach((tool) => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          (cats || []).forEach((cat) => {
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(tool);
+          });
+        });
+        dom.sidebar.innerHTML = '';
+        // link home
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className =
+          'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+        home.innerHTML =
+          `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
+        for (const cat in categories) {
+          const wrap = document.createElement('div');
+          wrap.className = 'mb-1';
+          const btn = document.createElement('button');
+          btn.className =
+            'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+          btn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach((tool) => {
+            const a = document.createElement('a');
+            a.href = tool.pageUrl;
+            const iconHtml = tool.icon
+              ? tool.icon
+                  .replace('w-10 h-10', 'w-5 h-5')
+                  .replace('mb-2', 'mr-2')
+              : '<span class="w-5 h-5 mr-2"></span>';
+            a.className =
+              `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+            a.innerHTML = iconHtml + `<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('svg').classList.toggle('rotate-180');
+          });
+          if (categories[cat].some((t) => t.id === currentPageId)) {
+            content.classList.add('expanded');
+            btn.querySelector('svg').classList.add('rotate-180');
+          }
+          wrap.appendChild(btn);
+          wrap.appendChild(content);
+          dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML =
+          '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+
+    /**
+     * Inicializa o toggle da sidebar para mobile
+     */
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) {
+          dom.sidebar.classList.toggle('-translate-x-full');
+          dom.sidebarOverlay.classList.toggle('hidden');
+          return;
+        }
+        if (show) {
+          dom.sidebar.classList.remove('-translate-x-full');
+          dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+          dom.sidebar.classList.add('-translate-x-full');
+          dom.sidebarOverlay.classList.add('hidden');
+        }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+
+    /**
+     * Converte um arquivo em base64.
+     * @param {File} file
+     * @returns {Promise<string>}
+     */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target.result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /**
+     * Extrai texto dos arquivos selecionados usando a API Gemini.
+     */
+    async function handleExtractText() {
+      if (!apiKey) {
+        alert('Por favor, configure a sua chave API do Gemini primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const files = dom.fileUpload.files;
+      if (!files || files.length === 0) {
+        alert('Por favor, selecione ao menos um arquivo (imagem ou PDF).');
+        return;
+      }
+      dom.extractedText.value = '';
+      dom.resultText.value = '';
+      // disable buttons during processing
+      dom.btnExtractText.disabled = true;
+      dom.btnResumo.disabled = true;
+      dom.btnEmenta.disabled = true;
+      dom.btnAta.disabled = true;
+      dom.btnOuvir.disabled = true;
+      dom.btnCopy.disabled = true;
+      dom.btnExport.disabled = true;
+      let fullOutput = '';
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+        try {
+          const base64 = await fileToBase64(file);
+          const prompt = 'Extraia todo o texto visível neste documento. Apresente o texto de forma limpa e estruturada.';
+          const payload = {
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  { inlineData: { mimeType: mimeType, data: base64 } }
+                ]
+              }
+            ]
+          };
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            const errTxt = await response.text();
+            fullOutput += `--- ERRO AO PROCESSAR ${file.name} ---\n${errTxt}\n\n`;
+          } else {
+            const data = await response.json();
+            let extracted = `--- TEXTO EXTRAÍDO DE: ${file.name} ---\n`;
+            const textPart = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            extracted += textPart ? textPart.trim() : 'Nenhum texto detetado ou a resposta foi bloqueada.';
+            fullOutput += extracted + '\n\n';
+          }
+        } catch (err) {
+          fullOutput += `--- FALHA AO PROCESSAR ${file.name} ---\n${err.message}\n\n`;
+        }
+        // small delay to avoid hitting API too quickly
+        await new Promise((res) => setTimeout(res, 500));
+      }
+      dom.extractedText.value = fullOutput.trim();
+      // enable summarization buttons if text extracted
+      if (dom.extractedText.value.trim().length > 0) {
+        dom.btnResumo.disabled = false;
+        dom.btnEmenta.disabled = false;
+        dom.btnAta.disabled = false;
+        dom.btnCopy.disabled = false;
+        dom.btnExport.disabled = false;
+      }
+      dom.btnExtractText.disabled = false;
+    }
+
+    /**
+     * Gera resumo, ementa ou ata usando a API Gemini.
+     * @param {'resumo'|'ementa'|'ata'} type
+     */
+    async function handleGenerate(type) {
+      if (!apiKey) {
+        alert('Por favor, configure a sua chave API do Gemini primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const text = dom.extractedText.value.trim();
+      if (!text) {
+        alert('Não há texto extraído para processar.');
+        return;
+      }
+      dom.btnResumo.disabled = true;
+      dom.btnEmenta.disabled = true;
+      dom.btnAta.disabled = true;
+      dom.btnOuvir.disabled = true;
+      dom.btnCopy.disabled = true;
+      dom.btnExport.disabled = true;
+      let prompt;
+      if (type === 'resumo') {
+        prompt = `Resuma o seguinte texto de forma concisa e clara:\n\n${text}`;
+      } else if (type === 'ementa') {
+        prompt = `Crie uma ementa com as principais cláusulas, tópicos e insights do seguinte documento:\n\n${text}`;
+      } else if (type === 'ata') {
+        prompt = `Gere uma ata de reunião ou minuta detalhada com base no seguinte documento, destacando decisões, participantes e próximos passos:\n\n${text}`;
+      }
+      const payload = {
+        contents: [ { parts: [ { text: prompt } ] } ]
+      };
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const errTxt = await response.text();
+          dom.resultText.value = `Erro: ${errTxt}`;
+        } else {
+          const data = await response.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.resultText.value = result;
+        }
+      } catch (err) {
+        dom.resultText.value = `Falha: ${err.message}`;
+      }
+      // enable again
+      dom.btnResumo.disabled = false;
+      dom.btnEmenta.disabled = false;
+      dom.btnAta.disabled = false;
+      dom.btnOuvir.disabled = false;
+      dom.btnCopy.disabled = false;
+      dom.btnExport.disabled = false;
+    }
+
+    /**
+     * Executa síntese de fala do resultado.
+     */
+    function speakResult() {
+      const text = dom.resultText.value.trim();
+      if (!text) {
+        alert('Nada para ouvir.');
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'pt-BR';
+      speechSynthesis.speak(utterance);
+    }
+
+    /**
+     * Copia o resultado para a área de transferência.
+     */
+    function copyResult() {
+      const text = dom.resultText.value.trim();
+      if (!text) {
+        alert('Nada para copiar.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Resultado copiado!');
+      });
+    }
+
+    /**
+     * Exporta o resultado para um arquivo de texto.
+     */
+    function exportResult() {
+      const text = dom.resultText.value.trim();
+      if (!text) {
+        alert('Nada para exportar.');
+        return;
+      }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const now = new Date();
+      const timestamp = now
+        .toISOString()
+        .replace(/[:.-]/g, '')
+        .slice(0, 15);
+      a.download = `capyrelato_${timestamp}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Inicializa a página
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      setupApiKeyModal();
+      initSidebarToggle();
+      // carregar chave
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) {
+        apiKey = saved;
+      }
+      // eventos
+      dom.btnExtractText?.addEventListener('click', handleExtractText);
+      dom.btnResumo?.addEventListener('click', () => handleGenerate('resumo'));
+      dom.btnEmenta?.addEventListener('click', () => handleGenerate('ementa'));
+      dom.btnAta?.addEventListener('click', () => handleGenerate('ata'));
+      dom.btnOuvir?.addEventListener('click', speakResult);
+      dom.btnCopy?.addEventListener('click', copyResult);
+      dom.btnExport?.addEventListener('click', exportResult);
+    });
+  </script>
+</body>
+</html>

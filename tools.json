@@ -673,5 +673,68 @@
     "pageUrl": "capywatermark.html",
     "category": "Imagens",
     "icon": "<i class='fa-solid fa-water w-5 h-5 mr-2 text-cyan-400'></i>"
+  },
+  {
+    "id": "CapyFlow",
+    "title": "CapyFlow",
+    "description": "Camada preditiva que automatiza fluxos e sugere ferramentas.",
+    "pageUrl": "capyflow.html",
+    "category": "Plataforma",
+    "icon": "<i class='fa-solid fa-stream w-5 h-5 mr-2 text-cyan-400'></i>",
+    "color": "cyan-400"
+  },
+  {
+    "id": "CapyVisaoCriativa",
+    "title": "CapyVisão Criativa",
+    "description": "Crie e otimize ativos de marketing com IA colaborativa.",
+    "pageUrl": "capyvisao.html",
+    "category": "Mídia & Marketing",
+    "icon": "<i class='fa-solid fa-palette w-5 h-5 mr-2 text-purple-400'></i>",
+    "color": "purple-400"
+  },
+  {
+    "id": "CapyPercepcao",
+    "title": "CapyPercepção",
+    "description": "Transforme imagens em dados e dashboards em tempo real.",
+    "pageUrl": "capypercepcao.html",
+    "category": "Análise de Dados",
+    "icon": "<i class='fa-solid fa-eye w-5 h-5 mr-2 text-emerald-400'></i>",
+    "color": "emerald-400"
+  },
+  {
+    "id": "CapyRelato",
+    "title": "Relator Inteligente",
+    "description": "Transforme documentos complexos em insights acionáveis e resumos por voz.",
+    "category": "Produtividade e Organização",
+    "pageUrl": "capyrelato.html",
+    "icon": "<i class='fa-solid fa-file-contract w-5 h-5 mr-2 text-pink-400'></i>",
+    "color": "pink-400"
+  },
+  {
+    "id": "CapyAto",
+    "title": "CapyAto",
+    "description": "Controle ações jurídicas por voz: elabore petições e resuma processos automaticamente.",
+    "category": "Jurídico",
+    "pageUrl": "capyato.html",
+    "icon": "<i class='fa-solid fa-scale-balanced w-5 h-5 mr-2 text-indigo-400'></i>",
+    "color": "indigo-400"
+  },
+  {
+    "id": "CapyGuia",
+    "title": "CapyGuia (G-IA)",
+    "description": "Copiloto inteligente para produtividade e aprendizado, sintetiza intenções em planos e conteúdos.",
+    "category": "Produtividade e Organização",
+    "pageUrl": "capyguia.html",
+    "icon": "<i class='fa-solid fa-lightbulb w-5 h-5 mr-2 text-amber-400'></i>",
+    "color": "amber-400"
+  },
+  {
+    "id": "CapyProfa",
+    "title": "CapyProfessor",
+    "description": "Assistente de ensino inteligente que cria experiências interativas e personalizadas de aprendizado.",
+    "category": "Aprendizagem e Educação",
+    "pageUrl": "capyprofa.html",
+    "icon": "<i class='fa-solid fa-chalkboard-user w-5 h-5 mr-2 text-emerald-400'></i>",
+    "color": "emerald-400"
   }
 ] 

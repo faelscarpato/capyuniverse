@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyProfa — Assistente Educacional</title>
+
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
+    type="image/png"
+  />
+
+  <!-- CapyUniverse Theme Overrides -->
+  <style>
+    :root {
+      --cu-bg-0: #0b0b14;
+      --cu-bg-1: #0f1024;
+      --cu-grid: #2a2e63;
+      --cu-card: #0f0f22cc;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #f59e0b;
+      --cu-emerald: #10b981;
+      --cu-text: #e6e6f0;
+      --cu-text-dim: #aab;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-blur: 12px;
+      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+    html {
+      background: var(--cu-bg-0);
+    }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(139, 92, 246, 0.25), transparent 60%),
+        radial-gradient(900px 600px at -10% 20%, rgba(34, 211, 238, 0.18), transparent 60%),
+        var(--cu-bg-0);
+    }
+    .cu-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.12) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 75% 35%, rgba(255, 255, 255, 0.1) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px) 0 0/260px 260px;
+    }
+    .cu-stage {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 38vh;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
+        repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
+        repeating-linear-gradient(to top, transparent 0 38px, var(--cu-grid) 38px 39px);
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+      backdrop-filter: blur(15px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+      border-radius: 999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+    }
+  </style>
+
+  <!-- CapyUniverse Shared Styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <!-- Decorative background elements -->
+  <div class="cu-stars"></div>
+  <div class="cu-stage"></div>
+
+  <!-- Header -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button
+        id="sidebarToggleBtn"
+        class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none"
+      >
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyProfa</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button
+        onclick="location.href='index.html'"
+        class="cu-btn hidden sm:inline-flex"
+      >
+        Início
+      </button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-4 min-h-0">
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin"
+    >
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"
+    ></div>
+
+    <!-- Main content area -->
+    <main
+      class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"
+      style="padding-top: 1rem;"
+    >
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col">
+        <div class="text-center mb-6 sm:mb-8">
+          <h1
+            class="text-2xl sm:text-3xl font-bold"
+            style="color: var(--cu-emerald);"
+          >
+            CapyProfa 📚
+          </h1>
+          <p class="text-zinc-300 mt-1">
+            Assistente educacional multimodal que explica, resume e gera conteúdo de estudo a partir de imagens e textos.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[380px,1fr] gap-6 min-h-0">
+          <!-- Control panel -->
+          <aside class="cu-panel p-4 sm:p-5 space-y-4">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fas fa-book-open text-zinc-300"></i>
+              <h2 class="text-lg font-semibold">Entrada</h2>
+            </div>
+            <label class="block text-sm text-zinc-300"
+              >Material (imagem ou PDF)</label
+            >
+            <input
+              id="profaFile"
+              type="file"
+              class="cu-input mt-1"
+              accept="image/*,application/pdf"
+            />
+            <hr class="my-3 border-white/10" />
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-wand-magic-sparkles text-zinc-300"></i>
+                <h3 class="font-medium">Ferramentas IA</h3>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-2 gap-3">
+                <button
+                  id="btnProfaExplicar"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-eye"></i> Explicar
+                </button>
+                <button
+                  id="btnProfaQuiz"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-question-circle"></i> Quiz
+                </button>
+                <button
+                  id="btnProfaResumo"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-align-left"></i> Resumo
+                </button>
+                <button
+                  id="btnProfaPlanoAula"
+                  class="cu-btn justify-center px-2 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled
+                >
+                  <i class="fas fa-chalkboard-teacher"></i> Plano Aula
+                </button>
+              </div>
+            </div>
+            <hr class="my-3 border-white/10" />
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-list-ol text-zinc-300"></i>
+                <h3 class="font-medium">Roteiro de Estudo</h3>
+              </div>
+              <label class="block text-sm text-zinc-300" for="profaTopics"
+                >Tópicos</label
+              >
+              <textarea
+                id="profaTopics"
+                rows="3"
+                class="cu-textarea mt-1"
+                placeholder="Ex: álgebra linear, derivadas, história do Brasil"
+              ></textarea>
+              <button
+                id="btnProfaRoteiro"
+                class="mt-3 w-full cu-btn justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-route"></i> Gerar Roteiro
+              </button>
+            </div>
+            <button
+              id="btnProfaOuvir"
+              class="mt-4 w-full cu-btn justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+              disabled
+            >
+              <i class="fas fa-volume-up"></i> Ouvir Resultado
+            </button>
+          </aside>
+          <!-- Output area -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <h3 class="text-lg font-semibold text-zinc-200">Resultado</h3>
+            <textarea
+              id="profaResult"
+              class="cu-textarea mt-1 h-56"
+              placeholder="O resultado aparecerá aqui..."
+              readonly
+            ></textarea>
+            <div class="flex gap-4 mt-4">
+              <button
+                id="btnProfaCopy"
+                class="cu-btn disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-copy"></i> Copiar
+              </button>
+              <button
+                id="btnProfaExport"
+                class="cu-btn disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled
+              >
+                <i class="fas fa-file-export"></i> Exportar
+              </button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Floating API Key button (mobile) -->
+  <button
+    id="fabApi"
+    class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50"
+    title="Chaves API"
+  >
+    🔑
+  </button>
+
+  <!-- API Keys Modal -->
+  <div
+    id="apiKeysModal"
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"
+  ></div>
+
+  <script>
+    const currentPageId = 'CapyProfa';
+    let apiKey = '';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    // DOM references
+    const dom = {
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi'),
+      profaFile: document.getElementById('profaFile'),
+      profaTopics: document.getElementById('profaTopics'),
+      btnProfaExplicar: document.getElementById('btnProfaExplicar'),
+      btnProfaQuiz: document.getElementById('btnProfaQuiz'),
+      btnProfaResumo: document.getElementById('btnProfaResumo'),
+      btnProfaPlanoAula: document.getElementById('btnProfaPlanoAula'),
+      btnProfaRoteiro: document.getElementById('btnProfaRoteiro'),
+      btnProfaOuvir: document.getElementById('btnProfaOuvir'),
+      profaResult: document.getElementById('profaResult'),
+      btnProfaCopy: document.getElementById('btnProfaCopy'),
+      btnProfaExport: document.getElementById('btnProfaExport')
+    };
+
+    /**
+     * Configura o modal de inserção da chave da API (Google Gemini)
+     */
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
+            <div class="flex">
+              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A chave é armazenada localmente e será usada pelas ferramentas.</p>
+          </div>
+        </div>`;
+      dom.apiKeysModal.innerHTML = html;
+      const close = () => dom.apiKeysModal.classList.add('hidden');
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+      dom.openApiKeysModalButton?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.fabApi?.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
+      dom.apiKeysModal.addEventListener('click', (e) => {
+        if (e.target === dom.apiKeysModal) close();
+      });
+      closeBtn?.addEventListener('click', close);
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim();
+        if (!key) {
+          alert('Insira uma chave válida.');
+          return;
+        }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!');
+        close();
+      });
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) {
+        input.value = saved;
+        apiKey = saved;
+      }
+    }
+
+    /**
+     * Carrega o menu lateral a partir de tools.json
+     */
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json();
+        const categories = {};
+        toolsData.forEach((tool) => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          (cats || []).forEach((cat) => {
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(tool);
+          });
+        });
+        dom.sidebar.innerHTML = '';
+        // home link
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className =
+          'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
+        home.innerHTML =
+          `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
+        dom.sidebar.appendChild(home);
+        for (const cat in categories) {
+          const wrap = document.createElement('div');
+          wrap.className = 'mb-1';
+          const btn = document.createElement('button');
+          btn.className =
+            'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+          btn.innerHTML = `<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+          categories[cat].forEach((tool) => {
+            const a = document.createElement('a');
+            a.href = tool.pageUrl;
+            const iconHtml = tool.icon
+              ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2')
+              : '<span class="w-5 h-5 mr-2"></span>';
+            a.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
+            a.innerHTML = iconHtml + `<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('svg').classList.toggle('rotate-180');
+          });
+          if (categories[cat].some((t) => t.id === currentPageId)) {
+            content.classList.add('expanded');
+            btn.querySelector('svg').classList.add('rotate-180');
+          }
+          wrap.appendChild(btn);
+          wrap.appendChild(content);
+          dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+
+    /**
+     * Inicializa o toggle do menu lateral para dispositivos móveis
+     */
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) {
+          dom.sidebar.classList.toggle('-translate-x-full');
+          dom.sidebarOverlay.classList.toggle('hidden');
+          return;
+        }
+        if (show) {
+          dom.sidebar.classList.remove('-translate-x-full');
+          dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+          dom.sidebar.classList.add('-translate-x-full');
+          dom.sidebarOverlay.classList.add('hidden');
+        }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+
+    /**
+     * Converte um arquivo para base64
+     * @param {File} file
+     * @returns {Promise<string>}
+     */
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64 = e.target.result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /**
+     * Atualiza o estado dos botões com base nos inputs
+     */
+    function updateButtons() {
+      const fileSelected = dom.profaFile.files && dom.profaFile.files.length > 0;
+      dom.btnProfaExplicar.disabled = !fileSelected;
+      dom.btnProfaQuiz.disabled = !fileSelected;
+      dom.btnProfaResumo.disabled = !fileSelected;
+      dom.btnProfaPlanoAula.disabled = !fileSelected;
+      const topicsProvided = dom.profaTopics.value.trim().length > 0;
+      dom.btnProfaRoteiro.disabled = !topicsProvided;
+      const hasResult = dom.profaResult.value.trim().length > 0;
+      dom.btnProfaCopy.disabled = !hasResult;
+      dom.btnProfaExport.disabled = !hasResult;
+      dom.btnProfaOuvir.disabled = !hasResult;
+    }
+
+    /**
+     * Envia requisição para a Gemini para processar material (imagem/pdf)
+     * @param {'explicar'|'quiz'|'resumo'|'planoaula'} type
+     */
+    async function handleProfaMaterial(type) {
+      if (!apiKey) {
+        alert('Por favor, configure a chave API do Gemini primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const files = dom.profaFile.files;
+      if (!files || files.length === 0) {
+        alert('Selecione um arquivo de imagem ou PDF.');
+        return;
+      }
+      dom.profaResult.value = '';
+      updateButtons();
+      const file = files[0];
+      const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream');
+      let prompt;
+      if (type === 'explicar') {
+        prompt = 'Explique passo a passo o conteúdo deste material de estudo de forma clara e didática.';
+      } else if (type === 'quiz') {
+        prompt = 'Crie um conjunto de questões de quiz interativas (com múltipla escolha) baseadas neste material de estudo. Use perguntas objetivas e forneça as respostas corretas ao final.';
+      } else if (type === 'resumo') {
+        prompt = 'Resuma este material de estudo de maneira estruturada, destacando conceitos importantes e exemplos.';
+      } else if (type === 'planoaula') {
+        prompt = 'Elabore um plano de aula detalhado com base neste material de estudo. Inclua objetivos de aprendizagem, tópicos, métodos de ensino e exercícios.';
+      }
+      try {
+        const base64 = await fileToBase64(file);
+        const payload = {
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                { inlineData: { mimeType: mimeType, data: base64 } }
+              ]
+            }
+          ]
+        };
+        // disable buttons while processing
+        dom.btnProfaExplicar.disabled = true;
+        dom.btnProfaQuiz.disabled = true;
+        dom.btnProfaResumo.disabled = true;
+        dom.btnProfaPlanoAula.disabled = true;
+        dom.btnProfaOuvir.disabled = true;
+        dom.btnProfaCopy.disabled = true;
+        dom.btnProfaExport.disabled = true;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          const errTxt = await response.text();
+          dom.profaResult.value = 'Erro: ' + errTxt;
+        } else {
+          const data = await response.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.profaResult.value = result;
+        }
+      } catch (err) {
+        dom.profaResult.value = 'Falha: ' + err.message;
+      }
+      // reenable
+      updateButtons();
+    }
+
+    /**
+     * Gera um roteiro de estudo baseado nos tópicos fornecidos
+     */
+    async function handleProfaRoteiro() {
+      if (!apiKey) {
+        alert('Por favor, configure a chave API do Gemini primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return;
+      }
+      const topics = dom.profaTopics.value.trim();
+      if (!topics) {
+        alert('Insira os tópicos de estudo.');
+        return;
+      }
+      dom.profaResult.value = '';
+      updateButtons();
+      const prompt = `Crie um roteiro de estudo modular com base nos seguintes tópicos. Para cada tópico, sugira materiais, exercícios práticos e feedbacks personalizados:\n\n${topics}`;
+      const payload = { contents: [ { parts: [ { text: prompt } ] } ] };
+      try {
+        dom.btnProfaRoteiro.disabled = true;
+        dom.btnProfaOuvir.disabled = true;
+        dom.btnProfaCopy.disabled = true;
+        dom.btnProfaExport.disabled = true;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) {
+          const errTxt = await res.text();
+          dom.profaResult.value = 'Erro: ' + errTxt;
+        } else {
+          const data = await res.json();
+          const result = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Nenhum resultado gerado ou a resposta foi bloqueada.';
+          dom.profaResult.value = result;
+        }
+      } catch (err) {
+        dom.profaResult.value = 'Falha: ' + err.message;
+      }
+      updateButtons();
+    }
+
+    /**
+     * Fala o resultado em voz alta
+     */
+    function speakProfa() {
+      const text = dom.profaResult.value.trim();
+      if (!text) {
+        alert('Nada para ouvir.');
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'pt-BR';
+      speechSynthesis.speak(utter);
+    }
+
+    /**
+     * Copia o resultado para a área de transferência
+     */
+    function copyProfa() {
+      const text = dom.profaResult.value.trim();
+      if (!text) {
+        alert('Nada para copiar.');
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Resultado copiado!');
+      });
+    }
+
+    /**
+     * Exporta o resultado para um arquivo .txt
+     */
+    function exportProfa() {
+      const text = dom.profaResult.value.trim();
+      if (!text) {
+        alert('Nada para exportar.');
+        return;
+      }
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const now = new Date();
+      const ts = now.toISOString().replace(/[:.-]/g, '').slice(0, 15);
+      a.download = `capyprofa_${ts}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Inicializa tudo após carregamento da página
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      setupApiKeyModal();
+      initSidebarToggle();
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) apiKey = saved;
+      // Atualiza botões quando arquivo ou texto muda
+      dom.profaFile.addEventListener('change', updateButtons);
+      dom.profaTopics.addEventListener('input', updateButtons);
+      // Liga botões de IA
+      dom.btnProfaExplicar.addEventListener('click', () => handleProfaMaterial('explicar'));
+      dom.btnProfaQuiz.addEventListener('click', () => handleProfaMaterial('quiz'));
+      dom.btnProfaResumo.addEventListener('click', () => handleProfaMaterial('resumo'));
+      dom.btnProfaPlanoAula.addEventListener('click', () => handleProfaMaterial('planoaula'));
+      dom.btnProfaRoteiro.addEventListener('click', handleProfaRoteiro);
+      // Ações de resultado
+      dom.btnProfaOuvir.addEventListener('click', speakProfa);
+      dom.btnProfaCopy.addEventListener('click', copyProfa);
+      dom.btnProfaExport.addEventListener('click', exportProfa);
+      // Inicial update
+      updateButtons();
+    });
+  </script>
+</body>
+</html>
