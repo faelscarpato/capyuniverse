@@ -349,6 +349,8 @@
   "id": "CapyLanding",
   "title": "CapyLanding",
   "description": "Gerador de landing page Tailwind + preview e export ZIP.",
+
+"imageUrl": "img/capylanding.webp",
   "pageUrl": "capylanding.html",
   "category": "Marketing",
   "icon": "<i class='fa-solid fa-rocket w-5 h-5 mr-2 text-violet-400'></i>"
@@ -417,6 +419,7 @@
     "id": "CapyPDFLab",
     "title": "PDF Lab",
     "description": "Junte, separe, rotacione e reconstrua PDFs no navegador.",
+"imageUrl": "img/capylab.webp",
     "pageUrl": "capypdflab.html",
     "category": "Documentos e PDFs",
     "icon": "<i class='fa-solid fa-file-pdf w-5 h-5 mr-2 text-rose-400'></i>"
@@ -475,6 +478,7 @@
     "id": "CapyRegex",
     "title": "CapyRegex",
     "description": "Teste e destaque regex com grupos.",
+"imageUrl": "img/capyregex.webp",
     "pageUrl": "capyregex.html",
     "category": "Dev Tools",
     "icon": "<i class='fa-solid fa-slash w-5 h-5 mr-2 text-indigo-400'></i>"
@@ -519,6 +523,16 @@
     "pageUrl": "capysimulador.html",
     "color": "sky-400"
   },
+{
+  "id": "CapySonhos",
+  "title": "Interpretador de Sonhos",
+  "iconUrl": "icon/capysonhos.png",
+  "imageUrl": "img/capysonhos.webp",
+  "description": "Analise sonhos com IA, anexe arquivos e receba interpretações claras e úteis.",
+  "category": "Bem-Estar & Autoconhecimento",
+  "pageUrl": "capysonhos.html",
+  "color": "violet-400"
+}, 
   {
     "id": "CapySolar",
     "title": "Simulador Solar",
@@ -554,6 +568,7 @@
     "id": "CapySQLCoach",
     "title": "SQL Coach",
     "description": "Do briefing em NL para SQL + explicação e testes.",
+"imageUrl": "img/capysql.webp",
     "pageUrl": "capysqlcoach.html",
     "category": "Dev Tools",
     "icon": "<i class='fa-solid fa-database w-5 h-5 mr-2 text-blue-400'></i>"
@@ -562,6 +577,7 @@
     "id": "CapySub",
     "title": "CapySub",
     "description": "SRT/VTT: converter, traduzir (IA), deslocar, gerar de texto.",
+"imageUrl": "img/capysub.webp",
     "pageUrl": "capysub.html",
     "category": "Multimídia",
     "icon": "<i class='fa-solid fa-closed-captioning w-5 h-5 mr-2 text-amber-400'></i>"
@@ -670,6 +686,7 @@
     "id": "CapyWatermark",
     "title": "CapyWatermark",
     "description": "Marca d'água e redimensionamento em lote.",
+"imageUrl": "img/capywatermark.webp",
     "pageUrl": "capywatermark.html",
     "category": "Imagens",
     "icon": "<i class='fa-solid fa-water w-5 h-5 mr-2 text-cyan-400'></i>"
@@ -678,6 +695,7 @@
     "id": "CapyFlow",
     "title": "CapyFlow",
     "description": "Camada preditiva que automatiza fluxos e sugere ferramentas.",
+"imageUrl": "img/capyflow.webp",
     "pageUrl": "capyflow.html",
     "category": "Plataforma",
     "icon": "<i class='fa-solid fa-stream w-5 h-5 mr-2 text-cyan-400'></i>",
@@ -687,6 +705,7 @@
     "id": "CapyVisaoCriativa",
     "title": "CapyVisão Criativa",
     "description": "Crie e otimize ativos de marketing com IA colaborativa.",
+"imageUrl": "img/capyvisao.webp",
     "pageUrl": "capyvisao.html",
     "category": "Mídia & Marketing",
     "icon": "<i class='fa-solid fa-palette w-5 h-5 mr-2 text-purple-400'></i>",
@@ -696,6 +715,7 @@
     "id": "CapyPercepcao",
     "title": "CapyPercepção",
     "description": "Transforme imagens em dados e dashboards em tempo real.",
+"imageUrl": "img/capypercepcao.webp",
     "pageUrl": "capypercepcao.html",
     "category": "Análise de Dados",
     "icon": "<i class='fa-solid fa-eye w-5 h-5 mr-2 text-emerald-400'></i>",
@@ -706,6 +726,7 @@
     "title": "Relator Inteligente",
     "description": "Transforme documentos complexos em insights acionáveis e resumos por voz.",
     "category": "Produtividade e Organização",
+"imageUrl": "img/capyrelator.webp",
     "pageUrl": "capyrelato.html",
     "icon": "<i class='fa-solid fa-file-contract w-5 h-5 mr-2 text-pink-400'></i>",
     "color": "pink-400"
@@ -715,6 +736,7 @@
     "title": "CapyAto",
     "description": "Controle ações jurídicas por voz: elabore petições e resuma processos automaticamente.",
     "category": "Jurídico",
+"imageUrl": "img/capyato.webp",
     "pageUrl": "capyato.html",
     "icon": "<i class='fa-solid fa-scale-balanced w-5 h-5 mr-2 text-indigo-400'></i>",
     "color": "indigo-400"
@@ -724,6 +746,7 @@
     "title": "CapyGuia (G-IA)",
     "description": "Copiloto inteligente para produtividade e aprendizado, sintetiza intenções em planos e conteúdos.",
     "category": "Produtividade e Organização",
+"imageUrl": "img/capyguia.webp",
     "pageUrl": "capyguia.html",
     "icon": "<i class='fa-solid fa-lightbulb w-5 h-5 mr-2 text-amber-400'></i>",
     "color": "amber-400"
@@ -733,6 +756,7 @@
     "title": "CapyProfessor",
     "description": "Assistente de ensino inteligente que cria experiências interativas e personalizadas de aprendizado.",
     "category": "Aprendizagem e Educação",
+"imageUrl": "img/capyprofessor.webp",
     "pageUrl": "capyprofa.html",
     "icon": "<i class='fa-solid fa-chalkboard-user w-5 h-5 mr-2 text-emerald-400'></i>",
     "color": "emerald-400"
