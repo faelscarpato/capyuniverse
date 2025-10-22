@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapyStudio — CapyUniverse</title>
+
+  <!-- Tailwind + Fonts + Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"/>
+
+  <!-- CapyUniverse shell -->
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+
+  <style>
+    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html{ background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14 }
+    body{ color:#e6edf3; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Noto Sans', sans-serif }
+    .font-syne{ font-family:'Syne',sans-serif } .font-mono{ font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace }
+    .glass{ background:var(--glass); backdrop-filter:blur(18px); border:1px solid var(--glass-border); border-radius:1.25rem; box-shadow:0 8px 32px rgba(0,0,0,.35) }
+    .sidebar-glass{ background:rgba(255,255,255,.03); backdrop-filter:blur(18px); border-right:1px solid var(--glass-border) }
+    .sidebar-link.active{ background:#6366f1; color:#fff; font-weight:600 }
+    .input{ background:#27272a; border:1px solid #3f3f46; color:#e4e4e7; border-radius:.5rem } .input:focus{ outline:none; border-color:#2563eb; box-shadow:0 0 0 2px rgba(37,99,235,.45) }
+    .btn{ background:#2563eb; color:#fff; border-radius:.5rem; padding:.625rem .9rem; font-weight:700 } .btn:hover{ background:#1d4ed8 }
+    .chip{ background:rgba(255,255,255,.06); border:1px solid var(--glass-border); padding:.35rem .6rem; border-radius:.6rem }
+    .status{ min-height:22px } .ok{ color:#22c55e } .err{ color:#ef4444 } .warn{ color:#f59e0b }
+    .gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; padding:12px }
+    figure{ margin:0; background:#0b0f14; border:1px solid var(--glass-border); border-radius:12px; overflow:hidden }
+    figure img, figure video{ width:100%; height:240px; object-fit:cover; display:block }
+    figcaption{ display:flex; gap:8px; align-items:center; justify-content:space-between; padding:10px; border-top:1px solid var(--glass-border); font-size:12px; color:#8b98a5 }
+    .pill{ border:1px solid var(--glass-border); padding:6px 10px; border-radius:999px; font-size:12px; color:#8b98a5; cursor:pointer }
+    .tab{ padding:.5rem .75rem; border:1px solid var(--glass-border); border-bottom:none; border-radius:.6rem .6rem 0 0; background:#0c1015; color:#9aa7b4 }
+    .tab.active{ background:var(--glass); color:#e6edf3 }
+    .tabpanel{ display:none }
+    .skeleton{ width:100%; height:240px; background:linear-gradient(90deg,#111418,#171c21,#111418); background-size:200% 100%; animation:shimmer 1.5s infinite }
+    @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* Chat de áudio */
+    .bubble{ background:rgba(255,255,255,.06); border:1px solid var(--glass-border); border-radius:1rem; padding:.75rem; }
+    .bubble.me{ background:#1e293b; }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col text-[15px]">
+  <!-- HEADER -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyStudio</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-4">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto scrollbar-thin pt-4">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="glass p-6 border border-zinc-800">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h1 class="text-3xl font-bold font-syne text-violet-400">CapyStudio 🎨</h1>
+            <p class="text-zinc-300 mt-1">Estúdio criativo — gere <b>imagens</b>, <b>texto</b> e <b>áudio (TTS)</b>, edite localmente e acompanhe <b>feeds</b> ao vivo.</p>
+          </div>
+          <div class="hidden md:flex gap-2">
+            <span class="chip text-xs">Pollinations Suite</span>
+            <span class="chip text-xs">Anon compat</span>
+            <span class="chip text-xs">Watermark: capyuniverse</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 border-b border-zinc-800 mb-4 flex-wrap">
+          <button class="tab active" data-tab="images">Imagens</button>
+          <button class="tab" data-tab="text">Texto</button>
+          <button class="tab" data-tab="audio">Áudio (TTS)</button>
+          <button class="tab" data-tab="feeds">Feeds</button>
+          <button class="tab" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- ========== IMAGES ========== -->
+        <section id="images" class="tabpanel" style="display:block">
+          <div class="grid lg:grid-cols-[1.1fr_.9fr] gap-4">
+            <!-- Controls -->
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-3">Gerar imagem</h3>
+              <label class="text-xs text-zinc-400">Prompt</label>
+              <textarea id="imgPrompt" class="input w-full min-h-[110px]" placeholder="capivara astronauta, synthwave, neon magenta e ciano, volumetric lighting, ultra-detalhado"></textarea>
+
+              <div id="styleChips" class="flex flex-wrap gap-2 mt-2">
+                <button class="chip text-xs" data-style="realistic photograph, 50mm lens, natural light">Realismo</button>
+                <button class="chip text-xs" data-style="anime style, vibrant cel shading">Anime</button>
+                <button class="chip text-xs" data-style="pixel art, 16-bit, sharp dithering">Pixel</button>
+                <button class="chip text-xs" data-style="synthwave, neon magenta and cyan, chrome highlights">Synthwave</button>
+                <button class="chip text-xs" data-style="noir, high contrast, film grain, dramatic shadows">Noir</button>
+                <button class="chip text-xs" data-style="cyberpunk, neon signs, rain, wet streets">Cyberpunk</button>
+              </div>
+
+              <div class="grid md:grid-cols-4 gap-3 mt-3">
+                <div>
+                  <label class="text-xs text-zinc-400">Modelo</label>
+                  <select id="imgModel" class="input w-full">
+                    <option value="flux" selected>flux</option>
+                    <option value="sd3">sd3</option>
+                    <option value="turbo">turbo</option>
+                    <option value="gptimage">gptimage (PNG transparente)</option>
+                    <option value="kontext">kontext (img2img)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Qtd</label>
+                  <select id="imgCount" class="input w-full"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Tamanho</label>
+                  <select id="imgSize" class="input w-full">
+                    <option value="768x768">768×768</option>
+                    <option value="1024x1024" selected>1024×1024</option>
+                    <option value="1280x768">1280×768 (wide)</option>
+                    <option value="768x1280">768×1280 (portrait)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Negative</label>
+                  <input id="imgNeg" class="input w-full" placeholder="borrado, texto, artefatos"/>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-5 gap-3 mt-3">
+                <div><label class="text-xs text-zinc-400">Seed</label><input id="imgSeed" type="number" min="0" max="999999999" class="input" placeholder="aleatória"></div>
+                <div><label class="text-xs text-zinc-400">Guidance</label><input id="imgGuidance" type="number" step="0.1" min="0" max="20" value="7.5" class="input"></div>
+                <div><label class="text-xs text-zinc-400">Safety</label>
+                  <select id="imgSafety" class="input w-full"><option value="strict" selected>strict</option><option value="medium">medium</option><option value="off">off</option></select>
+                </div>
+                <div><label class="text-xs text-zinc-400">Transparente (gptimage)</label>
+                  <select id="imgTransparent" class="input w-full"><option value="false" selected>Não</option><option value="true">Sim</option></select>
+                </div>
+                <div><label class="text-xs text-zinc-400">Ref (URL)</label><input id="imgRef" type="url" class="input" placeholder="https://... (kontext/gptimage)"></div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mt-4">
+                <button id="imgImprove" class="btn bg-zinc-700 hover:bg-zinc-600"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Melhorar prompt</button>
+                <button id="imgGen" class="btn"><i class="fa-solid fa-bolt mr-2"></i>Gerar</button>
+                <button id="imgStop" class="btn bg-zinc-700 hover:bg-zinc-600" disabled>Parar</button>
+                <button id="imgModels" class="btn bg-zinc-700 hover:bg-zinc-600">Atualizar modelos</button>
+                <span class="text-xs text-zinc-400">Fila automática (~5s no anônimo)</span>
+              </div>
+              <div id="imgStatus" class="status text-sm text-zinc-400 mt-1"></div>
+            </section>
+
+            <!-- Results -->
+            <section class="glass border border-zinc-800">
+              <div class="p-4"><h3 class="font-semibold">Resultados</h3><p class="text-xs text-zinc-400">Clique para abrir; “Baixar” aplica watermark via canvas.</p></div>
+              <div id="imgGallery" class="gallery"></div>
+            </section>
+          </div>
+
+          <!-- Editor local -->
+          <section class="glass p-4 border border-zinc-800 mt-4">
+            <h3 class="font-semibold mb-3">Editor local (upload + filtros + watermark)</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <input type="file" id="fileInput" accept="image/*" class="input w-full"/>
+                <canvas id="editCanvas" width="1024" height="1024" class="w-full max-h-[60vh] bg-[#0b0f14] border border-dashed border-[#243041] rounded-xl mt-2"></canvas>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Brilho <span id="bVal" class="text-zinc-300">100%</span></label>
+                <input type="range" id="brilho" min="0" max="200" value="100" class="w-full">
+                <label class="text-xs text-zinc-400">Contraste <span id="cVal" class="text-zinc-300">100%</span></label>
+                <input type="range" id="contraste" min="0" max="200" value="100" class="w-full">
+                <label class="text-xs text-zinc-400">Saturação <span id="sVal" class="text-zinc-300">100%</span></label>
+                <input type="range" id="satur" min="0" max="200" value="100" class="w-full">
+                <label class="text-xs text-zinc-400">Matiz (Hue) <span id="hVal" class="text-zinc-300">0°</span></label>
+                <input type="range" id="hue" min="-180" max="180" value="0" class="w-full">
+                <label class="text-xs text-zinc-400">Desfoque <span id="blVal" class="text-zinc-300">0px</span></label>
+                <input type="range" id="blur" min="0" max="8" value="0" class="w-full">
+
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <button class="chip text-xs" data-preset="synthwave">Synthwave</button>
+                  <button class="chip text-xs" data-preset="noir">Noir</button>
+                  <button class="chip text-xs" data-preset="vivid">Vivid</button>
+                  <button class="chip text-xs" data-preset="cool">Cool</button>
+                  <button class="chip text-xs" data-preset="warm">Warm</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-3">
+                  <div>
+                    <label class="text-xs text-zinc-400">Marca d’água</label>
+                    <select id="wmToggle" class="input w-full"><option value="on" selected>capyuniverse</option><option value="off">off</option></select>
+                  </div>
+                  <div>
+                    <label class="text-xs text-zinc-400">Tamanho</label>
+                    <select id="wmSize" class="input w-full"><option value="S">Pequena</option><option value="M" selected>Média</option><option value="L">Grande</option></select>
+                  </div>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                  <button id="edReset" class="btn bg-zinc-700 hover:bg-zinc-600">Resetar</button>
+                  <button id="edDownload" class="btn">Baixar</button>
+                </div>
+                <p class="text-xs text-zinc-400 mt-2">Edição 100% local. Para usar como img2img: hospede a imagem e cole a URL no campo de referência.</p>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- ========== TEXT ========== -->
+        <section id="text" class="tabpanel">
+          <div class="grid lg:grid-cols-[1.1fr_.9fr] gap-4">
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-3">Gerar texto (GET)</h3>
+              <label class="text-xs text-zinc-400">Prompt</label>
+              <textarea id="txtPrompt" class="input w-full min-h-[110px]" placeholder="Escreva um parágrafo inspirador sobre capivaras empreendedoras."></textarea>
+
+              <div class="grid md:grid-cols-4 gap-3 mt-3">
+                <div><label class="text-xs text-zinc-400">Modelo</label>
+                  <select id="txtModel" class="input w-full">
+                    <option value="openai" selected>openai</option>
+                    <option value="mistral">mistral</option>
+                    <option value="searchgpt">searchgpt</option>
+                  </select>
+                </div>
+                <div><label class="text-xs text-zinc-400">Seed</label><input id="txtSeed" type="number" class="input" placeholder="aleatória"></div>
+                <div><label class="text-xs text-zinc-400">Temp.</label><input id="txtTemp" type="number" step="0.1" min="0" max="3" value="0.7" class="input"></div>
+                <div><label class="text-xs text-zinc-400">JSON</label>
+                  <select id="txtJson" class="input w-full"><option value="false" selected>Não</option><option value="true">Sim</option></select>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mt-4">
+                <button id="txtGen" class="btn"><i class="fa-solid fa-bolt mr-2"></i>Gerar</button>
+                <button id="txtCopy" class="btn bg-zinc-700 hover:bg-zinc-600"><i class="fa-regular fa-copy mr-2"></i>Copiar</button>
+              </div>
+              <div id="txtStatus" class="status text-sm text-zinc-400 mt-1"></div>
+            </section>
+
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2">Saída</h3>
+              <pre id="txtOut" class="bg-[#0b0f14] border border-[#243041] rounded-xl p-3 font-mono text-sm whitespace-pre-wrap break-words"></pre>
+            </section>
+          </div>
+        </section>
+
+        <!-- ========== AUDIO (TTS) — NOVO ========== -->
+        <section id="audio" class="tabpanel">
+          <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-4">
+            <!-- 1) Sintetizar com estilo -->
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-3">Sintetizar texto com estilo</h3>
+              <label class="text-xs text-zinc-400">Texto</label>
+              <textarea id="ttsText" class="input w-full min-h-[110px]" placeholder="Cole seu texto aqui..."></textarea>
+
+              <div class="grid md:grid-cols-4 gap-3 mt-3">
+                <div>
+                  <label class="text-xs text-zinc-400">Estilo</label>
+                  <select id="ttsStyle" class="input w-full">
+                    <option value="narrativa" selected>Narrativa</option>
+                    <option value="animada">Animada</option>
+                    <option value="noticia">Notícia</option>
+                    <option value="anuncio">Anúncio</option>
+                    <option value="personalizada">Personalizada</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Voz</label>
+                  <select id="ttsVoice" class="input w-full">
+                    <option>alloy</option><option>echo</option><option>fable</option>
+                    <option>onyx</option><option selected>nova</option><option>shimmer</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Velocidade</label>
+                  <input id="ttsRate" type="number" step="0.1" min="0.5" max="2" value="1.0" class="input w-full">
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Pitch (semitons)</label>
+                  <input id="ttsPitch" type="number" step="1" min="-12" max="12" value="0" class="input w-full">
+                </div>
+              </div>
+
+              <div id="customStyleBox" class="grid md:grid-cols-2 gap-3 mt-3 hidden">
+                <div>
+                  <label class="text-xs text-zinc-400">Tom (descrição)</label>
+                  <input id="ttsCustomTone" class="input w-full" placeholder="ex.: calmo, envolvente, inspirador">
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400">Pausas</label>
+                  <select id="ttsPause" class="input w-full">
+                    <option value="short">Curtas</option>
+                    <option value="medium" selected>Médias</option>
+                    <option value="long">Longas</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-3 gap-3 mt-3">
+                <div>
+                  <label class="text-xs text-zinc-400">Formato</label>
+                  <select id="ttsFormat" class="input w-full">
+                    <option value="mp3" selected>MP3</option>
+                    <option value="wav">WAV (experimental)</option>
+                    <option value="ogg">OGG (experimental)</option>
+                  </select>
+                </div>
+                <div class="flex items-end">
+                  <button id="ttsGenStyled" class="btn w-full"><i class="fa-solid fa-bolt mr-2"></i>Gerar Áudio</button>
+                </div>
+                <div class="flex items-end">
+                  <button id="ttsDownload" class="btn bg-emerald-600 hover:bg-emerald-700 w-full" disabled><i class="fa-solid fa-download mr-2"></i>Baixar</button>
+                </div>
+              </div>
+              <p class="text-xs text-zinc-400 mt-2">Dica: “Narrativa” = calmo e envolvente; “Notícia” = neutro/objetivo; “Anúncio” = enérgico/persuasivo.</p>
+            </section>
+
+            <!-- Player -->
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2">Player</h3>
+              <audio id="ttsPlayer" controls class="w-full"></audio>
+              <div id="ttsStatus" class="status text-sm text-zinc-400 mt-2"></div>
+            </section>
+          </div>
+
+          <!-- 2) Conversa por áudio com IA -->
+          <section class="glass p-4 border border-zinc-800 mt-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold">Conversa por áudio com IA</h3>
+              <div class="flex gap-2">
+                <select id="chatStyle" class="input">
+                  <option value="narrativa" selected>Narrativa</option>
+                  <option value="animada">Animada</option>
+                  <option value="noticia">Notícia</option>
+                  <option value="anuncio">Anúncio</option>
+                </select>
+                <select id="chatVoice" class="input">
+                  <option>alloy</option><option>echo</option><option>fable</option>
+                  <option>onyx</option><option selected>nova</option><option>shimmer</option>
+                </select>
+                <button id="chatClear" class="btn bg-zinc-700 hover:bg-zinc-600">Limpar</button>
+              </div>
+            </div>
+
+            <div id="chatLog" class="mt-3 space-y-3 max-h-[380px] overflow-y-auto"></div>
+
+            <div class="mt-3 grid md:grid-cols-[1fr_auto] gap-2">
+              <input id="chatInput" class="input w-full" placeholder="Digite sua mensagem...">
+              <button id="chatSend" class="btn"><i class="fa-solid fa-message mr-2"></i>Responder em áudio</button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">A IA gera a resposta textual e já sintetiza em áudio com o estilo escolhido.</p>
+          </section>
+
+          <!-- 3) Leitura simples (compat original) -->
+          <section class="glass p-4 border border-zinc-800 mt-4">
+            <h3 class="font-semibold mb-2">Leitura simples (GET – compat)</h3>
+            <div class="grid md:grid-cols-3 gap-3">
+              <input id="ttsTextSimple" class="input w-full" placeholder="Texto curto para ler agora">
+              <select id="ttsVoiceSimple" class="input w-full">
+                <option>alloy</option><option>echo</option><option>fable</option>
+                <option>onyx</option><option selected>nova</option><option>shimmer</option>
+              </select>
+              <button id="ttsGenSimple" class="btn">Ler</button>
+            </div>
+          </section>
+        </section>
+
+        <!-- ========== FEEDS ========== -->
+        <section id="feeds" class="tabpanel">
+          <div class="grid lg:grid-cols-2 gap-4">
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2">Image Feed (SSE)</h3>
+              <div class="flex gap-2">
+                <button id="imgFeedStart" class="btn">Conectar</button>
+                <button id="imgFeedStop" class="btn bg-zinc-700 hover:bg-zinc-600" disabled>Parar</button>
+              </div>
+              <p class="text-xs text-zinc-400 mt-2">Criações públicas em tempo real.</p>
+            </section>
+            <section class="glass p-4 border border-zinc-800">
+              <h3 class="font-semibold mb-2">Text Feed (SSE)</h3>
+              <div class="flex gap-2">
+                <button id="txtFeedStart" class="btn">Conectar</button>
+                <button id="txtFeedStop" class="btn bg-zinc-700 hover:bg-zinc-600" disabled>Parar</button>
+              </div>
+              <p class="text-xs text-zinc-400 mt-2">Stream público de respostas.</p>
+            </section>
+          </div>
+
+          <section class="glass p-4 border border-zinc-800 mt-4">
+            <h3 class="font-semibold mb-2">Ao vivo</h3>
+            <div id="feedGallery" class="gallery"></div>
+          </section>
+        </section>
+
+        <!-- ========== SETTINGS ========== -->
+        <section id="settings" class="tabpanel">
+          <section class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-2">Preferências</h3>
+            <div class="grid md:grid-cols-3 gap-3">
+              <div>
+                <label class="text-xs text-zinc-400">Marca d'água</label>
+                <input id="brand" value="capyuniverse" class="input w-full"/>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Opacidade</label>
+                <input id="wmOpacity" type="number" step="0.05" min="0" max="1" value="0.32" class="input w-full"/>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Delay fila (ms)</label>
+                <input id="rateDelay" type="number" min="0" value="5200" class="input w-full"/>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 mt-3">
+              <span class="text-sm text-zinc-400">Histórico</span>
+              <button id="clearHistory" class="btn bg-zinc-700 hover:bg-zinc-600">Limpar</button>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Chaves API -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
+
+  <script>
+    /* ==== Base: sidebar + modal ==== */
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const dom = { sidebar: document.getElementById('sidebar'), sidebarToggleBtn: document.getElementById('sidebarToggleBtn'), sidebarOverlay: document.getElementById('sidebarOverlay'), apiKeysModal: document.getElementById('apiKeysModal'), openApiKeysModalButton: document.getElementById('openApiKeysModalButton') };
+
+    async function renderSidebar(currentPageId){
+      try{
+        const r = await fetch('tools.json'); const data = await r.json(); const cats = {};
+        data.forEach(t => { let c=t.category; if(typeof c==='string') c=[c]; (c||[]).forEach(cat => (cats[cat]=cats[cat]||[]).push(t)); });
+        dom.sidebar.innerHTML = '';
+        const home = document.createElement('a');
+        home.href='index.html';
+        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';
+        home.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Página Inicial</span>';
+        dom.sidebar.appendChild(home);
+        for(const name in cats){
+          const box=document.createElement('div'); box.className='mb-1';
+          const btn=document.createElement('button');
+          btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';
+          btn.innerHTML='<span class="font-semibold text-sm">'+name+'</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+          const content=document.createElement('div'); content.className='category-content pl-3 pt-0.5 space-y-0.5';
+          cats[name].forEach(t=>{
+            const a=document.createElement('a'); a.href=t.pageUrl;
+            const icon=t.icon? t.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2') : '<span class="w-5 h-5 mr-2"></span>';
+            a.className='sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ' + (t.id==='CapyStudio' ? 'active' : 'text-gray-400');
+            a.innerHTML=icon+'<span>'+t.title+'</span>';
+            content.appendChild(a);
+          });
+          btn.addEventListener('click',()=>{ content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
+          if(cats[name].some(t=>t.id==='CapyStudio')){ content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
+          box.appendChild(btn); box.appendChild(content); dom.sidebar.appendChild(box);
+        }
+      }catch(e){
+        dom.sidebar.innerHTML='<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
+      }
+    }
+
+    function setupApiKeyModal(){
+      var html='';
+      html+='<div class="glass border-zinc-800 p-7 rounded-2xl w-full max-w-md">';
+      html+='  <div class="flex justify-between items-center mb-4">';
+      html+='    <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>';
+      html+='    <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl">&times;</button>';
+      html+='  </div>';
+      html+='  <div class="space-y-3">';
+      html+='    <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">';
+      html+='      <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>';
+      html+='      <label class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>';
+      html+='      <div class="flex">';
+      html+='        <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input w-full rounded-r-none">';
+      html+='        <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>';
+      html+='      </div>';
+      html+='      <p class="text-xs text-zinc-400 mt-2">Chave salva localmente no seu navegador.</p>';
+      html+='    </div>';
+      html+='  </div>';
+      html+='</div>';
+      dom.apiKeysModal.innerHTML=html;
+      dom.openApiKeysModalButton?.addEventListener('click',()=>dom.apiKeysModal.classList.remove('hidden'));
+      document.getElementById('closeApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.add('hidden'));
+      document.getElementById('saveGeminiKey')?.addEventListener('click',()=>{
+        const v=document.getElementById('geminiApiKeyInputModal').value.trim();
+        if(v){ localStorage.setItem(API_KEY_STORAGE_KEY, v); alert('Chave API salva!'); dom.apiKeysModal.classList.add('hidden'); } else alert('Insira uma chave.');
+      });
+    }
+
+    function baseBoot(){ renderSidebar('CapyStudio'); setupApiKeyModal();
+      dom.sidebarToggleBtn?.addEventListener('click',()=>{ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+      dom.sidebarOverlay?.addEventListener('click',()=>{ dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
+    }
+
+    // ==== Helpers e Tabs ====
+    const $ = s=>document.querySelector(s); const $$ = s=>Array.from(document.querySelectorAll(s));
+    $$('.tab').forEach(b=>b.addEventListener('click',()=>{ $$('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); const id=b.dataset.tab; $$('.tabpanel').forEach(p=>p.style.display=p.id===id?'block':'none'); }));
+
+    // ==== Settings persistentes ====
+    const brandEl=$('#brand'), wmOpacityEl=$('#wmOpacity'), rateDelayEl=$('#rateDelay');
+    const settings = JSON.parse(localStorage.getItem('capy_settings')||'{}');
+    if(brandEl && settings.brand) brandEl.value=settings.brand;
+    if(wmOpacityEl && settings.wmOpacity) wmOpacityEl.value=settings.wmOpacity;
+    if(rateDelayEl && settings.rateDelay) rateDelayEl.value=settings.rateDelay;
+    function saveSettings(){ localStorage.setItem('capy_settings', JSON.stringify({brand:(brandEl?.value||'capyuniverse'), wmOpacity:parseFloat(wmOpacityEl?.value||'0.32'), rateDelay:parseInt(rateDelayEl?.value||'5200',10)})); }
+    ;[brandEl, wmOpacityEl, rateDelayEl].forEach(el=> el?.addEventListener('input', saveSettings));
+
+    // ==== IMAGES (Pollinations) ====
+    const imgPrompt=$('#imgPrompt'), imgNeg=$('#imgNeg'), imgModel=$('#imgModel'), imgCount=$('#imgCount'), imgSize=$('#imgSize'), imgSeed=$('#imgSeed'), imgGuidance=$('#imgGuidance'), imgSafety=$('#imgSafety'), imgTransparent=$('#imgTransparent'), imgRef=$('#imgRef');
+    const imgImprove=$('#imgImprove'), imgGen=$('#imgGen'), imgStop=$('#imgStop'), imgGallery=$('#imgGallery'), imgStatus=$('#imgStatus');
+    let aborter=null, cancelled=false; let history = JSON.parse(localStorage.getItem('capy_history')||'[]');
+
+    $('#styleChips')?.addEventListener('click',(e)=>{ const chip=e.target.closest('.chip'); if(!chip) return; const v=chip.dataset.style; if(v){ if(imgPrompt.value && !imgPrompt.value.trim().endsWith('.')) imgPrompt.value+=', '; imgPrompt.value+=v; }});
+    imgImprove?.addEventListener('click',()=>{ imgPrompt.value=improvePrompt(imgPrompt.value); flash(imgStatus,'Prompt enriquecido!','ok'); });
+    function improvePrompt(txt){
+      const hasCam=/(mm|lens|aperture|f\/|film|cinematic)/i.test(txt);
+      const hasLight=/(lighting|luz|iluminação|volumetric|rim light|softbox)/i.test(txt);
+      const hasQuality=/(8k|ultra|high|hdr|photoreal|detalh)/i.test(txt);
+      const extras=[]; if(!hasCam) extras.push('shot on 50mm lens, shallow depth of field, film grain subtle');
+      if(!hasLight) extras.push('soft cinematic lighting, volumetric fog, rim light');
+      if(!hasQuality) extras.push('ultra-detailed, 8k upscale, high dynamic range');
+      const suffix=extras.join(', '); const cleaned=txt.replace(/\s+,/g,',').replace(/,,+/g,',').replace(/\s+/g,' ').trim();
+      return cleaned+(suffix?(', '+suffix):'');
+    }
+
+    async function fetchModels(){
+      try{ const r=await fetch('https://image.pollinations.ai/models',{cache:'no-store'}); const models=await r.json();
+        const cur=imgModel.value; imgModel.innerHTML='';
+        (models||[]).forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=m; imgModel.appendChild(o); });
+        if([...imgModel.options].some(o=>o.value===cur)) imgModel.value=cur;
+        flash(imgStatus,'Modelos atualizados','ok');
+      }catch(e){ flash(imgStatus,'Falha ao listar modelos','warn'); }
+    }
+    $('#imgModels')?.addEventListener('click', fetchModels);
+
+    function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+    function setBusy(b){ if(imgGen) imgGen.disabled=b; if(imgStop) imgStop.disabled=!b; }
+    function flash(node,msg,type){ if(!node) return; node.textContent=msg; node.className='status '+(type||''); clearTimeout(node._t); node._t=setTimeout(()=>{ node.textContent=''; node.className='status'; }, 3200); }
+
+    imgGen?.addEventListener('click', generateQueued);
+    imgStop?.addEventListener('click', ()=>{ if(aborter){ cancelled=true; aborter.abort(); setBusy(false); }});
+
+    async function generateQueued(){
+      const prompt=imgPrompt.value.trim(); if(!prompt){ flash(imgStatus,'Insira um prompt 😉'); imgPrompt.focus(); return; }
+      const [w,h]=imgSize.value.split('x').map(n=>parseInt(n,10));
+      const n=parseInt(imgCount.value,10); const model=imgModel.value; const neg=imgNeg.value.trim(); const guidance=parseFloat(imgGuidance.value||'7.5'); const safety=imgSafety.value;
+      const transparent=imgTransparent.value==='true'; const ref=imgRef.value.trim(); const delay=parseInt((rateDelayEl?.value)||'5200',10);
+      const seedBase=imgSeed.value?parseInt(imgSeed.value,10):Math.floor(Math.random()*1e9);
+      setBusy(true); cancelled=false; aborter=new AbortController();
+      for(let i=0;i<n;i++){ if(cancelled) break; const seed=(seedBase+i)%1_000_000_000;
+        await generateOne({prompt,neg,model,w,h,seed,guidance,safety,transparent,ref,signal:aborter.signal});
+        if(i<n-1) await sleep(delay);
+      }
+      setBusy(false); saveHistory(); flash(imgStatus,'Pronto!','ok');
+    }
+
+    function skeletonCard({seed,w,h,model}){ const fig=document.createElement('figure'); const sk=document.createElement('div'); sk.className='skeleton'; const cap=document.createElement('figcaption'); cap.innerHTML=`<span>seed ${seed}</span><span>${w}×${h} · ${model}</span>`; fig.appendChild(sk); fig.appendChild(cap); return fig; }
+    function pill(label,fn){ const b=document.createElement('button'); b.className='pill'; b.textContent=label; b.onclick=fn; return b; }
+
+    async function generateOne({prompt,neg,model,w,h,seed,guidance,safety,transparent,ref,signal}){
+      const fullPrompt = neg?`${prompt} ### negative: ${neg}`:prompt;
+      const url=new URL(`https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}`);
+      url.searchParams.set('model',model); url.searchParams.set('seed',seed); url.searchParams.set('width',w); url.searchParams.set('height',h);
+      url.searchParams.set('guidance',guidance); url.searchParams.set('safe', safety==='strict'?'true':'false');
+      if(model==='gptimage' && transparent) url.searchParams.set('transparent','true');
+      if(ref && (model==='kontext'||model==='gptimage')) url.searchParams.set('image', ref);
+      url.searchParams.set('ts', Date.now().toString());
+      const fig=skeletonCard({seed,w,h,model}); imgGallery.prepend(fig);
+      try{
+        const res=await fetch(url.toString(),{signal,mode:'cors',cache:'no-store'});
+        if(!res.ok) throw new Error('Bad status '+res.status);
+        const blob=await res.blob(); const objectURL=URL.createObjectURL(blob);
+        fillCard(fig, objectURL,{prompt,model,seed,w,h,src:url.toString()}); pushHistory({prompt,model,seed,w,h,src:url.toString()});
+      }catch(err){
+        console.warn('Blob falhou, usando URL direta',err);
+        fillCard(fig,url.toString(),{prompt,model,seed,w,h,src:url.toString()}); pushHistory({prompt,model,seed,w,h,src:url.toString()});
+      }
+    }
+
+    function fillCard(fig, src, meta){
+      fig.innerHTML=''; const img=document.createElement('img'); img.src=src; img.loading='lazy'; img.decoding='async'; img.alt=meta.prompt?.slice(0,120)||'Imagem gerada'; fig.appendChild(img);
+      const cap=document.createElement('figcaption'); const left=document.createElement('span'); left.textContent=`seed ${meta.seed}`; const right=document.createElement('span'); right.textContent=`${meta.w}×${meta.h} · ${meta.model}`;
+      const actions=document.createElement('div'); actions.style.display='flex'; actions.style.gap='6px'; actions.style.marginLeft='auto';
+      const openBtn=pill('Abrir',()=>window.open(meta.src,'_blank'));
+      const dlBtn=pill('Baixar',()=>downloadWithWatermark(src,meta));
+      const copyBtn=pill('Copiar URL',()=>navigator.clipboard.writeText(meta.src).then(()=>flash(imgStatus,'URL copiada!','ok')));
+      actions.append(openBtn,dlBtn,copyBtn); cap.prepend(actions); cap.append(left,right); fig.appendChild(cap);
+    }
+
+    async function downloadWithWatermark(src, meta){
+      try{
+        let blob; if(src.startsWith('blob:')){ const r=await fetch(src); blob=await r.blob(); } else { const r=await fetch(src,{mode:'cors',cache:'no-store'}); blob=await r.blob(); }
+        const bm=await createImageBitmap(blob); const canvas=document.createElement('canvas'); canvas.width=bm.width; canvas.height=bm.height; const ctx=canvas.getContext('2d'); ctx.drawImage(bm,0,0);
+        const pad=Math.floor(canvas.width*0.02); const brand=(brandEl?.value)||'capyuniverse'; const fontSize=Math.max(16, Math.floor(canvas.width*0.035));
+        ctx.save(); ctx.globalAlpha=parseFloat((wmOpacityEl?.value)||'0.32'); ctx.fillStyle='#ffffff'; ctx.font=`700 ${fontSize}px system-ui,Arial`;
+        const m=ctx.measureText(brand); const x=canvas.width-m.width-pad; const y=canvas.height-pad; ctx.fillText(brand,x,y); ctx.restore();
+        const out=await new Promise(res=>canvas.toBlob(res,'image/png')); const url=URL.createObjectURL(out);
+        const a=document.createElement('a'); a.href=url; a.download=`ai_${meta.model}_seed${meta.seed}_${meta.w}x${meta.h}_${brand}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2500);
+      }catch(err){
+        console.error(err); const a=document.createElement('a'); a.href=meta.src; a.download=''; document.body.appendChild(a); a.click(); a.remove(); flash(imgStatus,'Sem CORS para watermark; baixei a original.','warn');
+      }
+    }
+
+    function pushHistory(meta){ history.unshift(meta); history=history.slice(0,60); localStorage.setItem('capy_history', JSON.stringify(history)); }
+    function saveHistory(){ localStorage.setItem('capy_history', JSON.stringify(history.slice(0,60))); }
+    $('#clearHistory')?.addEventListener('click',()=>{ if(confirm('Apagar histórico?')){ history=[]; saveHistory(); (imgGallery&&(imgGallery.innerHTML='')); const fg=$('#feedGallery'); if(fg) fg.innerHTML=''; }});
+
+    // ==== Editor local ====
+    const fileInput=$('#fileInput'); const editCanvas=$('#editCanvas'); const ectx=editCanvas?.getContext('2d'); let uploadBM=null;
+    fileInput?.addEventListener('change', async (e)=>{ const f=e.target.files?.[0]; if(!f) return; const ab=await f.arrayBuffer(); uploadBM=await createImageBitmap(new Blob([ab])); fitAndDraw(); });
+    function fitAndDraw(){ if(!uploadBM||!editCanvas) return; const maxW=1024,maxH=1024; let {width,height}=uploadBM; const r=Math.min(maxW/width,maxH/height); width=Math.round(width*r); height=Math.round(height*r); editCanvas.width=width; editCanvas.height=height; drawLocal(); }
+    function drawLocal(){
+      if(!uploadBM||!ectx||!editCanvas) return;
+      const b=parseInt($('#brilho').value||'100',10), c=parseInt($('#contraste').value||'100',10), s=parseInt($('#satur').value||'100',10), h=parseInt($('#hue').value||'0',10), bl=parseInt($('#blur').value||'0',10);
+      ectx.save(); ectx.filter=`brightness(${b}%) contrast(${c}%) saturate(${s}%) hue-rotate(${h}deg) blur(${bl}px)`; ectx.drawImage(uploadBM,0,0,editCanvas.width,editCanvas.height); ectx.restore();
+      if($('#wmToggle')?.value==='on'){ watermarkCanvas(editCanvas, ectx); }
+      $('#bVal').textContent=b+'%'; $('#cVal').textContent=c+'%'; $('#sVal').textContent=s+'%'; $('#hVal').textContent=h+'°'; $('#blVal').textContent=bl+'px';
+    }
+    function watermarkCanvas(ca, ctx){
+      const pad=Math.floor(ca.width*0.02); const brand=(brandEl?.value)||'capyuniverse'; const fontSize=Math.max(16, Math.floor(ca.width*0.04));
+      ctx.save(); ctx.globalAlpha=parseFloat((wmOpacityEl?.value)||'0.32'); ctx.fillStyle='#ffffff'; ctx.font=`700 ${fontSize}px system-ui,Arial`;
+      const m=ctx.measureText(brand); const x=ca.width-m.width-pad; const y=ca.height-pad; ctx.fillText(brand,x,y); ctx.restore();
+    }
+    ;['brilho','contraste','satur','hue','blur','wmToggle','wmSize'].forEach(id=>{ const el=$('#'+id); if(el) el.addEventListener('input', drawLocal); });
+    $('#edReset')?.addEventListener('click',()=>{ if(!$('#brilho')) return; $('#brilho').value=100; $('#contraste').value=100; $('#satur').value=100; $('#hue').value=0; $('#blur').value=0; drawLocal(); });
+    $('#edDownload')?.addEventListener('click', async ()=>{ if(!uploadBM||!editCanvas) return alert('Envie uma imagem primeiro'); const out=await new Promise(res=>editCanvas.toBlob(res,'image/png')); const url=URL.createObjectURL(out); const a=document.createElement('a'); a.href=url; a.download=`edit_${(brandEl?.value)||'capyuniverse'}.png`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000); });
+
+    // ==== Texto (GET) ====
+    const txtPrompt=$('#txtPrompt'), txtModel=$('#txtModel'), txtSeed=$('#txtSeed'), txtTemp=$('#txtTemp'), txtJson=$('#txtJson');
+    const txtGen=$('#txtGen'), txtCopy=$('#txtCopy'), txtOut=$('#txtOut'), txtStatus=$('#txtStatus');
+    txtGen?.addEventListener('click', async ()=>{
+      const p=txtPrompt.value.trim(); if(!p) return flash(txtStatus,'Escreva algo 😉');
+      const url=new URL('https://text.pollinations.ai/'+encodeURIComponent(p));
+      if(txtModel.value) url.searchParams.set('model',txtModel.value);
+      if(txtSeed.value) url.searchParams.set('seed',txtSeed.value);
+      const t=txtTemp.value; if(t) url.searchParams.set('temperature', t);
+      if(txtJson.value==='true') url.searchParams.set('json','true');
+      try{
+        const res=await fetch(url.toString(),{cache:'no-store'}); if(!res.ok) throw new Error('Bad status '+res.status);
+        const ct=res.headers.get('content-type')||''; const text = ct.includes('application/json')? await res.json() : await res.text();
+        txtOut.textContent = typeof text==='string'? text : JSON.stringify(text,null,2); flash(txtStatus,'Pronto!','ok');
+      }catch(e){ console.error(e); flash(txtStatus,'Falhou','err'); }
+    });
+    txtCopy?.addEventListener('click',()=>{ navigator.clipboard.writeText(txtOut.textContent||'').then(()=>flash(txtStatus,'Copiado!','ok')); });
+
+    // ==== Áudio TTS (novo) ====
+    const ttsPlayer = $('#ttsPlayer'); const ttsStatus = $('#ttsStatus');
+    const btnGenStyled = $('#ttsGenStyled'); const btnDownload = $('#ttsDownload');
+    const styleSel = $('#ttsStyle'); const voiceSel = $('#ttsVoice');
+    const rateInp = $('#ttsRate'); const pitchInp = $('#ttsPitch');
+    const fmtSel = $('#ttsFormat'); const customBox = $('#customStyleBox');
+    const customTone = $('#ttsCustomTone'); const pauseSel = $('#ttsPause');
+
+    styleSel?.addEventListener('change', ()=>{ customBox.classList.toggle('hidden', styleSel.value!=='personalizada'); });
+
+    function flash(node,msg,type){ if(!node) return; node.textContent=msg; node.className='status '+(type||''); clearTimeout(node._t); node._t=setTimeout(()=>{ node.textContent=''; node.className='status'; }, 3200); }
+
+    const STYLE_PRESETS = {
+      narrativa: { tone: 'calmo, envolvente, cinematográfico', rate: 0.95, pitch: 0, pause: 'medium' },
+      animada:   { tone: 'energético, entusiasmado, sorriso na voz', rate: 1.15, pitch: 2,  pause: 'short' },
+      noticia:   { tone: 'neutro, jornalístico, direto',            rate: 1.0,  pitch: 0,  pause: 'short' },
+      anuncio:   { tone: 'persuasivo, publicitário, confiante',     rate: 1.08, pitch: 1,  pause: 'medium' }
+    };
+    function ssmlPause(p){ return p==='long'?'800ms':(p==='short'?'200ms':'450ms'); }
+    function buildSSML(text, style, rate, pitch, pause, tone){
+      const ratePct = Math.round((rate||1)*100)+'%';
+      const pitchStr = (pitch||0)===0 ? '0st' : `${pitch}st`;
+      const breakMs = ssmlPause(pause||'medium');
+      const safeText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return `<speak><p><prosody rate="${ratePct}" pitch="${pitchStr}"><emphasis level="moderate">Tom:</emphasis> ${tone}.<break time="${breakMs}"/>${safeText}</prosody></p></speak>`;
+    }
+    function addStageDirections(text, tone, pause){
+      const breaks = pause==='long'?'(pausas longas)': pause==='short'?'(pausas curtas)':'(pausas médias)';
+      return `[voz: ${tone} ${breaks}] ${text}`;
+    }
+    function makeTTSUrl(payloadText, voice, format='mp3'){
+      const url = new URL('https://text.pollinations.ai/'+encodeURIComponent(payloadText));
+      url.searchParams.set('model','openai-audio'); url.searchParams.set('voice', voice||'nova'); url.searchParams.set('format', format);
+      return url;
+    }
+    async function fetchAudioBlob(url){ const res = await fetch(url.toString(),{cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); return await res.blob(); }
+    async function maybeConvert(blob, targetType){
+      if(targetType==='mp3') return blob;
+      try{
+        const arr = await blob.arrayBuffer();
+        const ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const buf = await new Promise((res,rej)=>ctx.decodeAudioData(arr,res,rej));
+        const dest = ctx.createMediaStreamDestination();
+        const src = ctx.createBufferSource(); src.buffer=buf; src.connect(dest); src.start(0);
+        const mime = targetType==='wav'?'audio/wav':'audio/ogg';
+        const rec = new MediaRecorder(dest.stream,{mimeType:mime});
+        const chunks=[]; rec.ondataavailable=e=>chunks.push(e.data);
+        const done=new Promise(r=>rec.onstop=r); rec.start();
+        setTimeout(()=>{rec.stop(); src.stop();}, Math.max(500, buf.duration*1000+80));
+        await done; return new Blob(chunks,{type:mime});
+      }catch(e){ console.warn('Conversão falhou, usando original', e); return blob; }
+    }
+    let lastBlobUrl=null;
+    function setPlayerBlob(blob){
+      if(lastBlobUrl) URL.revokeObjectURL(lastBlobUrl);
+      lastBlobUrl = URL.createObjectURL(blob);
+      ttsPlayer.src = lastBlobUrl;
+      ttsPlayer.play().catch(()=>{});
+      btnDownload.disabled = false;
+      btnDownload.onclick = ()=>{ const a=document.createElement('a'); a.href=lastBlobUrl; a.download='capystudio_tts.'+(blob.type.includes('ogg')?'ogg':blob.type.includes('wav')?'wav':'mp3'); a.click(); };
+    }
+
+    btnGenStyled?.addEventListener('click', async ()=>{
+      const raw = ($('#ttsText').value||'').trim(); if(!raw) return flash(ttsStatus,'Escreva um texto 😉');
+      const style = styleSel.value; const voice = voiceSel.value; const format = fmtSel.value;
+      const preset = STYLE_PRESETS[style] || STYLE_PRESETS.narrativa;
+      const rate = parseFloat(rateInp.value||preset.rate||1) || 1;
+      const pitch = parseInt(pitchInp.value||(preset.pitch||0),10);
+      const pause = (style==='personalizada'? (pauseSel.value||'medium') : (preset.pause||'medium'));
+      const tone  = (style==='personalizada'? (customTone.value||'personalizado') : preset.tone);
+      const ssml = buildSSML(raw, style, rate, pitch, pause, tone);
+      const withDirections = addStageDirections(raw, tone, pause);
+      flash(ttsStatus,'Gerando áudio...');
+      try{
+        let url = makeTTSUrl(ssml, voice, format);
+        let blob = await fetchAudioBlob(url);
+        if(blob.type.startsWith('text') || blob.size<300){
+          url = makeTTSUrl(withDirections, voice, format);
+          blob = await fetchAudioBlob(url);
+        }
+        const out = await maybeConvert(blob, format);
+        setPlayerBlob(out); flash(ttsStatus,'Pronto!','ok');
+      }catch(e){ console.error(e); flash(ttsStatus,'Falha ao gerar áudio.','err'); }
+    });
+
+    // ==== Chat de áudio com IA ====
+    const chatLog = $('#chatLog'); const chatInput = $('#chatInput'); const chatSend = $('#chatSend');
+    const chatStyle = $('#chatStyle'); const chatVoice = $('#chatVoice'); const chatClear = $('#chatClear');
+
+    function addBubble({html, me=false, audioBlob=null, meta=''}) {
+      const row = document.createElement('div');
+      row.className = 'flex '+(me?'justify-end':'justify-start');
+      const b = document.createElement('div'); b.className = 'bubble '+(me?'me':''); b.innerHTML = html + (meta? `<div class="text-[11px] text-zinc-400 mt-1">${meta}</div>`:'');
+      if(audioBlob){
+        const audio = document.createElement('audio'); audio.controls = true; audio.src = URL.createObjectURL(audioBlob); audio.className = 'w-full mt-2';
+        const dl = document.createElement('button'); dl.className = 'pill mt-2'; dl.textContent = 'Baixar áudio';
+        dl.onclick = ()=>{ const a=document.createElement('a'); a.href=audio.src; a.download='capystudio_chat.mp3'; a.click(); };
+        b.appendChild(audio); b.appendChild(dl);
+      }
+      row.appendChild(b); chatLog.appendChild(row); chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    async function aiReplyText(userMsg, style){
+      const sys = {
+        narrativa: 'Fale como narrador de documentário, calmo e envolvente.',
+        animada: 'Fale de forma animada, energia alta e positiva.',
+        noticia: 'Fale como apresentador de telejornal, objetivo e neutro.',
+        anuncio: 'Fale como locutor publicitário, persuasivo e confiante.'
+      }[style] || 'Fale de modo natural e claro.';
+      const prompt = `${sys}\n\nPergunta do usuário: ${userMsg}\nResposta concisa em 2-4 frases.`;
+      const url = new URL('https://text.pollinations.ai/'+encodeURIComponent(prompt));
+      url.searchParams.set('model','openai');
+      const res = await fetch(url.toString(),{cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status);
+      return await res.text();
+    }
+    chatSend?.addEventListener('click', async ()=>{
+      const msg = (chatInput.value||'').trim(); if(!msg) return;
+      addBubble({html: `<div class="font-medium">Você</div><div>${msg}</div>`, me:true}); chatInput.value='';
+      try{
+        const st = chatStyle.value; const vc = chatVoice.value;
+        const text = await aiReplyText(msg, st);
+        const preset = STYLE_PRESETS[st] || STYLE_PRESETS.narrativa;
+        const ssml = buildSSML(text, st, preset.rate, preset.pitch, preset.pause, preset.tone);
+        let url = makeTTSUrl(ssml, vc, 'mp3'); let blob = await fetchAudioBlob(url);
+        if(blob.type.startsWith('text') || blob.size<300){
+          const withDir = addStageDirections(text, preset.tone, preset.pause);
+          url = makeTTSUrl(withDir, vc, 'mp3'); blob = await fetchAudioBlob(url);
+        }
+        addBubble({html:`<div class="font-medium">Capy IA</div><div>${text}</div>`, audioBlob: blob, meta:`estilo: ${st} · voz: ${vc}`});
+      }catch(e){ console.error(e); addBubble({html:`<div class="font-medium text-red-400">Capy IA</div><div>Desculpe, não consegui gerar agora.</div>`}); }
+    });
+    chatClear?.addEventListener('click', ()=>{ chatLog.innerHTML=''; });
+
+    // ==== Leitura simples (compat) ====
+    $('#ttsGenSimple')?.addEventListener('click', async ()=>{
+      const p = ($('#ttsTextSimple').value||'').trim(); if(!p) return;
+      const v = $('#ttsVoiceSimple').value||'nova';
+      try{
+        const url = new URL('https://text.pollinations.ai/'+encodeURIComponent(p));
+        url.searchParams.set('model','openai-audio'); url.searchParams.set('voice', v);
+        const blob = await fetchAudioBlob(url); setPlayerBlob(blob); flash(ttsStatus,'Pronto!','ok');
+      }catch(e){ console.error(e); flash(ttsStatus,'Falha na leitura.','err'); }
+    });
+
+    // ==== Feeds (SSE) ====
+    const feedGallery=$('#feedGallery'); const imgFeedStart=$('#imgFeedStart'), imgFeedStop=$('#imgFeedStop'); const txtFeedStart=$('#txtFeedStart'), txtFeedStop=$('#txtFeedStop');
+    let imgEvtSrc=null, txtEvtSrc=null;
+    imgFeedStart?.addEventListener('click',()=>{ if(imgEvtSrc) return; imgEvtSrc=new EventSource('https://image.pollinations.ai/feed'); imgFeedStop.disabled=false; imgFeedStart.disabled=true;
+      imgEvtSrc.onmessage=(ev)=>{ try{ const data=JSON.parse(ev.data); const fig=document.createElement('figure'); const img=new Image(); img.src=data.imageURL; img.loading='lazy'; fig.appendChild(img); const cap=document.createElement('figcaption'); cap.textContent = `${data.model||''} · ${data.width}×${data.height} · seed ${data.seed}`; fig.appendChild(cap); feedGallery.prepend(fig); }catch(e){ console.log('non-json', ev.data); } };
+      imgEvtSrc.onerror=()=>{ console.warn('feed img error'); };
+    });
+    imgFeedStop?.addEventListener('click',()=>{ if(imgEvtSrc){ imgEvtSrc.close(); imgEvtSrc=null; imgFeedStart.disabled=false; imgFeedStop.disabled=true; }});
+    txtFeedStart?.addEventListener('click',()=>{ if(txtEvtSrc) return; txtEvtSrc=new EventSource('https://text.pollinations.ai/feed'); txtFeedStop.disabled=false; txtFeedStart.disabled=true;
+      txtEvtSrc.onmessage=(ev)=>{ try{ const data=JSON.parse(ev.data); const fig=document.createElement('figure'); const pre=document.createElement('pre'); pre.className='p-3 text-sm'; pre.textContent = (data.response||'').slice(0,400); fig.appendChild(pre); const cap=document.createElement('figcaption'); cap.textContent = `${data.model||''}`; fig.appendChild(cap); feedGallery.prepend(fig); }catch(e){ console.log('non-json', ev.data); } };
+      txtEvtSrc.onerror=()=>{ console.warn('feed text error'); };
+    });
+    txtFeedStop?.addEventListener('click',()=>{ if(txtEvtSrc){ txtEvtSrc.close(); txtEvtSrc=null; txtFeedStart.disabled=false; txtFeedStop.disabled=true; }});
+
+    // Boot
+    baseBoot();
+  </script>
+</body>
+</html>
