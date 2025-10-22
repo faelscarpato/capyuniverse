@@ -544,7 +544,7 @@
     "color": "amber-400"
   },
   {
-    "id": "CapySides",
+    "id": "CapySlides",
     "title": "Gerador de Slides",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-red-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\"></path><line x1=\"12\" y1=\"22\" x2=\"12\" y2=\"17\"></line><line x1=\"12\" y1=\"12\" x2=\"20\" y2=\"8\"></line><line x1=\"12\" y1=\"12\" x2=\"4\" y2=\"8\"></line></svg>",
     "imageUrl": "img/capyslide.webp",
@@ -582,6 +582,16 @@
     "category": "Multimídia",
     "icon": "<i class='fa-solid fa-closed-captioning w-5 h-5 mr-2 text-amber-400'></i>"
   },
+{
+  "id": "CapyStudio",
+  "title": "CapyStudio",
+  "iconUrl": "icon/capystudio.png",
+  "imageUrl": "img/capystudio.webp",
+  "description": "Estúdio criativo: gere imagens, texto e voz com IA, edite localmente e acompanhe feeds.",
+  "category": "Mídia & Marketing",
+  "pageUrl": "capystudio.html",
+  "color": "cyan-400"
+}, 
   {
     "id": "CapyTCC",
     "title": "Tutor de TCC",
