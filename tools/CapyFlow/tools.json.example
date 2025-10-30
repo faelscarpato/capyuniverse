@@ -1,0 +1,10 @@
+{
+  "id": "CapyFlow",
+  "title": "CapyFlow",
+  "iconUrl": "icon/capyflow.png",
+  "imageUrl": "img/capyflow.webp",
+  "description": "Canvas de fluxos com IA: gere prompts, conecte passos e exporte.",
+  "category": "Criação & Conteúdo",
+  "pageUrl": "tools/capyflow/capyflow-embed.html",
+  "color": "fuchsia-400"
+}

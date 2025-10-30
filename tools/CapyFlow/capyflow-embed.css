@@ -1,0 +1,71 @@
+:root{--bg:#0b0f14;--fg:#e8eaee;--border:#1b2230}
+html,body{height:100%}
+iframe#capyflowFrame{display:block}
+body{
+  background-image:
+    radial-gradient(1200px 600px at 120% -10%, rgba(62,227,255,0.08), transparent 40%),
+    radial-gradient(900px 500px at -10% 110%, rgba(217,70,239,0.08), transparent 45%);
+  background-color:#0b0f14;
+}
+ 
+header{
+  background-color:rgba(11,15,20,0.8);
+  backdrop-filter:blur(8px);
+  box-shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+header button{
+  background-color:transparent;
+  border:none;
+  color:var(--fg);
+  cursor:pointer;
+  padding:8px;
+  border-radius:6px;
+  transition:background-color .2s;
+}
+header button:hover{
+  background-color:rgba(255,255,255,0.1);
+}
+header button:focus{
+  outline:none;
+  box-shadow:0 0 0 2px rgba(100,150,250,0.6);
+}
+header button svg{
+  width:24px;
+  height:24px;
+}
+header .logo{
+  font-weight:700;
+  font-size:18px;
+  color:var(--fg);
+}
+header .logo a{
+  text-decoration:none;
+  color:inherit;
+} 
+main{
+  flex:1;
+  padding-top:56px;
+}
+iframe#capyflowFrame{
+  width:100%;
+  /* Prefer dynamic viewport height for mobile UI chrome, with fallback to vh */
+  height:calc(100dvh - 56px);
+  height:calc(100vh - 56px); /* fallback para navegadores que não suportam dvh */
+  border:none;
+  background-color:var(--bg);
+}
+footer{
+  padding:12px;
+  text-align:center;
+  font-size:12px;
+  color:var(--fg);
+}
+footer a{
+  color:var(--fg);
+  text-decoration:none;
+  font-weight:600;
+}
+footer a:hover{
+  text-decoration:underline;  
+}
+/* estilos adicionais do CapyFlow-main/styles.css */

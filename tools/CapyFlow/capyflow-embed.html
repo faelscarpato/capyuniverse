@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapyUniverse — CapyFlow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="capyflow-embed.css"/>
+</head>
+<body class="bg-zinc-900 text-white flex flex-col min-h-screen">
+  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
+    <div class="flex items-center">
+      <button id="btnBack" class="mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none" title="Voltar">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <a href="../../index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-[Syne]">
+        CapyUniverse
+      </a>
+    </div>
+   <!--<div class="flex items-center gap-2">
+      <button id="btnOpenInWindow" class="bg-slate-800 hover:bg-slate-700 px-3 py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors" title="Abrir em janela">Abrir</button>
+      <button id="btnSettings" class="bg-purple-600 hover:bg-purple-700 px-3 py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Configurações</button>
+    </div>--> 
+  </header>
+
+  <main class="flex-1 pt-16">
+    <iframe id="capyflowFrame"
+            src="../../CapyFlow-main/index.html?embedded=1"
+            title="CapyFlow"
+            class="w-full h-[calc(100dvh-64px)] border-t border-zinc-800 bg-zinc-950"
+            allow="clipboard-read; clipboard-write;"
+            allowfullscreen></iframe>
+  </main>
+
+  <script src="capyflow-embed.js"></script>
+</body>
+</html>
