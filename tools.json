@@ -388,7 +388,7 @@
     "title": "CapyFlow",
     "description": "Camada preditiva que automatiza fluxos e sugere ferramentas.",
 "imageUrl": "img/capyflow.webp",
-    "pageUrl": "/tools/capyflow/capyflow-embed.html",
+    "pageUrl": "tools/CapyFlow/capyflow-embed.html",
     "category": "Plataforma",
     "icon": "<i class='fa-solid fa-stream w-5 h-5 mr-2 text-cyan-400'></i>",
     "color": "cyan-400"
