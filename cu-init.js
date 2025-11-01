@@ -65,6 +65,28 @@
         link.href = newHref;
       }
     });
+
+    // Propagate progressive image hints site-wide.
+    //  - Add loading="lazy" to non-critical images (outside headers)
+    //  - Add decoding="async" where absent
+    const applyProgressiveImages = () => {
+      const images = Array.from(doc.querySelectorAll('img'));
+      images.forEach(img => {
+        const inHeader = img.closest('header, .header, .cu-header');
+        if (!inHeader && !img.hasAttribute('loading')) {
+          img.setAttribute('loading', 'lazy');
+        }
+        if (!img.hasAttribute('decoding')) {
+          img.setAttribute('decoding', 'async');
+        }
+      });
+    };
+
+    if (doc.readyState === 'complete' || doc.readyState === 'interactive') {
+      applyProgressiveImages();
+    } else {
+      doc.addEventListener('DOMContentLoaded', applyProgressiveImages, { once: true });
+    }
   } catch (err) {
     // Fail silently so that the absence of this initializer never
     // breaks the host page. Errors will be logged for debugging.

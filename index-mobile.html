@@ -2,13 +2,14 @@
 <html lang="pt-BR" class="dark">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CapyUniverse — Mobile</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="cu-init.js"></script>
   <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
 
   <style>
@@ -98,7 +99,7 @@
   <!-- HEADER -->
   <header class="header fixed top-0 inset-x-0 z-40">
     <div class="px-4 py-3 flex items-center gap-3">
-      <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" alt="Capy" class="w-7 h-7 rounded-md">
+      <img src="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" alt="Capy" width="28" height="28" decoding="async" class="w-7 h-7 rounded-md">
       <h1 class="font-syne text-lg tracking-tight">CapyUniverse</h1>
       <span class="ml-1 text-[11px] px-2 py-0.5 rounded-full bg-purple-600/20 border border-purple-500/30">Mobile</span>
       <div class="ml-auto flex items-center gap-3">
@@ -231,7 +232,7 @@
   const fav = FAVORITES.has(t.id);
   return `
     <article class="tool-card glass">
-      <img class="tool-img" src="${t.imageUrl||''}" alt="">
+      <img class="tool-img" src="${t.imageUrl||''}" alt="" loading="lazy" decoding="async">
       <div class="tool-overlay">
         <div class="tool-badge">${t.category||'Geral'}</div>
         <h3 class="tool-title">${t.title}</h3>
