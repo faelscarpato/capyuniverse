@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Exemplo — Sistema de Navegação Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+  <!-- ✨ Sistema de Navegação Universal ✨ -->
+  <script src="cu-navigation.js" defer></script>
+  <style>
+    html,body{background:#080915}
+    .font-syne{font-family:'Syne',system-ui,Inter,sans-serif}
+    .brand-grad{background:linear-gradient(90deg,#ff2bdc,#19d1ff); -webkit-background-clip:text; background-clip:text; color:transparent}
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">Exemplo de Navegação</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="index.html" class="cu-btn hidden sm:inline-flex">Início</a>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 pt-24 pb-14">
+    <div class="cu-panel p-8">
+      <h1 class="font-syne text-3xl brand-grad mb-6">🚀 Sistema de Navegação Modal Universal</h1>
+      
+      <div class="space-y-6">
+        <section>
+          <h2 class="text-xl font-semibold mb-4 text-cyan-400">Como Funciona</h2>
+          <p class="text-gray-300 mb-4">
+            O sistema intercepta automaticamente todos os links internos (.html) e os abre em modais, 
+            criando uma experiência de Single Page Application (SPA) fluida.
+          </p>
+          <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+            <h3 class="font-medium text-purple-400 mb-2">Funcionalidades:</h3>
+            <ul class="text-sm text-gray-300 space-y-1">
+              <li>✅ Navegação sem recarregar a página</li>
+              <li>✅ Histórico de navegação com botão "Voltar"</li>
+              <li>✅ Botão de recarregar página no modal</li>
+              <li>✅ Fechar com tecla ESC</li>
+              <li>✅ Links externos abrem normalmente</li>
+              <li>✅ Preserva âncoras e links especiais</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4 text-cyan-400">Teste a Navegação</h2>
+          <p class="text-gray-300 mb-4">
+            Clique nos links abaixo para ver o sistema em ação:
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Links internos - serão abertos em modal -->
+            <a href="capyimg.html" class="cu-btn block text-center">
+              🖼️ CapyIMG
+            </a>
+            <a href="capychat.html" class="cu-btn block text-center">
+              💬 CapyChat
+            </a>
+            <a href="capypdf.html" class="cu-btn block text-center">
+              📄 CapyPDF
+            </a>
+            <a href="capyide.html" class="cu-btn block text-center">
+              💻 CapyIDE
+            </a>
+            <a href="capy-hub.html" class="cu-btn block text-center">
+              🌟 Hub das Capys
+            </a>
+            <a href="index.html" class="cu-btn block text-center">
+              🏠 Página Inicial
+            </a>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4 text-cyan-400">Links Especiais</h2>
+          <p class="text-gray-300 mb-4">
+            Estes links mantêm comportamento normal (não abrem em modal):
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <!-- Link externo -->
+            <a href="https://github.com/faelscarpato/capyuniverse" target="_blank" class="cu-btn">
+              🔗 GitHub (Externo)
+            </a>
+            <!-- Âncora -->
+            <a href="#exemplo" class="cu-btn">
+              ⚓ Âncora Local
+            </a>
+            <!-- Email -->
+            <a href="mailto:exemplo@email.com" class="cu-btn">
+              ✉️ Email
+            </a>
+          </div>
+        </section>
+
+        <section id="exemplo">
+          <h2 class="text-xl font-semibold mb-4 text-cyan-400">Uso Programático</h2>
+          <p class="text-gray-300 mb-4">
+            Você também pode abrir modais via JavaScript:
+          </p>
+          <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 mb-4">
+            <pre class="text-sm text-green-400"><code>// Abrir página em modal
+window.CU_NAVIGATION.openInModal('capyimg.html', 'CapyIMG');
+
+// Fechar modal atual
+window.CU_NAVIGATION.closeModal();</code></pre>
+          </div>
+          <button onclick="window.CU_NAVIGATION?.openInModal('capyimg.html', 'CapyIMG via JS')" class="cu-btn primary">
+            🚀 Testar API JavaScript
+          </button>
+        </section>
+
+        <section>
+          <h2 class="text-xl font-semibold mb-4 text-cyan-400">Implementação</h2>
+          <p class="text-gray-300 mb-4">
+            Para adicionar o sistema a qualquer página HTML:
+          </p>
+          <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700">
+            <pre class="text-sm text-blue-400"><code>&lt;!-- Adicionar no &lt;head&gt; --&gt;
+&lt;script src="cu-navigation.js" defer&gt;&lt;/script&gt;</code></pre>
+          </div>
+          <p class="text-gray-300 mt-4 text-sm">
+            O sistema é inicializado automaticamente quando o DOM estiver pronto.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Exemplo de uso da API
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 Sistema de navegação carregado:', !!window.CU_NAVIGATION);
+    });
+  </script>
+</body>
+</html>

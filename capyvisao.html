@@ -1,351 +1,624 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="capyuniverse">
+<html lang="pt-BR" class="dark" data-theme="capyuniverse">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CapyVisão Criativa — Design Inteligente</title>
+  <title>CapyVisão Criativa — Lite</title>
 
-  <!-- Tailwind CSS & Icons -->
+  <!-- Tailwind + Fonts + Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
-    rel="stylesheet"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-  <link
-    rel="icon"
-    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
-    type="image/png"
-  />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- CapyUniverse Theme Overrides -->
+  <!-- OCR + Canvas + Export libs (estáveis UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+
   <style>
-    :root {
-      --cu-bg-0: #0b0b14;
-      --cu-bg-1: #0f1024;
-      --cu-grid: #2a2e63;
-      --cu-card: #0f0f22cc;
-      --cu-cyan: #22d3ee;
-      --cu-magenta: #f472d0;
-      --cu-amber: #f59e0b;
-      --cu-text: #e6e6f0;
-      --cu-text-dim: #aab;
-      --cu-radius: 16px;
-      --cu-radius-lg: 22px;
-      --cu-blur: 12px;
-      --cu-shadow: 0 10px 30px rgba(0, 0, 0, 0.45),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-    }
-    html {
-      background: var(--cu-bg-0);
-    }
-    body {
-      font-family: Inter, system-ui, sans-serif;
-      color: var(--cu-text);
-      background:
-        radial-gradient(
-          1200px 700px at 70% -10%,
-          rgba(139, 92, 246, 0.25),
-          transparent 60%
-        ),
-        radial-gradient(
-          900px 600px at -10% 20%,
-          rgba(34, 211, 238, 0.18),
-          transparent 60%
-        ),
-        var(--cu-bg-0);
-    }
-    .cu-stars {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: -2;
-      background:
-        radial-gradient(
-          circle at 15% 20%,
-          rgba(255, 255, 255, 0.12) 0 1px,
-          transparent 2px
-        )
-          0 0/180px 180px,
-        radial-gradient(
-          circle at 75% 35%,
-          rgba(255, 255, 255, 0.1) 0 1px,
-          transparent 2px
-        )
-          0 0/220px 220px,
-        radial-gradient(
-          circle at 40% 70%,
-          rgba(255, 255, 255, 0.08) 0 1px,
-          transparent 2px
-        )
-          0 0/260px 260px;
-    }
-    .cu-stage {
-      position: fixed;
-      inset: auto 0 0 0;
-      height: 38vh;
-      pointer-events: none;
-      z-index: -1;
-      background:
-        linear-gradient(to top, rgba(10, 10, 22, 0.65), transparent 70%),
-        repeating-linear-gradient(
-          to right,
-          transparent 0 38px,
-          var(--cu-grid) 38px 39px
-        ),
-        repeating-linear-gradient(
-          to top,
-          transparent 0 38px,
-          var(--cu-grid) 38px 39px
-        );
-      mask: linear-gradient(to top, black, transparent 80%);
-    }
-    .cu-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 40;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0 0.9rem;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(
-        180deg,
-        rgba(10, 10, 30, 0.7),
-        rgba(10, 10, 30, 0.35)
-      );
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .cu-brand {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .cu-appname {
-      font-family: Syne, Inter, sans-serif;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      color: white;
-    }
-    .cu-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: linear-gradient(
-        120deg,
-        rgba(34, 211, 238, 0.16),
-        rgba(139, 92, 246, 0.16)
-      );
-      color: white;
-    }
-    .cu-panel {
-      background: var(--cu-card);
-      backdrop-filter: blur(var(--cu-blur));
-      border-radius: var(--cu-radius-lg);
-      box-shadow: var(--cu-shadow);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .cu-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-      padding: 0.6rem 0.9rem;
-      border-radius: 14px;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: linear-gradient(
-        130deg,
-        rgba(34, 211, 238, 0.18),
-        rgba(244, 114, 208, 0.18)
-      );
-      box-shadow: var(--cu-shadow);
-      backdrop-filter: blur(6px);
-      transition: 0.2s transform, 0.2s filter;
-    }
-    .cu-btn:hover {
-      transform: translateY(-1px);
-      filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.45))
-        drop-shadow(0 0 24px rgba(244, 114, 208, 0.35));
-    }
-    .cu-btn.primary {
-      background: linear-gradient(
-        140deg,
-        #0ea5e9 0%,
-        #22d3ee 40%,
-        #a855f7 78%,
-        #f59e0b 100%
-      );
-      color: white;
-      border-color: transparent;
-    }
-    .sidebar-glass {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
-      backdrop-filter: blur(15px);
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
-      border-radius: 999px;
-    }
-    .scrollbar-thin::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.06);
-    }
+    :root { --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
+    html { background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14 }
+    body { color:#e6edf3; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, 'Noto Sans', sans-serif }
+    .font-syne{ font-family:'Syne',sans-serif } .font-mono{ font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace }
+    .glass{ background:var(--glass); backdrop-filter:blur(18px); border:1px solid var(--glass-border); border-radius:1.25rem; box-shadow:0 8px 32px rgba(0,0,0,.35) }
+    .input{ background:#27272a; border:1px solid #3f3f46; color:#e4e4e7; border-radius:.6rem; padding:.6rem .75rem }
+    .btn{ background:#7c3aed; color:#fff; border-radius:.65rem; padding:.65rem .9rem; font-weight:700 } .btn:hover{ filter:brightness(1.05) }
+    .chip{ background:rgba(255,255,255,.06); border:1px solid var(--glass-border); padding:.35rem .6rem; border-radius:.6rem }
+    .status{ min-height:22px } .ok{ color:#22c55e } .err{ color:#ef4444 } .warn{ color:#f59e0b }
+    .tab{ padding:.55rem .85rem; border:1px solid var(--glass-border); border-bottom:none; border-radius:.6rem .6rem 0 0; background:#0c1015; color:#9aa7b4; font-weight:600 }
+    .tab.active{ background:var(--glass); color:#e6edf3 }
+    .tabpanel{ display:none }
+    .thumb{ width:100%; border:1px solid #243041; border-radius:.6rem }
+    .kpi{ background:#0f1520; border:1px solid #203049; border-radius:1rem; padding:1rem }
   </style>
-
-  <!-- CapyUniverse Shared Styles & JS -->
-  <link rel="stylesheet" href="cu-style.css" />
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
 
-<body class="min-h-screen flex flex-col">
-  <!-- Decorative background elements -->
-  <div class="cu-stars"></div>
-  <div class="cu-stage"></div>
-
-  <!-- Fixed Header -->
-  <header class="cu-header">
-    <div class="cu-brand">
-      <button
-        id="sidebarToggleBtn"
-        class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none"
-      >
-        <i class="fas fa-bars text-xl"></i>
-      </button>
-      <div class="flex items-center gap-2">
-        <span class="cu-appname text-xl">CapyVisão Criativa</span>
-        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
-      </div>
+<body class="min-h-screen flex flex-col text-[15px]">
+  <header class="px-4 py-3 flex items-center justify-between border-b border-white/10">
+    <div class="flex items-center gap-2">
+      <span class="text-xl font-syne">CapyVisão Criativa</span>
+      <span class="chip text-xs">Lite — 100% funcional</span>
     </div>
     <div class="flex items-center gap-2">
-      <button
-        onclick="location.href='index.html'"
-        class="cu-btn hidden sm:inline-flex"
-      >
-        Início
-      </button>
-      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+      <button id="openKeys" class="btn bg-sky-600 hover:bg-sky-700">🔑 API (opcional)</button>
     </div>
   </header>
 
-  <div class="flex flex-1 pt-4 min-h-0">
-    <!-- Sidebar placeholder (loaded by cu-app.js) -->
-    <aside
-      id="sidebar"
-      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto scrollbar-thin pt-4"
-    >
-      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
-    </aside>
-    <div
-      id="sidebarOverlay"
-      class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"
-    ></div>
-
-    <!-- Main content area -->
-    <main
-      class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"
-      style="padding-top: 1rem;"
-    >
-      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col">
-        <div class="text-center mb-6 sm:mb-8">
-          <h1
-            class="text-2xl sm:text-3xl font-bold"
-            style="color: #a855f7;"
-          >
-            CapyVisão Criativa 🎨
-          </h1>
-          <p class="text-zinc-300 mt-1">
-            Crie e otimize conteúdo visual e textual com IA colaborativa e
-            consistente com a sua marca.
-          </p>
+  <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+    <section class="glass p-6 border border-zinc-800">
+      <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h1 class="text-3xl font-bold font-syne text-fuchsia-400">CapyVisão Criativa</h1>
+          <p class="text-zinc-300 max-w-2xl mt-1">Brief → Geração (texto/imagem) → Canvas → Downloads/ZIP. Tudo local + IA grátis (Pollinations).</p>
         </div>
+        <div class="flex gap-2">
+          <span class="chip text-xs">Canvas pronto</span>
+          <span class="chip text-xs">OCR opcional</span>
+          <span class="chip text-xs">Export TXT/DOCX/PDF/ZIP</span>
+        </div>
+      </div>
 
-        <div class="space-y-6 text-base text-gray-300">
-          <div>
-            <h2 class="text-xl font-semibold mb-2 text-purple-300">O que é o CapyVisão Criativa?</h2>
-            <p>
-              CapyVisão Criativa (CV) é um estúdio de marketing alimentado por
-              modelos de IA de visão e linguagem. Ele permite que equipes
-              insiram briefs e referências e, em segundos, recebam layouts,
-              artes e textos otimizados. A IA garante aderência à identidade
-              visual, enquanto todos colaboram em tempo real em um canvas
-              compartilhado.
-            </p>
+      <div class="flex gap-2 border-b border-zinc-800 mb-4 flex-wrap">
+        <button class="tab active" data-tab="brief">Briefing</button>
+        <button class="tab" data-tab="generate">Geração</button>
+        <button class="tab" data-tab="canvas">Canvas</button>
+        <button class="tab" data-tab="assets">Ativos</button>
+        <button class="tab" data-tab="metrics">Métricas</button>
+      </div>
+
+      <!-- BRIEF -->
+      <section id="brief" class="tabpanel" style="display:block">
+        <div class="grid lg:grid-cols-[1.1fr_.9fr] gap-4">
+          <section class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-3">Briefing</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div><label class="text-xs text-zinc-400">Projeto</label><input id="brTitle" class="input w-full"></div>
+              <div><label class="text-xs text-zinc-400">Objetivo</label><input id="brGoal" class="input w-full"></div>
+              <div class="md:col-span-2"><label class="text-xs text-zinc-400">Público</label><input id="brAudience" class="input w-full"></div>
+              <div class="md:col-span-2"><label class="text-xs text-zinc-400">Mensagem-chave</label><input id="brKey" class="input w-full"></div>
+              <div class="md:col-span-2"><label class="text-xs text-zinc-400">Referências (URLs por linha)</label><textarea id="brRefs" class="input w-full min-h-[90px]"></textarea></div>
+            </div>
+
+            <h4 class="font-semibold mt-4 mb-2">Identidade</h4>
+            <div class="grid md:grid-cols-3 gap-3">
+              <div><label class="text-xs text-zinc-400">Cor primária</label><input id="brandPrimary" class="input w-full" value="#7c3aed"></div>
+              <div><label class="text-xs text-zinc-400">Cor secundária</label><input id="brandSecondary" class="input w-full" value="#06b6d4"></div>
+              <div><label class="text-xs text-zinc-400">Fonte</label><input id="brandFont" class="input w-full" value="Inter"></div>
+              <div class="md:col-span-2"><label class="text-xs text-zinc-400">Logo (URL)</label><input id="brandLogo" class="input w-full" placeholder="https://...png"></div>
+              <div>
+                <label class="text-xs text-zinc-400">Tom de voz</label>
+                <select id="brandTone" class="input w-full">
+                  <option>futurista confiante</option>
+                  <option selected>técnico sofisticado</option>
+                  <option>amigável e direto</option>
+                  <option>divertido irreverente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+              <button id="saveBrief" class="btn">Salvar brief</button>
+              <span id="briefStatus" class="status text-sm text-zinc-400"></span>
+            </div>
+          </section>
+
+          <section class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-3">CapyOCR (opcional)</h3>
+            <input type="file" id="ocrFile" accept="image/*" class="input w-full" />
+            <div class="flex gap-2 mt-2">
+              <button id="runOCR" class="btn bg-sky-600 hover:bg-sky-700">Rodar OCR</button>
+              <button id="applyTokens" class="btn bg-emerald-600 hover:bg-emerald-700">Aplicar tokens</button>
+            </div>
+            <pre id="ocrOut" class="bg-[#0b0f14] border border-[#243041] rounded-xl p-3 font-mono text-xs whitespace-pre-wrap break-words mt-3 min-h-[100px]"></pre>
+          </section>
+        </div>
+      </section>
+
+      <!-- GERAÇÃO -->
+      <section id="generate" class="tabpanel">
+        <div class="grid lg:grid-cols-[1.05fr_.95fr] gap-4">
+          <section class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-3">Gerar com IA</h3>
+            <div class="grid md:grid-cols-4 gap-3">
+              <div>
+                <label class="text-xs text-zinc-400">Modelo (img)</label>
+                <select id="imgModel" class="input w-full">
+                  <option value="flux" selected>flux</option>
+                  <option value="sd3">sd3</option>
+                  <option value="turbo">turbo</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Tamanho</label>
+                <select id="imgSize" class="input w-full">
+                  <option value="1024x1024" selected>1024×1024</option>
+                  <option value="1280x768">1280×768</option>
+                  <option value="768x1280">768×1280</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Qtd</label>
+                <select id="imgCount" class="input w-full">
+                  <option>1</option>
+                  <option selected>2</option>
+                  <option>3</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-zinc-400">Seed</label>
+                <input id="imgSeed" class="input w-full" type="number" placeholder="aleatória">
+              </div>
+            </div>
+
+            <label class="text-xs text-zinc-400 mt-3 block">Diretrizes extras (opcional)</label>
+            <textarea id="genExtra" class="input w-full min-h-[90px]" placeholder="Grid, margens, CTA, contraste..."></textarea>
+
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button id="genImages" class="btn"><i class="fa-solid fa-image mr-2"></i>Gerar Imagens</button>
+              <button id="genText" class="btn bg-indigo-600 hover:bg-indigo-700"><i class="fa-solid fa-align-left mr-2"></i>Gerar Textos</button>
+              <span id="genStatus" class="status text-sm text-zinc-400"></span>
+            </div>
+          </section>
+
+          <section class="glass p-4 border border-zinc-800">
+            <h3 class="font-semibold mb-2">Saídas</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-2">Imagens</h4>
+                <div id="imgOut" class="grid grid-cols-2 gap-2"></div>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-2">Textos</h4>
+                <pre id="txtOut" class="bg-[#0b0f14] border border-[#243041] rounded-xl p-3 font-mono text-xs whitespace-pre-wrap break-words min-h-[160px]"></pre>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <button id="sendToCanvas" class="btn bg-emerald-600 hover:bg-emerald-700">→ Canvas</button>
+                  <button id="dlTxt" class="btn bg-zinc-700 hover:bg-zinc-600">TXT</button>
+                  <button id="dlDocx" class="btn bg-zinc-700 hover:bg-zinc-600">DOCX</button>
+                  <button id="dlPdf" class="btn bg-zinc-700 hover:bg-zinc-600">PDF</button>
+                  <button id="copyText" class="btn bg-zinc-700 hover:bg-zinc-600">Copiar</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- CANVAS -->
+      <section id="canvas" class="tabpanel">
+        <div class="glass p-4 border border-zinc-800">
+          <h3 class="font-semibold mb-3">Canvas</h3>
+
+          <div class="flex flex-wrap gap-2 mb-2 items-center">
+            <button id="addText" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-font mr-2"></i>Texto</button>
+            <button id="addImg" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-image mr-2"></i>Imagem (URL)</button>
+            <label class="btn bg-sky-600 hover:bg-sky-700 cursor-pointer">
+              <i class="fa-solid fa-upload mr-2"></i>Upload
+              <input id="uploadImg" type="file" accept="image/*" class="hidden">
+            </label>
+            <button id="addRect" class="btn bg-indigo-600 hover:bg-indigo-700"><i class="fa-regular fa-square mr-2"></i>Retângulo</button>
+            <button id="addCircle" class="btn bg-indigo-600 hover:bg-indigo-700"><i class="fa-regular fa-circle mr-2"></i>Círculo</button>
+            <button id="addLogo" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-signature mr-2"></i>Logo</button>
+            <button id="brandApply" class="btn bg-fuchsia-600 hover:bg-fuchsia-700"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Aplicar Identidade</button>
+            <button id="downloadCanvas" class="btn bg-emerald-600 hover:bg-emerald-700"><i class="fa-solid fa-download mr-2"></i>Baixar PNG</button>
+
+            <!-- Controles de cor do elemento -->
+            <div class="ml-2 flex items-center gap-2">
+              <label class="text-xs text-zinc-400">Cor (preench.)</label>
+              <input id="elementFill" type="color" class="input h-9 w-12 p-0" title="Fill color">
+              <label class="text-xs text-zinc-400 ml-2">Borda</label>
+              <input id="elementStroke" type="color" class="input h-9 w-12 p-0" title="Stroke color">
+              <label class="text-xs text-zinc-400 ml-2">Opacidade</label>
+              <input id="elementOpacity" type="range" min="0" max="100" value="100" class="h-9" style="width:110px">
+            </div>
           </div>
 
-          <div>
-            <h2 class="text-xl font-semibold mb-2 text-purple-300">Fluxo de uso</h2>
-            <ol class="list-decimal list-inside space-y-2 ml-4">
-              <li><strong>Inserção de briefing:</strong> forneça objetivos, público‑alvo e imagens de referência.</li>
-              <li><strong>Geração automática:</strong> a IA cria layouts, artes e copies de acordo com o seu briefing.</li>
-              <li><strong>Colaboração em tempo real:</strong> edite e comente no canvas com sua equipe; a IA sugere melhorias.</li>
-              <li><strong>CapyOCR:</strong> o módulo lê guias de estilo e anúncios para ajustar cores, fontes e tom de voz.</li>
-            </ol>
-          </div>
+          <!-- PATCH: canvas com tamanho intrínseco 1280×720 e apenas escala CSS -->
+          <canvas id="fabricCanvas" width="1280" height="720"
+                  class="border border-[#243041] rounded-xl bg-transparent"
+                  style="width:100%; height:auto; display:block;"></canvas>
+        </div>
+      </section>
 
-          <div>
-            <h2 class="text-xl font-semibold mb-2 text-purple-300">Métricas de sucesso</h2>
-            <table class="min-w-full text-left text-sm">
-              <thead class="text-zinc-200">
-                <tr>
-                  <th class="pb-2 pr-4">Métrica</th>
-                  <th class="pb-2">Descrição</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-zinc-800">
-                <tr>
-                  <td class="py-2 pr-4 font-medium">Nº de ativos criados/mês</td>
-                  <td class="py-2">Quantidade de artes e textos produzidos na plataforma.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-medium">Tempo médio economizado</td>
-                  <td class="py-2">Redução de horas comparado ao processo manual de design.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-medium">Taxa de conformidade</td>
-                  <td class="py-2">Percentual de peças que seguem as diretrizes de marca.</td>
-                </tr>
-                <tr>
-                  <td class="py-2 pr-4 font-medium">Engajamento no canvas</td>
-                  <td class="py-2">Número de usuários participantes por sessão ou projeto.</td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- ATIVOS -->
+      <section id="assets" class="tabpanel">
+        <div class="glass p-4 border border-zinc-800">
+          <h3 class="font-semibold mb-3">Ativos</h3>
+          <div id="assetGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <button id="exportZip" class="btn bg-emerald-600 hover:bg-emerald-700"><i class="fa-solid fa-file-zipper mr-2"></i>Exportar ZIP</button>
+            <span id="assetStatus" class="status text-sm text-zinc-400"></span>
           </div>
         </div>
       </section>
-    </main>
+
+      <!-- Sincronizador de cores (mantido) -->
+      <script>
+        window.addEventListener('load', () => {
+          const fill = document.getElementById('elementFill');
+          const stroke = document.getElementById('elementStroke');
+          const opacity = document.getElementById('elementOpacity');
+          const saveBrief = document.getElementById('saveBrief');
+
+          try {
+            const bp = document.getElementById('brandPrimary');
+            const bs = document.getElementById('brandSecondary');
+            if (bp && bp.value) fill.value = bp.value;
+            if (bs && bs.value) stroke.value = bs.value;
+          } catch(e){}
+
+          function pushToTokens(){
+            const bp = document.getElementById('brandPrimary');
+            const bs = document.getElementById('brandSecondary');
+            if (fill && bp) bp.value = fill.value;
+            if (stroke && bs) bs.value = stroke.value;
+            if (saveBrief) saveBrief.click();
+          }
+
+          const addRect = document.getElementById('addRect');
+          if (addRect) addRect.addEventListener('click', () => { pushToTokens(); }, true);
+          const addCircle = document.getElementById('addCircle');
+          if (addCircle) addCircle.addEventListener('click', () => { pushToTokens(); }, true);
+          const brandApply = document.getElementById('brandApply');
+          if (brandApply) brandApply.addEventListener('click', pushToTokens, true);
+
+          window._capyElementColor = () => ({ fill: fill?.value, stroke: stroke?.value, opacity: (opacity?.value||100)/100 });
+        });
+      </script>
+
+      <!-- MÉTRICAS -->
+      <section id="metrics" class="tabpanel">
+        <div class="grid md:grid-cols-4 gap-3">
+          <div class="kpi"><div class="text-zinc-400 text-xs">Nº ativos/mês</div><div id="kpiAssets" class="text-3xl font-syne mt-1">0</div></div>
+          <div class="kpi"><div class="text-zinc-400 text-xs">Horas economizadas</div><div id="kpiTime" class="text-3xl font-syne mt-1">0h</div></div>
+          <div class="kpi"><div class="text-zinc-400 text-xs">Conformidade</div><div id="kpiCompliance" class="text-3xl font-syne mt-1">0%</div></div>
+          <div class="kpi"><div class="text-zinc-400 text-xs">Engajamento</div><div id="kpiEng" class="text-3xl font-syne mt-1">0</div></div>
+        </div>
+        <div class="glass p-4 border border-zinc-800 mt-4">
+          <div class="grid md:grid-cols-4 gap-3">
+            <div><label class="text-xs text-zinc-400">Horas por peça (manual)</label><input id="mHoursManual" type="number" class="input" value="4"></div>
+            <div><label class="text-xs text-zinc-400">Fator IA</label><input id="mIaFactor" type="number" step="0.1" class="input" value="0.6"></div>
+            <div><label class="text-xs text-zinc-400">Conformidade (%)</label><input id="mComplianceIn" type="number" class="input" value="92"></div>
+            <div><label class="text-xs text-zinc-400">Engajamento</label><input id="mEngIn" type="number" class="input" value="3"></div>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button id="recalc" class="btn">Recalcular</button>
+            <span id="metricStatus" class="status text-sm text-zinc-400"></span>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- Modal API -->
+  <div id="keysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="glass p-6 w-full max-w-md border border-zinc-800">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-purple-400 font-syne">Chaves de API</h2>
+        <button id="closeKeys" class="text-2xl text-zinc-300">&times;</button>
+      </div>
+      <label class="text-xs text-zinc-400">Gemini (opcional)</label>
+      <div class="flex gap-2">
+        <input id="gemKey" type="password" class="input w-full" placeholder="Cole sua chave aqui">
+        <button id="saveKey" class="btn bg-sky-600 hover:bg-sky-700">Salvar</button>
+      </div>
+      <p class="text-xs text-zinc-400 mt-2">A chave fica somente no seu navegador.</p>
+    </div>
   </div>
 
-  <!-- Floating API Key button (mobile) -->
-  <button
-    id="fabApi"
-    class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50"
-    title="Chaves API"
-  >
-    🔑
-  </button>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* ===== Util ===== */
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
+      const flash = (el, msg, kind='') => { if(!el) return; el.textContent=msg; el.className='status '+kind; clearTimeout(el._t); el._t=setTimeout(()=>{ el.textContent=''; el.className='status' },3000); };
+      const toDataURL = blob => new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(blob); });
 
-  <!-- API Keys Modal -->
-  <div
-    id="apiKeysModal"
-    class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"
-  ></div>
+      /* ===== Storage ===== */
+      const LS = { BRIEF:'cv:brief', TOKENS:'cv:brandTokens', ASSETS:'cv:assets', METRICS:'cv:metrics' };
+      const state = {
+        brief: JSON.parse(localStorage.getItem(LS.BRIEF)||'{}'),
+        tokens: JSON.parse(localStorage.getItem(LS.TOKENS)||'{}'),
+        assets: JSON.parse(localStorage.getItem(LS.ASSETS)||'[]'),
+        metrics: JSON.parse(localStorage.getItem(LS.METRICS)||'{"assetsMonth":0,"hoursSaved":0,"compliance":0,"engagement":0}')
+      };
+
+      /* ===== Tabs ===== */
+      $$('.tab').forEach(b=>b.addEventListener('click',()=>{ $$('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); const id=b.dataset.tab; $$('.tabpanel').forEach(p=>p.style.display=p.id===id?'block':'none'); }));
+
+      /* ===== Brief ===== */
+      const briefEls = { title:$('#brTitle'), goal:$('#brGoal'), audience:$('#brAudience'), key:$('#brKey'), refs:$('#brRefs'),
+        primary:$('#brandPrimary'), secondary:$('#brandSecondary'), font:$('#brandFont'), logo:$('#brandLogo'), tone:$('#brandTone') };
+      function loadBriefUI(){
+        const b=state.brief||{}, t=state.tokens||{};
+        briefEls.title.value=b.title||''; briefEls.goal.value=b.goal||''; briefEls.audience.value=b.audience||'';
+        briefEls.key.value=b.key||''; briefEls.refs.value=(b.refs||[]).join('\n');
+        briefEls.primary.value=t.primary||'#7c3aed'; briefEls.secondary.value=t.secondary||'#06b6d4';
+        briefEls.font.value=t.font||'Inter'; briefEls.logo.value=t.logo||''; briefEls.tone.value=t.tone||'técnico sofisticado';
+      }
+      loadBriefUI();
+
+      $('#saveBrief').addEventListener('click', ()=>{
+        state.brief = {
+          title: briefEls.title.value.trim(), goal: briefEls.goal.value.trim(), audience: briefEls.audience.value.trim(),
+          key: briefEls.key.value.trim(), refs: briefEls.refs.value.split('\n').map(x=>x.trim()).filter(Boolean)
+        };
+        state.tokens = {
+          primary: briefEls.primary.value.trim()||'#7c3aed', secondary: briefEls.secondary.value.trim()||'#06b6d4',
+          font: briefEls.font.value.trim()||'Inter', logo: briefEls.logo.value.trim(), tone: briefEls.tone.value
+        };
+        localStorage.setItem(LS.BRIEF, JSON.stringify(state.brief));
+        localStorage.setItem(LS.TOKENS, JSON.stringify(state.tokens));
+        flash($('#briefStatus'),'Brief salvo!','ok');
+      });
+
+      /* OCR */
+      let ocrBlob = null;
+      $('#ocrFile').addEventListener('change', e => { ocrBlob = e.target.files?.[0] || null; });
+      $('#runOCR').addEventListener('click', async ()=>{
+        if(!ocrBlob){ flash($('#ocrOut'),'Selecione uma imagem.','warn'); return; }
+        $('#ocrOut').textContent='Lendo...';
+        const { createWorker } = Tesseract;
+        const worker = await createWorker('por');
+        const ret = await worker.recognize(ocrBlob);
+        await worker.terminate();
+        $('#ocrOut').textContent = ret.data.text.trim();
+      });
+      $('#applyTokens').addEventListener('click', ()=>{
+        const txt=$('#ocrOut').textContent||'';
+        const hexes=[...txt.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})/gi)].map(m=>m[0]);
+        if(hexes[0]) briefEls.primary.value=hexes[0];
+        if(hexes[1]) briefEls.secondary.value=hexes[1];
+        if(/inter|poppins|roboto|syne|montserrat/i.test(txt)) briefEls.font.value=(txt.match(/inter|poppins|roboto|syne|montserrat/i)||['Inter'])[0];
+        flash($('#briefStatus'),'Tokens sugeridos aplicados.','ok');
+      });
+
+      /* ===== IA (Pollinations) ===== */
+      async function genText(prompt){
+        const url=new URL('https://text.pollinations.ai/'+encodeURIComponent(prompt));
+        url.searchParams.set('model','openai');
+        const r=await fetch(url.toString(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+        return await r.text();
+      }
+      async function genImageToDataURL({prompt,model='flux',size='1024x1024',seed}){
+        const url=new URL('https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt));
+        url.searchParams.set('model',model);
+        const [w,h]=size.split('x'); url.searchParams.set('width',w); url.searchParams.set('height',h);
+        if(seed) url.searchParams.set('seed',seed);
+        url.searchParams.set('ts',Date.now().toString());
+        const r=await fetch(url.toString(),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
+        const blob=await r.blob(); return await toDataURL(blob);
+      }
+      function makeImgPrompt(kind='generic'){
+        const b=state.brief||{}, t=state.tokens||{};
+        const base=`brand colors ${t.primary||'#7c3aed'} ${t.secondary||'#06b6d4'}, font ${t.font||'Inter'}, tone ${t.tone||'técnico sofisticado'}, goal ${b.goal||''}, audience ${b.audience||''}, message ${b.key||''}`;
+        const spec = kind==='post' ? 'social media post, bold headline, safe margins, high contrast'
+                   : kind==='ad'   ? 'advertising layout with strong CTA button, visual hierarchy, product focus'
+                                   : 'balanced composition, clean grid, whitespace, premium look';
+        return `futuristic neon style, ${spec}, consistent branding, crisp UI graphic, high detail, 8k feel, ${base}`;
+      }
+      function makeCopyPrompt(){
+        const b=state.brief||{}, t=state.tokens||{};
+        const extra=($('#genExtra').value||'').trim();
+        return `Escreva 3 variações curtas de copy para a campanha "${b.title||'Sem título'}".
+Tom de voz: ${t.tone||'técnico sofisticado'}. Público: ${b.audience||'geral'}. Mensagem-chave: ${b.key||''}.
+Inclua CTA. ${extra?('Diretriz extra: '+extra):''}`;
+      }
+
+      $('#genText').addEventListener('click', async ()=>{
+        try{
+          flash($('#genStatus'),'Gerando texto...');
+          const text=await genText(makeCopyPrompt());
+          $('#txtOut').textContent=text;
+          addAsset({type:'text', data:text});
+          incMetric('assetsMonth',1);
+          flash($('#genStatus'),'Texto pronto!','ok');
+        }catch(e){ console.error(e); flash($('#genStatus'),'Falha no texto','err'); }
+      });
+
+      $('#genImages').addEventListener('click', async ()=>{
+        const model=$('#imgModel').value; const size=$('#imgSize').value;
+        const count=parseInt($('#imgCount').value||'1',10);
+        const seedBase=parseInt($('#imgSeed').value||'')||Math.floor(Math.random()*1e9);
+        const extra=($('#genExtra').value||'').trim();
+        $('#imgOut').innerHTML=''; flash($('#genStatus'),'Gerando imagens...');
+        for(let i=0;i<count;i++){
+          try{
+            const prompt=makeImgPrompt(i%2?'post':'ad')+(extra?(', '+extra):'');
+            const dataUrl=await genImageToDataURL({prompt,model,size,seed:(seedBase+i)});
+            const wrap=document.createElement('div');
+            const img=document.createElement('img'); img.src=dataUrl; img.className='thumb';
+            const row=document.createElement('div'); row.className='flex items-center justify-between mt-1';
+            const btnCanvas=document.createElement('button'); btnCanvas.className='btn bg-emerald-600 hover:bg-emerald-700'; btnCanvas.textContent='→ Canvas';
+            btnCanvas.onclick=()=>addImgToCanvas(dataUrl);
+            const btnSave=document.createElement('button'); btnSave.className='btn bg-zinc-700 hover:bg-zinc-600'; btnSave.textContent='Salvar';
+            btnSave.onclick=()=>addAsset({type:'image', data:dataUrl, meta:{model,size}});
+            row.append(btnCanvas,btnSave); wrap.append(img,row); $('#imgOut').appendChild(wrap);
+            incMetric('assetsMonth',1);
+          }catch(e){ console.error(e); }
+        }
+        flash($('#genStatus'),'Imagens prontas!','ok');
+      });
+
+      /* ===== Canvas (Fabric 5.x) ===== */
+      const canvasEl = document.getElementById('fabricCanvas');
+      const BASE_W = 1280, BASE_H = 720; // PATCH: base lógica
+      const fc = new fabric.Canvas('fabricCanvas', {
+        preserveObjectStacking:true, selection:true, allowTouchScrolling:true
+      });
+      fc.setBackgroundColor('#0b0f14', fc.renderAll.bind(fc));
+
+      // PATCH: resize via zoom/viewportTransform (sem distorção/offset)
+      function fitCanvas(){
+        if(!canvasEl || !canvasEl.parentElement) return;
+        const parentW = canvasEl.parentElement.clientWidth || BASE_W;
+        const scale = Math.max(0.1, Math.min(1.0, parentW / BASE_W)); // encaixa largura
+        const cssW = Math.round(BASE_W * scale);
+        const cssH = Math.round(BASE_H * scale);
+        fc.setDimensions({ width: cssW, height: cssH }, { cssOnly: true });
+        fc.setViewportTransform([scale, 0, 0, scale, 0, 0]);
+        fc.renderAll();
+      }
+      window.addEventListener('resize', fitCanvas);
+      fitCanvas();
+
+      function addTextToCanvas(txt='Seu título aqui', bold=true){
+        const t=state.tokens||{};
+        const obj=new fabric.Textbox(txt,{
+          left:80, top:80, width:620, fill:'#e6edf3',
+          fontFamily:t.font||'Inter', fontWeight:bold?700:600, fontSize:bold?36:24
+        });
+        fc.add(obj).setActiveObject(obj); fc.renderAll();
+      }
+      function addImgToCanvas(dataUrl){
+        fabric.Image.fromURL(dataUrl,(img)=>{
+          img.set({ left:120, top:120, scaleX:0.5, scaleY:0.5, selectable:true, crossOrigin:'anonymous' });
+          fc.add(img).setActiveObject(img); fc.renderAll();
+        },{ crossOrigin:'anonymous' });
+      }
+      function addUploadToCanvas(file){
+        const reader=new FileReader();
+        reader.onload=e=>addImgToCanvas(e.target.result);
+        reader.readAsDataURL(file);
+      }
+      function applyBrand(){
+        const t=state.tokens||{};
+        fc.getObjects().forEach(o=>{
+          if(o.type==='textbox') o.set({ fill:'#e6edf3', fontFamily:t.font||'Inter' });
+          if(o.type==='rect' || o.type==='circle') o.set({ fill: t.primary||'#7c3aed' });
+        });
+        fc.setBackgroundColor('#0b0f14', fc.renderAll.bind(fc));
+        fc.renderAll();
+      }
+
+      $('#addText').addEventListener('click', ()=>addTextToCanvas());
+      $('#addImg').addEventListener('click', ()=>{
+        const url=prompt('URL da imagem:'); if(url){
+          fetch(url).then(r=>r.blob()).then(toDataURL).then(addImgToCanvas).catch(()=>alert('Falha ao carregar imagem.'));
+        }
+      });
+      $('#uploadImg').addEventListener('change', e=>{ const f=e.target.files?.[0]; if(f) addUploadToCanvas(f); e.target.value=''; });
+      $('#addRect').addEventListener('click', ()=>{
+        const t=state.tokens||{};
+        const r=new fabric.Rect({ left:220, top:200, width:360, height:200, fill:t.primary||'#7c3aed', rx:18, ry:18 });
+        fc.add(r); fc.setActiveObject(r); fc.renderAll();
+      });
+      $('#addCircle').addEventListener('click', ()=>{
+        const t=state.tokens||{};
+        const c=new fabric.Circle({ left:460, top:240, radius:100, fill:t.secondary||'#06b6d4' });
+        fc.add(c); fc.setActiveObject(c); fc.renderAll();
+      });
+      $('#addLogo').addEventListener('click', ()=>{
+        const url=(state.tokens||{}).logo || prompt('URL do logo:'); if(!url) return;
+        fetch(url).then(r=>r.blob()).then(toDataURL).then(addImgToCanvas).catch(()=>alert('Falha no logo.'));
+      });
+      $('#brandApply').addEventListener('click', applyBrand);
+
+      // PATCH: download em resolução cheia (compensando o zoom atual)
+      $('#downloadCanvas').addEventListener('click', ()=>{
+        const vt = fc.viewportTransform || [1,0,0,1,0,0];
+        const currentZoom = vt[0] || 1;
+        const url = fc.toDataURL({ format:'png', multiplier: 1 / currentZoom }); // 2/currentZoom para 2×
+        const a=document.createElement('a'); a.href=url; a.download=`canvas_${Date.now()}.png`; a.click();
+        addAsset({ type:'canvas', data:url });
+      });
+
+      /* ===== Saídas de texto ===== */
+      $('#sendToCanvas').addEventListener('click', ()=>{ const t=$('#txtOut').textContent||''; if(t) addTextToCanvas(t,true); });
+      $('#copyText').addEventListener('click', ()=>navigator.clipboard.writeText($('#txtOut').textContent||''));
+      $('#dlTxt').addEventListener('click', ()=>{
+        const txt=$('#txtOut').textContent||''; if(!txt) return; const blob=new Blob([txt],{type:'text/plain'}); saveAs(blob,`copy_${Date.now()}.txt`);
+      });
+      $('#dlDocx').addEventListener('click', async ()=>{
+        const txt=$('#txtOut').textContent||''; if(!txt) return;
+        const { Document, Packer, Paragraph } = window.docx;
+        const doc=new Document({ sections:[{ children: txt.split('\n').map(l=>new Paragraph(l)) }] });
+        const blob=await Packer.toBlob(doc); saveAs(blob,`copy_${Date.now()}.docx`);
+      });
+      $('#dlPdf').addEventListener('click', async ()=>{
+        const txt=$('#txtOut').textContent||''; if(!txt) return;
+        const { jsPDF } = window.jspdf; const doc=new jsPDF({ unit:'pt', format:'a4' });
+        const m=54, w=doc.internal.pageSize.getWidth()-m*2, lines=doc.splitTextToSize(txt,w); let y=m, lh=14;
+        lines.forEach(ln=>{ if(y>doc.internal.pageSize.getHeight()-m){ doc.addPage(); y=m; } doc.text(ln,m,y); y+=lh; });
+        saveAs(doc.output('blob'),`copy_${Date.now()}.pdf`);
+      });
+
+      /* ===== Assets + ZIP ===== */
+      function persistAssets(){ localStorage.setItem(LS.ASSETS, JSON.stringify(state.assets)); }
+      function addAsset(obj){ state.assets.unshift(obj); persistAssets(); renderAssets(); }
+      function renderAssets(){
+        const grid=$('#assetGrid'); grid.innerHTML='';
+        state.assets.forEach((a,idx)=>{
+          const card=document.createElement('div'); card.className='glass p-3 border border-zinc-800';
+          if(a.type==='text'){
+            const pre=document.createElement('pre'); pre.className='bg-[#0b0f14] border border-[#243041] rounded-md p-3 text-xs whitespace-pre-wrap break-words'; pre.textContent=a.data; card.appendChild(pre);
+          }else{
+            const img=document.createElement('img'); img.src=a.data; img.className='w-full rounded-md border border-[#243041]'; card.appendChild(img);
+          }
+          const row=document.createElement('div'); row.className='flex flex-wrap items-center justify-between gap-2 mt-2';
+          row.innerHTML=`<span class="text-xs text-zinc-400">${a.type}</span>`;
+          const tools=document.createElement('div'); tools.className='flex flex-wrap gap-2';
+          const toCanvas=document.createElement('button'); toCanvas.className='btn bg-emerald-600 hover:bg-emerald-700'; toCanvas.textContent='→ Canvas';
+          toCanvas.onclick=()=>{ a.type==='text' ? addTextToCanvas(a.data,true) : addImgToCanvas(a.data); };
+          const dl=document.createElement('button'); dl.className='btn bg-zinc-700 hover:bg-zinc-600'; dl.textContent='Baixar';
+          dl.onclick=()=>{ if(a.type==='text'){ saveAs(new Blob([a.data],{type:'text/plain'}),`copy_${idx}.txt`); } else { const an=document.createElement('a'); an.href=a.data; an.download=`asset_${idx}.png`; an.click(); } };
+          const rm=document.createElement('button'); rm.className='btn bg-red-600 hover:bg-red-700'; rm.textContent='Remover';
+          rm.onclick=()=>{ state.assets.splice(idx,1); persistAssets(); renderAssets(); };
+          tools.append(toCanvas,dl,rm); row.appendChild(tools); card.appendChild(row); grid.appendChild(card);
+        });
+      }
+      renderAssets();
+
+      $('#exportZip').addEventListener('click', async ()=>{
+        const zip=new JSZip(); let i=0;
+        for(const a of state.assets){
+          if(a.type==='text'){
+            zip.file(`text_${i}.txt`, a.data);
+            const { Document, Packer, Paragraph } = window.docx;
+            const doc=new Document({ sections:[{ children: a.data.split('\n').map(l=>new Paragraph(l)) }] });
+            const blobDocx=await Packer.toBlob(doc); zip.file(`text_${i}.docx`, blobDocx);
+            const { jsPDF } = window.jspdf; const pdf=new jsPDF({ unit:'pt', format:'a4' });
+            const m=54, w=pdf.internal.pageSize.getWidth()-m*2, lines=pdf.splitTextToSize(a.data,w); let y=m, lh=14;
+            lines.forEach(ln=>{ if(y>pdf.internal.pageSize.getHeight()-m){ pdf.addPage(); y=m; } pdf.text(ln,m,y); y+=lh; });
+            zip.file(`text_${i}.pdf`, pdf.output('blob'));
+          }else{
+            const blob=await (await fetch(a.data)).blob(); zip.file(`image_${i}.png`, blob);
+          }
+          i++;
+        }
+        const out=await zip.generateAsync({type:'blob'}); saveAs(out,`capyvisao_assets_${Date.now()}.zip`);
+        flash($('#assetStatus'),'ZIP exportado.','ok');
+      });
+
+      /* ===== Métricas ===== */
+      function showMetrics(){
+        $('#kpiAssets').textContent=state.metrics.assetsMonth||0;
+        $('#kpiTime').textContent=(state.metrics.hoursSaved||0)+'h';
+        $('#kpiCompliance').textContent=(state.metrics.compliance||0)+'%';
+        $('#kpiEng').textContent=state.metrics.engagement||0;
+      }
+      function incMetric(key,delta){ state.metrics[key]=(state.metrics[key]||0)+delta; localStorage.setItem(LS.METRICS, JSON.stringify(state.metrics)); showMetrics(); }
+      showMetrics();
+      $('#recalc').addEventListener('click', ()=>{
+        const hoursManual=parseFloat($('#mHoursManual').value||'4');
+        const iaFactor=parseFloat($('#mIaFactor').value||'0.6');
+        const assets=state.metrics.assetsMonth||0;
+        state.metrics.hoursSaved=Math.max(0, Math.round(assets*hoursManual*iaFactor));
+        state.metrics.compliance=parseInt($('#mComplianceIn').value||'92',10);
+        state.metrics.engagement=parseInt($('#mEngIn').value||'3',10);
+        localStorage.setItem(LS.METRICS, JSON.stringify(state.metrics));
+        showMetrics(); flash($('#metricStatus'),'Métricas recalculadas.','ok');
+      });
+
+      /* ===== API modal (opcional) ===== */
+      $('#openKeys').addEventListener('click', ()=>$('#keysModal').classList.remove('hidden'));
+      $('#closeKeys').addEventListener('click', ()=>$('#keysModal').classList.add('hidden'));
+      $('#saveKey').addEventListener('click', ()=>{ const k=$('#gemKey').value.trim(); if(k){ localStorage.setItem('capyUniverseApiKey_gemini',k); alert('Chave salva localmente.'); $('#keysModal').classList.add('hidden'); } });
+    });
+  </script>
 </body>
 </html>

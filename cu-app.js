@@ -42,7 +42,7 @@
 
   function toolAbbr(name) {
     const letters = (name || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 3);
-    return (letters || 'CU').toUpperCase();
+    return (letters || 'Capy').toUpperCase();
   }
 
   function createLogoEl(abbr) {

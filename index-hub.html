@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyUniverse — Hub com Abas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            capy: {
+              bg: "#0b0f14",
+              card: "#0f1520",
+              line: "#1a2230",
+              neon: "#39FF14",
+              cyan: "#32eafd",
+              pink: "#ff3ea5"
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    html, body { height: 100%; background: #0b0f14; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; }
+    .tabs-scroll { scroll-behavior: smooth; }
+    .glass { backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.06); }
+    iframe[data-sleep="1"] { opacity: 0; pointer-events: none; }
+    .pill { border:1px solid rgba(255,255,255,.08); }
+    .ring-neon { box-shadow: 0 0 0 2px rgba(57,255,20,.25), 0 0 20px rgba(57,255,20,.25) inset; }
+    .sheet { transition: transform .28s ease; }
+    .sheet.hidden { transform: translateY(110%); }
+  </style>
+</head>
+<body class="min-h-screen text-white">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-40 glass">
+    <div class="mx-auto max-w-7xl px-3 sm:px-6 py-2 flex items-center gap-3">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-full bg-gradient-to-br from-capy-neon/80 via-capy-cyan/60 to-capy-pink/70"></div>
+        <span class="font-semibold">CapyUniverse</span>
+      </div>
+      <div class="flex-1"></div>
+      <div class="hidden md:flex items-center gap-2">
+        <input id="search" type="search" placeholder="Buscar ferramenta…" class="w-72 rounded-xl bg-capy.card/80 ring-1 ring-white/10 px-3 py-2 outline-none focus:ring-capy.cyan/50" />
+        <select id="filterCat" class="rounded-xl bg-capy.card/80 ring-1 ring-white/10 px-3 py-2 outline-none">
+          <option value="">Todas as categorias</option>
+        </select>
+        <button id="btnOpenApi" class="rounded-xl px-3 py-2 bg-capy.card ring-1 ring-white/10 hover:ring-capy.cyan/40">Chaves API</button>
+      </div>
+    </div>
+    <div class="border-t border-white/10"></div>
+    <nav id="tabbar" class="tabs-scroll overflow-x-auto flex items-center gap-2 px-2 py-2">
+      <!-- Abas via JS -->
+    </nav>
+  </header>
+
+  <!-- Área principal -->
+  <main class="mx-auto max-w-7xl px-3 sm:px-6 py-4 pb-24">
+    <!-- Home -->
+    <section id="home" class="space-y-6">
+      <div class="flex items-center justify-between gap-2">
+        <h1 id="homeTitle" class="text-xl sm:text-2xl font-semibold">Explorar Ferramentas</h1>
+        <div class="md:hidden flex items-center gap-2">
+          <input id="searchMobile" type="search" placeholder="Buscar…" class="w-44 rounded-xl bg-capy.card/80 ring-1 ring-white/10 px-3 py-2 outline-none" />
+          <button id="btnFilterMobile" class="rounded-xl px-3 py-2 bg-capy.card ring-1 ring-white/10">Filtro</button>
+        </div>
+      </div>
+
+      <ai-cards id="cards" class="block"></ai-cards>
+
+      <div id="toolsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+      <!-- vazio favoritos -->
+      <div id="emptyFavs" class="hidden rounded-2xl p-4 bg-black/40 ring-1 ring-white/10">
+        <div class="font-semibold mb-1">Você ainda não tem favoritos.</div>
+        <div class="text-sm text-white/70">Clique na ⭐ de uma ferramenta para favoritar. O botão ⭐ na barra inferior mostra só os seus favoritos.</div>
+      </div>
+    </section>
+
+    <!-- Abas (iframes) -->
+    <div id="tabsArea" class="relative w-full mt-4"></div>
+  </main>
+
+  <!-- Bottom nav (mobile) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 glass border-t border-white/10 z-40">
+    <div class="flex items-center justify-around py-2 text-xs">
+      <button data-act="goHome" class="flex flex-col items-center gap-1"><span>🏠</span><span>Início</span></button>
+      <button data-act="showTabs" class="flex flex-col items-center gap-1"><span>🗂️</span><span>Abas</span></button>
+      <button data-act="newTab" class="flex flex-col items-center gap-1"><span>➕</span><span>Novo</span></button>
+      <button data-act="favorites" class="flex flex-col items-center gap-1"><span>⭐</span><span>Favoritos</span></button>
+      <button data-act="profile" class="flex flex-col items-center gap-1"><span>⚙️</span><span>Perfil</span></button>
+    </div>
+  </nav>
+
+  <!-- Sheet switcher de abas (mobile) -->
+  <div id="sheet" class="md:hidden fixed inset-x-0 bottom-12 sheet hidden z-40">
+    <div class="mx-auto max-w-2xl bg-capy.card rounded-2xl ring-1 ring-white/10 p-3">
+      <div class="flex items-center justify-between px-1 pb-2">
+        <span class="font-semibold">Suas abas</span>
+        <button id="sheetClose" class="text-white/70 hover:text-white">Fechar</button>
+      </div>
+      <div id="sheetList" class="grid grid-cols-1 gap-2 max-h-[50vh] overflow-auto"></div>
+    </div>
+  </div>
+
+  <!-- Modal API -->
+  <dialog id="apiModal" class="backdrop:bg-black/60 rounded-xl p-0 w-[90vw] max-w-lg">
+    <form method="dialog" class="bg-capy.card text-white rounded-xl ring-1 ring-white/10">
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <h3 class="font-semibold">Chaves de API</h3>
+        <button class="px-2 py-1 rounded pill hover:bg-white/10">✖</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <label class="block text-sm">Google Gemini API Key</label>
+        <input id="geminiKey" class="w-full rounded-xl bg-black/40 ring-1 ring-white/10 px-3 py-2" placeholder="AIza…" />
+        <p class="text-xs text-white/60">Guardado localmente (localStorage). Usado por ferramentas que suportam IA.</p>
+      </div>
+      <div class="p-3 border-t border-white/10 flex justify-end gap-2">
+        <button value="cancel" class="px-3 py-2 rounded pill">Cancelar</button>
+        <button id="saveApi" value="default" class="px-3 py-2 rounded pill ring-1 ring-capy.cyan/40">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Perfil/Configurações -->
+  <dialog id="profileModal" class="backdrop:bg-black/60 rounded-xl p-0 w-[95vw] max-w-2xl">
+    <form method="dialog" class="bg-capy.card text-white rounded-xl ring-1 ring-white/10 max-h-[85vh] overflow-hidden">
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <h3 class="font-semibold">Perfil & Configurações</h3>
+        <button class="px-2 py-1 rounded pill hover:bg-white/10">✖</button>
+      </div>
+      <div class="p-0 grid md:grid-cols-2 gap-0">
+        <!-- Perfil -->
+        <div class="p-4 border-b md:border-b-0 md:border-r border-white/10">
+          <div class="font-semibold mb-2">Seus Favoritos</div>
+          <div id="favList" class="space-y-2 max-h-[45vh] overflow-auto"></div>
+          <div class="mt-3 flex items-center gap-2">
+            <button id="btnExportFavs" class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10">Exportar</button>
+            <label class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10 cursor-pointer">
+              Importar <input id="importFavs" type="file" accept="application/json" class="hidden">
+            </label>
+            <button id="btnClearFavs" class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10">Limpar</button>
+          </div>
+        </div>
+        <!-- Config -->
+        <div class="p-4">
+          <div class="font-semibold mb-2">Chaves & Preferências</div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm mb-1">Google Gemini API Key</label>
+              <div class="flex items-center gap-2">
+                <input id="geminiKeyProfile" class="flex-1 rounded-xl bg-black/40 ring-1 ring-white/10 px-3 py-2" placeholder="AIza…">
+                <button id="saveApiProfile" class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10">Salvar</button>
+              </div>
+              <p class="text-xs text-white/60 mt-1">Sincroniza com o modal “Chaves API”.</p>
+            </div>
+            <div class="pt-2 border-t border-white/10">
+              <button id="btnOnlyFavs" class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10">Ver apenas favoritos</button>
+              <button id="btnShowAll" class="px-3 py-2 rounded pill bg-white/5 ring-1 ring-white/10">Ver tudo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 border-t border-white/10 flex justify-end gap-2">
+        <button value="default" class="px-3 py-2 rounded pill ring-1 ring-capy.cyan/40">Fechar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- CapyMate (fallback do “Novo”) -->
+  <dialog id="capymateModal" class="backdrop:bg-black/60 rounded-xl p-0 w-[95vw] max-w-2xl">
+    <form method="dialog" class="bg-capy.card text-white rounded-xl ring-1 ring-white/10">
+      <div class="p-4 border-b border-white/10">
+        <div class="font-semibold">CapyMate — recomendo ferramentas para você</div>
+        <p class="text-sm text-white/70">Descreva o que precisa; clique numa sugestão para abrir como aba.</p>
+      </div>
+      <div class="p-4 space-y-3">
+        <input id="capyQuery" class="w-full rounded-xl bg-black/40 ring-1 ring-white/10 px-3 py-2" placeholder="Ex.: gerar capa de ebook com IA, ou comparar celulares…">
+        <div id="capyChips" class="flex flex-wrap gap-2"></div>
+        <div id="capyList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[55vh] overflow-auto"></div>
+      </div>
+      <div class="p-3 border-t border-white/10 flex justify-end">
+        <button class="px-3 py-2 rounded pill ring-1 ring-capy.cyan/40">Fechar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+  // ==== tools.json ====
+  const TOOL_SOURCES = [
+    '/tools.json',
+    'https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/tools.json',
+    'https://faelscarpato.github.io/capyuniverse/tools.json'
+  ];
+
+  async function loadTools() {
+    for (const url of TOOL_SOURCES) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) { const json = await res.json(); console.info('tools.json carregado de', url); return json; }
+      } catch (e) {}
+    }
+    throw new Error('tools.json não encontrado em nenhuma origem');
+  }
+
+  // ==== Estado ====
+  const state = {
+    tools: [],
+    tabs: [], // {id, title, url, iframeEl, touchedAt}
+    active: 'home',
+    favorites: new Set(JSON.parse(localStorage.getItem('capy:favs')||'[]')),
+    isMobile: matchMedia('(max-width: 768px)').matches,
+    maxLiveFramesMobile: 3,
+    onlyFavs: false
+  };
+
+  const els = {
+    tabbar: document.getElementById('tabbar'),
+    home: document.getElementById('home'),
+    homeTitle: document.getElementById('homeTitle'),
+    grid: document.getElementById('toolsGrid'),
+    emptyFavs: document.getElementById('emptyFavs'),
+    tabsArea: document.getElementById('tabsArea'),
+    search: document.getElementById('search'),
+    searchMobile: document.getElementById('searchMobile'),
+    filterCat: document.getElementById('filterCat'),
+    cards: document.getElementById('cards'),
+    apiModal: document.getElementById('apiModal'),
+    geminiKey: document.getElementById('geminiKey'),
+    sheet: document.getElementById('sheet'),
+    sheetList: document.getElementById('sheetList'),
+    profileModal: document.getElementById('profileModal'),
+    favList: document.getElementById('favList'),
+    geminiKeyProfile: document.getElementById('geminiKeyProfile'),
+    capymateModal: document.getElementById('capymateModal'),
+    capyQuery: document.getElementById('capyQuery'),
+    capyChips: document.getElementById('capyChips'),
+    capyList: document.getElementById('capyList')
+  };
+
+  // ==== Utils ====
+  const slug = (s)=> s.toLowerCase().normalize('NFD').replace(/[^\w\s-]/g,'').trim().replace(/[\s_]+/g,'-');
+  const withEmbed = (url)=> url.includes('?') ? url+'&embed=1' : url+'?embed=1';
+
+  // ==== Render =====
+  function renderFilters() {
+    const cats = Array.from(new Set(state.tools.map(t=>t.category).filter(Boolean))).sort();
+    els.filterCat.innerHTML = '<option value="">Todas as categorias</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+
+  function cardTemplate(t) {
+    const fav = state.favorites.has(t.id);
+    return `
+      <article class="rounded-2xl p-3 bg-capy.card ring-1 ring-white/10 hover:ring-capy.cyan/40 transition group">
+        <div class="flex items-center gap-3">
+          <img src="${t.imageUrl || 'img/capy.png'}" class="h-12 w-12 rounded-xl object-cover ring-1 ring-white/10" alt="${t.title}">
+          <div class="min-w-0">
+            <h3 class="font-semibold truncate">${t.title}</h3>
+            <div class="text-xs text-white/60 truncate">${t.category || 'Geral'}</div>
+          </div>
+          <button data-fav="${t.id}" class="ml-auto text-lg" title="Favoritar">${fav?'⭐':'☆'}</button>
+        </div>
+        <p class="mt-3 text-sm text-white/80 line-clamp-2">${t.description || ''}</p>
+        <div class="mt-3 flex items-center gap-2">
+          <button data-open="${t.id}" class="px-3 py-2 rounded-xl bg-black/40 ring-1 ring-white/10 hover:ring-capy.cyan/40">Abrir</button>
+          <a href="${t.pageUrl}" target="_blank" class="px-3 py-2 rounded-xl bg-black/30 ring-1 ring-white/10 hover:ring-white/20">Nova guia ↗</a>
+        </div>
+      </article>
+    `;
+  }
+
+  function currentFilteredItems() {
+    const q = (els.search?.value || els.searchMobile?.value || '').toLowerCase();
+    const cat = els.filterCat?.value || '';
+    return state.tools.filter(t => {
+      const matchesQ = !q || (t.title+ ' ' + (t.description||'') + ' ' + (t.category||'')).toLowerCase().includes(q);
+      const matchesCat = !cat || t.category === cat;
+      const matchesFav = !state.onlyFavs || state.favorites.has(t.id);
+      return matchesQ && matchesCat && matchesFav;
+    });
+  }
+
+  function applyGridFilter() {
+    const items = currentFilteredItems();
+    els.grid.innerHTML = items.map(cardTemplate).join('');
+    const showEmptyFavs = state.onlyFavs && items.length === 0;
+    els.emptyFavs.classList.toggle('hidden', !showEmptyFavs);
+    els.homeTitle.textContent = state.onlyFavs ? 'Favoritos' : 'Explorar Ferramentas';
+  }
+
+  // ==== Abas ====
+  function ensureTabbarHome() {
+    if (!document.querySelector('[data-tab="home"]')) {
+      const btn = document.createElement('button');
+      btn.dataset.tab = 'home';
+      btn.className = 'px-3 py-2 rounded-xl pill bg-black/30 ring-1 ring-white/10';
+      btn.textContent = 'Início';
+      btn.onclick = ()=>activate('home');
+      els.tabbar.appendChild(btn);
+    }
+  }
+
+  function renderTabbar() {
+    els.tabbar.innerHTML = '';
+    ensureTabbarHome();
+    for (const tab of state.tabs) {
+      const btn = document.createElement('div');
+      btn.className = 'flex items-center gap-2 px-3 py-2 rounded-xl pill bg-black/30 ring-1 ring-white/10 max-w-[40vw]';
+      btn.innerHTML = `<button class="truncate" title="${tab.title}" data-tab="${tab.id}">${tab.title}</button><button class="text-white/60 hover:text-white" data-close="${tab.id}">✖</button>`;
+      els.tabbar.appendChild(btn);
+    }
+    highlightActive();
+  }
+
+  function highlightActive() {
+    [...els.tabbar.querySelectorAll('[data-tab]')].forEach(el=>{
+      const isActive = el.dataset.tab === state.active;
+      el.classList.toggle('ring-neon', isActive);
+      el.classList.toggle('bg-black/50', isActive);
+    });
+    els.home.style.display = state.active === 'home' ? '' : 'none';
+    [...document.querySelectorAll('iframe[data-tool]')].forEach(ifr => {
+      const on = (ifr.dataset.tool === state.active);
+      ifr.dataset.sleep = on ? '0' : '1';
+      ifr.style.display = on ? 'block' : 'none';
+    });
+  }
+
+  function openTab(tool) {
+    const id = slug(tool.id || tool.title);
+    let tab = state.tabs.find(t=>t.id===id);
+    if (!tab) {
+      tab = { id, title: tool.title, url: withEmbed(tool.pageUrl), iframeEl: null, touchedAt: Date.now() };
+      state.tabs.push(tab);
+      const iframe = document.createElement('iframe');
+      iframe.dataset.tool = id;
+      iframe.src = tab.url;
+      iframe.loading = 'lazy';
+      iframe.className = 'w-full h-[70vh] md:h-[78vh] rounded-2xl ring-1 ring-white/10 bg-black/40';
+      iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts allow-forms allow-popups allow-downloads');
+      els.tabsArea.appendChild(iframe);
+      tab.iframeEl = iframe;
+    }
+    state.active = id;
+    tab.touchedAt = Date.now();
+    pruneFramesIfNeeded();
+    renderTabbar();
+    window.scrollTo({ top: document.body.scrollHeight * 0.15, behavior: 'smooth' }); // micro ajuste
+  }
+
+  function closeTab(id) {
+    const idx = state.tabs.findIndex(t=>t.id===id);
+    if (idx>=0) {
+      const [tab] = state.tabs.splice(idx,1);
+      tab.iframeEl?.remove();
+      if (state.active===id) state.active = 'home';
+      renderTabbar();
+    }
+  }
+
+  function activate(id) {
+    state.active = id;
+    const tab = state.tabs.find(t=>t.id===id);
+    if (tab) tab.touchedAt = Date.now();
+    pruneFramesIfNeeded();
+    highlightActive();
+  }
+
+  function pruneFramesIfNeeded() {
+    if (!state.isMobile) return;
+    const live = state.tabs
+      .sort((a,b)=>b.touchedAt-a.touchedAt)
+      .slice(0, state.maxLiveFramesMobile)
+      .map(t=>t.id);
+    for (const tab of state.tabs) {
+      const on = live.includes(tab.id);
+      if (tab.iframeEl) {
+        tab.iframeEl.dataset.sleep = on ? '0' : '1';
+      }
+    }
+  }
+
+  // ==== Favoritos ====
+  function toggleFav(id) {
+    if (state.favorites.has(id)) state.favorites.delete(id); else state.favorites.add(id);
+    localStorage.setItem('capy:favs', JSON.stringify([...state.favorites]));
+    applyGridFilter();
+    renderFavList(); // se perfil estiver aberto
+  }
+
+  function setOnlyFavs(on) {
+    state.onlyFavs = !!on;
+    applyGridFilter();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ==== Perfil/Config ====
+  function renderFavList() {
+    if (!els.favList) return;
+    const favIds = [...state.favorites];
+    if (favIds.length === 0) {
+      els.favList.innerHTML = `<div class="text-sm text-white/70">Sem favoritos.</div>`;
+      return;
+    }
+    const favTools = favIds
+      .map(fid => state.tools.find(t=>t.id===fid))
+      .filter(Boolean);
+    els.favList.innerHTML = favTools.map(t => `
+      <div class="flex items-center gap-2 rounded-xl p-2 bg-black/30 ring-1 ring-white/10">
+        <img src="${t.imageUrl||'img/capy.png'}" class="h-8 w-8 rounded-lg ring-1 ring-white/10">
+        <div class="min-w-0">
+          <div class="truncate">${t.title}</div>
+          <div class="text-xs text-white/60 truncate">${t.category||'Geral'}</div>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <button data-open="${t.id}" class="px-2 py-1 rounded pill bg-white/5">Abrir</button>
+          <button data-fav="${t.id}" class="px-2 py-1 rounded pill bg-white/5">Remover</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Export/Import favoritos
+  function exportFavs() {
+    const data = JSON.stringify({favorites:[...state.favorites]}, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'capy-favoritos.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function importFavs(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const json = JSON.parse(reader.result || '{}');
+        if (Array.isArray(json.favorites)) {
+          state.favorites = new Set(json.favorites);
+          localStorage.setItem('capy:favs', JSON.stringify([...state.favorites]));
+          applyGridFilter();
+          renderFavList();
+        }
+      } catch(e){}
+    };
+    reader.readAsText(file);
+  }
+
+  // ==== CapyFlow / CapyMate ====
+  function findCapyFlow() {
+    return state.tools.find(t =>
+      slug(t.id||'') === 'capyflow' || slug(t.title||'') === 'capyflow'
+    );
+  }
+
+  function openCapyMate() {
+    // chips rápidas por categoria
+    const cats = Array.from(new Set(state.tools.map(t=>t.category).filter(Boolean))).slice(0,8);
+    els.capyChips.innerHTML = cats.map(c=>`<button class="px-3 py-1 rounded-full bg-white/5 ring-1 ring-white/10" data-chip="${c}">${c}</button>`).join('');
+    const renderList = (items) => {
+      els.capyList.innerHTML = items.slice(0,24).map(t => `
+        <button data-open="${t.id}" class="text-left rounded-xl p-3 bg-black/30 ring-1 ring-white/10 hover:ring-capy.cyan/40">
+          <div class="flex items-center gap-2">
+            <img src="${t.imageUrl||'img/capy.png'}" class="h-9 w-9 rounded-lg ring-1 ring-white/10">
+            <div class="min-w-0">
+              <div class="font-medium truncate">${t.title}</div>
+              <div class="text-xs text-white/60 truncate">${t.category||'Geral'}</div>
+            </div>
+          </div>
+          <p class="mt-1 text-sm text-white/70 line-clamp-2">${t.description||''}</p>
+        </button>
+      `).join('');
+    };
+    renderList(state.tools);
+    els.capyQuery.value = '';
+    els.capymateModal.showModal();
+
+    const filterNow = () => {
+      const q = els.capyQuery.value.toLowerCase();
+      const items = state.tools.filter(t =>
+        !q || (t.title + ' ' + (t.description||'') + ' ' + (t.category||'')).toLowerCase().includes(q)
+      );
+      renderList(items);
+    };
+    els.capyQuery.oninput = filterNow;
+
+    els.capymateModal.addEventListener('click', (e)=>{
+      const chip = e.target.closest('[data-chip]'); if (chip) {
+        els.capyQuery.value = chip.getAttribute('data-chip'); filterNow();
+      }
+    }, { once:false });
+  }
+
+  // ==== Widget: AI Cards ====
+  class AICards extends HTMLElement {
+    set data(tools) {
+      const favs = tools.filter(t=>state.favorites.has(t.id));
+      const featured = favs.concat(tools.filter(t=>!state.favorites.has(t.id))).slice(0,8);
+      this.innerHTML = `
+        <div class="rounded-2xl p-4 glass">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold">Sugestões para você</h3>
+            <div class="text-xs text-white/60">baseado em favoritos e uso recente</div>
+          </div>
+          <div class="flex gap-3 overflow-x-auto">
+            ${featured.map(t=>`
+              <button data-open="${t.id}" class="shrink-0 w-64 text-left rounded-2xl p-3 bg-gradient-to-br from-capy.card to-black ring-1 ring-white/10 hover:ring-capy.cyan/40">
+                <div class="flex items-center gap-2">
+                  <img src="${t.imageUrl||'img/capy.png'}" class="h-10 w-10 rounded-lg ring-1 ring-white/10" />
+                  <div class="min-w-0">
+                    <div class="font-medium truncate">${t.title}</div>
+                    <div class="text-xs text-white/60 truncate">${t.category||'Geral'}</div>
+                  </div>
+                </div>
+                <p class="mt-2 text-sm text-white/80 line-clamp-2">${t.description||''}</p>
+              </button>
+            `).join('')}
+          </div>
+        </div>`;
+    }
+  }
+  customElements.define('ai-cards', AICards);
+
+  // ==== Sheet (mobile) ====
+  function openSheet() { els.sheet.classList.remove('hidden'); }
+  function closeSheet() { els.sheet.classList.add('hidden'); }
+  function renderSheet() {
+    els.sheetList.innerHTML = state.tabs.map(t=>`
+      <div class="rounded-xl p-3 bg-black/40 ring-1 ring-white/10 flex items-center gap-2">
+        <div class="h-10 w-10 rounded-lg bg-capy.card ring-1 ring-white/10"></div>
+        <div class="min-w-0">
+          <div class="font-medium truncate">${t.title}</div>
+          <div class="text-xs text-white/60 truncate">${new URL(t.url, location.href).pathname.replace(/^\//,'')}</div>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <button data-act="switch:${t.id}" class="px-2 py-1 rounded pill bg-white/5">Ir</button>
+          <button data-act="close:${t.id}" class="px-2 py-1 rounded pill bg-white/5">Fechar</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ==== Eventos globais ====
+  document.addEventListener('click', (e)=>{
+    const openBtn = e.target.closest('[data-open]');
+    if (openBtn) {
+      const id = openBtn.getAttribute('data-open');
+      const tool = state.tools.find(t=>t.id===id);
+      if (tool) { openTab(tool); }
+    }
+    const tabBtn = e.target.closest('[data-tab]');
+    if (tabBtn) activate(tabBtn.getAttribute('data-tab'));
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) closeTab(closeBtn.getAttribute('data-close'));
+    const favBtn = e.target.closest('[data-fav]');
+    if (favBtn) toggleFav(favBtn.getAttribute('data-fav'));
+
+    const act = e.target.closest('[data-act]')?.getAttribute('data-act');
+    if (act) {
+      if (act==='goHome') { setOnlyFavs(false); activate('home'); }
+      if (act==='showTabs') { renderSheet(); openSheet(); }
+      if (act==='newTab') {
+        const cf = findCapyFlow();
+        if (cf) openTab(cf); else openCapyMate();
+      }
+      if (act==='favorites') { setOnlyFavs(true); activate('home'); }
+      if (act==='profile') {
+        els.geminiKeyProfile.value = localStorage.getItem('capy:gemini')||'';
+        renderFavList();
+        document.getElementById('profileModal').showModal();
+      }
+      if (act.startsWith('switch:')) { activate(act.split(':')[1]); closeSheet(); }
+      if (act.startsWith('close:')) { closeTab(act.split(':')[1]); renderSheet(); }
+    }
+    if (e.target.id==='sheetClose') closeSheet();
+  });
+
+  // Inputs & botões
+  els.search?.addEventListener('input', applyGridFilter);
+  els.searchMobile?.addEventListener('input', applyGridFilter);
+  els.filterCat?.addEventListener('change', applyGridFilter);
+
+  document.getElementById('btnOpenApi')?.addEventListener('click', ()=>{
+    els.geminiKey.value = localStorage.getItem('capy:gemini')||'';
+    els.apiModal.showModal();
+  });
+  document.getElementById('saveApi')?.addEventListener('click', ()=>{
+    localStorage.setItem('capy:gemini', els.geminiKey.value||'');
+  });
+
+  // Perfil modal actions
+  document.getElementById('btnExportFavs')?.addEventListener('click', (e)=>{ e.preventDefault(); exportFavs(); });
+  document.getElementById('btnClearFavs')?.addEventListener('click', (e)=>{ e.preventDefault(); state.favorites.clear(); localStorage.setItem('capy:favs','[]'); applyGridFilter(); renderFavList(); });
+  document.getElementById('btnOnlyFavs')?.addEventListener('click', (e)=>{ e.preventDefault(); setOnlyFavs(true); });
+  document.getElementById('btnShowAll')?.addEventListener('click', (e)=>{ e.preventDefault(); setOnlyFavs(false); });
+  document.getElementById('saveApiProfile')?.addEventListener('click', (e)=>{ e.preventDefault(); localStorage.setItem('capy:gemini', els.geminiKeyProfile.value||''); });
+  document.getElementById('importFavs')?.addEventListener('change', (e)=>{ const f = e.target.files?.[0]; if (f) importFavs(f); });
+
+  // CapyMate: clique fora (chips/list) já tratado por delegação acima
+
+  // Deep-link: ?open={id}
+  function checkDeepLink() {
+    const u = new URL(location.href);
+    const open = u.searchParams.get('open');
+    if (open) {
+      const tool = state.tools.find(t=>slug(t.id)===slug(open) || slug(t.title)===slug(open));
+      if (tool) openTab(tool);
+    }
+  }
+
+  // ==== Boot ====
+  (async function boot(){
+    try {
+      const data = await loadTools();
+      state.tools = Array.isArray(data) ? data : (data.tools || []);
+      state.tools = state.tools.map(t => ({ ...t, id: t.id || slug(t.title) }));
+      renderFilters();
+      applyGridFilter();
+      els.cards.data = state.tools;
+      ensureTabbarHome();
+      renderTabbar();
+      checkDeepLink();
+    } catch (e) {
+      els.grid.innerHTML = `<div class='p-4 rounded-2xl bg-red-900/30 ring-1 ring-red-500/30'>
+        <div class='font-semibold mb-1'>Falha ao carregar tools.json</div>
+        <div class='text-white/80 text-sm'>Coloque o <code>tools.json</code> no mesmo domínio do hub, ou habilite CORS no GitHub Pages. Fontes tentadas:<br>${TOOL_SOURCES.map(s=>`<code>${s}</code>`).join('<br>')}</div>
+      </div>`;
+      console.error(e);
+    }
+  })();
+  </script>
+</body>
+</html>

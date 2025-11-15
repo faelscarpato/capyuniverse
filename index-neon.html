@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapyUniverse — Neon</title>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tema base CapyUniverse -->
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+  <!-- Recarrega a fonte Syne depois do cu-init.js (que remove links antigos) -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --cu-neon-pink:#ff2bdc;
+      --cu-neon-cyan:#19d1ff;
+      --cu-neon-violet:#7b2cff;
+      --cu-deep:#080915;
+    }
+    html,body{background:#080915}
+    .font-syne{font-family:'Syne',system-ui,Inter,sans-serif}
+    .hero-gradient{
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(25,209,255,.12), transparent 60%),
+        radial-gradient(1000px 700px at -10% 50%, rgba(123,44,255,.18), transparent 60%),
+        radial-gradient(700px 500px at 50% 120%, rgba(255,43,220,.16), transparent 60%),
+        #080915;
+    }
+    .glass-soft{background:rgba(255,255,255,.06); backdrop-filter: blur(14px); border:1px solid rgba(255,255,255,.12)}
+    .btn-neon{position:relative; overflow:hidden}
+    .btn-neon::after{content:''; position:absolute; inset:-1px; border-radius:14px; padding:1px; background:linear-gradient(90deg, var(--cu-neon-pink), var(--cu-neon-cyan)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;}
+    .brand-grad{background:linear-gradient(90deg, var(--cu-neon-pink), var(--cu-neon-cyan)); -webkit-background-clip:text; background-clip:text; color:transparent}
+    /* hero slider container */
+    #heroSlides .slide{background-size:cover;background-position:center; filter: saturate(110%) brightness(.9) blur(6px)}
+    /* conector entre seções */
+    #connector path{stroke:url(#gradConn); stroke-width:3; fill:none; stroke-linecap:round; transition: stroke-dashoffset .4s ease}
+  </style>
+  <script src="neon-shared.js" defer></script>
+</head>
+<body class="min-h-screen text-slate-100">
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyUniverse</span>
+        <span class="cu-chip hidden sm:inline-flex">Neon</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="index.html#ferramentas" class="cu-btn hidden sm:inline-flex">Hub</a>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section data-anchor id="sec-hero" class="hero-gradient relative pt-24 pb-16">
+    <!-- background slider -->
+    <div id="heroSlides" class="absolute inset-0 opacity-70"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 grid md:grid-cols-2 items-center gap-10">
+      <div>
+        <div class="inline-flex items-center gap-2 glass-soft rounded-full pl-1 pr-3 py-1 mb-5">
+          <div class="w-6 h-6 rounded-full" style="background: radial-gradient(circle, var(--cu-neon-pink), transparent 70%);"></div>
+          <span class="text-xs text-slate-300">Bem-vindo ao novo</span>
+        </div>
+        <h1 class="font-syne text-5xl md:text-6xl tracking-tight mb-3 brand-grad">CapyUniverse</h1>
+        <p class="text-slate-300/90 text-lg leading-relaxed mb-6">
+          Um hub de IAs com visual neon, animações suaves e experiência moderna. Explore as capys por categorias, com transições conectando cada seção.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="#sec-vitrines" class="cu-btn btn-neon">Explorar</a>
+          <a href="index.html#ferramentas" class="cu-btn">Abrir Hub</a>
+        </div>
+      </div>
+      <div class="relative h-[360px] md:h-[420px]">
+        <div class="absolute inset-0 rounded-3xl border border-white/10 glass-soft [transform-style:preserve-3d]" data-tilt="14">
+          <div class="absolute -inset-1 rounded-3xl" style="background: radial-gradient(600px 140px at 70% 20%, rgba(25,209,255,.25), transparent 70%)"></div>
+          <img src="img/capybranding.webp" alt="" class="absolute inset-0 w-full h-full object-contain p-8 [transform:translateZ(60px)]">
+          <div class="absolute bottom-4 right-4 px-3 py-1 rounded-full text-xs text-black font-semibold" style="background:linear-gradient(90deg,var(--cu-neon-pink),var(--cu-neon-cyan));">3D Tilt</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SVG conector -->
+  <svg id="connector" class="pointer-events-none fixed left-0 top-0 w-full h-full z-[1] opacity-60">
+    <defs>
+      <linearGradient id="gradConn" x1="0" x2="1">
+        <stop offset="0%" stop-color="#ff2bdc"/><stop offset="100%" stop-color="#19d1ff"/>
+      </linearGradient>
+    </defs>
+    <path d="M0,0 C 200,200 300,300 400,400"></path>
+  </svg>
+
+  <!-- VITRINES -->
+  <section data-anchor id="sec-vitrines" class="relative z-10 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="font-syne text-3xl brand-grad">Destaques</h2>
+        <a href="index.html#ferramentas" class="text-sm text-sky-300 hover:underline">Ver tudo →</a>
+      </div>
+      <div id="vitrines" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- preenchido por JS com 6 items -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIAS (links) -->
+  <section data-anchor id="sec-categorias" class="relative z-10 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <h2 class="font-syne text-3xl mb-6 brand-grad">Categorias</h2>
+      <div id="cats" class="flex flex-wrap gap-3"></div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // popula vitrines e categorias
+      const tools = await CU_NEON.loadTools();
+      const vitrines = document.getElementById('vitrines');
+      const pick = tools.slice(0, 6);
+      pick.forEach(t => {
+        const a = document.createElement('a');
+        a.href = t.pageUrl || '#';
+        a.className = 'group rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all';
+        a.setAttribute('data-tilt', '8');
+        a.innerHTML = `
+          <div class="h-44 w-full overflow-hidden">
+            <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="${t.imageUrl||''}" alt="">
+          </div>
+          <div class="p-4">
+            <h3 class="font-bold bg-gradient-to-r from-fuchsia-400 to-sky-400 bg-clip-text text-transparent">${t.title}</h3>
+            <p class="text-sm text-slate-300/80 mt-1 line-clamp-2">${t.description||''}</p>
+          </div>`;
+        vitrines.appendChild(a);
+      });
+      CU_NEON.initTilt();
+
+      // categorias
+      const cats = [...new Set(tools.map(t => t.category).filter(Boolean))].sort();
+      const wrap = document.getElementById('cats');
+      cats.forEach(c => {
+        const link = document.createElement('a');
+        link.href = `categoria.html?cat=${encodeURIComponent(c)}`;
+        link.className = 'px-4 py-2 rounded-full border border-white/10 bg-white/5 text-sm hover:border-fuchsia-400/50';
+        link.textContent = c;
+        wrap.appendChild(link);
+      });
+    });
+  </script>
+</body>
+</html>

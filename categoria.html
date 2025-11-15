@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Categoria — CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="neon-shared.js" defer></script>
+  <style>
+    html,body{background:#080915}
+    .font-syne{font-family:'Syne',system-ui,Inter,sans-serif}
+    .brand-grad{background:linear-gradient(90deg,#ff2bdc,#19d1ff); -webkit-background-clip:text; background-clip:text; color:transparent}
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">Categoria</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="index.html#ferramentas" class="cu-btn hidden sm:inline-flex">Hub</a>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <main id="categoryRoot" class="max-w-7xl mx-auto px-6 pt-24 pb-14">
+    <div class="flex items-center justify-between mb-6">
+      <h1 id="catTitle" class="font-syne text-3xl brand-grad">Categoria</h1>
+      <a href="index.html#ferramentas" class="text-sm text-sky-300 hover:underline">← voltar</a>
+    </div>
+    <div data-grid class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      CU_NEON.buildCategoryView('#categoryRoot');
+    });
+  </script>
+</body>
+</html>

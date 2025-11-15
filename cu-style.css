@@ -1,5 +1,6 @@
+
 /*
- * CapyUniverse Shared Styles
+ * CapyUniverse Shared Styles - UI 3.0
  *
  * This stylesheet centralizes the look and feel used across the
  * CapyUniverse tools. It is based on the custom theme originally
@@ -9,39 +10,55 @@
  * subtle gradients, glassy panels and colourful accents. The
  * variables are prefixed with `--cu` and can be reused within
  * inline styles if needed.
- *
- * In addition, the `.font-syne` class has been overridden to
- * fallback to Inter or the system sans-serif fonts. This allows
- * existing markup to remain unchanged while removing any
- * dependency on the Syne typeface.
  */
 
-:root{
-  --cu-bg-0:#0b0b14;
-  --cu-bg-1:#0f1024;
-  --cu-grid:#2a2e63;
-  --cu-card:#0f0f22cc;
-  --cu-cyan:#22d3ee;
-  --cu-magenta:#f472d0;
-  --cu-amber:#f59e0b;
-  --cu-text:#e6e6f0;
-  --cu-text-dim:#aab;
-  --cu-radius:16px;
-  --cu-radius-lg:22px;
-  --cu-blur:12px;
-  --cu-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+:root {
+  /* UI 3.0: Aurora & Neon Fusion */
+  --cu-bg-0: #0D0C14; /* Near-black with a hint of deep purple */
+  --cu-bg-1: #191823; /* Slightly lighter background for depth */
+  --cu-grid: #3a385833; /* More subtle grid lines */
+  --cu-card: #1E1C2E99; /* Translucent card background */
+  
+  /* Vibrant, Neon-like Accents */
+  --cu-cyan: #00f6ff;
+  --cu-magenta: #ff00f5;
+  --cu-purple: #9d00ff;
+  --cu-amber: #ffb800;
+
+  /* Text colors for clarity */
+  --cu-text: #f0f0f5; /* Slightly off-white for comfort */
+  --cu-text-dim: #a0a0b5; /* Softer dim text */
+
+  /* UI Geometry & Effects */
+  --cu-radius: 14px;
+  --cu-radius-lg: 20px;
+  --cu-blur: 16px; /* Increased blur for a dreamier effect */
+  --cu-shadow: 0 8px 40px #00000099, inset 0 0 0 1.5px #ffffff0a; /* Deeper shadow, subtle inner border */
+
+  /* New Gradient Definitions */
+  --glow-purple: #7e22ce;
+  --glow-blue: #0077ff;
+  --glow-pink: #ff00a0;
+  --premium-gradient: linear-gradient(135deg, var(--cu-purple), var(--cu-magenta), var(--cu-cyan));
 }
+
 
 html{
   background:var(--cu-bg-0);
+  overflow-x:hidden;
+  max-width:100vw;
+}
+
+*,*::before,*::after{
+  box-sizing:border-box;
 }
 
 body{
   font-family:Inter,system-ui,sans-serif;
   color:var(--cu-text);
   background:
-    radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
-    radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(800px 600px at 80% -15%, #9d00ff22, transparent 70%),
+    radial-gradient(600px 500px at 10% 20%, #00f6ff1a, transparent 70%),
     var(--cu-bg-0);
   position:relative;
 }
@@ -54,8 +71,8 @@ html[data-theme="capyuniverse"] body{
   font-family:Inter,system-ui,sans-serif !important;
   color:var(--cu-text) !important;
   background:
-    radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
-    radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(800px 600px at 80% -15%, #9d00ff22, transparent 70%),
+    radial-gradient(600px 500px at 10% 20%, #00f6ff1a, transparent 70%),
     var(--cu-bg-0) !important;
   position:relative;
   min-height:100vh;
@@ -87,7 +104,7 @@ body::before{
   pointer-events:none;
   z-index:-1;
   background:
-    linear-gradient(to top, rgba(10,10,22,.65), transparent 70%),
+    linear-gradient(to top, rgba(13, 12, 20, .85), transparent 70%),
     repeating-linear-gradient(to right, transparent 0 38px, var(--cu-grid) 38px 39px),
     repeating-linear-gradient(to top,   transparent 0 38px, var(--cu-grid) 38px 39px);
   /* fade the stage into nothing */
@@ -105,11 +122,39 @@ body::before{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:.75rem;
-  padding:0 .9rem;
-  backdrop-filter: blur(10px);
-  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
-  border-bottom:1px solid rgba(255,255,255,.06);
+  gap:.5rem;
+  padding:0 .75rem;
+  backdrop-filter: blur(12px);
+  background: #0D0C1488;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  min-width:0;
+}
+
+@media (max-width: 768px) {
+  .cu-header {
+    padding:0 .5rem;
+    gap:.25rem;
+  }
+  
+  .cu-brand {
+    min-width:0;
+    flex-shrink:1;
+  }
+  
+  .cu-appname {
+    font-size:1rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:150px;
+  }
+  
+  .cu-logo {
+    width:1.5rem;
+    height:1.5rem;
+    font-size:.7rem;
+    flex-shrink:0;
+  }
 }
 
 /* Ensure legacy headers adopt the unified style automatically when
@@ -127,23 +172,25 @@ html[data-theme="capyuniverse"] body > header:not(.cu-header){
   justify-content:space-between;
   gap:.75rem;
   padding:0 .9rem;
-  backdrop-filter: blur(10px);
-  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
-  border-bottom:1px solid rgba(255,255,255,.06);
+  backdrop-filter: blur(12px);
+  background: #0D0C1488;
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
 
 /* Backwards-compatibility for pages using "global-header" or a plain
  * "header" class. Scoped by data-theme to avoid touching the homepage. */
 html[data-theme="capyuniverse"] header.global-header,
 html[data-theme="capyuniverse"] header.header{
-  background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
-  border-bottom:1px solid rgba(255,255,255,.06);
+  background: #0D0C1488;
+  border-bottom:1px solid rgba(255,255,255,.08);
 }
 
 .cu-brand{
   display:flex;
   align-items:center;
   gap:.6rem;
+  min-width:0;
+  flex:1;
 }
 
 .cu-appname{
@@ -159,7 +206,7 @@ html[data-theme="capyuniverse"] header.header{
   padding:.25rem .6rem;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.12);
-  background:linear-gradient(120deg, rgba(34,211,238,.16), rgba(139,92,246,.16));
+  background:linear-gradient(120deg, #00f6ff22, #9d00ff22);
 }
 
 /* Panels are translucent cards used for grouping content. */
@@ -168,7 +215,7 @@ html[data-theme="capyuniverse"] header.header{
   backdrop-filter: blur(var(--cu-blur));
   border-radius:var(--cu-radius-lg);
   box-shadow:var(--cu-shadow);
-  border:1px solid rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
 }
 
 /* Legacy pages rely on a `.glass` utility. Mirror the new visual. */
@@ -184,25 +231,37 @@ html[data-theme="capyuniverse"] .glass{
 .cu-btn{
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:.55rem;
   padding:.6rem .9rem;
-  border-radius:14px;
+  border-radius:12px;
   font-weight:600;
-  border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(130deg, rgba(34,211,238,.18), rgba(244,114,208,.18));
-  box-shadow:var(--cu-shadow);
-  backdrop-filter: blur(6px);
-  transition:.2s transform, .2s filter;
+  border:1px solid rgba(255,255,255,.12);
+  background: #ffffff1a;
+  box-shadow: 0 2px 8px #00000055;
+  backdrop-filter: blur(4px);
+  transition: all .2s;
+  text-decoration: none;
+  color: var(--cu-text);
 }
 .cu-btn:hover{
-  transform: translateY(-1px);
-  filter: drop-shadow(0 0 10px rgba(34,211,238,.45)) drop-shadow(0 0 24px rgba(244,114,208,.35));
+  transform: translateY(-2px);
+  background: #ffffff22;
+  border-color: rgba(255,255,255,.2);
+  box-shadow: 0 6px 20px #00000077;
+  filter: drop-shadow(0 0 12px var(--cu-cyan)22) drop-shadow(0 0 24px var(--cu-magenta)22);
 }
 .cu-btn.primary{
-  background: linear-gradient(140deg, #0ea5e9 0%, #22d3ee 40%, #a855f7 78%, #f59e0b 100%);
+  background: var(--premium-gradient);
   color:white;
   border-color:transparent;
+  box-shadow: 0 6px 25px #9d00ff66, 0 2px 10px #00f6ff55;
 }
+.cu-btn.primary:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 8px 30px #9d00ff88, 0 4px 15px #00f6ff77;
+}
+
 
 .cu-logo{
   display:inline-flex;
@@ -215,8 +274,7 @@ html[data-theme="capyuniverse"] .glass{
   font-weight:700;
   letter-spacing:.4px;
   color:white;
-  background:linear-gradient(140deg, rgba(14,165,233,.9) 0%, rgba(34,211,238,.9) 45%, rgba(168,85,247,.9) 80%, rgba(245,158,11,.95) 100%);
-  box-shadow:0 8px 22px rgba(15,23,42,.35), inset 0 0 0 1px rgba(255,255,255,.18);
+  background:transparent;
 }
 
 .cu-header-actions .cu-btn{
@@ -228,18 +286,19 @@ html[data-theme="capyuniverse"] .glass{
 .cu-select,
 .cu-textarea{
   width:100%;
-  background:rgba(15,15,40,.6);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:12px;
+  background: #191823;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;
   padding:.75rem .9rem;
   color:var(--cu-text);
   outline:none;
+  transition: all .2s;
 }
 .cu-input:focus,
 .cu-select:focus,
 .cu-textarea:focus{
   border-color: var(--cu-cyan);
-  box-shadow: 0 0 0 3px rgba(34,211,238,.18);
+  box-shadow: 0 0 0 3px #00f6ff22, 0 0 15px #00f6ff33;
 }
 
 /* Map legacy field classes to the unified look. */
@@ -248,9 +307,9 @@ html[data-theme="capyuniverse"] .input-select,
 html[data-theme="capyuniverse"] .input-textarea,
 html[data-theme="capyuniverse"] textarea.input-field,
 html[data-theme="capyuniverse"] select.input-field{
-  background:rgba(15,15,40,.6) !important;
-  border:1px solid rgba(255,255,255,.08) !important;
-  border-radius:12px !important;
+  background: #191823 !important;
+  border:1px solid rgba(255,255,255,.1) !important;
+  border-radius:10px !important;
   padding:.75rem .9rem !important;
   color:var(--cu-text) !important;
   outline:none !important;
@@ -260,7 +319,7 @@ html[data-theme="capyuniverse"] .input-field:focus,
 html[data-theme="capyuniverse"] .input-select:focus,
 html[data-theme="capyuniverse"] .input-textarea:focus{
   border-color: var(--cu-cyan) !important;
-  box-shadow: 0 0 0 3px rgba(34,211,238,.18) !important;
+  box-shadow: 0 0 0 3px #00f6ff22, 0 0 15px #00f6ff33 !important;
 }
 
 /* Sidebar styling to achieve a frosted glass effect. */
@@ -288,7 +347,7 @@ html[data-theme="capyuniverse"] .input-textarea:focus{
 }
 
 .sidebar-link.active{
-  background:linear-gradient(130deg, rgba(34,211,238,.2), rgba(244,114,208,.2));
+  background:linear-gradient(130deg, #00f6ff22, #ff00f522);
   border-color:rgba(255,255,255,.18);
   color:white !important;
   box-shadow:0 10px 20px rgba(15,23,42,.35);
@@ -341,7 +400,7 @@ html[data-theme="capyuniverse"] .input-textarea:focus{
   height:8px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb{
-  background:linear-gradient(120deg,#22d3ee,#8b5cf6);
+  background:var(--premium-gradient);
   border-radius:999px;
 }
 .scrollbar-thin::-webkit-scrollbar-track{
@@ -355,4 +414,34 @@ html[data-theme="capyuniverse"] .input-textarea:focus{
 
 #apiKeysModal .cu-btn.primary{
   box-shadow:none;
+}
+
+/* Modal visibility utilities, restored from index.html styles */
+.modal-hidden{
+  opacity:0;
+  pointer-events:none;
+}
+.modal-visible{
+  opacity:1;
+  pointer-events:auto;
+}
+.modal-overlay-bg{
+  transition:opacity .25s;
+}
+.modal-content{
+  transition:transform .25s,opacity .25s;
+}
+.modal-hidden .modal-overlay-bg{
+  opacity:0;
+}
+.modal-hidden .modal-content{
+  opacity:0;
+  transform:translateY(-8px) scale(.98);
+}
+.modal-visible .modal-overlay-bg{
+  opacity:.75;
+}
+.modal-visible .modal-content{
+  opacity:1;
+  transform:none;
 }
