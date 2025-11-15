@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,125 +24,141 @@
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
-
-  <script>
-    const params = new URLSearchParams(location.search);
-    if (window.innerWidth <= 768 && !params.get('from')) {
-      // window.location.href = "abertura.html";
-    }
-  </script>
-
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-navigation.js" defer></script>
   <style>
+    /* Modern Hero Slider Styles (melhorias: variáveis, acessibilidade, performance) */
     :root{
-      --primary-gradient: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      --secondary-gradient: linear-gradient(135deg,#f093fb 0%,#f5576c 100%);
-      --accent-gradient: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
-      --dark-gradient: linear-gradient(135deg,#0c0c0c 0%,#1a1a2e 50%,#16213e 100%);
-      --glass-bg: rgba(255,255,255,0.05);
-      --glass-border: rgba(255,255,255,0.1);
-      --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      --glow-purple:#8b5cf6; --glow-blue:#06b6d4; --glow-pink:#ec4899;
-      --text-primary:#f8fafc; --text-secondary:#cbd5e1;
+      --hero-transition-duration: 1000ms;
+      --hero-content-delay: 500ms;
+      --hero-interval: 5s; /* deve corresponder ao JS */
+      --dot-size: 10px;
+      --dot-active-opacity: 0.9;
     }
-    html{scroll-behavior:smooth;}
-    body{font-family:Inter,sans-serif;background:var(--dark-gradient);color:var(--text-primary);overflow-x:hidden;}
-    .glass-card{background:var(--glass-bg);backdrop-filter:blur(18px);border:1px solid var(--glass-border);box-shadow:var(--card-shadow);}
-    .premium-gradient{background:var(--primary-gradient);}
-    .hover-lift{transition:.3s cubic-bezier(.4,0,.2,1);}
-    .hover-lift:hover{transform:translateY(-6px) scale(1.01);box-shadow:0 20px 40px rgba(0,0,0,.3);}
-    .parallax-bg{background:var(--dark-gradient);min-height:100vh;position:relative;overflow:hidden;}
-    .parallax-bg::before{content:'';position:absolute;inset:0;background:
-      radial-gradient(circle at 20% 80%, rgba(139,92,246,.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(6,182,212,.15) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(236,72,153,.10) 0%, transparent 50%);}
-    .floating-orb{animation:floatingOrb 6s ease-in-out infinite alternate;}
-    @keyframes floatingOrb{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-20px) rotate(180deg)}100%{transform:translateY(-10px) rotate(360deg)}}
-    .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-    .particle{position:absolute;border-radius:50%;}
-    .particle:nth-child(1){width:4px;height:4px;top:20%;left:10%;background:rgba(139,92,246,.6);animation:floatParticle 8s linear infinite;}
-    .particle:nth-child(2){width:6px;height:6px;top:40%;left:80%;background:rgba(6,182,212,.6);animation:floatParticle 12s linear infinite -3s;}
-    .particle:nth-child(3){width:3px;height:3px;top:70%;left:30%;background:rgba(236,72,153,.6);animation:floatParticle 10s linear infinite -6s;}
-    .particle:nth-child(4){width:5px;height:5px;top:60%;left:70%;background:rgba(251,191,36,.6);animation:floatParticle 15s linear infinite -9s;}
-    .particle:nth-child(5){width:4px;height:4px;top:30%;left:50%;background:rgba(168,85,247,.6);animation:floatParticle 11s linear infinite -12s;}
-    @keyframes floatParticle{0%{transform:translateY(100vh);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh);opacity:0}}
 
-    .header{position:fixed;inset:0 0 auto;z-index:50;height:64px;display:flex;align-items:center}
-    .nav-link{position:relative;padding:.5rem .75rem;color:#e5e7eb;transition:color .25s,transform .25s}
-    .nav-link::after{content:'';position:absolute;width:0;height:2px;bottom:-4px;left:50%;transform:translateX(-50%);background:linear-gradient(to right,#a200ff,#fbbf24);transition:width .25s}
-    .nav-link:hover{color:#fbbf24;transform:translateY(-2px)}
-    .nav-link:hover::after,.nav-link.active::after{width:100%}
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #0f172a; /* fallback escuro */
+      opacity: 0;
+      transition: opacity var(--hero-transition-duration) ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem;
+      will-change: opacity;
+    }
+    .hero-slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 45%, transparent 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .hero-slide.active {
+      opacity: 1;
+    }
 
-    .carrossel-container{position:relative;max-width:100%;overflow:hidden;border-radius:1.25rem;box-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 10px 10px -5px rgba(0,0,0,.04)}
-    .carrossel{position:relative;width:100%;transition:height .35s ease}
-    .carrossel-slide{opacity:0;position:absolute;inset:0;width:100%;padding:1.25rem;pointer-events:none;transition:opacity .5s ease}
-    .carrossel-slide.active{opacity:1;pointer-events:auto;position:relative}
-    .carrossel-dots{position:absolute;bottom:1rem;left:0;right:0;display:flex;justify-content:center;gap:.6rem;z-index:5}
-    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.5);transition:all .2s;cursor:pointer}
-    .dot.active{background:#f59e0b;transform:scale(1.2)}
+    .hero-slide-content {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out var(--hero-content-delay), transform 0.5s ease-out var(--hero-content-delay);
+      max-width: min(60ch, 60%);
+    }
+    .hero-slide.active .hero-slide-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-    .modal-hidden{opacity:0;pointer-events:none}
-    .modal-visible{opacity:1}
-    .modal-overlay-bg{transition:opacity .25s}
-    .modal-content{transition:transform .25s,opacity .25s}
-    .modal-hidden .modal-overlay-bg{opacity:0}
-    .modal-hidden .modal-content{opacity:0;transform:translateY(-8px) scale(.98)}
-    .modal-visible .modal-overlay-bg{opacity:.75}
-    .modal-visible .modal-content{opacity:1;transform:none}
+    /* Dots */
+    .hero-slider-dot {
+      width: var(--dot-size);
+      height: var(--dot-size);
+      border-radius: 50%;
+      background: rgba(255,255,255,0.28);
+      cursor: pointer;
+      transition: background 0.25s, transform 0.18s;
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .hero-slider-dot:hover { transform: scale(1.08); }
+    .hero-slider-dot:focus { outline: 2px solid rgba(255,255,255,0.12); outline-offset: 3px; }
 
-    #notificationArea{position:fixed;top:1.25rem;right:1.25rem;z-index:60;display:flex;flex-direction:column;gap:.5rem;width:100%;max-width:24rem}
-    .notification{padding:1rem;border-radius:.5rem;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);font-size:.875rem;display:flex;justify-content:space-between;align-items:center;transition:all .25s;opacity:0;transform:translateX(100%)}
-    .notification.show{opacity:1;transform:translateX(0)}
-    .notification-success{background:#10b981;color:#fff}.notification-error{background:#ef4444;color:#fff}.notification-info{background:#3b82f6;color:#fff}.notification-warning{background:#f59e0b;color:#111}
-    .notification button{margin-left:.75rem;font-weight:700;font-size:1.125rem;background:none;border:none;color:inherit;cursor:pointer}
+    .hero-slider-dot.active {
+      background: rgba(255,255,255,var(--dot-active-opacity));
+    }
 
-    @media (max-width:768px){ .particles{display:none} }
-    ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#1f2937}::-webkit-scrollbar-thumb{background:#a200ff;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#6b7280}
+    /* Usar transform scaleX para animação de progresso (mais suave e GPU-accelerated) */
+    .hero-slider-dot .progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      transform-origin: left center;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+      opacity: 0.95;
+      transition: transform 0.15s linear;
+      pointer-events: none;
+    }
+    .hero-slider-dot.active .progress {
+      animation: fill-progress var(--hero-interval) linear forwards;
+    }
+    @keyframes fill-progress {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
 
-/* === Hamburger animado (CapyUniverse) === */
-#hamburger-button .hamburger-icon{
-  position: relative;
-  width: 30px;             /* mesmo tamanho do snippet */
-  height: 22px;            /* altura suficiente p/ 3 barras */
-  transition: transform .5s ease-in-out;
-}
+    /* Prevent horizontal overflow */
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
 
-#hamburger-button .hamburger-icon span{
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: #e5e7eb;     /* linhas claras p/ dark UI */
-  border-radius: 5px;
-  transition: transform .5s ease-in-out, opacity .35s ease-in-out, top .5s ease-in-out, background .25s;
-  transform-origin: center;
-}
+    * { box-sizing: border-box; }
 
-/* posições das 3 barras */
-#hamburger-button .hamburger-icon span:nth-child(1){ top: 0; }
-#hamburger-button .hamburger-icon span:nth-child(2){ top: 9.5px; }
-#hamburger-button .hamburger-icon span:nth-child(3){ bottom: 0; }
+    .floating-orb { max-width: 100vw; }
 
-/* hover de leve */
-#hamburger-button:hover .hamburger-icon span{ background: #fff; }
+    /* Cards / textos */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
-/* estado aberto (classe .open já é aplicada no seu JS) */
-#hamburger-button .hamburger-icon.open span:nth-child(1){
-  transform: translateY(9.5px) rotate(45deg);
-}
-#hamburger-button .hamburger-icon.open span:nth-child(2){
-  opacity: 0;
-  transform: scaleX(0);
-}
-#hamburger-button .hamburger-icon.open span:nth-child(3){
-  transform: translateY(-9.5px) rotate(-45deg);
-}
+    /* Responsividade: ajustar conteúdo e dots em telas pequenas */
+    @media (max-width: 1024px) {
+      .hero-slide { padding: 1.25rem; }
+      .hero-slide-content { max-width: 90%; }
+      :root { --dot-size: 8px; }
+      #hero-slider-dots { gap: 8px; padding-bottom: 6px; }
+    }
 
-/* acessibilidade: reduzir animação se o usuário preferir */
-@media (prefers-reduced-motion: reduce){
-  #hamburger-button .hamburger-icon span{
-    transition: none;
-  }
-}
+    /* Preferências de usuário: reduzir animações */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-slide,
+      .hero-slide-content,
+      .hero-slider-dot .progress {
+        transition: none !important;
+        animation: none !important;
+      }
+      .hero-slide { opacity: 1; transform: none; }
+      .hero-slide-content { opacity: 1; transform: none; }
+    }
   </style>
 
   <!-- gtag -->
@@ -157,180 +173,114 @@
   <script>window.amplitude.add(window.sessionReplay.plugin({sampleRate:1}));window.amplitude.init('923ad9fef9eabc6dd7b7194bc8c91d41',{"fetchRemoteConfig":true,"autocapture":true});</script>
 </head>
 
-<body class="text-gray-100 min-h-screen flex flex-col">
+<body class="text-gray-100 min-h-screen flex flex-col overflow-x-hidden">
   <!-- HEADER -->
-  <header class="header glass-card border-b border-white/10 px-4 md:px-8">
-    <div class="w-full max-w-7xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-3 hover-lift group">
-        <div class="glass-card p-2 rounded-xl border border-white/20 group-hover:border-purple-400/50 transition-all">
-          <img src="img/logo.png" alt="CapyUniverse Logo" class="h-9 w-9 md:h-10 md:w-10 group-hover:scale-110 transition-transform">
-        </div>
-        <span class="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">CapyUniverse</span>
-      </a>
-
-      <nav class="hidden md:flex items-center gap-6 lg:gap-8">
-        <!-- atualizados para abrir modais -->
-        <a href="#" class="nav-link" data-open="contato">Contato</a>
-        <a href="#" class="nav-link" data-open="como">Como Funciona</a>
-        <a href="#" class="nav-link" data-open="quem">Quem Somos</a>
-        <a href="#" class="nav-link" data-open="faq">FAQ</a>
-        <button id="openManageApiKeyModalButtonHeader" class="glass-card px-4 py-2 rounded-xl border border-cyan-400/30 text-cyan-300 hover:border-cyan-400/60 hover-lift">Chaves API</button>
-      </nav>
-
-      <button id="hamburger-button" class="md:hidden p-2 rounded-md hover:bg-white/10" aria-label="Abrir menu">
-        <div class="hamburger-icon flex flex-col justify-between w-7 h-4">
-          <span class="block w-full h-0.5 bg-gray-200"></span>
-          <span class="block w-full h-0.5 bg-gray-200"></span>
-          <span class="block w-full h-0.5 bg-gray-200"></span>
-        </div>
-      </button>
+  <header class="cu-header">
+    <div class="cu-brand min-w-0 flex-shrink">
+        <a href="index.html" class="flex items-center gap-2 group min-w-0">
+            <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+            <span class="cu-appname text-lg sm:text-xl truncate">CapyUniverse</span>
+        </a>
     </div>
 
+    <nav class="hidden md:flex items-center gap-2 flex-shrink-0">
+        <a href="#" class="cu-btn" data-open="contato">Contato</a>
+        <a href="#" class="cu-btn" data-open="como">Como Funciona</a>
+        <a href="#" class="cu-btn" data-open="quem">Quem Somos</a>
+        <a href="#" class="cu-btn" data-open="faq">FAQ</a>
+        <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
+    </nav>
+    
+    <button id="hamburger-button" class="md:hidden cu-btn flex-shrink-0 p-2" aria-label="Abrir menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <!-- OVERLAY MENU MOBILE -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    
     <!-- MENU MOBILE -->
-    <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900 shadow-2xl p-6 pt-20 md:hidden translate-x-full">
-      <nav class="flex flex-col space-y-6 text-xl">
-        <a href="#" class="nav-link py-2" data-open="contato" onclick="closeMobileMenu()">Contato</a>
-        <a href="#" class="nav-link py-2" data-open="como" onclick="closeMobileMenu()">Como Funciona</a>
-        <a href="#" class="nav-link py-2" data-open="quem" onclick="closeMobileMenu()">Quem Somos</a>
-        <a href="#" class="nav-link py-2" data-open="faq" onclick="closeMobileMenu()">FAQ</a>
-        <button id="openManageApiKeyModalButtonMobile" class="glass-card px-4 py-3 rounded-xl text-left border border-cyan-400/30 text-cyan-300">🔑 Chaves API</button>
+    <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-gray-900/95 backdrop-blur-md shadow-2xl p-6 pt-20 md:hidden translate-x-full z-50 transition-transform duration-300 ease-out">
+      <nav class="flex flex-col space-y-4">
+        <a href="#" class="cu-btn" data-open="contato" onclick="closeMobileMenu()">Contato</a>
+        <a href="#" class="cu-btn" data-open="como" onclick="closeMobileMenu()">Como Funciona</a>
+        <a href="#" class="cu-btn" data-open="quem" onclick="closeMobileMenu()">Quem Somos</a>
+        <a href="#" class="cu-btn" data-open="faq" onclick="closeMobileMenu()">FAQ</a>
+        <button id="openManageApiKeyModalButtonMobile" class="cu-btn primary w-full">🔑 Chaves API</button>
       </nav>
     </div>
   </header>
 
-  <div class="pt-16"></div>
   <div id="notificationArea"></div>
 
   <!-- HERO -->
-  <div class="parallax-bg relative py-14 px-4 min-h-[calc(100vh-64px)]">
-    <div class="absolute inset-0 pointer-events-none">
-      <div class="floating-orb absolute -top-24 left-1/4 w-72 h-72 rounded-full" style="background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%); opacity:.3;"></div>
-      <div class="floating-orb absolute top-1/4 right-1/5 w-64 h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%); opacity:.25; animation-delay:-1s;"></div>
-      <div class="floating-orb absolute bottom-1/4 left-1/2 w-64 h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%); opacity:.2; animation-delay:-2s;"></div>
+  <div class="relative py-14 px-4 min-h-[calc(100vh-64px)] flex items-center">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="floating-orb absolute -top-24 left-1/4 w-64 h-64 sm:w-72 sm:h-72 rounded-full" style="background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%); opacity:.3;"></div>
+      <div class="floating-orb absolute top-1/4 right-0 w-48 h-48 sm:w-64 sm:h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%); opacity:.25; animation-delay:-1s;"></div>
+      <div class="floating-orb absolute bottom-1/4 left-1/3 w-48 h-48 sm:w-64 sm:h-64 rounded-full" style="background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%); opacity:.2; animation-delay:-2s;"></div>
       <div class="particles">
         <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
       </div>
     </div>
 
     <div class="relative z-10 w-full max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-10 items-center min-h-0">
-        <!-- Texto -->
-        <div class="flex flex-col justify-center text-center lg:text-left min-h-0">
-          <div class="glass-card inline-flex items-center justify-center rounded-3xl p-4 mb-8 mx-auto lg:mx-0 w-28 h-28 hover-lift">
-            <img src="img/logo.png" class="w-full h-full object-contain" alt="Logo CapyUniverse">
-          </div>
-
-          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent leading-tight">
-            CapyUniverse IA
-          </h1>
-          <p class="text-lg sm:text-xl text-slate-300 mb-2">Inteligência Artificial <span class="text-cyan-400 font-semibold">Premium</span> com a</p>
-          <p class="text-base sm:text-lg text-slate-400 mb-6"><span class="text-2xl">🚀</span> simpatia das capivaras mais futuristas do universo</p>
-
-          <div class="glass-card inline-flex items-center px-4 py-2 rounded-full mb-8 mx-auto lg:mx-0">
-            <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-            <span class="text-sm text-slate-300">Plataforma Ativa • 50+ Ferramentas IA</span>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <a href="#ferramentas" class="group premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift text-center relative overflow-hidden">
-              <span class="relative z-10">Explorar Ferramentas</span>
-              <span class="absolute inset-0 bg-white/15 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-            </a>
-            <button id="openManageApiKeyModalButton" class="glass-card px-8 py-4 rounded-2xl font-semibold text-cyan-400 border border-cyan-400/30 hover:border-cyan-400/60 hover-lift">
-              <span class="flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Configurar API</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Carrossel (desktop) -->
-        <div class="hidden lg:block min-h-0">
-          <div class="carrossel-container">
-            <div class="carrossel" id="carrossel">
-              <!-- Slide 1 -->
-              <div class="carrossel-slide active">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-blue-900/50 to-sky-900/50 rounded-2xl border border-blue-500/30">
-                  <div class="flex-1 text-center md:text-left">
-                    <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-blue-500/20 text-blue-300 text-sm font-medium">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Em Destaque
-                    </div>
-                    <h2 class="text-3xl font-bold text-white mb-2">CapyResumo</h2>
-                    <p class="text-lg text-gray-300 mb-6">Resuma qualquer texto, artigo ou documento em segundos.</p>
-                    <div class="flex flex-wrap gap-3 mb-6 justify-center md:justify-start">
-                      <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Resumos Rápidos</span>
-                      <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Análise de Texto</span>
-                      <span class="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">IA Avançada</span>
-                    </div>
-                    <a href="capyresumo.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-lg hover:opacity-90">Experimentar Agora →</a>
-                  </div>
-                  <div class="flex-1">
-                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-                      <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Exemplo:</p><p class="text-blue-300 font-medium">"A IA revolucionou a forma como processamos informações..."</p></div>
-                      <div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-blue-500 to-sky-500 rounded-full w-3/4"></div></div>
-                      <p class="text-xs text-gray-400 mt-2 text-right">75% mais conciso</p>
-                    </div>
-                  </div>
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr,1.2fr] gap-10 items-center">
+              <!-- Texto -->
+              <div class="flex flex-col justify-center text-center lg:text-left">
+                <div class="cu-panel inline-flex items-center justify-center rounded-3xl p-4 mb-8 mx-auto lg:mx-0 w-28 h-28">
+                  <img src="img/logo.png" class="w-full h-full object-contain" alt="Logo CapyUniverse">
+                </div>
+      
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent leading-tight" style="background-image: linear-gradient(135deg, var(--cu-purple), var(--cu-magenta), var(--cu-cyan))">
+                  CapyUniverse IA
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-300 mb-2">Inteligência Artificial <span class="font-semibold" style="color: var(--cu-cyan)">Premium</span> com a</p>
+                <p class="text-base sm:text-lg text-slate-400 mb-6"><span class="text-2xl">🚀</span> simpatia das capivaras mais futuristas do universo</p>
+      
+                <div class="cu-chip inline-flex items-center px-4 py-2 rounded-full mb-8 mx-auto lg:mx-0">
+                  <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                  <span class="text-sm">Plataforma Ativa • 50+ Ferramentas IA</span>
+                </div>
+      
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <a href="#ferramentas" class="cu-btn primary px-8 py-4">
+                    <span>Explorar Ferramentas</span>
+                  </a>
+                  <button id="openManageApiKeyModalButton" class="cu-btn px-8 py-4">
+                    <span class="flex items-center justify-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg> Configurar API</span>
+                  </button>
                 </div>
               </div>
-              <!-- Slide 2 -->
-              <div class="carrossel-slide">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-yellow-900/50 to-amber-900/50 rounded-2xl border border-yellow-500/30">
-                  <div class="flex-1 text-center md:text-left">
-                    <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-yellow-500/20 text-yellow-300 text-sm font-medium">
-                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Exclusivo
-                    </div>
-                    <h2 class="text-3xl font-bold text-white mb-2">CapyExplica</h2>
-                    <p class="text-lg text-gray-300 mb-6">Entenda conceitos complexos de forma simples e didática.</p>
-                    <a href="capyexplica.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-gray-900 rounded-lg hover:opacity-90">Explicar Agora →</a>
-                  </div>
-                  <div class="flex-1">
-                    <div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
-                      <div class="text-left p-4 bg-gray-900/50 rounded-lg mb-4"><p class="text-gray-400 text-sm mb-1">Pergunte:</p><p class="text-yellow-300 font-medium">"O que é inteligência artificial?"</p></div>
-                      <div class="h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full w-4/5"></div></div>
-                      <p class="text-xs text-gray-400 mt-2 text-right">Resposta em 2s</p>
-                    </div>
-                  </div>
+              
+              <!-- Modern Hero Slider -->
+              <div id="hero-slider-container" class="hidden lg:block relative w-full aspect-video rounded-2xl cu-panel overflow-hidden">
+                <div id="hero-slider-slides" class="relative w-full h-full">
+                  <!-- Slides will be injected by JS -->
+                </div>
+                <div id="hero-slider-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                  <!-- Dots will be injected by JS -->
                 </div>
               </div>
-              <!-- Slide 3 -->
-              <div class="carrossel-slide">
-                <div class="flex flex-col md:flex-row items-center justify-between gap-8 p-6 bg-gradient-to-br from-purple-900/50 to-fuchsia-900/50 rounded-2xl border border-purple-500/30">
-                  <div class="flex-1 text-center md:text-left">
-                    <div class="inline-flex items-center mb-4 px-4 py-2 rounded-full bg-purple-500/20 text-purple-300 text-sm font-medium">Popular</div>
-                    <h2 class="text-3xl font-bold text-white mb-2">CapyFlashcards</h2>
-                    <p class="text-lg text-gray-300 mb-6">Crie flashcards para estudar qualquer assunto.</p>
-                    <a href="capyflashcards.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg hover:opacity-90">Criar Flashcards →</a>
-                  </div>
-                  <div class="flex-1">
-                    <div class="relative h-64 bg-gray-800/50 rounded-xl border-2 border-dashed border-purple-500/30 flex items-center justify-center p-4">
-                      <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform rotate-2 -translate-y-3 -translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">O que é Machine Learning?</p><p class="text-sm text-gray-400">Clique para ver a resposta</p></div>
-                      <div class="absolute w-11/12 h-40 bg-gray-900/50 rounded-lg border border-purple-500/50 p-4 transform -rotate-2 translate-y-3 translate-x-1 shadow-lg"><p class="text-purple-300 font-medium mb-2">R: Sistemas que aprendem com dados.</p></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      
             </div>
-            <div class="carrossel-dots"><span class="dot active" data-slide="0"></span><span class="dot" data-slide="1"></span><span class="dot" data-slide="2"></span></div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
   <!-- Descubra -->
   <section class="max-w-7xl mx-auto px-4 py-10">
-    <div class="glass-card p-6 sm:p-8 rounded-3xl mb-12 hover-lift">
+    <div class="cu-panel p-6 sm:p-8 rounded-3xl mb-12">
       <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-2">Descubra sua Ferramenta IA</h2>
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent mb-2" style="background-image: linear-gradient(135deg, var(--cu-cyan), var(--cu-purple))">Descubra sua Ferramenta IA</h2>
         <p class="text-slate-400">Mais de 50 ferramentas inteligentes ao seu alcance</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
         <div class="space-y-2">
           <label for="search-input" class="block text-sm font-medium text-slate-300">Buscar Ferramenta</label>
-          <input id="search-input" type="text" placeholder="Digite o nome, categoria ou funcionalidade..." class="w-full glass-card border border-white/10 text-slate-200 placeholder-slate-500 rounded-xl p-4 focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400/50 hover:border-white/20">
+          <input id="search-input" type="text" placeholder="Digite o nome, categoria ou funcionalidade..." class="cu-input">
         </div>
         <div class="space-y-2">
           <label for="category-select" class="block text-sm font-medium text-slate-300">Categoria</label>
-          <select id="category-select" class="w-full glass-card border border-white/10 text-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-purple-400 focus:border-purple-400/50 hover:border-white/20">
+          <select id="category-select" class="cu-select">
             <option value="">Todas as Categorias</option>
           </select>
         </div>
@@ -339,20 +289,20 @@
   </section>
 
   <!-- Ferramentas -->
-  <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20 min-h-0">
-    <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 min-h-[200px]">
+  <section id="ferramentas" class="max-w-7xl mx-auto px-4 pb-20 sm:px-6 lg:px-8 min-h-0">
+    <div id="tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 min-h-[300px]">
       <div class="col-span-full text-center text-slate-400">A carregar ferramentas...</div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="text-center mt-16 py-12 px-4 glass-card rounded-t-3xl border-t border-white/10">
+  <footer class="text-center mt-16 py-12 px-4 cu-panel rounded-t-3xl border-t border-white/10">
     <div class="max-w-4xl mx-auto">
-      <div class="flex justify-center mb-6"><div class="glass-card p-4 rounded-2xl border border-white/20"><div class="text-3xl">🚀</div></div></div>
-      <h2 class="text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">Transforme suas ideias em realidade</h2>
-      <p class="text-slate-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">Junte-se a milhares de usuários que já descobriram o poder da IA com a simpatia das capivaras. <span class="text-cyan-400 font-medium">Comece sua jornada hoje mesmo.</span></p>
+      <div class="flex justify-center mb-6"><div class="cu-panel p-4 rounded-2xl border border-white/20"><div class="text-3xl">🚀</div></div></div>
+      <h2 class="text-3xl font-bold mb-4 bg-clip-text text-transparent" style="background-image: linear-gradient(135deg, var(--cu-purple), var(--cu-magenta), var(--cu-cyan))">Transforme suas ideias em realidade</h2>
+      <p class="text-slate-400 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">Junte-se a milhares de usuários que já descobriram o poder da IA com a simpatia das capivaras. <span class="font-medium" style="color: var(--cu-cyan)">Comece sua jornada hoje mesmo.</span></p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-        <a href="#ferramentas" class="premium-gradient px-8 py-4 rounded-2xl font-semibold text-white shadow-2xl hover-lift group">
+        <a href="#ferramentas" class="cu-btn primary px-8 py-4 group">
           <span class="flex items-center">Começar de Graça
             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </span>
@@ -360,9 +310,9 @@
         <div class="text-slate-400 text-sm">✨ Sem cadastro necessário • 🚀 Acesso instantâneo</div>
       </div>
       <div class="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
-        <div><div class="text-2xl font-bold text-cyan-400">50+</div><div class="text-xs text-slate-500">Ferramentas</div></div>
-        <div><div class="text-2xl font-bold text-purple-400">24/7</div><div class="text-xs text-slate-500">Disponível</div></div>
-        <div><div class="text-2xl font-bold text-pink-400">Free</div><div class="text-xs text-slate-500">Para Sempre</div></div>
+        <div><div class="text-2xl font-bold" style="color: var(--cu-cyan)">50+</div><div class="text-xs text-slate-500">Ferramentas</div></div>
+        <div><div class="text-2xl font-bold" style="color: var(--cu-purple)">24/7</div><div class="text-xs text-slate-500">Disponível</div></div>
+        <div><div class="text-2xl font-bold" style="color: var(--cu-magenta)">Free</div><div class="text-xs text-slate-500">Para Sempre</div></div>
       </div>
       <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-6"></div>
       <p class="text-slate-600 text-sm">&copy; <span id="current-year"></span> CapyUniverse IA • Construído com ❤️ para inovadores como você</p>
@@ -498,7 +448,7 @@
       </div>
       <p id="modalToolCategory" class="text-sm text-gray-400 mb-1">Categoria</p>
       <p id="modalToolDescription" class="text-gray-300 mb-6">Descrição detalhada.</p>
-      <a id="modalToolLink" href="#" target="_blank" class="w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform bg-cyan-500">Acessar IA →</a>
+      <a id="modalToolLink" href="#" class="w-full text-center block px-6 py-3 rounded-lg font-semibold text-gray-900 shadow-lg hover:scale-105 transition-transform bg-cyan-500">Acessar IA →</a>
     </div>
   </div>
 
@@ -584,33 +534,34 @@
     }
 
     function createToolCard(tool, index){
-      const colorTheme = colorClasses[tool.color] || colorClasses.fuchsia;
-      const card = document.createElement('div');
-      card.className = 'group glass-card rounded-2xl overflow-hidden flex flex-col border border-white/10 hover:border-white/20 transition-all';
-      card.style.animationDelay = `${index*0.08}s`;
-      Object.keys(tool).forEach(k => card.dataset[k] = tool[k]);
+        const card = document.createElement('div');
+        card.className = 'group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl';
+        card.style.animationDelay = `${index * 0.08}s`;
+        Object.keys(tool).forEach(k => card.dataset[k] = tool[k]);
 
-      card.innerHTML = `
-        <div class="relative aspect-[4/3] w-full overflow-hidden cursor-pointer tool-image-placeholder">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-800/10 to-slate-900/50 z-10"></div>
-          <img src="${tool.imageUrl || `https://placehold.co/640x480/1e293b/94a3b8?text=${encodeURIComponent(tool.title?.slice(0,8)||'IA')}`}" alt="${tool.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/640x480/334155/94a3b8?text=IA';">
-          <div class="absolute top-3 left-3 z-20"><span class="px-2 py-1 text-xs font-medium rounded-full glass-card border border-white/20 text-slate-300">${tool.category}</span></div>
-          <div class="absolute top-3 right-3 z-20 w-8 h-8 glass-card rounded-full flex items-center justify-center text-lg">${tool.icon || '🤖'}</div>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </div>
-        <div class="p-5 flex-grow flex flex-col justify-between">
-          <div class="mb-4">
-            <h3 class="text-lg font-bold text-slate-100 mb-2 group-hover:text-white">${tool.title}</h3>
-            <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">${tool.description || ''}</p>
-          </div>
-          <button class="open-modal-button w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-card border border-white/10 text-slate-300 hover:text-white">
-            <span>Explorar</span>
-            <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-          </button>
-        </div>`;
-      card.querySelector('.tool-image-placeholder').addEventListener('click',()=>openToolModal(tool));
-      card.querySelector('.open-modal-button').addEventListener('click',()=>openToolModal(tool));
-      return card;
+        const placeholderUrl = `https://placehold.co/640x480/1e293b/94a3b8?text=${encodeURIComponent(tool.title?.slice(0, 8) || 'IA')}`;
+        const imageUrl = tool.imageUrl || placeholderUrl;
+
+        card.innerHTML = `
+            <div class="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-300 group-hover:scale-110" style="background-image: url('${imageUrl}')"></div>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            
+            <div class="relative flex flex-col justify-end h-full p-4 text-white z-10">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 flex items-center justify-center text-2xl rounded-lg bg-white/10 backdrop-blur-sm">${tool.icon || '🤖'}</div>
+                    <h3 class="text-lg font-bold truncate">${tool.title}</h3>
+                </div>
+                <p class="text-sm text-gray-300 line-clamp-2 mb-3">${tool.description || ''}</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">${tool.category}</span>
+                    <svg class="w-5 h-5 text-gray-300 group-hover:text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => openToolModal(tool));
+        return card;
     }
 
     function displayTools(list){
@@ -690,60 +641,185 @@
         allToolsData = await res.json();
         populateCategories(allToolsData);
         displayTools(allToolsData);
+        initializeHeroSlider(allToolsData);
       }catch(e){
         console.error(e);
         toolsGrid.innerHTML = '<p class="text-center text-red-500 col-span-full">Não foi possível carregar as ferramentas.</p>';
       }
     }
 
-    // --- Carrossel com ResizeObserver (não corta) ---
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const carrossel = document.getElementById('carrossel');
-      const slides = carrossel ? [...carrossel.querySelectorAll('.carrossel-slide')] : [];
-      const dots = document.querySelectorAll('.dot');
-      let current = 0, busy=false, iv;
+    // --- Modern Hero Slider (melhorias: segurança, restart animation, intervalo dinâmico) ---
+    function initializeHeroSlider(tools) {
+        const featuredToolIds = ['CapyIDE', 'CapyFlow', 'CapyCLT', 'capyimg'];
+        const featuredTools = featuredToolIds.map(id => tools.find(t => t.id === id)).filter(Boolean);
 
-      function setHeight(node){
-        if(!carrossel || !node) return;
-        carrossel.style.height = node.scrollHeight+'px';
-      }
-      const ro = carrossel ? new ResizeObserver(()=>setHeight(slides[current])) : null;
-      if (carrossel && slides[0]) { setHeight(slides[0]); ro.observe(slides[0]); }
+        if (featuredTools.length === 0) return;
 
-      function go(to){
-        if(busy || !slides.length) return; busy=true;
-        const old = current;
-        if (typeof to==='number') current = to;
-        else current = (current+1) % slides.length;
-        if (old===current) { busy=false; return; }
-        slides[old].classList.remove('active');
-        slides[current].classList.add('active');
-        dots[old]?.classList.remove('active'); dots[current]?.classList.add('active');
+        const slidesContainer = document.getElementById('hero-slider-slides');
+        const dotsContainer = document.getElementById('hero-slider-dots');
+        const sliderContainer = document.getElementById('hero-slider-container');
+        if (!slidesContainer || !dotsContainer || !sliderContainer) return;
 
-        ro?.unobserve(slides[old]); ro?.observe(slides[current]);
-        setHeight(slides[current]);
-        setTimeout(()=>busy=false, 500);
-      }
-      function start(){ stop(); if (slides.length>1) iv=setInterval(()=>{ if(!document.hidden) go(); }, 7000); }
-      function stop(){ clearInterval(iv); }
+        // helper to read CSS var --hero-interval (supports "5s" or "5000ms")
+        function parseIntervalMs() {
+            const v = getComputedStyle(document.documentElement).getPropertyValue('--hero-interval').trim() || '5s';
+            if (v.endsWith('ms')) return parseFloat(v);
+            if (v.endsWith('s')) return parseFloat(v) * 1000;
+            const n = parseFloat(v);
+            return isNaN(n) ? 5000 : n;
+        }
+        const intervalMs = parseIntervalMs();
 
-      dots.forEach((d,i)=>d.addEventListener('click',()=>{ go(i); start(); }));
-      carrossel?.addEventListener('mouseenter',stop);
-      carrossel?.addEventListener('mouseleave',start);
-      start();
-    });
+        let slidesHTML = '';
+        let dotsHTML = '';
+
+        featuredTools.forEach((tool, index) => {
+            slidesHTML += `
+                <div class="hero-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${tool.imageUrl}')" data-index="${index}">
+                    <div class="hero-slide-content">
+                        <h3 class="text-3xl font-bold mb-2">${tool.title}</h3>
+                        <p class="text-lg text-slate-300 mb-4 max-w-md">${tool.description}</p>
+                        <button class="cu-btn primary hero-explore-btn" data-url="${tool.pageUrl}" data-title="${tool.title}">Explorar Ferramenta</button>
+                    </div>
+                </div>
+            `;
+            dotsHTML += `
+                <div class="hero-slider-dot ${index === 0 ? 'active' : ''}" data-index="${index}" role="button" tabindex="0" aria-label="Slide ${index+1}">
+                    <div class="progress" aria-hidden="true"></div>
+                </div>
+            `;
+        });
+
+        slidesContainer.innerHTML = slidesHTML;
+        dotsContainer.innerHTML = dotsHTML;
+
+        const slides = Array.from(slidesContainer.querySelectorAll('.hero-slide'));
+        const dots = Array.from(dotsContainer.querySelectorAll('.hero-slider-dot'));
+        let currentIndex = 0;
+        let slideInterval = null;
+
+        function goToSlide(index) {
+            if (!slides.length) return;
+            if (index === currentIndex) {
+                // restart progress animation for the active dot
+                const activeDot = dots[currentIndex];
+                if (activeDot) {
+                    activeDot.classList.remove('active');
+                    void activeDot.offsetWidth; // reflow
+                    activeDot.classList.add('active');
+                }
+                return;
+            }
+
+            // remove active classes safely
+            if (slides[currentIndex]) slides[currentIndex].classList.remove('active');
+            if (dots[currentIndex]) {
+              // stop progress animation by toggling class
+              dots[currentIndex].classList.remove('active');
+            }
+
+            currentIndex = Math.max(0, Math.min(index, slides.length - 1));
+
+            if (slides[currentIndex]) slides[currentIndex].classList.add('active');
+            if (dots[currentIndex]) {
+              dots[currentIndex].classList.add('active');
+            }
+        }
+
+        function startSlider() {
+            stopSlider();
+            slideInterval = setInterval(() => {
+                const nextIndex = (currentIndex + 1) % featuredTools.length;
+                goToSlide(nextIndex);
+            }, intervalMs);
+        }
+
+        function stopSlider() {
+            if (slideInterval) {
+                clearInterval(slideInterval);
+                slideInterval = null;
+            }
+        }
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const idx = parseInt(e.currentTarget.dataset.index);
+                if (Number.isInteger(idx)) {
+                    stopSlider();
+                    goToSlide(idx);
+                    startSlider();
+                }
+            });
+            dot.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const idx = parseInt(e.currentTarget.dataset.index);
+                    if (Number.isInteger(idx)) {
+                      stopSlider();
+                      goToSlide(idx);
+                      startSlider();
+                    }
+                }
+            });
+        });
+        
+        slidesContainer.addEventListener('click', e => {
+            const btn = e.target.closest('.hero-explore-btn');
+            if (btn) {
+                const url = btn.dataset.url;
+                const title = btn.dataset.title;
+                if (url && url.endsWith('.html')) {
+                    if (window.CU_NAVIGATION && window.innerWidth < 1024) {
+                        window.CU_NAVIGATION.openInModal(url, title);
+                    } else {
+                        window.location.href = url;
+                    }
+                } else if (url) {
+                    // external or dynamic link
+                    window.open(url, '_self');
+                }
+            }
+        });
+
+        sliderContainer.addEventListener('mouseenter', stopSlider);
+        sliderContainer.addEventListener('mouseleave', startSlider);
+
+        // start with progress animation for first dot
+        startSlider();
+    }
 
     // --- Menu mobile ---
     const hamburgerButton = document.getElementById('hamburger-button');
     const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    
     function toggleMobileMenu(){
-      mobileMenu.classList.toggle('open');
-      mobileMenu.style.transform = mobileMenu.classList.contains('open') ? 'translateX(0)' : 'translateX(100%)';
-      hamburgerButton.querySelector('.hamburger-icon').classList.toggle('open');
-      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+      const isOpen = mobileMenu.classList.contains('open');
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
     }
-    window.closeMobileMenu = function(){ mobileMenu.classList.remove('open'); mobileMenu.style.transform='translateX(100%)'; hamburgerButton.querySelector('.hamburger-icon').classList.remove('open'); document.body.style.overflow=''; }
+    
+    function openMobileMenu() {
+      mobileMenu.classList.add('open');
+      mobileMenu.style.transform = 'translateX(0)';
+      mobileMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+      mobileMenuOverlay.classList.add('opacity-100');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    window.closeMobileMenu = function(){
+      mobileMenu.classList.remove('open');
+      mobileMenu.style.transform = 'translateX(100%)';
+      mobileMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+      mobileMenuOverlay.classList.remove('opacity-100');
+      document.body.style.overflow = '';
+    }
+    
     hamburgerButton.addEventListener('click', toggleMobileMenu);
+    mobileMenuOverlay.addEventListener('click', closeMobileMenu);
     document.addEventListener('click', (e)=>{ if (mobileMenu.classList.contains('open') && !mobileMenu.contains(e.target) && !hamburgerButton.contains(e.target)) closeMobileMenu(); });
 
     // --- Listeners ---
@@ -862,6 +938,30 @@
     // --- Init ---
     document.getElementById('current-year').textContent = new Date().getFullYear();
     fetchAndProcessTools();
+    
+    // Recriar cards ao redimensionar
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        filterTools();
+      }, 150);
+    });
+
+        // Usar o sistema de navegação universal (apenas mobile)
+        modalToolLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = e.currentTarget.href;
+            const title = modalToolName.textContent;
+            if (url && url.endsWith('.html')) {
+                if (window.CU_NAVIGATION && window.innerWidth < 1024) {
+                    closeToolModal();
+                    window.CU_NAVIGATION.openInModal(url, title);
+                } else {
+                    window.location.href = url;
+                }
+            }
+        });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js').catch(console.error);
@@ -869,6 +969,8 @@
 
       
   </script>
+
+
 
 </body>
 </html>

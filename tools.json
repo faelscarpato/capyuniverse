@@ -53,11 +53,11 @@
     "id": "capybussola",
     "title": "Capy Bussola",
     "description": "Tome melhor suas decisões ponderando as opções com IA.",
-    "imageUrl": "assets/capy/capybussola.png",
+    "imageUrl": "img/capybussola.png",
     "category": "Desenvolvimento & TI",
     "pageUrl": "capybussola.html",
     "color": "#A855F7",
-    "iconUrl": "assets/capy/capybussola.png"
+    "iconUrl": "img/capybussola.png"
   },
   {
     "id": "CapyByte",
@@ -135,6 +135,16 @@
     "color": "indigo-400",
     "iconUrl": "img/capyconciliador.webp"
   },
+  {
+  "id": "CapyContos",
+  "title": "Tecelão de Narrativas",
+  "imageUrl": "img/capycontos.webp",
+  "iconUrl": "icon/capycontos.png",
+  "description": "Crie histórias interativas, com personagens, cenários e decisões guiadas por IA.",
+  "category": "Escrita & Storytelling",
+  "pageUrl": "capycontos.html",
+  "color": "amber-400"
+},
   {
     "id": "CapyContrato",
     "title": "Gerador de Contratos",
@@ -388,7 +398,7 @@
     "title": "CapyFlow",
     "description": "Camada preditiva que automatiza fluxos e sugere ferramentas.",
 "imageUrl": "img/capyflow.webp",
-    "pageUrl": "tools/CapyFlow/capyflow-embed.html",
+    "pageUrl": "/capyflow/index.html",
     "category": "Plataforma",
     "icon": "<i class='fa-solid fa-stream w-5 h-5 mr-2 text-cyan-400'></i>",
     "color": "cyan-400"
@@ -532,6 +542,16 @@
     "color": "slate-400",
     "iconUrl": "img/capyminuta.webp"
   },
+  {
+  "id": "CapyMuse",
+  "title": "Museu de Inspirações IA",
+  "imageUrl": "img/capymuse.webp",
+  "iconUrl": "icon/capymuse.png",
+  "description": "Galerias temáticas, desafios criativos e caderno de ideias para nunca mais travar na hora de criar.",
+  "category": "Criatividade & Inspiração",
+  "pageUrl": "capymuse.html",
+  "color": "violet-400"
+},
   {
     "id": "CapyNarrativas",
     "title": "CapyNarrativas",
