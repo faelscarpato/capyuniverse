@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hub — CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-navigation.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="neon-shared.js" defer></script>
+</head>
+<body class="min-h-screen">
+  <header class="cu-header">
+    <div class="cu-brand">
+      <a href="index.html" class="flex items-center gap-2 group">
+        <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+        <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+      </a>
+      <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ Hub</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold bg-clip-text text-transparent" style="background-image: var(--premium-gradient)">Todas as Ferramentas</h1>
+      <div id="hubChips" class="flex flex-wrap gap-2"></div>
+    </div>
+    <div id="hubGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"></div>
+  </main>
+
+  <div id="notificationArea"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.CU_NEON) {
+        CU_NEON.buildHub('#hubGrid', '#hubChips');
+      } else {
+        document.getElementById('hubGrid').innerHTML = '<p class="text-red-400 col-span-full">Erro: neon-shared.js não foi carregado.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
+

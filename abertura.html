@@ -1,75 +1,41 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1 " />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bem-vindo ao CapyUniverse</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/3.1.0/parallax.min.js"></script>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="cu-style.css">
+
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Helvetica Neue', sans-serif;
-      background-image: url('background.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      color: white;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
     @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+      from { opacity: 0; transform: scale(0.98); }
+      to   { opacity: 1; transform: scale(1); }
     }
-
     .animate-fade-in {
-      animation: fadeIn 1s ease-in-out;
-    }
-
-    button:hover {
-      border: 0.3px solid #ffffff; /* Cor do hover */
-      background-color: rgb(42, 0, 110); /* Cor de fundo com opacidade */
-      color: #ffffff; /* Cor do texto */
-      
-      cursor: pointer;
+      animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col animate-fade-in overscroll-y-none">
+<body class="min-h-screen flex flex-col items-center justify-center text-center p-4 animate-fade-in">
 
-  <!-- Main Content -->
-  <main role="main" class="flex-grow flex flex-col items-center justify-around px-7 pt-2 text-center">
-    <img src="logo-colorida.png" alt="CapyUniverse Logo" class="w-48 mb-2">
-    <div id="capy-scene" class="w-56 h-auto mb-2 relative">
-      <img data-depth="0.5" src="capyuniverse.png" alt="Capy Mascote" class="block w-full">
-    </div>
-    <h1 class="text-3xl font-bold">Venha para o universo das Capy's</h1>
-    <p class="mt-0 text-xs text-gray-200">Suas Capy's Inteligentes, prontas para te ajudar.</p>
-     <button id="accessButton" class="w-full max-w-sm mx-auto rounded-full bg-purple-900 py-3 text-lg font-semibold text-white shadow-md  ">
+  <main role="main" class="flex-grow flex flex-col items-center justify-center">
+    <img src="img/logo.png" alt="CapyUniverse Logo" class="w-32 h-32 mb-6 cu-panel p-4">
+    <h1 class="text-4xl font-bold mb-2 bg-clip-text text-transparent" style="background-image: var(--premium-gradient)">Bem-vindo ao CapyUniverse</h1>
+    <p class="text-lg text-cu-text-dim mb-8">Suas Capivaras Inteligentes, prontas para te ajudar.</p>
+     <button id="accessButton" class="cu-btn primary text-lg px-8 py-4">
       Acesse Agora
     </button>
   </main>
 
-  <!-- Footer / Action Area -->
-  <footer role="contentinfo" class="w-full px-6 pb-6 text-center">
-   
-    <p class="text-xs text-gray-400 mt-2">© 2024 CapyUniverse. Todos os direitos reservados.</p>
+  <footer role="contentinfo" class="w-full py-6 text-center">
+    <p class="text-xs text-cu-text-dim/50">© 2024 CapyUniverse. Todos os direitos reservados.</p>
   </footer>
 
   <script>
-    // Navegação para a próxima página
     document.getElementById('accessButton').addEventListener('click', function() {
       window.location.href = 'index.html?from=splash';
-    });
-
-    // Inicialização do efeito Parallax
-    var scene = document.getElementById('capy-scene');
-    var parallaxInstance = new Parallax(scene, {
-      relativeInput: true, // Faz o movimento ser relativo ao container
-      hoverOnly: true     // Ativa o efeito com o giroscópio do celular também
     });
   </script>
 

@@ -1,530 +1,153 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CapyBússola — Decisões com Clareza</title>
-  <meta name="theme-color" content="#0b1020" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Export libs (client-side only) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-navigation.js" defer></script>
+
   <style>
-    :root { --bg:#0b1020; --panel:#121735; --text:#e6e6f0; --muted:#9aa0b4; --accent:#a855f7; --cyan:#22d3ee; --ok:#34d399; --warn:#f59e0b; --bad:#ef4444; }
-    body { background:var(--bg); color:var(--text); font-family:Inter, ui-sans-serif, system-ui; }
-    .glass { background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,.08); }
-    .step { opacity:.6; } .step.active { opacity:1; color:#fff; }
-    .badge { font-size:.72rem; padding:.15rem .45rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.15); }
-    .risk-0 { background: rgba(52,211,153,.15); border-color: rgba(52,211,153,.4);} /* green */
-    .risk-1 { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.4);} /* amber */
-    .risk-2 { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.4);} /* red */
-    /* mobile-first layout tweaks */
-    .container { max-width:100%; }
-    @media (min-width:1024px){ .container{ max-width:1100px; } }
+    .step { opacity:.6; } .step.active { opacity:1; font-weight: 600; color: var(--cu-cyan); }
+    .badge { font-size:.72rem; padding:.15rem .45rem; border-radius:.5rem; border:1px solid #ffffff26; }
+    .risk-0 { background: #10b98133; border-color: #10b98166;} /* green */
+    .risk-1 { background: #f59e0b33; border-color: #f59e0b66;} /* amber */
+    .risk-2 { background: #ef444433; border-color: #ef444466;} /* red */
   </style>
 </head>
-<body>
-  <!-- Header -->
-  <header class="sticky top-0 z-40 bg-[#0b1020]/80 backdrop-blur">
-    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <!-- Logo/Ícone -->
-        <svg width="28" height="28" viewBox="0 0 64 64" class="text-cyan-300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#a855f7"/></linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="28" fill="none" stroke="url(#g)" stroke-width="2.5"/>
-          <path d="M32 10 L38 32 L32 54 L26 32 Z" fill="none" stroke="url(#g)" stroke-width="2.5"/>
-          <!-- nariz/orelha capy negativa -->
-          <circle cx="32" cy="28" r="5" fill="none" stroke="url(#g)" stroke-width="2"/>
-        </svg>
-        <div>
-          <div class="font-extrabold tracking-tight text-lg">CapyBússola<span class="ml-2 text-xs align-middle px-2 py-1 rounded bg-white/10 border border-white/10">MVP</span></div>
-          <div class="text-[12px] text-slate-400">Decida com visão de futuro — nada é salvo.</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button id="openKey" class="px-3 py-2 rounded-lg glass hover:bg-white/[.08] text-sm">Configurar IA</button>
-        <span id="providerBadge" class="hidden md:inline text-xs text-slate-300"></span>
-      </div>
+<body class="min-h-screen flex flex-col">
+  <header class="cu-header">
+    <div class="cu-brand">
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+            <span class="cu-appname text-lg sm:text-xl">CapyBússola</span>
+        </a>
     </div>
-    <!-- Stepper -->
-    <div class="container mx-auto px-4 pb-2">
-      <div class="flex items-center gap-2 text-[12px] text-slate-300 overflow-x-auto">
-        <div class="step active" data-step="1">1) Cenário</div>
-        <span>•</span>
-        <div class="step" data-step="2">2) Interpretações A/B</div>
-        <span>•</span>
-        <div class="step" data-step="3">3) Pesos</div>
-        <span>•</span>
-        <div class="step" data-step="4">4) Opções & Consequências</div>
-        <span>•</span>
-        <div class="step" data-step="5">5) Exportar</div>
-      </div>
+    <div class="flex items-center gap-2">
+        <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="container mx-auto px-4 py-4 space-y-4">
-    <!-- Step 1: Cenário -->
-    <section id="step1" class="glass rounded-2xl p-4">
+  <div class="w-full max-w-5xl mx-auto px-4 pt-4">
+      <div class="flex items-center justify-center gap-2 text-xs text-cu-text-dim overflow-x-auto">
+        <div class="step active" data-step="1">1. Cenário</div><span>&bull;</span>
+        <div class="step" data-step="2">2. Interpretações</div><span>&bull;</span>
+        <div class="step" data-step="3">3. Pesos</div><span>&bull;</span>
+        <div class="step" data-step="4">4. Opções</div><span>&bull;</span>
+        <div class="step" data-step="5">5. Exportar</div>
+      </div>
+  </div>
+
+  <main class="w-full max-w-5xl mx-auto px-4 py-4 space-y-4">
+    <section id="step1" class="cu-panel p-4">
       <h2 class="font-bold text-lg mb-2">Descreva seu cenário</h2>
-      <p class="text-sm text-slate-300 mb-3">Explique a decisão difícil e o que pode ser impactado. Anexe fatos essenciais (copie e cole) — nada será salvo.</p>
-      <textarea id="scenario" rows="6" class="w-full rounded-xl bg-white/5 border border-white/10 p-3 focus:outline-none focus:ring-2 focus:ring-cyan-300" placeholder="Ex.: Devo aceitar uma proposta de trabalho em outra cidade com salário maior, mas longe da minha rede de apoio?"></textarea>
-      <div class="mt-3 flex items-center gap-2">
-        <button id="btnInterpret" class="px-4 py-2 rounded-xl bg-cyan-400/20 border border-cyan-300/30 hover:bg-cyan-400/30">Gerar Interpretações A/B</button>
-        <span class="text-xs text-slate-400">A IA retornará duas leituras para você confirmar.</span>
-      </div>
+      <p class="text-sm text-cu-text-dim mb-3">Explique a decisão a ser tomada. A IA irá te guiar.</p>
+      <textarea id="scenario" rows="6" class="cu-textarea" placeholder="Ex: Devo aceitar uma proposta de trabalho em outra cidade?"></textarea>
+      <div class="mt-3"><button id="btnInterpret" class="cu-btn primary">Gerar Interpretações A/B</button></div>
     </section>
 
-    <!-- Step 2: Interpretações A/B -->
-    <section id="step2" class="hidden glass rounded-2xl p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="font-bold text-lg">Interpretações do seu cenário</h2>
-        <button class="text-xs text-slate-300 hover:underline" id="backTo1">editar cenário</button>
-      </div>
+    <section id="step2" class="hidden cu-panel p-4">
+      <h2 class="font-bold text-lg mb-2">Interpretações do seu cenário</h2>
       <div id="interpWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
-      <div class="mt-3 flex items-center gap-2">
-        <button id="confirmInterp" disabled class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-slate-300">Confirmar interpretação</button>
-        <span class="text-xs text-slate-400">Escolha A ou B (ou ajuste o texto).</span>
-      </div>
+      <div class="mt-3"><button id="confirmInterp" disabled class="cu-btn">Confirmar interpretação</button></div>
     </section>
 
-    <!-- Step 3: Pesos -->
-    <section id="step3" class="hidden glass rounded-2xl p-4">
-      <h2 class="font-bold text-lg mb-2">Critérios e restrições</h2>
-      <p class="text-sm text-slate-300 mb-3">Atribua importância (0–10). Esses pesos guiam a recomendação. Você pode pular e usar o padrão.</p>
+    <section id="step3" class="hidden cu-panel p-4">
+      <h2 class="font-bold text-lg mb-2">Critérios e Restrições</h2>
       <div id="weightsWrap" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
       <div class="mt-3 flex items-center gap-3">
-        <label class="flex items-center gap-2 text-sm text-slate-300"><input id="binaryToggle" type="checkbox" class="accent-cyan-300"> Esta decisão é um Sim/Não</label>
-        <button id="btnGenerateOptions" class="ml-auto px-4 py-2 rounded-xl bg-cyan-400/20 border border-cyan-300/30 hover:bg-cyan-400/30">Gerar Opções</button>
+        <label class="flex items-center gap-2 text-sm"><input id="binaryToggle" type="checkbox" class="accent-cyan-400"> Decisão Sim/Não</label>
+        <button id="btnGenerateOptions" class="ml-auto cu-btn primary">Gerar Opções</button>
       </div>
     </section>
 
-    <!-- Step 4: Opções & Consequências -->
-    <section id="step4" class="hidden glass rounded-2xl p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="font-bold text-lg">Opções geradas & consequências</h2>
-        <div class="text-xs text-slate-400">Clique em <span class="badge">Escolher</span> para seguir o caminho — a IA proporá uma opção ainda melhor. </div>
-      </div>
+    <section id="step4" class="hidden cu-panel p-4">
+      <h2 class="font-bold text-lg mb-2">Opções e Consequências</h2>
       <div id="optionsWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
-      <div class="mt-4 flex items-center justify-between">
-        <div class="text-xs text-slate-400">Histórico de escolhas: <span id="pathCount" class="font-bold">0</span> passos</div>
-        <button id="goExport" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/20">Ir para Exportar</button>
-      </div>
+      <div class="mt-4 flex justify-between items-center"><span class="text-xs">Histórico: <span id="pathCount">0</span></span><button id="goExport" class="cu-btn">Ir para Exportar</button></div>
     </section>
 
-    <!-- Step 5: Exportar -->
-    <section id="step5" class="hidden glass rounded-2xl p-4">
-      <h2 class="font-bold text-lg mb-2">Exportar caminho de decisão</h2>
-      <p class="text-sm text-slate-300 mb-3">Nada é salvo. Gere seu PDF, mapa mental ou taglines e compartilhe como quiser.</p>
+    <section id="step5" class="hidden cu-panel p-4">
+      <h2 class="font-bold text-lg mb-2">Exportar Caminho de Decisão</h2>
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div class="rounded-xl border border-white/10 p-3">
-          <h3 class="font-semibold mb-2">Mapa mental</h3>
-          <div id="mindmap" class="relative rounded-xl bg-white/[.03] border border-white/10 p-4 min-h-[280px] overflow-hidden"></div>
-          <div class="mt-3 flex gap-2">
-            <button id="btnDownloadMapPNG" class="px-3 py-2 rounded-lg bg-cyan-400/20 border border-cyan-300/30">Baixar PNG</button>
-            <button id="btnExportMapPDF" class="px-3 py-2 rounded-lg bg-cyan-400/20 border border-cyan-300/30">Mapa → PDF</button>
-          </div>
+        <div class="cu-panel bg-transparent p-3">
+          <h3 class="font-semibold mb-2">Mapa Mental</h3>
+          <div id="mindmap" class="relative rounded-xl bg-white/5 min-h-[280px]"></div>
+          <div class="mt-3 flex gap-2"><button id="btnDownloadMapPNG" class="cu-btn">Baixar PNG</button></div>
         </div>
-        <div class="rounded-xl border border-white/10 p-3">
+        <div class="cu-panel bg-transparent p-3">
           <h3 class="font-semibold mb-2">Resumo & Taglines</h3>
-          <div id="summary" class="text-sm text-slate-200 whitespace-pre-wrap"></div>
-          <div class="mt-3 flex gap-2">
-            <button id="btnExportSummaryPDF" class="px-3 py-2 rounded-lg bg-white/10 border border-white/20">Resumo → PDF</button>
-            <button id="btnGenTaglines" class="px-3 py-2 rounded-lg bg-white/10 border border-white/20">Gerar Taglines</button>
-            <button id="btnDownloadTaglines" disabled class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-400">Baixar Taglines .txt</button>
-          </div>
+          <div id="summary" class="text-sm whitespace-pre-wrap"></div>
+          <div class="mt-3 flex gap-2"><button id="btnExportSummaryPDF" class="cu-btn">Resumo PDF</button><button id="btnGenTaglines" class="cu-btn">Gerar Taglines</button></div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Modal API Key -->
-  <div id="keyModal" class="fixed inset-0 hidden items-center justify-center bg-black/60 p-4">
-    <div class="w-full max-w-lg rounded-2xl glass p-4">
-      <div class="flex items-start justify-between">
-        <h3 class="font-bold text-lg">Configurar IA — chave local (nada é salvo)</h3>
-        <button id="closeKey" class="text-slate-300">✕</button>
-      </div>
-      <p class="text-sm text-slate-300 mt-1">Use **Gemini** (recomendado no navegador) ou **OpenAI**. As chamadas vão direto do seu dispositivo à API. </p>
-      <div class="mt-3 grid grid-cols-1 gap-3">
-        <label class="text-sm">Provedor
-          <select id="provider" class="mt-1 w-full rounded-xl bg-white/5 border border-white/10 p-2">
-            <option value="gemini">Google AI Studio (Gemini)</option>
-            <option value="openai">OpenAI</option>
-          </select>
-        </label>
-        <label class="text-sm">Modelo
-          <input id="model" class="mt-1 w-full rounded-xl bg-white/5 border border-white/10 p-2" value="gemini-2.0-flash">
-        </label>
-        <label class="text-sm">API Key
-          <input id="apiKey" type="password" class="mt-1 w-full rounded-xl bg-white/5 border border-white/10 p-2" placeholder="Cole aqui sua chave…">
-        </label>
-        <div class="text-xs text-slate-400">Dica: no Google AI Studio, as chamadas web costumam ter CORS liberado. No OpenAI, prefira <code>/v1/responses</code>. Nada fica salvo nesta página.</div>
-        <div class="flex justify-end gap-2 mt-2">
-          <button id="saveKey" class="px-4 py-2 rounded-xl bg-cyan-400/20 border border-cyan-300/30 hover:bg-cyan-400/30">Usar esta chave</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-2 rounded-xl glass text-sm"></div>
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-2 rounded-xl cu-panel text-sm"></div>
 
   <script>
-    // --- STATE (in-memory only) ---
-    const state = {
-      provider: 'gemini',
-      model: 'gemini-2.0-flash',
-      apiKey: '',
-      scenario: '',
-      interpretations: [],
-      selectedInterp: null,
-      criteria: {
-        'Impacto financeiro': 7,
-        'Tempo': 6,
-        'Risco': 5,
-        'Reputação': 5,
-        'Saúde/Bem-estar': 6,
-        'Aprendizado': 7,
-        'Impacto social': 3
-      },
-      isBinary: false,
-      options: [],
-      decisionPath: [], // sequência de escolhas do usuário
-      taglines: []
-    };
+    const state = { provider: 'gemini', model: 'gemini-2.0-flash', apiKey: localStorage.getItem('capyUniverseApiKey_gemini') || '', scenario: '', interpretations: [], selectedInterp: null, criteria: {'Impacto financeiro':7, 'Tempo':6, 'Risco':5, 'Bem-estar':8}, isBinary: false, options: [], decisionPath: [] };
+    const $ = sel => document.querySelector(sel), $$ = sel => Array.from(document.querySelectorAll(sel));
+    const toast = msg => { const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2400); };
+    const setStep = n => { $$('.step').forEach(el=>el.classList.remove('active')); $(`.step[data-step="${n}"]`).classList.add('active'); $$('main > section').forEach((s,i)=>s.classList.toggle('hidden', i !== n-1)); };
 
-    // --- UI Helpers ---
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-    function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 2400); }
-    function setStep(n){ $$('.step').forEach(el=>el.classList.remove('active')); $(`.step[data-step="${n}"]`).classList.add('active');
-      ['#step1','#step2','#step3','#step4','#step5'].forEach((id,i)=>{ const el=$(id); if(i===n-1) el.classList.remove('hidden'); else el.classList.add('hidden'); }); }
+    async function callLLM_JSON(prompt) {
+        if (!state.apiKey) { toast('Configure sua chave de API.'); throw new Error('Sem chave'); }
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${state.model}:generateContent?key=${state.apiKey}`;
+        const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } }) });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        return JSON.parse(data.candidates[0].content.parts[0].text);
+    }
 
-    // --- Key Modal ---
-    $('#openKey').onclick = ()=> { $('#keyModal').classList.remove('hidden'); }
-    $('#closeKey').onclick = ()=> { $('#keyModal').classList.add('hidden'); }
-    $('#saveKey').onclick = ()=>{
-      state.provider = $('#provider').value;
-      state.model = $('#model').value.trim();
-      state.apiKey = $('#apiKey').value.trim();
-      $('#keyModal').classList.add('hidden');
-      $('#providerBadge').textContent = `${state.provider.toUpperCase()} · ${state.model}`;
-      $('#providerBadge').classList.remove('hidden');
-      toast('Chave aplicada localmente.');
-    };
+    const promptInterpretations = s => `Gere DUAS interpretações (A e B) do cenário: "${s}", com summary, assumptions, critical_questions, e editable_text. Responda em JSON: {"interpretations":[{"id":"A",...},{"id":"B",...}]}`;
+    const promptOptions = ({scenario, interp, criteria, isBinary}) => `Cenário: ${scenario}. Interpretação: ${interp}. Pesos: ${JSON.stringify(criteria)}. Binária? ${isBinary}. Gere opções de decisão (melhor, sensata, sim/não) com rationale, scores, consequências, mitigações e gatilhos. JSON: {"options":[{...}]}`;
+    const promptEvolve = ({chosen}) => `Evolua a opção: ${JSON.stringify(chosen)}. Gere 1 nova opção superior. JSON: {"options":[{...}]}`;
 
-    // --- Build Weights UI ---
-    function drawWeights(){
-      const wrap = $('#weightsWrap');
-      wrap.innerHTML = '';
-      Object.entries(state.criteria).forEach(([k,v])=>{
-        const id = k.replace(/\s+/g,'_');
-        const row = document.createElement('div');
-        row.className = 'p-3 rounded-xl bg-white/5 border border-white/10';
-        row.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-semibold">${k}</div>
-            <div class="text-sm text-cyan-300 font-mono" id="val_${id}">${v}</div>
-          </div>
-          <input type="range" min="0" max="10" value="${v}" class="w-full mt-2" id="rng_${id}"/>
-        `;
-        wrap.appendChild(row);
-        row.querySelector(`#rng_${id}`).addEventListener('input', (e)=>{
-          state.criteria[k] = +e.target.value; row.querySelector(`#val_${id}`).textContent = e.target.value;
+    function drawWeights() {
+        const wrap = $('#weightsWrap'); wrap.innerHTML = '';
+        Object.entries(state.criteria).forEach(([k,v])=>{
+            const row = document.createElement('div'); row.className = 'cu-panel bg-transparent p-3';
+            row.innerHTML = `<div class="flex justify-between"><label>${k}</label><span id="val_${k}">${v}</span></div><input type="range" min="0" max="10" value="${v}" class="w-full mt-2" id="rng_${k}"/>`;
+            wrap.appendChild(row);
+            row.querySelector(`#rng_${k}`).oninput = e => { state.criteria[k]=+e.target.value; $(`#val_${k}`).textContent=e.target.value; };
         });
-      });
     }
 
-    // --- AI CALL CORE ---
-    async function callLLM_JSON(prompt){
-      if(!state.apiKey){ toast('Configure sua chave de API.'); throw new Error('Sem chave'); }
-      if(state.provider==='gemini') return callGeminiJSON(prompt, state.model, state.apiKey);
-      else return callOpenAIJSON(prompt, state.model, state.apiKey);
+    function drawInterpretations(data) {
+        state.interpretations = data.interpretations || [];
+        const wrap = $('#interpWrap'); wrap.innerHTML = '';
+        state.interpretations.forEach(interp => {
+            const card = document.createElement('div'); card.className = 'cu-panel bg-transparent p-3';
+            card.innerHTML = `<div class="flex justify-between"><div class="font-semibold">${interp.id}</div><input type="radio" name="interpPick" value="${interp.id}"></div><p class="text-sm mt-2">${interp.summary}</p><textarea class="mt-3 w-full cu-textarea text-sm">${interp.editable_text}</textarea>`;
+            wrap.appendChild(card);
+        });
+        $$('input[name="interpPick"]').forEach(r => r.onchange = () => $('#confirmInterp').disabled = false);
     }
 
-    async function callGeminiJSON(prompt, model, apiKey){
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-      const body = {
-        contents: [{ role: 'user', parts: [{ text: prompt }]}],
-        generationConfig: { responseMimeType: 'application/json' }
-      };
-      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) });
-      if(!res.ok){ const t=await res.text(); throw new Error(t); }
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-      return safeParseJSON(text);
+    function drawOptions() {
+        const wrap = $('#optionsWrap'); wrap.innerHTML = '';
+        state.options.forEach((opt, idx)=>{
+            const card = document.createElement('div'); card.className = `cu-panel bg-transparent p-3`;
+            card.innerHTML = `<div class="flex justify-between items-center"><span class="font-bold">${opt.label}</span><div class="flex gap-2"><button data-idx="${idx}" class="btnChoose cu-btn text-xs">Escolher</button><button data-idx="${idx}" class="btnEvolve cu-btn text-xs">Evoluir</button></div></div><p class="text-sm mt-2">${opt.rationale}</p>`;
+            wrap.appendChild(card);
+        });
+        $$('.btnChoose').forEach(b => b.onclick = async e => { const chosen = state.options[+e.target.dataset.idx]; state.decisionPath.push(chosen); $('#pathCount').textContent = state.decisionPath.length; toast(`Escolhido: ${chosen.label}`); try { const data = await callLLM_JSON(promptEvolve({chosen})); if(data?.options?.length) { state.options.push(data.options[0]); drawOptions(); } } catch(err) { toast('Falha ao evoluir.'); } });
+        $$('.btnEvolve').forEach(b => b.onclick = async e => { const chosen = state.options[+e.target.dataset.idx]; try { const data = await callLLM_JSON(promptEvolve({chosen})); if(data?.options?.length) { state.options.splice(+e.target.dataset.idx + 1, 0, data.options[0]); drawOptions(); } } catch(err) { toast('Falha ao evoluir.'); } });
     }
 
-    async function callOpenAIJSON(prompt, model, apiKey){
-      const url = 'https://api.openai.com/v1/responses';
-      const body = { model, input: [{ role:'user', content: prompt }], response_format: { type:'json_object' } };
-      const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${apiKey}` }, body: JSON.stringify(body) });
-      if(!res.ok){ const t=await res.text(); throw new Error(t); }
-      const data = await res.json();
-      const text = data.output_text || data?.choices?.[0]?.message?.content || JSON.stringify(data.output || {});
-      return safeParseJSON(text);
-    }
+    $('#btnInterpret').onclick = async () => { try { state.scenario = $('#scenario').value.trim(); if(!state.scenario) return; setStep(2); $('#interpWrap').innerHTML = 'Gerando...'; const data = await callLLM_JSON(promptInterpretations(state.scenario)); drawInterpretations(data); } catch(err) { toast('Falha ao gerar.'); } };
+    $('#confirmInterp').onclick = () => { const pick = $$('input[name="interpPick"]').find(r=>r.checked)?.value; if(!pick) return; const card = $$('#interpWrap > div')[pick==='A'?0:1]; state.selectedInterp = { ...state.interpretations.find(i=>i.id===pick), editable_text: card.querySelector('textarea').value }; setStep(3); drawWeights(); };
+    $('#binaryToggle').onchange = e => state.isBinary = e.target.checked;
+    $('#btnGenerateOptions').onclick = async () => { try { setStep(4); $('#optionsWrap').innerHTML = 'Gerando...'; const data = await callLLM_JSON(promptOptions({ scenario: state.scenario, interp: state.selectedInterp.editable_text, criteria: state.criteria, isBinary: state.isBinary })); state.options = data?.options||[]; drawOptions(); } catch(err) { toast('Falha ao gerar.'); } };
+    $('#goExport').onclick = () => setStep(5);
 
-    function safeParseJSON(txt){
-      try{ return JSON.parse(txt); }catch(e){
-        // tentativa de extrair primeiro bloco JSON
-        const m = txt && txt.match(/\{[\s\S]*\}/);
-        if(m){ try { return JSON.parse(m[0]); } catch(e2){ /* ignore */ } }
-        throw new Error('Falha ao ler JSON da IA');
-      }
-    }
-
-    // --- Prompts ---
-    function promptInterpretations(scenario){
-      return `Você é uma IA de decisões chamada CapyBússola. Gere DUAS interpretações distintas (A e B) do cenário abaixo, com \n- summary (1 parágrafo objetivo)\n- assumptions (3-5 hipóteses)\n- critical_questions (até 3)\n- editable_text (reformule o cenário para o usuário editar).\nResponda APENAS em JSON com o schema: {"interpretations":[{"id":"A","summary":"...","assumptions":["..."],"critical_questions":["..."],"editable_text":"..."},{"id":"B",...}]}.\n\nCenário:\n${scenario}`;
-    }
-
-    function promptOptions({scenario, interp, criteria, isBinary}){
-      const weights = Object.entries(criteria).map(([k,v])=>`${k}:${v}`).join(', ');
-      return `Você é CapyBússola. Com base no cenário e na interpretação confirmada, gere opções de decisão.\nContexto:\nSCENARIO: ${scenario}\nINTERPRETATION: ${interp}\nWEIGHTS(0-10): ${weights}\nBINÁRIA (Sim/Não)? ${isBinary ? 'Sim' : 'Talvez'}\n\nRegras:\n- Sempre crie ao menos 2 opções: (1) \"Melhor Escolha\" (max valor esperado) e (2) \"Opção Mais Sensata\" (robustez, minimax regret).\n- Se for binária, inclua também \"Sim\" e \"Não\".\n- Para cada opção, forneça: label, type(best|sensible|yes|no|custom), rationale, value_score(0-100), risk_score(0-100), consequences(lista de objetos {horizon: 1w|1m|6m|1y|5y, description, severity(1-5), probability(1-5)}), mitigation(lista de strings), triggers(lista de sinais de revisão).\nResponda APENAS em JSON no schema: {"options":[{...}]}.`;
-    }
-
-    function promptEvolve({scenario, criteria, chosen, allOptions}){
-      const weights = Object.entries(criteria).map(([k,v])=>`${k}:${v}`).join(', ');
-      const prev = JSON.stringify(allOptions.slice(-4));
-      return `Você é CapyBússola. O usuário escolheu esta opção e quer uma versão superior que DOMINE a anterior (maior valor esperado ou mesmo valor com menor risco).\nSCENARIO: ${scenario}\nWEIGHTS: ${weights}\nCHOSEN_OPTION: ${JSON.stringify(chosen)}\nRECENT_OPTIONS: ${prev}\n\nGere exatamente 1 nova opção com schema JSON: {"options":[{"label":"...","type":"improved","rationale":"...","value_score":0-100,"risk_score":0-100,"consequences":[{"horizon":"1m","description":"...","severity":1-5,"probability":1-5}],"mitigation":["..."],"triggers":["..."]}]}\nApenas JSON.`;
-    }
-
-    function promptTaglines({scenario, path}){
-      const pathTxt = path.map((p,i)=>`${i+1}. ${p.label} [valor ${p.value_score}/100 | risco ${p.risk_score}/100]`).join('\n');
-      return `Crie 12 taglines curtas (<= 90 caracteres) que sintetizem a decisão tomada, com tom claro e sereno.\nCENÁRIO: ${scenario}\nCAMINHO ESCOLHIDO:\n${pathTxt}\nResponda JSON: {"taglines":["..."]}`;
-    }
-
-    // --- Render Interpretações ---
-    function drawInterpretations(data){
-      state.interpretations = data.interpretations || [];
-      const wrap = $('#interpWrap');
-      wrap.innerHTML = '';
-      state.interpretations.forEach(interp => {
-        const card = document.createElement('div');
-        card.className = 'rounded-xl p-3 border border-white/10 bg-white/5';
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div class="font-semibold">Interpretação ${interp.id}</div>
-            <label class="text-xs text-slate-300 flex items-center gap-1"><input type="radio" name="interpPick" value="${interp.id}" class="accent-cyan-300"> escolher</label>
-          </div>
-          <p class="text-sm text-slate-200 mt-2">${interp.summary}</p>
-          <div class="mt-2 text-xs text-slate-300"><span class="badge">Hipóteses</span> ${interp.assumptions?.map(a=>`• ${a}`).join('  ') || ''}</div>
-          <div class="mt-2 text-xs text-slate-300"><span class="badge">Perguntas críticas</span> ${interp.critical_questions?.map(a=>`• ${a}`).join('  ') || ''}</div>
-          <textarea class="mt-3 w-full rounded bg-white/5 border border-white/10 p-2 text-sm">${interp.editable_text || ''}</textarea>
-        `;
-        wrap.appendChild(card);
-      });
-      $$('input[name="interpPick"]').forEach(r=>{
-        r.onchange = ()=>{ $('#confirmInterp').disabled = false; };
-      });
-    }
-
-    // --- Render Opções ---
-    function riskClass(score){ if(score<=33) return 'risk-0'; if(score<=66) return 'risk-1'; return 'risk-2'; }
-
-    function drawOptions(){
-      const wrap = $('#optionsWrap');
-      wrap.innerHTML = '';
-      state.options.forEach((opt, idx)=>{
-        const card = document.createElement('div');
-        card.className = `rounded-xl p-3 border ${opt.type==='best'?'border-cyan-300/40':'border-white/10'} bg-white/5`;
-        const typeColors = { best:'bg-cyan-400/20 border-cyan-300/40', sensible:'bg-emerald-400/10 border-emerald-300/30', yes:'bg-sky-400/10 border-sky-300/30', no:'bg-rose-400/10 border-rose-300/30', improved:'bg-violet-400/10 border-violet-300/30', custom:'bg-white/10 border-white/20' };
-        const typeLabel = { best:'Melhor Escolha', sensible:'Opção Mais Sensata', yes:'Sim', no:'Não', improved:'Opção Evoluída', custom:'Opção' }[opt.type] || opt.type;
-        const cons = (opt.consequences||[]).map(c=>`<span class="badge ${riskClass((c.severity*20)+(c.probability*10))}">${c.horizon}</span>`).join(' ');
-        card.innerHTML = `
-          <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2">
-              <span class="badge ${typeColors[opt.type]||'bg-white/10 border-white/20'}">${typeLabel}</span>
-              <span class="text-xs text-slate-400">valor <b>${opt.value_score ?? '—'}</b> · risco <b>${opt.risk_score ?? '—'}</b></span>
-            </div>
-            <div class="flex gap-2">
-              <button data-idx="${idx}" class="btnChoose px-3 py-1 rounded-lg bg-white/10 border border-white/20 text-xs">Escolher</button>
-              <button data-idx="${idx}" class="btnEvolve px-3 py-1 rounded-lg bg-cyan-400/20 border border-cyan-300/30 text-xs">Evoluir</button>
-            </div>
-          </div>
-          <p class="text-sm text-slate-200 mt-2">${opt.rationale||''}</p>
-          <div class="mt-2 flex flex-wrap gap-1">${cons}</div>
-          <details class="mt-2 text-xs text-slate-300">
-            <summary class="cursor-pointer">Detalhes</summary>
-            <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div class="p-2 rounded bg-white/5 border border-white/10"><div class="font-semibold text-[12px]">Consequências</div><ul class="list-disc ml-4">${(opt.consequences||[]).map(c=>`<li><b>${c.horizon}</b>: ${c.description} (S${c.severity}/P${c.probability})</li>`).join('')}</ul></div>
-              <div class="p-2 rounded bg-white/5 border border-white/10"><div class="font-semibold text-[12px]">Mitigações</div><ul class="list-disc ml-4">${(opt.mitigation||[]).map(m=>`<li>${m}</li>`).join('')}</ul></div>
-              <div class="p-2 rounded bg-white/5 border border-white/10"><div class="font-semibold text-[12px]">Gatilhos de revisão</div><ul class="list-disc ml-4">${(opt.triggers||[]).map(m=>`<li>${m}</li>`).join('')}</ul></div>
-            </div>
-          </details>
-        `;
-        wrap.appendChild(card);
-      });
-      // bind
-      $$('.btnChoose').forEach(b=> b.onclick = async (e)=>{
-        const idx = +e.target.getAttribute('data-idx');
-        const chosen = state.options[idx];
-        state.decisionPath.push(chosen);
-        $('#pathCount').textContent = state.decisionPath.length;
-        toast(`Você escolheu: ${chosen.label}`);
-        // Ao escolher, peça evolução automática
-        try{
-          const evoPrompt = promptEvolve({ scenario: state.scenario, criteria: state.criteria, chosen, allOptions: state.options });
-          const data = await callLLM_JSON(evoPrompt);
-          if(data?.options?.length){ state.options.push(data.options[0]); drawOptions(); toast('Nova opção evoluída gerada.'); }
-        }catch(err){ console.error(err); toast('Falha ao evoluir opção.'); }
-      });
-      $$('.btnEvolve').forEach(b=> b.onclick = async (e)=>{
-        const idx = +e.target.getAttribute('data-idx');
-        const chosen = state.options[idx];
-        try{
-          const evoPrompt = promptEvolve({ scenario: state.scenario, criteria: state.criteria, chosen, allOptions: state.options });
-          const data = await callLLM_JSON(evoPrompt);
-          if(data?.options?.length){ state.options.splice(idx+1,0,data.options[0]); drawOptions(); toast('Opção evoluída adicionada.'); }
-        }catch(err){ console.error(err); toast('Falha ao evoluir opção.'); }
-      });
-    }
-
-    // --- Mind Map (very simple radial) ---
-    function drawMindMap(){
-      const el = $('#mindmap');
-      el.innerHTML = '';
-      const root = document.createElement('div');
-      root.className = 'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-center max-w-[60%]';
-      root.textContent = (state.selectedInterp?.summary || 'Cenário') + '';
-      el.appendChild(root);
-      // branches from decisionPath
-      const R = Math.min(el.clientWidth, el.clientHeight)/2 - 40;
-      const center = { x: el.clientWidth/2, y: el.clientHeight/2 };
-      state.decisionPath.forEach((step, i)=>{
-        const a = (i / Math.max(1,state.decisionPath.length)) * Math.PI*2; // spread
-        const x = center.x + Math.cos(a) * (R - 40);
-        const y = center.y + Math.sin(a) * (R - 40);
-        const node = document.createElement('div');
-        node.className = 'absolute px-2 py-1 rounded-xl bg-white/5 border border-white/10 text-xs max-w-[40%]';
-        node.style.left = (x-60)+'px'; node.style.top = (y-16)+'px';
-        node.innerHTML = `<b>${step.label}</b><br><span class="text-slate-300">v${step.value_score}/r${step.risk_score}</span>`;
-        el.appendChild(node);
-        // line
-        const line = document.createElement('div');
-        const dx = x - center.x, dy = y - center.y; const len = Math.sqrt(dx*dx+dy*dy);
-        const ang = Math.atan2(dy, dx) * 180 / Math.PI;
-        line.className = 'absolute origin-left h-[2px] bg-gradient-to-r from-cyan-300 to-fuchsia-400';
-        line.style.width = (len-60)+'px'; line.style.left = center.x+'px'; line.style.top = center.y+'px'; line.style.transform = `rotate(${ang}deg)`;
-        el.appendChild(line);
-      });
-    }
-
-    // --- Summary text ---
-    function buildSummary(){
-      const lines = [];
-      lines.push(`# CapyBússola — Relatório de Decisão`);
-      lines.push(`\n**Cenário**\n${state.scenario}`);
-      if(state.selectedInterp){ lines.push(`\n**Interpretação Confirmada**\n${state.selectedInterp.summary}`); }
-      lines.push(`\n**Pesos**`);
-      Object.entries(state.criteria).forEach(([k,v])=>{ lines.push(`- ${k}: ${v}`); });
-      lines.push(`\n**Opções Consideradas**`);
-      state.options.forEach((o,i)=>{
-        lines.push(`\n${i+1}. ${o.label} [${o.type}] — valor ${o.value_score}/100 · risco ${o.risk_score}/100`);
-        lines.push(`   - Racional: ${o.rationale}`);
-        (o.consequences||[]).forEach(c=>{ lines.push(`   - ${c.horizon}: ${c.description} (S${c.severity}/P${c.probability})`); });
-      });
-      if(state.decisionPath.length){
-        lines.push(`\n**Caminho Escolhido (sequência)**`);
-        state.decisionPath.forEach((s,i)=>{ lines.push(`${i+1}. ${s.label} — valor ${s.value_score}/100 · risco ${s.risk_score}/100`); });
-      }
-      return lines.join('\n');
-    }
-
-    // --- Export functions ---
-    async function exportSummaryPDF(){
-      const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit:'pt', format:'a4' });
-      const text = buildSummary();
-      const margin = 40; const maxW = 515; let y=margin; const lines = doc.splitTextToSize(text, maxW);
-      doc.setFont('helvetica','normal'); doc.setFontSize(11);
-      lines.forEach(line=>{ if(y>780){ doc.addPage(); y=margin; } doc.text(line, margin, y); y+=16; });
-      doc.save('capy-bussola-resumo.pdf');
-    }
-
-    async function exportMindMapPDF(){
-      const node = $('#mindmap');
-      const canvas = await html2canvas(node, { backgroundColor: null, scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation:'landscape', unit:'pt', format:'a4' });
-      const w = doc.internal.pageSize.getWidth(); const h = doc.internal.pageSize.getHeight();
-      doc.addImage(imgData, 'PNG', 0, 0, w, h);
-      doc.save('capy-bussola-mindmap.pdf');
-    }
-
-    async function downloadMapPNG(){
-      const node = $('#mindmap');
-      const canvas = await html2canvas(node, { backgroundColor: null, scale: 2 });
-      const link = document.createElement('a'); link.download = 'capy-bussola-mindmap.png'; link.href = canvas.toDataURL('image/png'); link.click();
-    }
-
-    function downloadTaglinesTxt(){
-      const txt = (state.taglines||[]).map(t=>`- ${t}`).join('\n');
-      const blob = new Blob([txt], { type:'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'capy-bussola-taglines.txt'; a.click(); URL.revokeObjectURL(url);
-    }
-
-    // --- EVENTS ---
-    $('#btnInterpret').onclick = async ()=>{
-      try{
-        state.scenario = $('#scenario').value.trim(); if(!state.scenario) return toast('Descreva seu cenário primeiro.');
-        setStep(2);
-        $('#interpWrap').innerHTML = '<div class="text-sm text-slate-300">Gerando interpretações…</div>';
-        const data = await callLLM_JSON(promptInterpretations(state.scenario));
-        drawInterpretations(data);
-      }catch(err){ console.error(err); toast('Falha ao gerar A/B. Verifique a chave e o modelo.'); }
-    };
-    $('#backTo1').onclick = ()=> setStep(1);
-
-    $('#confirmInterp').onclick = ()=>{
-      const pick = $$('input[name="interpPick"]').find(r=>r.checked)?.value;
-      if(!pick) return;
-      // merge editable text if changed
-      const cards = $$('#interpWrap > div');
-      const idx = pick==='A'?0:1; const edited = cards[idx].querySelector('textarea').value;
-      const chosen = state.interpretations.find(i=>i.id===pick);
-      state.selectedInterp = { ...chosen, summary: chosen.summary, editable_text: edited };
-      setStep(3); drawWeights();
-    };
-
-    $('#binaryToggle').onchange = (e)=>{ state.isBinary = e.target.checked; };
-
-    $('#btnGenerateOptions').onclick = async ()=>{
-      try{
-        setStep(4);
-        $('#optionsWrap').innerHTML = '<div class="text-sm text-slate-300">Gerando opções…</div>';
-        const interpText = state.selectedInterp?.editable_text || state.selectedInterp?.summary || '';
-        const data = await callLLM_JSON(promptOptions({ scenario: state.scenario, interp: interpText, criteria: state.criteria, isBinary: state.isBinary }));
-        state.options = (data?.options||[]);
-        drawOptions(); drawMindMap(); updateSummaryUI();
-      }catch(err){ console.error(err); toast('Falha ao gerar opções.'); }
-    };
-
-    function updateSummaryUI(){ $('#summary').textContent = buildSummary(); }
-
-    $('#goExport').onclick = ()=>{ setStep(5); drawMindMap(); updateSummaryUI(); };
-    $('#btnExportSummaryPDF').onclick = exportSummaryPDF;
-    $('#btnExportMapPDF').onclick = exportMindMapPDF;
-    $('#btnDownloadMapPNG').onclick = downloadMapPNG;
-
-    $('#btnGenTaglines').onclick = async ()=>{
-      try{
-        const data = await callLLM_JSON(promptTaglines({ scenario: state.scenario, path: state.decisionPath }));
-        state.taglines = data?.taglines || [];
-        $('#summary').textContent += `\n\n**Taglines**\n` + state.taglines.map(t=>'• '+t).join('\n');
-        $('#btnDownloadTaglines').disabled = false; toast('Taglines geradas.');
-      }catch(err){ console.error(err); toast('Falha ao gerar taglines.'); }
-    };
-    $('#btnDownloadTaglines').onclick = downloadTaglinesTxt;
-
-    // Init
-    setStep(1);
+    document.addEventListener('DOMContentLoaded', () => setStep(1));
   </script>
 </body>
 </html>
+

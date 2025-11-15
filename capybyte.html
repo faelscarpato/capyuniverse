@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,175 +8,99 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+    <link rel="stylesheet" href="cu-style.css">
+    <script src="cu-navigation.js" defer></script>
 
     <style>
-        html { background: #121217; }
-        body {
-            font-family: 'Inter', sans-serif;
-            color: #e5e7eb; /* zinc-200 */
-            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
-            background-repeat: repeat;
-            background-size: 300px;
-            background-color: #18181b; /* zinc-900 */
-        }
-        .font-syne { font-family: 'Syne', sans-serif; }
         .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
-        .glass {
-            background: rgba(24, 24, 27, 0.6); /* zinc-900 with opacity */
-            backdrop-filter: blur(12px);
-            border-radius: 1.2rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(63, 63, 70, 0.4); /* zinc-700 with opacity */
-        }
-        .sidebar-glass { 
-             background: rgba(39, 39, 42, 0.7); /* zinc-800 with opacity */
-             backdrop-filter: blur(15px);
-             border-right: 1px solid rgba(63, 63, 70, 0.3); /* zinc-700 */
-        }
-
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #292932; border-radius: 60px; }
-        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: #4a4a4d #ffffff00;  }
-
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .category-content.expanded { max-height: 1500px; }
-        .sidebar-link.active { background-color: #4f46e5; color: white; font-weight: 600; }
-        
-        .loader {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
+        .loader { border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .output-card {
-            background-color: rgba(30, 30, 40, 0.5);
-            border: 1px solid rgba(80, 80, 100, 0.5);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-top: 1.5rem; /* Adicionado para dar espaço acima */
+        
+        /* Estilos para o conteúdo formatado */
+        .output-content {
+            line-height: 1.6;
+            margin: 0.5em 0;
         }
-         .output-card h3 {
-            font-family: 'Syne', sans-serif;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-size: 1.125rem; /* text-lg */
+        .output-content strong {
+            color: #ffd700;
+            font-weight: 600;
+        }
+        .output-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        #solution-output {
+            padding-left: 1em;
         }
     </style>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3FFD7ZEBN1');
-</script>
-
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
-<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+<body class="min-h-screen flex flex-col">
 
-    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-        <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    <header class="cu-header">
+        <div class="cu-brand">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+            </a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyByte</span>
         </div>
-        <div class="flex items-center">
-            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        <div class="flex items-center gap-2">
+            <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
         </div>
     </header>
 
     <div id="notificationArea"></div>
 
-    <div class="flex flex-1 pt-16"> 
-        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    <div class="flex flex-1">
+        <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+            <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
         </aside>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full max-w-4xl mx-auto">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+            <section class="cu-panel p-4 sm:p-6 flex flex-col h-full max-w-4xl mx-auto">
                 <div class="text-center mb-6">
-                    <h1 class="text-3xl font-bold font-syne text-orange-400">CapyByte 🔮</h1>
-                    <p class="text-zinc-300 mt-1">Seu Oráculo Tecnológico para Diagnósticos Precisos.</p>
+                    <h1 class="text-3xl font-bold" style="color: var(--cu-amber);">CapyByte 🔮</h1>
+                    <p class="text-cu-text-dim mt-1">Seu Oráculo Tecnológico para Diagnósticos Precisos.</p>
                 </div>
 
                 <div class="mb-6">
-                    <label for="problem-input" class="block text-lg font-semibold mb-2 text-zinc-200 font-syne">Descreva o Problema:</label>
-                    <textarea id="problem-input" rows="5" placeholder="Ex: Meu PC gamer está lento ao iniciar jogos pesados. Tenho uma RTX 3060, Ryzen 5 5600X e 16GB de RAM." class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 font-jetbrains rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 scrollbar-thin"></textarea>
-                    <button id="diagnose-button" class="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-black font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300 transform hover:scale-105">
+                    <label for="problem-input" class="block text-lg font-semibold mb-2 text-cu-text">Descreva o Problema:</label>
+                    <textarea id="problem-input" rows="5" placeholder="Ex: Meu PC está lento ao iniciar jogos..." class="cu-textarea w-full font-jetbrains"></textarea>
+                    <button id="diagnose-button" class="mt-4 w-full cu-btn primary text-lg">
                         <span class="btn-text">Diagnosticar com IA</span>
                         <div class="loader hidden"></div>
                     </button>
                 </div>
 
                 <div id="output-section" class="space-y-4 hidden">
-                    <div id="diagnosis-card" class="output-card">
-                        <h3 class="text-xl text-orange-300">Diagnóstico Preliminar</h3>
-                        <p id="diagnosis-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap"></p>
+                    <div class="cu-panel bg-transparent p-4">
+                        <h3 class="text-xl text-amber-300">Diagnóstico Preliminar</h3>
+                        <p id="diagnosis-output" class="font-jetbrains text-cu-text-dim whitespace-pre-wrap"></p>
                     </div>
-                    <div id="cause-card" class="output-card">
+                    <div class="cu-panel bg-transparent p-4">
                         <h3 class="text-xl text-sky-300">Causa Raiz Provável</h3>
-                        <p id="cause-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap"></p>
+                        <p id="cause-output" class="font-jetbrains text-cu-text-dim whitespace-pre-wrap"></p>
                     </div>
-                    <div id="solution-card" class="output-card">
-                        <h3 class="text-xl text-green-300">Solução Passo-a-Passo</h3>
-                        <div id="solution-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap"></div>
+                    <div class="cu-panel bg-transparent p-4">
+                        <h3 class="text-xl text-emerald-300">Solução Passo-a-Passo</h3>
+                        <div id="solution-output" class="font-jetbrains text-cu-text-dim whitespace-pre-wrap"></div>
                     </div>
-                    <div id="components-card" class="output-card">
-                        <h3 class="text-xl text-amber-300">Componentes / Software Sugeridos</h3>
-                        <p id="components-output" class="font-jetbrains text-zinc-300 whitespace-pre-wrap"></p>
+                    <div class="cu-panel bg-transparent p-4">
+                        <h3 class="text-xl text-purple-300">Componentes / Software Sugeridos</h3>
+                        <p id="components-output" class="font-jetbrains text-cu-text-dim whitespace-pre-wrap"></p>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
-                <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-            </div>
-            <div class="space-y-3">
-                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                    <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
-                    <div class="flex">
-                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700"/>
-                        <button id="saveGeminiKey" data-provider="gemini" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const currentPageId = 'CapyByte';
-        let apiKey = '';
-        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
-
         const dom = {
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            apiKeysModal: document.getElementById('apiKeysModal'),
-            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
-            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'), // Renomeado para consistência
-            geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
-
             problemInput: document.getElementById('problem-input'),
             diagnoseButton: document.getElementById('diagnose-button'),
             outputSection: document.getElementById('output-section'),
@@ -185,7 +109,9 @@
             solutionOutput: document.getElementById('solution-output'),
             componentsOutput: document.getElementById('components-output')
         };
-        
+
+        let apiKey = localStorage.getItem('capyUniverseApiKey_gemini') || '';
+
         function toggleLoading(isLoading) {
             const btnText = dom.diagnoseButton.querySelector('.btn-text');
             const loader = dom.diagnoseButton.querySelector('.loader');
@@ -198,194 +124,101 @@
                 loader.classList.add('hidden');
             }
         }
-        
-      function displayResults(data) {
-    dom.diagnosisOutput.textContent = data.diagnosis || "Não foi possível determinar o diagnóstico.";
-    dom.causeOutput.textContent = data.rootCause || "Não foi possível determinar a causa raiz.";
-    dom.solutionOutput.innerHTML = data.stepByStepSolution ? data.stepByStepSolution.replace(/\n/g, '<br>') : "Nenhuma solução passo a passo pôde ser gerada.";
-    dom.componentsOutput.textContent = data.suggestedComponents || "N/A";
-    dom.outputSection.classList.remove('hidden');
-}
 
-async function diagnoseProblem() {
-    const problemDescription = dom.problemInput.value.trim();
-    if (!problemDescription) {
-        alert("Por favor, descreva o problema antes de diagnosticar.");
-        return;
-    }
-    if (!apiKey) {
-        alert("Por favor, configure sua chave de API do Gemini primeiro.");
-        if (dom.apiKeysModal) dom.apiKeysModal.classList.remove('hidden');
-        return;
-    }
-
-    toggleLoading(true);
-    dom.outputSection.classList.remove('hidden');
-    dom.diagnosisOutput.textContent = "Analisando as entranhas do silício...";
-    dom.causeOutput.textContent = "Consultando os espíritos da máquina...";
-    dom.solutionOutput.innerHTML = "Traçando o caminho da cura..."; // Use innerHTML se for inserir <br>
-    dom.componentsOutput.textContent = "Forjando as ferramentas necessárias...";
-
-    const prompt = `
-        Você é o CapyByte, um Oráculo Tecnológico especialista em hardware e software.
-        Um usuário descreveu o seguinte problema: "${problemDescription}".
-        Sua tarefa é fornecer uma análise estruturada em formato JSON.
-
-        O JSON deve ter as seguintes chaves:
-        1. "diagnosis": Um diagnóstico preliminar, explicando o que provavelmente está acontecendo em linguagem clara.
-        2. "rootCause": A causa raiz mais provável do problema, sendo específico (ex: "Driver da GPU desatualizado", "Superaquecimento do processador por poeira no cooler").
-        3. "stepByStepSolution": Um guia passo a passo, fácil de seguir, para resolver o problema. Use \\n para quebras de linha que serão convertidas para <br>.
-        4. "suggestedComponents": Se aplicável, sugira componentes de hardware (ex: "SSD NVMe de 1TB") ou software (ex: "MSI Afterburner para monitoramento") que possam ajudar. Se não for aplicável, retorne "N/A".
-
-        Responda APENAS com o objeto JSON.
-    `;
-
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => null); // Tenta ler o corpo do erro
-            throw new Error(`Erro na API: ${response.status} ${response.statusText}. ${errorData?.error?.message || ''}`);
-        }
-
-        const data = await response.json();
-        if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-            let jsonString = data.candidates[0].content.parts[0].text;
-
-            // Encontra o início e o fim do JSON
-            const jsonStart = jsonString.indexOf('{');
-            const jsonEnd = jsonString.lastIndexOf('}');
-
-            if (jsonStart !== -1 && jsonEnd !== -1 && jsonStart < jsonEnd) {
-                jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
-                try {
-                    const result = JSON.parse(jsonString);
-                    displayResults(result);
-                } catch (parseError) {
-                    console.error("Erro ao analisar JSON:", parseError);
-                    console.error("String JSON com problema:", jsonString); // Log da string problemática
-                    throw new Error("Resposta da API contém JSON inválido: " + parseError.message);
-                }
-            } else {
-                throw new Error("JSON inválido encontrado na resposta da API.");
+        function formatContent(content) {
+            if (Array.isArray(content)) {
+                return content.join('<br><br>');
             }
-        } else {
-            throw new Error("Resposta da API inválida ou vazia. Motivo: " + JSON.stringify(data.promptFeedback || data.candidates?.[0]?.finishReason || "Desconhecido"));
+            return content;
         }
 
-    } catch (error) {
-        console.error("Erro ao diagnosticar:", error);
-        dom.diagnosisOutput.textContent = `Ocorreu um erro: ${error.message}. Verifique sua chave de API e a conexão.`;
-        dom.causeOutput.textContent = "-";
-        dom.solutionOutput.innerHTML = "-"; // Use innerHTML aqui também
-        dom.componentsOutput.textContent = "-";
-    } finally {
-        toggleLoading(false);
-    }
-}
-        
-        async function renderSidebar() {
-            if (!dom.sidebar) return;
+        function formatMarkdown(text) {
+            // Converte markdown básico para HTML
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // negrito
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // itálico
+                .replace(/`(.*?)`/g, '<code>$1</code>')            // código
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>'); // links
+        }
+
+        function displayResults(data) {
             try {
-                const response = await fetch('tools.json'); 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const toolsData = await response.json();
+                // Processa cada campo
+                const processField = (content) => {
+                    if (!content) return "N/A";
+                    const formatted = formatContent(content);
+                    return formatMarkdown(formatted);
+                };
+
+                // Aplica a formatação para cada campo
+                dom.diagnosisOutput.innerHTML = processField(data.diagnosis);
+                dom.causeOutput.innerHTML = processField(data.rootCause);
+                dom.solutionOutput.innerHTML = processField(data.stepByStepSolution);
+                dom.componentsOutput.innerHTML = processField(data.suggestedComponents);
                 
-                const categories = {};
-                toolsData.forEach(tool => {
-                    if (!categories[tool.category]) categories[tool.category] = [];
-                    categories[tool.category].push(tool);
+                dom.outputSection.classList.remove('hidden');
+            } catch (error) {
+                console.error('Erro ao processar resultados:', error);
+                dom.diagnosisOutput.textContent = "Erro ao processar resposta da API";
+                dom.causeOutput.textContent = "N/A";
+                dom.solutionOutput.innerHTML = "N/A";
+                dom.componentsOutput.textContent = "N/A";
+            }
+        }
+
+        async function diagnoseProblem() {
+            const problemDescription = dom.problemInput.value.trim();
+            if (!problemDescription) return alert("Descreva o problema.");
+            if (!apiKey) return alert("Configure sua chave API do Gemini.");
+
+            toggleLoading(true);
+            dom.outputSection.classList.remove('hidden');
+            
+            // Atualiza os elementos de saída de forma segura
+            if (dom.diagnosisOutput) dom.diagnosisOutput.textContent = "Analisando...";
+            if (dom.causeOutput) dom.causeOutput.textContent = "Analisando...";
+            if (dom.solutionOutput) dom.solutionOutput.innerHTML = "Analisando...";
+            if (dom.componentsOutput) dom.componentsOutput.textContent = "Analisando...";
+
+            const prompt = `Você é o CapyByte, um Oráculo Tecnológico. Analise: "${problemDescription}". Responda em JSON com chaves: "diagnosis", "rootCause", "stepByStepSolution" (com \n), e "suggestedComponents".`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
                 });
-                dom.sidebar.innerHTML = ''; 
+                if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
+                const result = await response.json();
+                const jsonString = result.candidates[0].content.parts[0].text;
                 
-                const homeLinkSidebar = document.createElement('a');
-                homeLinkSidebar.href = 'index.html';
-                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-                dom.sidebar.appendChild(homeLinkSidebar);
-
-                for (const categoryName in categories) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'mb-1';
-                    const categoryButton = document.createElement('button');
-                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                    const categoryContent = document.createElement('div');
-                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-                    
-                    categories[categoryName].forEach(tool => {
-                        const link = document.createElement('a');
-                        link.href = tool.pageUrl;
-                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-                        categoryContent.appendChild(link);
-                    });
-
-                    categoryButton.addEventListener('click', () => {
-                        categoryContent.classList.toggle('expanded');
-                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                    });
-                    
-                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                        categoryContent.classList.add('expanded');
-                        categoryButton.querySelector('svg').classList.add('rotate-180');
-                    }
-
-                    categoryDiv.appendChild(categoryButton);
-                    categoryDiv.appendChild(categoryContent);
-                    dom.sidebar.appendChild(categoryDiv);
+                try {
+                    const data = JSON.parse(jsonString.trim());
+                    // Garante que todos os campos existam
+                    const processedData = {
+                        diagnosis: data.diagnosis || "N/A",
+                        rootCause: data.rootCause || "N/A",
+                        stepByStepSolution: data.stepByStepSolution || "N/A",
+                        suggestedComponents: data.suggestedComponents || "N/A"
+                    };
+                    displayResults(processedData);
+                } catch (error) {
+                    console.error('Erro ao processar JSON:', error, jsonString);
+                    throw new Error('Erro ao processar resposta da API');
                 }
             } catch (error) {
-                console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
-            }
-        }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) { 
-                apiKey = savedKey; 
-                if(dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = savedKey; 
+                dom.diagnosisOutput.textContent = `Erro: ${error.message}`;
+            } finally {
+                toggleLoading(false);
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); // Corrigido para chamar a função correta
-            loadApiKey();
-
-            if(dom.diagnoseButton) dom.diagnoseButton.addEventListener('click', diagnoseProblem);
-
-            if(dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay){
-                dom.sidebarToggleBtn.addEventListener('click', () => {
-                    dom.sidebar.classList.toggle('-translate-x-full');
-                    dom.sidebarOverlay.classList.toggle('hidden');
-                });
-                if(dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => {
-                    dom.sidebar.classList.add('-translate-x-full');
-                    dom.sidebarOverlay.classList.add('hidden');
-                });
-            }
-
-            if(dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => {if(dom.apiKeysModal) dom.apiKeysModal.classList.remove('hidden')});
-            if(dom.closeApiKeysModalButton) dom.closeApiKeysModalButton.addEventListener('click', () => {if(dom.apiKeysModal) dom.apiKeysModal.classList.add('hidden')});
-            
-            if(dom.saveGeminiKeyBtn) dom.saveGeminiKeyBtn.addEventListener('click', () => {
-                const key = dom.geminiApiKeyInput.value.trim();
-                if(key) {
-                    localStorage.setItem(API_KEY_STORAGE_KEY, key);
-                    apiKey = key;
-                    alert("Chave de API do Gemini salva!");
-                    if(dom.apiKeysModal) dom.apiKeysModal.classList.add('hidden');
-                } else {
-                    alert("Por favor, insira uma chave de API válida.");
-                }
-            });
+            const savedKey = localStorage.getItem('capyUniverseApiKey_gemini');
+            if (savedKey) apiKey = savedKey;
+            dom.diagnoseButton.addEventListener('click', diagnoseProblem);
         });
     </script>
 </body>
 </html>
+
