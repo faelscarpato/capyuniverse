@@ -1,1318 +1,175 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>CapyCLT - Sua Especialista em CLT</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts for Inter, Syne, JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap"
-        rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.0/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-
-    <!-- PDF.js for PDF parsing (worker will be loaded dynamically by JS) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-
-
-    <!-- Favicon -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+    <link rel="stylesheet" href="cu-style.css">
+    <script src="cu-navigation.js" defer></script>
 
     <style>
-        /* Base styles from CapyContrato */
-        html {
-            background: #121217;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: #e5e7eb;
-            /* zinc-200 */
-           /* background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');*/
-            background-repeat: repeat;
-            background-size: 300px;
-            background-color: #18181b;
-            /* zinc-900 */
-        }
-
-       /* .font-syne {
-            font-family: 'Syne', sans-serif;
-        }*/
-
-        .font-jetbrains {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .glass {
-            background: rgba(24, 24, 27, 0.6);
-            /* zinc-900 with opacity */
-            backdrop-filter: blur(12px);
-            border-radius: 1.2rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(63, 63, 70, 0.4);
-            /* zinc-700 with opacity */
-        }
-
-        .sidebar-glass {
-            background: rgba(39, 39, 42, 0.7);
-            /* zinc-800 with opacity */
-            backdrop-filter: blur(15px);
-            border-right: 1px solid rgba(63, 63, 70, 0.3);
-            /* zinc-700 */
-        }
-
-        /* Custom scrollbar for chat area and sidebar */
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-            background: #292932;
-            border-radius: 60px;
-        }
-
-        .scrollbar-thin::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Loader animation */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #8b5cf6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Notification Styles */
-        #notificationArea {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.25rem;
-            z-index: 1050;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            width: 100%;
-            max-width: 24rem;
-        }
-
-        .notification {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            font-size: 0.875rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease-in-out;
-            opacity: 0;
-            transform: translateX(100%);
-        }
-
-        .notification.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .notification-success {
-            background-color: #10b981;
-            color: white;
-        }
-
-        .notification-error {
-            background-color: #ef4444;
-            color: white;
-        }
-
-        .notification-info {
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        .notification-warning {
-            background-color: #f59e0b;
-            color: #1f2937;
-        }
-
-        .notification button {
-            margin-left: 0.75rem;
-            font-weight: bold;
-            font-size: 1.125rem;
-            line-height: 1;
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-        }
-
-        /* Chat-specific styles (adjusted for dark theme contrast) */
-        .message-bubble {
-            max-width: 80%;
-            padding: 12px 18px;
-            /* Slightly larger padding */
-            border-radius: 1.2rem;
-            /* More rounded corners */
-            margin-bottom: 12px;
-            /* More spacing */
-            word-wrap: break-word;
-            font-size: 0.95rem;
-            /* Slightly larger font */
-            line-height: 1.4;
-        }
-
-        .message-bubble pre, 
-.message-bubble code {
-  background: rgba(255,255,255,0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
-  white-space: pre-wrap;
-  word-break: break-word;
-  display: block;
-  margin-top: 0.5rem;
-  color: #fcd34d;
-}
-
-.message-bubble p {
-  margin-bottom: 0.5rem;
-  margin-top: 5px;
-    color: #d4d4d8;
-    /* zinc-300 */
-    
-}
-
-        .user-message {
-            background-color: #8e4bf3;
-            /* Deep purple for user */
-            align-self: flex-end;
-            border-bottom-right-radius: 0.5rem;
-            /* Smoother corner transition */
-            color: #e5e7eb;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            margin-top: 0.5rem;
-        }
-
-        .capy-message {
-            background-color: #141314;
-            /* Darker purple for Capy */
-            align-self: flex-start;
-            border-bottom-left-radius: 0.5rem;
-            /* Smoother corner transition */
-            color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            padding: 12px ;
-            border-radius: 1.2rem;
-        }
-
-        /* File Input Customization */
-        .custom-file-input {
-            width: auto;
-            /* Adjust width */
-        }
-
-        .custom-file-input::-webkit-file-upload-button {
-            visibility: hidden;
-        }
-
-        .custom-file-input::before {
-            content: 'Escolher Arquivo';
-            display: inline-block;
-            background: linear-gradient(180deg, #6b21a8, #8b5cf6);
-            /* Purple shades */
-            color: white;
-            padding: 10px 20px;
-            /* Larger padding */
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            outline: none;
-            white-space: nowrap;
-            -webkit-user-select: none;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-
-        .custom-file-input:hover::before {
-            background: linear-gradient(180deg, #8b5cf6, #a78bfa);
-            /* Lighter purple on hover */
-            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
-        }
-
-        .custom-file-input:active::before {
-            transform: translateY(1px);
-            box-shadow: none;
-        }
-
-        /* Buttons general style from CapyContrato */
-        button {
-            background-color: #8b5cf6;
-            /* default purple */
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.6rem;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        button:hover {
-            background-color: #a78bfa;
-            /* lighter purple on hover */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Specific button colors */
-        #analyze-document-button {
-            background-color: #db2777;
-        }
-
-        /* pink-600 */
-        #analyze-document-button:hover {
-            background-color: #be185d;
-        }
-
-        /* pink-700 */
-        #summarize-article-button {
-            background-color: #fbbf24;
-            color: #1f2937;
-        }
-
-        /* amber-400 */
-        #summarize-article-button:hover {
-            background-color: #f59e0b;
-        }
-
-        /* amber-500 */
-        #generate-scenario-button {
-            background-color: #10b981;
-        }
-
-        /* emerald-500 */
-        #generate-scenario-button:hover {
-            background-color: #059669;
-        }
-
-        /* emerald-600 */
-        #send-button {
-            background-color: #3b82f6;
-        }
-
-        /* blue-500 */
-        #send-button:hover {
-            background-color: #2563eb;
-        }
-
-        /* blue-600 */
-        #export-pdf-button {
-            background-color: #dc2626;
-        }
-
-        /* red-600 */
-        #export-pdf-button:hover {
-            background-color: #b91c1c;
-        }
-
-        /* red-700 */
-
-
-        /* Textarea and Input fields */
-        textarea,
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="number"],
-        input[type="password"] {
-            background-color: #27272a;
-            /* zinc-800 */
-            border: 1px solid #3f3f46;
-            /* zinc-700 */
-            color: #d4d4d8;
-            /* zinc-300 */
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        textarea:focus,
-        input:focus {
-            outline: none;
-            border-color: #a78bfa;
-            /* violet-400 */
-            box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.5);
-            /* violet-400 with opacity */
-            background-color: #2e2e30;
-            /* slightly lighter for focus */
-        }
-
-        ::placeholder {
-            color: #a1a1aa;
-            /* zinc-400 */
-            opacity: 0.8;
-            
-        }
-
-        #chat-messages {
-  max-height: 400px; /* ou o valor que preferir */
-  overflow-y: auto;
-  scroll-behavior: smooth;
-}
-
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--cu-purple); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .message-bubble { max-width: 80%; padding: 12px 18px; border-radius: 1.2rem; margin-bottom: 12px; word-wrap: break-word; font-size: 0.95rem; line-height: 1.4; }
+        .user-message { background: var(--premium-gradient); color: white; align-self: flex-end; border-bottom-right-radius: 0.5rem; }
+        .capy-message { background: var(--cu-bg-1); color: var(--cu-text); align-self: flex-start; border-bottom-left-radius: 0.5rem; }
     </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3FFD7ZEBN1');
-</script>  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
+<body class="min-h-screen flex flex-col">
 
-<body class="bg-gray-900 text-white flex flex-col min-h-screen">
-
-    <header
-        class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-        <div class="flex items-center">
-            <button id="sidebarToggleBtn"
-                class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <a href="index.html"
-                class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse
-                IA</a>
+    <header class="cu-header">
+        <div class="cu-brand">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+            </a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyCLT</span>
         </div>
-        <div class="flex items-center">
-            <button onclick="window.location.href='index.html'"
-                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-            <button id="openApiKeysModalButton"
-                class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves
-                API</button>
+        <div class="flex items-center gap-2">
+            <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
         </div>
     </header>
 
     <div id="notificationArea"></div>
 
-    <div class="flex flex-1 pt-16">
-        <aside id="sidebar"
-            class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    <div class="flex flex-1">
+        <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+            <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
         </aside>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
-            <section class="glass border-zinc-800 p-6 flex flex-col max-w-3xl mx-auto">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+            <section class="cu-panel p-4 sm:p-6 flex flex-col h-full max-w-3xl mx-auto">
                 <div class="text-center mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="mx-auto h-12 w-12 text-violet-400 mb-2">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <path d="M8 12h8"></path>
-                        <path d="M8 16h8"></path>
-                    </svg>
-                    <h1 class="text-3xl font-bold font-syne text-violet-400">CapyCLT</h1>
-                    <p class="text-md text-gray-300 mt-1">Sua especialista em Lei Trabalhista Brasileira.</p>
+                    <h1 class="text-3xl font-bold" style="color: var(--cu-purple);">CapyCLT ⚖️</h1>
+                    <p class="text-cu-text-dim mt-1">Sua especialista em Lei Trabalhista Brasileira.</p>
                 </div>
 
-                <!-- Chat Messages Area -->
-                <div id="chat-messages"
-                    class="flex-1 overflow-y-auto p-4 rounded-xl bg-zinc-800 mb-6 shadow-inner border border-zinc-700 scrollbar-thin">
-                    <!-- Messages will be appended here -->
-                    <div class="flex flex-col items-start">
-                        <div class="capy-message rounded-bl-none shadow">Olá! Sou a CapyCLT, sua especialista em
-                            legislação trabalhista brasileira. Como posso te ajudar hoje?</div>
-                    </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-4 rounded-xl bg-[var(--cu-bg-1)] mb-6 shadow-inner border border-white/10 scrollbar-thin min-h-[400px]">
+                    <div class="flex flex-col items-start"><div class="capy-message message-bubble">Olá! Sou a CapyCLT. Como posso ajudar?</div></div>
                 </div>
 
-                <!-- Input Area -->
                 <div class="flex flex-col space-y-4">
-                    <textarea id="user-input"
-                        class="w-full p-4 rounded-xl border border-zinc-600 focus:ring-violet-500 focus:border-violet-500 transition shadow-sm resize-none bg-zinc-700 text-gray-200"
-                        rows="3"
-                        placeholder="Faça sua pergunta sobre a CLT, cole um texto para resumir, descreva um cenário, ou faça o upload de um documento para análise..."></textarea>
-
-                    <div
-                        class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-3">
-                        <input type="file" id="file-upload" class="custom-file-input flex-1 w-full"
-                            accept=".pdf,.txt,.docx" />
-                        <button id="analyze-document-button"
-                            class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
-                            Analisar Documento
-                        </button>
-                        <button id="summarize-article-button"
-                            class="bg-amber-400 hover:bg-amber-500 text-zinc-900 font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
-                            ✨ Resumir Artigo
-                        </button>
+                    <textarea id="user-input" class="cu-textarea w-full resize-none" rows="3" placeholder="Faça sua pergunta sobre a CLT..."></textarea>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <input type="file" id="file-upload" class="hidden" accept=".pdf,.txt" />
+                        <label for="file-upload" class="cu-btn justify-center"><i class="fas fa-upload"></i> Upload</label>
+                        <button id="analyze-document-button" class="cu-btn"><i class="fas fa-file-alt"></i> Analisar Doc</button>
+                        <button id="summarize-article-button" class="cu-btn"><i class="fas fa-book-open"></i> Resumir Artigo</button>
+                        <button id="send-button" class="cu-btn primary"><i class="fas fa-paper-plane"></i> Perguntar</button>
                     </div>
-                    <div
-                        class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-3">
-                        <button id="generate-scenario-button"
-                            class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
-                            ✨ Gerar Cenários
-                        </button>
-                        <button id="send-button"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
-                            Perguntar
-                        </button>
-                    </div>
-                    <div class="flex justify-center mt-4">
-                         <!-- <button id="export-pdf-button"
-                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg w-full md:w-auto">
-                            Exportar Conversa para PDF
-                        </button>-->
-                    </div>
-                    <div id="loading-indicator" class="hidden text-center text-violet-400 font-semibold mt-2">
-                        Carregando... <span class="loader ml-2"></span>
-                    </div>
-                    <div id="error-message" class="hidden text-center text-red-400 font-semibold mt-2">
-                        Ocorreu um erro. Por favor, tente novamente.
-                    </div>
+                    <div id="loading-indicator" class="hidden text-center text-purple-400"><div class="loader inline-block"></div> Carregando...</div>
                 </div>
-
-                <!-- Footer / User ID (Removed as per user request) -->
             </section>
         </main>
     </div>
 
-    <!-- API Keys Modal (from CapyContrato) -->
-    <div id="apiKeysModal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
-        <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API (Global)</h2>
-                <button id="closeApiKeysModalButton"
-                    class="text-gray-400 hover:text-white text-2xl leading-none bg-transparent shadow-none">&times;</button>
-            </div>
-            <div class="space-y-3">
-                <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                    <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                    <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key
-                        Gemini:</label>
-                    <div class="flex">
-                        <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini"
-                            class="font-jetbrains p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border-zinc-700" />
-                        <button id="saveGeminiKey" data-provider="gemini"
-                            class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white shadow-none">Salvar</button>
-                    </div>
-                    <p class="text-xs text-zinc-400 mt-1">Esta chave será usada por todas as ferramentas CapyUniverse
-                        que requerem Gemini.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript for CapyCLT -->
     <script type="module">
-        // PDF.js for PDF parsing
         import { getDocument, GlobalWorkerOptions } from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.3.136/build/pdf.min.mjs';
         GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.3.136/build/pdf.worker.min.mjs';
 
+        let apiKey = localStorage.getItem('capyUniverseApiKey_gemini') || '';
+        let chatHistory = [];
 
-        const currentPageId = 'CapyCLT'; // This app's ID
-        let geminiApiKey = ''; // Global API Key for Gemini
-        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini'; // Key for localStorage
-
-        // DOM elements
         const dom = {
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            apiKeysModal: document.getElementById('apiKeysModal'),
-            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-            closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
-            geminiApiKeyInputModal: document.getElementById('geminiApiKeyInputModal'),
-            saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
-            notificationArea: document.getElementById('notificationArea'),
-
             chatMessagesDiv: document.getElementById('chat-messages'),
             userInput: document.getElementById('user-input'),
             sendButton: document.getElementById('send-button'),
             fileUpload: document.getElementById('file-upload'),
             analyzeDocumentButton: document.getElementById('analyze-document-button'),
             summarizeArticleButton: document.getElementById('summarize-article-button'),
-            generateScenarioButton: document.getElementById('generate-scenario-button'),
-           // exportPdfButton: document.getElementById('export-pdf-button'), // New button
             loadingIndicator: document.getElementById('loading-indicator'),
-            errorMessageDiv: document.getElementById('error-message')
         };
 
-        // Chat history (in-memory only, no Firebase persistence)
-        let chatHistory = [];
-
-        // Displays a message in the chat interface
         const displayMessage = (message, sender) => {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message-bubble', 'shadow');
-            if (sender === 'user') {
-  messageDiv.textContent = message;
-} else {
-  messageDiv.innerHTML = marked.parse(message);
-}
-
-            if (sender === 'user') {
-                messageDiv.classList.add('user-message', 'rounded-tr-none', 'self-end');
-            } else { // 'model' or 'capy'
-                messageDiv.classList.add('capy-message', 'rounded-tl-none', 'self-start');
-            }
-            dom.chatMessagesDiv.appendChild(messageDiv);
+            const div = document.createElement('div');
+            div.className = `message-bubble ${sender === 'user' ? 'user-message' : 'capy-message'}`;
+            div.innerHTML = sender === 'user' ? message : marked.parse(message);
+            dom.chatMessagesDiv.appendChild(div);
             dom.chatMessagesDiv.scrollTop = dom.chatMessagesDiv.scrollHeight;
-
-            // Add to in-memory chat history for PDF export and API context
-            chatHistory.push({ sender: sender, message: message });
+            chatHistory.push({ sender, message });
         };
 
-        // Shows the loading indicator
-        const showLoading = () => {
-            dom.loadingIndicator.classList.remove('hidden');
-            dom.sendButton.disabled = true;
-            dom.analyzeDocumentButton.disabled = true;
-            dom.summarizeArticleButton.disabled = true;
-            dom.generateScenarioButton.disabled = true;
-            //dom.exportPdfButton.disabled = false; // Disable export button during loading
-            dom.userInput.disabled = true;
-            dom.fileUpload.disabled = true;
+        const toggleLoading = isLoading => {
+            dom.loadingIndicator.classList.toggle('hidden', !isLoading);
+            [dom.sendButton, dom.analyzeDocumentButton, dom.summarizeArticleButton, dom.userInput, dom.fileUpload].forEach(el => el.disabled = isLoading);
         };
 
-        // Hides the loading indicator
-        const hideLoading = () => {
-            dom.loadingIndicator.classList.add('hidden');
-            dom.sendButton.disabled = false;
-            dom.analyzeDocumentButton.disabled = false;
-            dom.summarizeArticleButton.disabled = false;
-            dom.generateScenarioButton.disabled = false;
-           // dom.exportPdfButton.disabled = true; // Enable export button after loading
-            dom.userInput.disabled = false;
-            dom.fileUpload.disabled = false;
-        };
+        const callGeminiAPI = async (prompt) => {
+            if (!apiKey) return alert("Configure a chave API do Gemini.");
+            toggleLoading(true);
 
-        // Shows an error message
-        const showError = (message) => {
-            dom.errorMessageDiv.textContent = message;
-            dom.errorMessageDiv.classList.remove('hidden');
-        };
-
-        // Hides the error message
-        const hideError = () => {
-            dom.errorMessageDiv.classList.add('hidden');
-        };
-
-        // Helper for Notifications (copied from CapyContrato)
-        let notificationCounter = 0;
-        function addNotification(message, type = 'info', duration = 5000) {
-            const notificationId = `notif-${notificationCounter++}`;
-            const notificationDiv = document.createElement('div');
-            notificationDiv.id = notificationId;
-            notificationDiv.classList.add('notification');
-
-            if (type === 'success') notificationDiv.classList.add('notification-success');
-            else if (type === 'error') notificationDiv.classList.add('notification-error');
-            else if (type === 'warning') notificationDiv.classList.add('notification-warning');
-            else notificationDiv.classList.add('notification-info');
-
-            notificationDiv.innerHTML = `<span>${message}</span><button onclick="removeNotification('${notificationId}')">&times;</button>`;
-            dom.notificationArea.appendChild(notificationDiv);
-
-            setTimeout(() => notificationDiv.classList.add('show'), 10); // Trigger transition
-            setTimeout(() => removeNotification(notificationId), duration);
-        }
-
-        window.removeNotification = (id) => {
-            const notification = document.getElementById(id);
-            if (notification) {
-                notification.classList.remove('show');
-                notification.addEventListener('transitionend', () => notification.remove());
-            }
-        };
-
-        // Calls the Gemini API to get a response
-        const callGeminiAPI = async (promptText) => {
-            showLoading();
-            hideError();
-
-            if (!geminiApiKey) {
-                addNotification("Chave API Gemini não configurada. Por favor, insira sua chave em 'Chaves API'.", "error");
-                hideLoading();
-                return;
-            }
-
-            // Define the system instruction (CapyCLT persona)
-            const systemInstructionText = `Você é a CapyCLT, uma especialista em legislação trabalhista brasileira. Sua função é responder a perguntas sobre a CLT de forma clara, objetiva, precisa e em português do Brasil. Adote um tone formal e profissional, mas seja empática e compreensiva. Use um humor rápido e sagaz ocasionalmente, quando apropriado, para descontrair temas complexos, como "Essa questão é mais intrincada que um nó de marinheiro, mas a gente desvenda!" ou "Ah, a CLT e suas nuances! Vamos desbravar isso juntos.". Priorize a clareza e a simplicidade, evitando jargões jurídicos excessivos. Se uma pergunta for muito específica, exigir aconselhamento legal ou envolver interpretação de casos concretos, você deve indicar que é apenas um assistente de IA e que a consulta a um advogado ou profissional do direito é indispensável. Nunca forneça conselhos jurídicos diretos ou personalizados. Mantenha as respostas concisas e focadas no tópico da CLT.`;
-
-            // Prepare the conversation history for the API call.
-            let apiChatHistory = [];
-
-            // Prepend the system instruction to the very first user message.
-            if (chatHistory.length === 0) {
-                apiChatHistory.push({ role: "user", parts: [{ text: systemInstructionText + "\n\n" + promptText }] });
-            } else {
-                // Reconstruct the history with user/model roles for the API.
-                apiChatHistory = chatHistory.map(msg => ({
-                    role: msg.sender === 'user' ? 'user' : 'model',
-                    parts: [{ text: msg.message }]
-                }));
-                // Add the current user's prompt to the API history
-                apiChatHistory.push({ role: "user", parts: [{ text: promptText }] });
-            }
-
-            const payload = {
-                contents: apiChatHistory,
-                generationConfig: {
-                    temperature: 0.7,
-                    topP: 0.95,
-                    topK: 40,
-                },
-            };
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+            const apiHistory = chatHistory.map(msg => ({ role: msg.sender === 'user' ? 'user' : 'model', parts: [{ text: msg.message }] }));
+            apiHistory.push({ role: "user", parts: [{ text: prompt }] });
 
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: apiHistory, generationConfig: { temperature: 0.7, topP: 0.95 } })
                 });
-
+                if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
                 const result = await response.json();
-                console.log("API Response:", result);
-
-                if (!response.ok) {
-                    let msg = `Erro ${response.status}: ${result?.error?.message || response.statusText}`;
-                    if (response.status === 400 && msg.toLowerCase().includes("api key not valid")) msg = "Erro: API Key Gemini inválida ou mal formatada.";
-                    else if (response.status === 403) msg = "Erro 403: Acesso negado. Verifique sua API Key e configurações.";
-                    throw new Error(msg);
-                }
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    displayMessage(text, 'model');
-                } else {
-                    showError("Não consegui gerar uma resposta. Por favor, tente reformular sua pergunta.");
-                    console.error("Estrutura de resposta inesperada da API:", result);
-                    addNotification("Resposta da IA vazia ou em formato inesperado.", "error");
-                }
-            } catch (error) {
-                console.error("Erro ao chamar a API Gemini:", error);
-                showError("Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.");
-                addNotification(`Erro na API: ${error.message}`, "error");
-            } finally {
-                hideLoading();
-            }
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) displayMessage(text, 'model');
+                else displayMessage("Não obtive uma resposta.", 'model');
+            } catch (error) { displayMessage(`Erro: ${error.message}`, 'model'); } 
+            finally { toggleLoading(false); }
         };
 
-        // Sends the user's message
-        const sendMessage = async () => {
+        const sendMessage = () => {
             const prompt = dom.userInput.value.trim();
-            if (prompt) {
-                displayMessage(prompt, 'user');
-                dom.userInput.value = '';
-                await callGeminiAPI(prompt);
-            }
+            if (prompt) { displayMessage(prompt, 'user'); dom.userInput.value = ''; callGeminiAPI(prompt); }
         };
 
-        // Handles document file upload and extraction
         const handleDocumentUpload = async () => {
             const file = dom.fileUpload.files[0];
-            if (!file) {
-                showError("Por favor, selecione um arquivo para analisar.");
-                addNotification("Selecione um arquivo para analisar.", "warning");
-                return;
-            }
-
-            hideError();
-            showLoading();
-
-            console.log("Iniciando upload de documento.");
-            console.log("Nome do arquivo:", file.name);
-            console.log("Tipo de arquivo (MIME Type):", file.type);
-            console.log("Tamanho do arquivo:", file.size, "bytes");
-
-
-            let fileContent = '';
-            const reader = new FileReader();
-
-            reader.onload = async (e) => {
-                try {
-                    // Check file extension first, then MIME type
-                    const fileNameLower = file.name.toLowerCase();
-
-                    if (fileNameLower.endsWith('.pdf')) {
-                        console.log("Detectado arquivo PDF pela extensão. Tentando carregar como ArrayBuffer...");
-                        const pdfData = new Uint8Array(e.target.result);
-                        const pdfDoc = await getDocument({ data: pdfData }).promise;
-                        console.log("PDF carregado. Número de páginas:", pdfDoc.numPages);
-                        let fullText = '';
-                        for (let i = 1; i <= pdfDoc.numPages; i++) {
-                            const page = await pdfDoc.getPage(i);
-                            const textContent = await page.getTextContent();
-                            fullText += textContent.items.map(item => item.str).join(' ') + '\n';
-                        }
-                        fileContent = fullText;
-                        console.log("Texto extraído do PDF (primeiros 500 caracteres):", fileContent.substring(0, 500));
-                        if (fileContent.length === 0) {
-                            console.warn("PDF lido, mas nenhum texto foi extraído. Pode ser um PDF baseado em imagem.");
-                            addNotification("O PDF foi lido, mas nenhum texto foi extraído. Parece ser um PDF de imagem. Por favor, tente copiar o texto manualmente.", "warning");
-                            showError("Nenhum texto extraído do PDF. Pode ser um PDF de imagem.");
-                            hideLoading();
-                            return;
-                        }
-
-                    } else if (fileNameLower.endsWith('.txt')) {
-                        console.log("Detectado arquivo TXT pela extensão. Lendo texto...");
-                        fileContent = e.target.result;
-                        console.log("Texto lido do TXT (primeiros 500 caracteres):", fileContent.substring(0, 500));
-                    } else if (fileNameLower.endsWith('.docx')) {
-                        showError("Análise de arquivos .docx não é diretamente suportada pelo navegador. Por favor, copie o texto e cole-o, ou converta para PDF/TXT.");
-                        addNotification("Arquivos DOCX não suportados para análise direta. Cole o texto ou converta.", "warning");
-                        hideLoading();
-                        return;
-                    } else {
-                        // Fallback for unexpected MIME types not covered by common extensions
-                        showError(`Formato de arquivo "${file.type}" não suportado. Por favor, use PDF ou TXT.`);
-                        addNotification(`Formato de arquivo "${file.type}" não suportado. Use PDF ou TXT.`, "warning");
-                        hideLoading();
-                        return;
+            if (!file) return alert("Selecione um arquivo.");
+            toggleLoading(true);
+            try {
+                let text = '';
+                if (file.name.endsWith('.pdf')) {
+                    const pdfData = new Uint8Array(await file.arrayBuffer());
+                    const pdfDoc = await getDocument({ data: pdfData }).promise;
+                    for (let i = 1; i <= pdfDoc.numPages; i++) {
+                        const page = await pdfDoc.getPage(i);
+                        text += (await page.getTextContent()).items.map(item => item.str).join(' ');
                     }
-
-                    if (fileContent) {
-                        const analysisPrompt = `Analise o seguinte documento relacionado à CLT brasileira e extraia as informações mais relevantes, como tipo de contrato, jornada de trabalho, salário, férias, rescisão, etc. Se houver alguma inconformidade ou ponto de atenção, destaque-o. Forneça uma análise clara e concisa:\n\n${fileContent.substring(0, 5000)}`; // Limit content length for API
-                        displayMessage(`Analisando o documento: ${file.name}...`, 'user');
-                        await callGeminiAPI(analysisPrompt);
-                    } else {
-                        showError("Não foi possível extrair conteúdo do arquivo ou o arquivo está vazio.");
-                        addNotification("Não foi possível extrair conteúdo do arquivo ou o arquivo está vazio.", "error");
-                    }
-                } catch (error) {
-                    console.error("Erro no processamento do arquivo:", error);
-                    showError(`Erro ao analisar o arquivo: ${error.message}. Certifique-se de que é um PDF ou TXT válido.`);
-                    addNotification(`Erro ao analisar o arquivo: ${error.message}`, "error");
-                } finally {
-                    hideLoading();
+                } else {
+                    text = await file.text();
                 }
-            };
-
-            reader.onerror = (error) => {
-                console.error("Erro na leitura do arquivo pelo FileReader:", error);
-                showError("Erro na leitura do arquivo. O arquivo pode estar corrompido ou o navegador não conseguiu lê-lo.");
-                addNotification("Erro na leitura do arquivo. Tente novamente.", "error");
-                hideLoading();
-            };
-
-            // Determine how to read the file based on its perceived type/extension
-            const fileNameLower = file.name.toLowerCase();
-            if (fileNameLower.endsWith('.pdf')) {
-                reader.readAsArrayBuffer(file); // PDFs need to be read as ArrayBuffer
-            } else if (fileNameLower.endsWith('.txt')) {
-                reader.readAsText(file); // TXT files are read as text
-            } else {
-                // For other types, try to read as text by default, but it will be caught by the file extension/type check in onload
-                reader.readAsText(file);
-            }
+                const prompt = `Analise o seguinte documento da CLT e extraia as informações mais relevantes:\n\n${text.substring(0, 5000)}`;
+                displayMessage(`Analisando o documento: ${file.name}...`, 'user');
+                await callGeminiAPI(prompt);
+            } catch (error) { displayMessage(`Erro ao analisar: ${error.message}`, 'model'); } 
+            finally { toggleLoading(false); }
         };
 
-        // Function to summarize the text from user input
-        const summarizeArticle = async () => {
-            const textToSummarize = dom.userInput.value.trim();
-            if (!textToSummarize) {
-                showError("Por favor, digite ou cole o texto que deseja resumir.");
-                addNotification("Digite o texto para resumir.", "warning");
-                return;
-            }
-            displayMessage('Por favor, CapyCLT, faça um resumo dos pontos chave da CLT no texto abaixo, focado na legislação e suas implicações:\n\n' + textToSummarize, 'user');
+        const summarizeArticle = () => {
+            const text = dom.userInput.value.trim();
+            if (!text) return alert("Digite o texto para resumir.");
+            const prompt = `Resuma os pontos chave da CLT no texto: "${text}"`;
+            displayMessage(prompt, 'user');
             dom.userInput.value = '';
-            const prompt = `Por favor, CapyCLT, faça um resumo dos pontos chave da CLT no texto abaixo, focado na legislação e suas implicações:\n\n${textToSummarize}`;
-            await callGeminiAPI(prompt);
+            callGeminiAPI(prompt);
         };
 
-        // Function to generate a CLT scenario
-        const generateScenario = async () => {
-            const scenarioDescription = dom.userInput.value.trim();
-            if (!scenarioDescription) {
-                showError("Por favor, digite uma breve descrição para o cenário da CLT que deseja gerar.");
-                addNotification("Descreva o cenário da CLT que deseja gerar.", "warning");
-                return;
-            }
-            displayMessage('Crie um cenário prático da CLT sobre: ' + scenarioDescription, 'user');
-            dom.userInput.value = '';
-            const prompt = `Crie um cenário prático e realista da CLT, com foco em direitos e deveres de empregador e empregado, baseado na seguinte descrição: "${scenarioDescription}". Inclua elementos como tipo de contrato, jornada, e possíveis situações de conflito ou conformidade.`;
-            await callGeminiAPI(prompt);
-        };
+        dom.sendButton.addEventListener('click', sendMessage);
+        dom.userInput.addEventListener('keypress', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+        dom.analyzeDocumentButton.addEventListener('click', handleDocumentUpload);
+        dom.summarizeArticleButton.addEventListener('click', summarizeArticle);
 
-
-        
-
-
-
-        const exportChatToPdf = () => {
-            const chatElement = document.getElementById("chat-messages");
-
-            if (!chatElement || chatElement.innerText.trim() === "") {
-                addNotification("Nada para exportar!", "warning");
-                return;
-            }
-
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF("p", "mm", "a4");
-            pdf.setFont("Helvetica", "normal");
-            pdf.setFontSize(12);
-            pdf.text("CapyCLT - Conversa", 10, 10);
-            let y = 10; // Start position for text
-            const lines = chatElement.innerText.split("\n");
-            lines.forEach((line) => {
-                if (y + 10 > pdf.internal.pageSize.height) {
-                    pdf.addPage();
-                    y = 10; // Reset y position for new page
-                }
-                pdf.text(line, 10, y);
-                y += 10; // Move down for next line
-
-            });
-
-
-                pdf.save("CapyCLT-conversa.pdf");
-                addNotification("PDF exportado com sucesso!", "success");
-
-
-            };
-
-
-
-            // Sidebar rendering logic (from CapyContrato, adapted)
-
-            async function renderSidebar() {
-                if (!dom.sidebar) return;
-                try {
-                    // Fetch tools.json from the root of the serving directory
-                    const response = await fetch('tools.json');
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const toolsData = await response.json();
-
-                    const categories = {};
-                    toolsData.forEach(tool => {
-                        if (!categories[tool.category]) categories[tool.category] = [];
-                        categories[tool.category].push(tool);
-                    });
-                    dom.sidebar.innerHTML = '';
-
-                    const homeLinkSidebar = document.createElement('a');
-                    homeLinkSidebar.href = 'index.html';
-                    homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-                    homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-                    dom.sidebar.appendChild(homeLinkSidebar);
-
-                    for (const categoryName in categories) {
-                        const categoryDiv = document.createElement('div');
-                        categoryDiv.className = 'mb-1';
-                        const categoryButton = document.createElement('button');
-                        categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150 bg-transparent shadow-none';
-                        categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                        const categoryContent = document.createElement('div');
-                        categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-
-                        categories[categoryName].forEach(tool => {
-                            const link = document.createElement('a');
-                            link.href = tool.pageUrl;
-                            const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                            link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                            link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-                            categoryContent.appendChild(link);
-                        });
-
-                        categoryButton.addEventListener('click', () => {
-                            categoryContent.classList.toggle('expanded');
-                            categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                        });
-
-                        if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                            categoryContent.classList.add('expanded');
-                            categoryButton.querySelector('svg').classList.add('rotate-180');
-                        }
-
-                        categoryDiv.appendChild(categoryButton);
-                        categoryDiv.appendChild(categoryContent);
-                        dom.sidebar.appendChild(categoryDiv);
-                    }
-                } catch (error) {
-                    console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                    if (dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
-                }
-            }
-
-            // API Key loading/saving
-            function loadApiKey() {
-                const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-                if (savedKey) {
-                    geminiApiKey = savedKey;
-                    if (dom.geminiApiKeyInputModal) dom.geminiApiKeyInputModal.value = savedKey;
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                renderSidebar();
-                loadApiKey();
-
-                // Event Listeners for CapyCLT functionality
-                dom.sendButton.addEventListener('click', sendMessage);
-                dom.userInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                });
-                dom.analyzeDocumentButton.addEventListener('click', handleDocumentUpload);
-                dom.summarizeArticleButton.addEventListener('click', summarizeArticle);
-                dom.generateScenarioButton.addEventListener('click', generateScenario);
-              //  dom.exportPdfButton.addEventListener('click', exportChatToPdf); // New event listener
-
-                // Event Listeners for Sidebar and API Key Modal
-                if (dom.sidebarToggleBtn && dom.sidebar && dom.sidebarOverlay) {
-                    dom.sidebarToggleBtn.addEventListener('click', () => { dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
-                    if (dom.sidebarOverlay) dom.sidebarOverlay.addEventListener('click', () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); });
-                }
-                if (dom.openApiKeysModalButton && dom.apiKeysModal) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-                if (dom.closeApiKeysModalButton && dom.apiKeysModal) dom.closeApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-                if (dom.saveGeminiKeyBtn && dom.geminiApiKeyInputModal) dom.saveGeminiKeyBtn.addEventListener('click', () => {
-                    const key = dom.geminiApiKeyInputModal.value.trim();
-                    if (key) { localStorage.setItem(API_KEY_STORAGE_KEY, key); geminiApiKey = key; addNotification("Chave API do Gemini salva!", "success"); dom.apiKeysModal.classList.add('hidden'); }
-                    else { addNotification("Por favor, insira uma chave API.", "warning"); }
-                });
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('capyUniverseApiKey_gemini');
+            if (savedKey) apiKey = savedKey;
+        });
     </script>
-    <script>
-/* ===== CapyLink v2 – interliga ferramentas, estado no localStorage e UI auxiliar ===== */
-(function () {
-  const LS_KEY = 'capy:audiencia:summary';
-  const NOTIFY_MS = 10000; // 10s
-  const IS_AUDIENCIAS = /CapyAudiências|CapyAudiencias/i.test(document.title);
-  const IS_CONCILIADOR = /CapyConcilia|CapyConciliador/i.test(document.title);
-  const IS_CRONOS = /CapyCronos/i.test(document.title);
-  const IS_CLT = /CapyCLT/i.test(document.title);
-
-  /* ---------- helpers UI ---------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-  function ensureArea() {
-    // Reaproveita notificationArea das páginas que já têm, senão cria o nosso.
-    let area = document.getElementById('notificationArea');
-    if (!area) {
-      area = document.createElement('div');
-      area.id = 'capyLinkNotifyArea';
-      area.style.position = 'fixed';
-      area.style.top = '16px';
-      area.style.right = '16px';
-      area.style.zIndex = '2147483647';
-      document.body.appendChild(area);
-    }
-    return area;
-  }
-
-  function showToast(html, ms = NOTIFY_MS) {
-    const area = ensureArea();
-    const box = document.createElement('div');
-    box.style.cssText =
-      'max-width:360px;background:rgba(17,17,20,.96);border:1px solid rgba(99,102,241,.4);' +
-      'padding:12px 14px;margin-bottom:10px;border-radius:14px;color:#e5e7eb;' +
-      'box-shadow:0 10px 30px rgba(0,0,0,.5);font:500 14px/1.35 Inter,system-ui;';
-    box.innerHTML = html;
-    area.appendChild(box);
-    setTimeout(() => box.remove(), ms);
-  }
-
-  function createDock() {
-    if (document.getElementById('capyDock')) return;
-    const dock = document.createElement('div');
-    dock.id = 'capyDock';
-    dock.style.cssText = `
-      position:fixed; right:18px; bottom:18px; z-index:2147483647;
-      display:flex; flex-direction:column; gap:10px;
-    `;
-    const btnStyle = `
-      width:52px; height:52px; border-radius:9999px; border:1px solid rgba(63,63,70,.6);
-      background:rgba(24,24,27,.88); color:#fff; display:flex; align-items:center; justify-content:center;
-      box-shadow:0 6px 18px rgba(0,0,0,.45); cursor:pointer; backdrop-filter: blur(8px);
-      transition: transform .15s ease, opacity .15s ease;
-    `;
-
-    function makeBtn(title, icon, click) {
-      const b = document.createElement('button');
-      b.setAttribute('aria-label', title);
-      b.title = title;
-      b.style.cssText = btnStyle;
-      b.innerHTML = icon;
-      on(b, 'click', click);
-      on(b, 'mouseenter', () => (b.style.transform = 'translateY(-2px)'));
-      on(b, 'mouseleave', () => (b.style.transform = 'translateY(0)'));
-      return b;
-    }
-
-    const icoConcilia = '<i class="fas fa-handshake"></i>';
-    const icoCronos   = '<i class="fas fa-stopwatch"></i>';
-    const icoCLT      = '<i class="fas fa-scale-balanced"></i>';
-    const icoClose    = '<i class="fas fa-times"></i>';
-
-    dock.appendChild(makeBtn('Abrir CapyConciliador', icoConcilia, () => openTool('concilia')));
-    dock.appendChild(makeBtn('Abrir CapyCronos',     icoCronos,   () => openTool('cronos')));
-    dock.appendChild(makeBtn('Abrir CapyCLT',        icoCLT,      () => openTool('clt')));
-    dock.appendChild(makeBtn('Ocultar atalhos',      icoClose,    () => dock.remove()));
-
-    document.body.appendChild(dock);
-  }
-
-  /* ---------- estado compartilhado ---------- */
-  function saveSharedState(state) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
-  }
-  function loadSharedState() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch { return null; }
-  }
-
-  /* ---------- modal embutindo ferramenta (versão “compacta” porém completa) ---------- */
-  function openTool(which) {
-    const map = {
-      concilia: 'capyconciliador.html?embed=1',
-      cronos:   'capycronos.html?embed=1',
-      clt:      'capyclt.html?embed=1'
-    };
-    const src = map[which];
-    if (!src) return;
-
-    const wrap = document.createElement('div');
-    wrap.id = 'capyLinkModal';
-    wrap.style.cssText = `
-      position:fixed; inset:0; background:rgba(0,0,0,.7);
-      display:flex; align-items:center; justify-content:center; z-index:2147483647;
-    `;
-    const panel = document.createElement('div');
-    panel.style.cssText = `
-      width:min(100vw - 40px, 1100px); height:min(100vh - 40px, 720px);
-      background:#0b0b0e; border:1px solid rgba(99,102,241,.4); border-radius:16px; overflow:hidden;
-      box-shadow:0 20px 80px rgba(0,0,0,.6);
-    `;
-    const bar = document.createElement('div');
-    bar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:rgba(24,24,27,.9); color:#e5e7eb;';
-    bar.innerHTML = `<strong style="font:600 14px Inter,system-ui">CapyLink</strong>
-      <button id="capyClose" style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;padding:6px 10px;color:#fff;cursor:pointer">
-        Fechar
-      </button>`;
-
-    const iframe = document.createElement('iframe');
-    iframe.src = src;
-    iframe.style.cssText = 'width:100%; height:100%; border:0; display:block;';
-    panel.appendChild(bar);
-    panel.appendChild(iframe);
-    wrap.appendChild(panel);
-    document.body.appendChild(wrap);
-
-    on($('#capyClose', bar), 'click', () => wrap.remove());
-    // Prefill após carregar
-    on(iframe, 'load', () => {
-      const shared = loadSharedState();
-      if (!shared) return;
-      try {
-        const doc = iframe.contentWindow.document;
-        if (which === 'concilia') {
-          const ta = doc.getElementById('caseDescription');
-          if (ta) ta.value = shared.prefillForCase || '';
-        } else if (which === 'cronos') {
-          const ta = doc.getElementById('documentInput');
-          if (ta) ta.value = shared.prefillForDeadlines || '';
-        } else if (which === 'clt') {
-          // Não vou disparar automaticamente chat; só deixo o texto pronto no input para não assustar
-          const inp = doc.getElementById('user-input');
-          if (inp) inp.value = shared.prefillForCLT || '';
-        }
-      } catch (e) { /* cross-origin? ignore */ }
-    });
-  }
-
-  /* ---------- lógica: CapyAudiências detecta “resumo pronto”, notifica e cria Dock ---------- */
-  async function initAudiencias() {
-    const decisions = document.getElementById('decisionsOutput');
-    const steps     = document.getElementById('nextStepsOutput');
-    const parties   = document.getElementById('partiesOutput');
-    const ataInput  = document.getElementById('ataInput');
-
-    if (!decisions || !steps || !parties) return;
-
-    function isMeaningful(text) {
-      if (!text) return false;
-      const t = text.trim().toLowerCase();
-      return t && !/^analisando\.\.\.|erro|nenhuma/.test(t);
-    }
-    function extractListText(el) {
-      // pega texto limpo das ULs/PLAIN
-      const clone = el.cloneNode(true);
-      // remove tags e junta linhas
-      return (clone.textContent || '').trim();
-    }
-
-    function buildSharedPayload() {
-      const src = (window.parsedResultCache || null); // global no CapyAudiências
-      const decisionsTxt = extractListText(decisions);
-      const stepsTxt     = extractListText(steps);
-      const partiesTxt   = extractListText(parties);
-      const resumoOk = src || (isMeaningful(decisionsTxt) || isMeaningful(stepsTxt));
-      if (!resumoOk) return null;
-
-      // Prefills para cada ferramenta
-      const prefillForCase =
-        `-- Principais Decisões:\n${decisionsTxt || '- (não informado)'}\n\n` +
-        `-- Próximos Passos:\n${stepsTxt || '- (não informado)'}\n\n` +
-        `-- Partes:\n${partiesTxt || '- (não informado)'}\n`;
-
-      const prefillForDeadlines =
-        `${decisionsTxt ? 'PRINCIPAIS TRECHOS RELEVANTES:\n' + decisionsTxt + '\n\n' : ''}` +
-        `${stepsTxt ? 'POSSÍVEIS PRAZOS / PRÓXIMOS PASSOS:\n' + stepsTxt + '\n\n' : ''}` +
-        `${partiesTxt ? 'PARTES ENVOLVIDAS:\n' + partiesTxt + '\n' : ''}`;
-
-      const prefillForCLT =
-        `Analise sob a ótica da CLT o resumo abaixo (contrato/emprego/FGTS etc.). ` +
-        `Aponte obrigações, direitos e riscos:\n\n${prefillForCase}`;
-
-      return {
-        from: 'CapyAudiências',
-        rawAta: (ataInput && ataInput.value) || '',
-        parsed: window.parsedResultCache || null,
-        decisionsTxt, stepsTxt, partiesTxt,
-        prefillForCase, prefillForDeadlines, prefillForCLT,
-        ts: Date.now()
-      };
-    }
-
-    let alreadyNotified = false;
-    const observer = new MutationObserver(async () => {
-      const payload = buildSharedPayload();
-      if (!payload || alreadyNotified) return;
-      // Debounce curto para evitar pegar “meio render”
-      await sleep(350);
-      const again = buildSharedPayload();
-      if (!again) return;
-
-      saveSharedState(again);
-      alreadyNotified = true;
-
-      // Toast com call-to-actions
-      showToast(`
-        <div style="display:flex; gap:10px; align-items:flex-start">
-          <div style="font-size:18px;margin-top:2px">✅</div>
-          <div>
-            <div style="font-weight:700;color:#a5b4fc;margin-bottom:4px">Resumo pronto!</div>
-            <div style="opacity:.9;margin-bottom:8px">Você pode avançar para a próxima etapa sem sair desta página.</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap">
-              <button data-open="concilia" style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyConciliador</button>
-              <button data-open="cronos"   style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCronos</button>
-              <button data-open="clt"      style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCLT</button>
-            </div>
-          </div>
-        </div>
-      `, NOTIFY_MS);
-
-      // clique nos botões do toast
-      const area = document.getElementById('notificationArea') || document.getElementById('capyLinkNotifyArea');
-      if (area) {
-        area.querySelectorAll('[data-open]').forEach(btn =>
-          btn.addEventListener('click', (e) => {
-            const w = e.currentTarget.getAttribute('data-open');
-            openTool(w);
-          })
-        );
-      }
-
-      // Cria dock flutuante amigável à leitura
-      createDock();
-    });
-    observer.observe(decisions, { subtree:true, childList:true, characterData:true });
-    observer.observe(steps,     { subtree:true, childList:true, characterData:true });
-    observer.observe(parties,   { subtree:true, childList:true, characterData:true });
-  }
-
-  /* ---------- nas outras páginas: se houver state salvo, sugere continuar ---------- */
-  function initOtherPages() {
-    const shared = loadSharedState();
-    if (!shared) return;
-
-    // CapyConciliador: se o textarea estiver vazio, sugira prefill
-    if (IS_CONCILIADOR) {
-      const ta = document.getElementById('caseDescription');
-      if (ta && !ta.value.trim()) ta.value = shared.prefillForCase || '';
-    }
-    // CapyCronos
-    if (IS_CRONOS) {
-      const ta = document.getElementById('documentInput');
-      if (ta && !ta.value.trim()) ta.value = shared.prefillForDeadlines || '';
-    }
-    // CapyCLT – só prepara o prompt
-    if (IS_CLT) {
-      const inp = document.getElementById('user-input');
-      if (inp && !inp.value.trim()) inp.value = shared.prefillForCLT || '';
-    }
-  }
-
-  /* ---------- boot ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (IS_AUDIENCIAS) initAudiencias();
-    else initOtherPages();
-  });
-})();
-</script>
-<script>
-  window.capyAutomation?.emitAction({
-    toolId:'CapyAudiencias',
-    tag:'analysis_complete',
-    category:'Jurídico',
-    message:'Ata analisada. Continuar com Resumo, Prazos ou Acordo?'
-  });
-</script>
-
-
 </body>
-
 </html>
+

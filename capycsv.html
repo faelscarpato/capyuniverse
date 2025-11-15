@@ -1,101 +1,82 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
   <title>CapyCSV — CapyUniverse</title>
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-navigation.js" defer></script>
+
   <style>
-    :root{ --glass: rgba(255,255,255,.06); --glass-border: rgba(255,255,255,.1) }
-    html{background: radial-gradient(1200px 800px at 80% -10%, #1a2030 0%, #0b0f14 60%), #0b0f14;}
-    body{color:#e6edf3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans',sans-serif;}
-    .font-syne{font-family:'Syne',sans-serif} .font-mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
-    .glass{background:var(--glass);backdrop-filter:blur(18px);border:1px solid var(--glass-border);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
-    .sidebar-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(18px);border-right:1px solid var(--glass-border)}
-    .sidebar-link.active{background:#6366f1;color:#fff;font-weight:600}
-    .input{background:#27272a;border:1px solid #3f3f46;color:#e4e4e7;border-radius:.5rem}
-    .input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.45)}
-    .btn{background:#2563eb;color:#fff;border-radius:.5rem;padding:.625rem .9rem;font-weight:700} .btn:hover{background:#1d4ed8}
-    .chip{background:rgba(255,255,255,.06);border:1px solid var(--glass-border);padding:.4rem .6rem;border-radius:.6rem}
-    .dropzone{position:relative;border:2px dashed rgba(71,85,105,.5);border-radius:1.25rem;padding:2rem;text-align:center;cursor:pointer}
-    .dropzone.dragover{outline:2px dashed #7c5cff;outline-offset:-6px}
-    .hidden-input{position:absolute;inset:0;opacity:0}
-    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}.scrollbar-thin::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:60px}
+    .dropzone { border: 2px dashed #ffffff33; transition: background-color 0.3s; }
+    .dropzone.dragover { background-color: #ffffff11; }
   </style>
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
-<body class="min-h-screen flex flex-col text-[15px]">
-  <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-    <div class="flex items-center">
-      <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
-      <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+<body class="min-h-screen flex flex-col">
+  <header class="cu-header">
+    <div class="cu-brand">
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+            <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+        </a>
+        <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyCSV</span>
     </div>
-    <div class="flex items-center">
-      <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-      <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+    <div class="flex items-center gap-2">
+        <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
     </div>
   </header>
 
-  <div class="flex flex-1 pt-16">
-    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+  <div class="flex flex-1">
+    <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+      <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
     </aside>
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
-      <section class="glass border-zinc-800 p-6">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+      <section class="cu-panel p-4 sm:p-6">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold font-syne text-emerald-400">CapyCSV 🧹</h1>
-          <p class="text-zinc-300 mt-1">Limpe, una e exporte dados CSV/XLSX no navegador.</p>
+          <h1 class="text-3xl font-bold" style="color: var(--cu-cyan);">CapyCSV 🧹</h1>
+          <p class="text-cu-text-dim mt-1">Limpe, una e exporte dados CSV/XLSX no navegador.</p>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-5">
           <div class="lg:col-span-2 space-y-4">
-            <div class="glass p-4 border border-zinc-800">
-              <div id="csvDrop" class="dropzone">
-                <input id="csvInput" type="file" accept=".csv,.tsv,.txt,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple class="hidden-input">
-                <p class="text-zinc-300"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste CSV/XLSX aqui ou <span class="underline">clique para selecionar</span>.</p>
+            <div class="cu-panel bg-transparent p-4">
+              <div id="csvDrop" class="dropzone p-5 text-center">
+                <input id="csvInput" type="file" accept=".csv,.tsv,.txt,.xlsx" multiple class="absolute inset-0 opacity-0 cursor-pointer">
+                <p class="text-cu-text-dim"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste CSV/XLSX ou <span class="underline">clique</span>.</p>
               </div>
             </div>
 
-            <div class="glass p-3 border border-zinc-800">
+            <div class="cu-panel bg-transparent p-3">
               <div class="flex flex-wrap gap-2 mb-2">
-                <span class="chip text-xs">Delimitador:
-                  <select id="delim" class="input ml-2 px-2 py-1 text-xs">
-                    <option value="auto">auto</option><option value=",">,</option><option value=";">;</option><option value="\t">Tab</option><option value="|">|</option>
-                  </select>
-                </span>
-                <label class="chip text-xs flex items-center gap-2"><input id="trimCells" type="checkbox" class="accent-indigo-500">Trim células</label>
-                <label class="chip text-xs flex items-center gap-2"><input id="removeEmpty" type="checkbox" class="accent-indigo-500">Remover linhas vazias</label>
-                <span class="chip text-xs">Cabeçalho:
-                  <select id="headerCase" class="input ml-2 px-2 py-1 text-xs">
-                    <option value="keep">manter</option><option value="title">Title Case</option><option value="snake">snake_case</option><option value="lower">lowercase</option>
-                  </select>
-                </span>
+                <select id="delim" class="cu-select text-xs"><option value="auto">Delimitador: Auto</option><option value=",">,</option><option value=";">;</option><option value="\t">Tab</option></select>
+                <label class="cu-chip text-xs"><input id="trimCells" type="checkbox" class="accent-purple-500 mr-2">Trim</label>
+                <label class="cu-chip text-xs"><input id="removeEmpty" type="checkbox" class="accent-purple-500 mr-2">Remover vazias</label>
+                <select id="headerCase" class="cu-select text-xs"><option value="keep">Cabeçalho: Manter</option><option value="title">Title Case</option><option value="snake">snake_case</option></select>
               </div>
               <div class="flex gap-2">
-                <button id="btnApply" class="btn"><i class="fa-solid fa-broom mr-2"></i>Aplicar limpeza</button>
-                <button id="btnExportCSV" class="btn bg-sky-600 hover:bg-sky-700"><i class="fa-solid fa-file-csv mr-2"></i>Exportar CSV</button>
-                <button id="btnExportXLSX" class="btn bg-amber-600 hover:bg-amber-700"><i class="fa-solid fa-file-excel mr-2"></i>Exportar XLSX</button>
+                <button id="btnApply" class="cu-btn primary"><i class="fa-solid fa-broom mr-2"></i>Limpar</button>
+                <button id="btnExportCSV" class="cu-btn"><i class="fa-solid fa-file-csv mr-2"></i>CSV</button>
+                <button id="btnExportXLSX" class="cu-btn"><i class="fa-solid fa-file-excel mr-2"></i>XLSX</button>
               </div>
             </div>
 
-            <div id="preview" class="overflow-auto glass p-3 border border-zinc-800 max-h-[60vh]"></div>
+            <div id="preview" class="overflow-auto cu-panel bg-transparent p-3 max-h-[60vh] scrollbar-thin"></div>
           </div>
 
           <div class="space-y-4">
-            <div class="glass p-4 border border-zinc-800">
-              <h3 class="font-semibold mb-2 text-zinc-200">Arquivos</h3>
-              <ul id="fileList" class="text-sm text-zinc-300 space-y-1"></ul>
-              <button id="btnMerge" class="btn w-full mt-2"><i class="fa-solid fa-layer-group mr-2"></i>Unir datasets</button>
+            <div class="cu-panel bg-transparent p-4">
+              <h3 class="font-semibold mb-2">Arquivos</h3>
+              <ul id="fileList" class="text-sm space-y-1"></ul>
+              <button id="btnMerge" class="cu-btn w-full mt-2"><i class="fa-solid fa-layer-group mr-2"></i>Unir</button>
             </div>
-            <div class="glass p-4 border border-zinc-800">
-              <h3 class="font-semibold mb-2 text-zinc-200">Status</h3>
-              <p id="status" class="text-zinc-400 text-sm">Nenhum arquivo.</p>
+            <div class="cu-panel bg-transparent p-4">
+              <h3 class="font-semibold mb-2">Status</h3>
+              <p id="status" class="text-cu-text-dim text-sm">Nenhum arquivo.</p>
             </div>
           </div>
         </div>
@@ -103,39 +84,92 @@
     </main>
   </div>
 
-  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
-
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    // ===== Sidebar + API modal =====
-    const API_KEY_STORAGE_KEY='capyUniverseApiKey_gemini';
-    const dom={sidebar:document.getElementById('sidebar'),sidebarToggleBtn:document.getElementById('sidebarToggleBtn'),sidebarOverlay:document.getElementById('sidebarOverlay'),apiKeysModal:document.getElementById('apiKeysModal'),openApiKeysModalButton:document.getElementById('openApiKeysModalButton')};
-    async function renderSidebar(currentPageId){try{const r=await fetch('tools.json');const data=await r.json();const cats={};data.forEach(t=>{let c=t.category;if(typeof c==='string')c=[c];(c||[]).forEach(cat=>{(cats[cat]=cats[cat]||[]).push(t);});});dom.sidebar.innerHTML='';const home=document.createElement('a');home.href='index.html';home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300';home.innerHTML='<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"text-purple-400\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><polyline points=\"9 22 9 12 15 12 15 22\"></polyline></svg><span>Página Inicial</span>';dom.sidebar.appendChild(home);for(const name in cats){const box=document.createElement('div');box.className='mb-1';const btn=document.createElement('button');btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md';btn.innerHTML=`<span class='font-semibold text-sm'>${name}</span><svg class='w-4 h-4 transform transition-transform duration-200' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'></path></svg>`;const content=document.createElement('div');content.className='category-content pl-3 pt-0.5 space-y-0.5';cats[name].forEach(t=>{const a=document.createElement('a');a.href=t.pageUrl;const icon=t.icon?t.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class=\"w-5 h-5 mr-2\"></span>';a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white ${t.id===currentPageId?'active':'text-gray-400'}`;a.innerHTML=icon+`<span>${t.title}</span>`;content.appendChild(a);});btn.addEventListener('click',()=>{content.classList.toggle('expanded');btn.querySelector('svg').classList.toggle('rotate-180');});if(cats[name].some(t=>t.id===currentPageId)){content.classList.add('expanded');btn.querySelector('svg').classList.add('rotate-180');}box.appendChild(btn);box.appendChild(content);dom.sidebar.appendChild(box);}}catch(e){dom.sidebar.innerHTML='<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';} }
-    function setupApiKeyModal(){const html=`<div class='glass border-zinc-800 p-7 rounded-2xl w-full max-w-md'><div class='flex justify-between items-center mb-4'><h2 class='text-lg font-bold text-purple-400 font-syne'>Gerenciar Chaves de API</h2><button id='closeApiKeysModalButton' class='text-gray-400 hover:text-white text-2xl'>&times;</button></div><div class='space-y-3'><div class='p-3 border border-zinc-700 rounded-md bg-zinc-900'><h3 class='text-md font-medium text-sky-400 mb-1.5'>Google Gemini</h3><label class='block text-xs font-medium text-gray-300 mb-1'>Sua Chave API Gemini:</label><div class='flex'><input id='geminiApiKeyInputModal' type='password' placeholder='Cole sua chave API aqui' class='input w-full rounded-r-none'><button id='saveGeminiKey' class='bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white'>Salvar</button></div><p class='text-xs text-zinc-400 mt-2'>Sua chave é salva localmente.</p></div></div></div>`;dom.apiKeysModal.innerHTML=html;document.getElementById('openApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.remove('hidden'));document.getElementById('closeApiKeysModalButton')?.addEventListener('click',()=>dom.apiKeysModal.classList.add('hidden'));document.getElementById('saveGeminiKey')?.addEventListener('click',()=>{const v=document.getElementById('geminiApiKeyInputModal').value.trim();if(v){localStorage.setItem(API_KEY_STORAGE_KEY,v);alert('Chave API salva!');dom.apiKeysModal.classList.add('hidden');}else alert('Insira uma chave.')});}
-    function baseBoot(currentPageId){renderSidebar(currentPageId);setupApiKeyModal();dom.sidebarToggleBtn?.addEventListener('click',()=>{dom.sidebar.classList.toggle('-translate-x-full');dom.sidebarOverlay.classList.toggle('hidden');});dom.sidebarOverlay?.addEventListener('click',()=>{dom.sidebar.classList.add('-translate-x-full');dom.sidebarOverlay.classList.add('hidden');});}
+    const $ = s => document.querySelector(s);
+    const state = { datasets: [], headers: [], merged: [] };
 
-    // ===== CapyCSV =====
-    const $=(s,e=document)=>e.querySelector(s); const $$=(s,e=document)=>Array.from(e.querySelectorAll(s));
-    const state={datasets:[],headers:[],merged:[]};
-    function autoDelim(str){const c=[',',';','\\t','|'];let best=',',bc=0;for(const d of c){const cnt=(str.match(new RegExp(d==='\\t'?'\\t':d,'g'))||[]).length;if(cnt>bc){bc=cnt;best=d;}}return best;}
-    async function readFile(file){const ext=file.name.toLowerCase().split('.').pop();if(ext==='xlsx'){const ab=await file.arrayBuffer();const wb=XLSX.read(ab,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const json=XLSX.utils.sheet_to_json(ws,{header:1});return json;}else{const text=await file.text();const delimSel=$('#delim').value;const delimiter=delimSel==='auto'?autoDelim(text):(delimSel==='\\t'?'\\t':delimSel);const parsed=Papa.parse(text,{delimiter,skipEmptyLines:false});return parsed.data;}}
-    function renderFiles(){const ul=$('#fileList');ul.innerHTML='';state.datasets.forEach(d=>{const li=document.createElement('li');li.innerHTML=`<span class='chip'>${d.name}</span> <span class='text-xs text-zinc-400'>${d.rows.length} linhas × ${d.rows[0]?.length||0} col</span>`;ul.appendChild(li);});$('#status').textContent=state.datasets.length?'Arquivos carregados.':'Nenhum arquivo.';}
-    function preview(rows){const maxRows=100;const wrap=$('#preview');if(!rows.length){wrap.innerHTML='<p class="text-zinc-400">Sem dados.</p>';return;}const tbl=document.createElement('table');tbl.className='w-full text-sm';const thead=document.createElement('thead');const trh=document.createElement('tr');(rows[0]||[]).forEach(h=>{const th=document.createElement('th');th.className='text-left sticky top-0 bg-zinc-900/70 px-2 py-1';th.textContent=String(h??'');trh.appendChild(th);});thead.appendChild(trh);tbl.appendChild(thead);const tb=document.createElement('tbody');rows.slice(1,maxRows).forEach(r=>{const tr=document.createElement('tr');r.forEach(c=>{const td=document.createElement('td');td.className='px-2 py-1 border-b border-zinc-800';td.textContent=String(c??'');tr.appendChild(td);});tb.appendChild(tr);});tbl.appendChild(tb);wrap.innerHTML='';wrap.appendChild(tbl);}
-    function transformHeaders(h){const m=$('#headerCase').value;const norm=s=>String(s||'').trim();if(m==='keep')return h.map(norm);if(m==='lower')return h.map(x=>norm(x).toLowerCase());if(m==='snake')return h.map(x=>norm(x).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''));if(m==='title')return h.map(x=>norm(x).toLowerCase().replace(/(^|\\s)\\S/g,t=>t.toUpperCase()));}
-    function clean(rows){if(!rows.length)return rows;let out=rows.map(r=>r.map(c=>{$('#trimCells').checked?(c=String(c??'').trim()):0;return c;}));if($('#removeEmpty').checked){out=out.filter((r,i)=>i===0||r.some(c=>String(c??'').trim()!==''));}out[0]=transformHeaders(out[0]);return out;}
-    function mergeDatasets(){if(!state.datasets.length)return;const all=[];state.datasets.forEach(ds=>all.push(...ds.rows.slice(1)));const headers=state.datasets[0].rows[0];state.merged=[headers,...all];preview(state.merged);$('#status').textContent=`Merge concluído: ${all.length} linhas.`;}
-    function toCSV(rows,del=','){return rows.map(r=>r.map(v=>{const s=String(v??'');const need=s.includes(del)||s.includes('\"')||s.includes('\\n');return need?('\"'+s.replace(/\"/g,'\"\"')+'\"'):s;}).join(del)).join('\\n');}
-    document.getElementById('btnApply').addEventListener('click',()=>{if(!state.datasets.length)return alert('Carregue um arquivo.');state.datasets=state.datasets.map(ds=>({name:ds.name,rows:clean(ds.rows)}));preview(state.datasets[0].rows);$('#status').textContent='Limpeza aplicada.';});
-    document.getElementById('btnMerge').addEventListener('click',mergeDatasets);
-    document.getElementById('btnExportCSV').addEventListener('click',()=>{const rows=state.merged.length?state.merged:(state.datasets[0]?.rows||[]);if(!rows.length)return alert('Nada para exportar.');const csv=toCSV(rows,',');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='capy.csv';a.click();});
-    document.getElementById('btnExportXLSX').addEventListener('click',()=>{const rows=state.merged.length?state.merged:(state.datasets[0]?.rows||[]);if(!rows.length)return alert('Nada para exportar.');const ws=XLSX.utils.aoa_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Dados');const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='capy.xlsx';a.click();});
-    const drop=document.getElementById('csvDrop'),input=document.getElementById('csvInput');drop.addEventListener('click',()=>input.click());
-    ;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('dragover');}));
-    ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('dragover');}));
-    drop.addEventListener('drop',async e=>{const files=Array.from(e.dataTransfer.files);for(const f of files){const rows=await readFile(f);state.datasets.push({name:f.name,rows});}renderFiles();preview(state.datasets[0].rows);});
-    input.addEventListener('change',async e=>{const files=Array.from(e.target.files);for(const f of files){const rows=await readFile(f);state.datasets.push({name:f.name,rows});}renderFiles();preview(state.datasets[0].rows);});
-    baseBoot('CapyCSV');
+    async function readFile(file) {
+        if (file.name.toLowerCase().endsWith('.xlsx')) {
+            const ab = await file.arrayBuffer();
+            const wb = XLSX.read(ab, {type: 'array'});
+            return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
+        } else {
+            const text = await file.text();
+            const delim = $('#delim').value === 'auto' ? Papa.parse(text, {preview: 1}).meta.delimiter : $('#delim').value;
+            return Papa.parse(text, {delimiter: delim, skipEmptyLines: false}).data;
+        }
+    }
+
+    function renderFiles() {
+        $('#fileList').innerHTML = state.datasets.map(d => `<li><span class="cu-chip text-xs">${d.name}</span></li>`).join('');
+        $('#status').textContent = `${state.datasets.length} arquivo(s) carregado(s).`;
+    }
+
+    function preview(rows) {
+        const wrap = $('#preview');
+        if (!rows.length) return wrap.innerHTML = '<p>Sem dados.</p>';
+        const table = `<table><thead><tr>${rows[0].map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.slice(1, 100).map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+        wrap.innerHTML = table;
+    }
+
+    function clean(rows) {
+        let out = $('#trimCells').checked ? rows.map(r => r.map(c => String(c || '').trim())) : rows;
+        if ($('#removeEmpty').checked) out = out.filter((r, i) => i === 0 || r.some(c => String(c || '').trim()));
+        const headerCase = $('#headerCase').value;
+        if (headerCase !== 'keep') out[0] = out[0].map(h => headerCase === 'lower' ? h.toLowerCase() : headerCase === 'snake' ? h.toLowerCase().replace(/\W+/g, '_') : h.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()));
+        return out;
+    }
+
+    async function handleFiles(files) {
+        for (const f of files) {
+            const rows = await readFile(f);
+            state.datasets.push({ name: f.name, rows });
+        }
+        renderFiles();
+        preview(state.datasets[0].rows);
+    }
+
+    document.getElementById('btnApply').addEventListener('click', () => {
+        state.datasets = state.datasets.map(ds => ({ ...ds, rows: clean(ds.rows) }));
+        preview(state.datasets[0].rows);
+    });
+
+    document.getElementById('btnMerge').addEventListener('click', () => {
+        if (state.datasets.length < 2) return alert('Carregue pelo menos 2 arquivos para unir.');
+        const allRows = state.datasets.flatMap(ds => ds.rows.slice(1));
+        state.merged = [state.datasets[0].rows[0], ...allRows];
+        preview(state.merged);
+    });
+
+    function exportFile(format) {
+        const rows = state.merged.length ? state.merged : state.datasets[0]?.rows;
+        if (!rows) return alert('Nenhum dado para exportar.');
+        const filename = `capy.${format}`;
+        if (format === 'csv') {
+            const csv = Papa.unparse(rows);
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+        } else if (format === 'xlsx') {
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+            const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([out], { type: 'application/octet-stream' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+        }
+    }
+
+    document.getElementById('btnExportCSV').addEventListener('click', () => exportFile('csv'));
+    document.getElementById('btnExportXLSX').addEventListener('click', () => exportFile('xlsx'));
+
+    const dropzone = document.getElementById('csvDrop');
+    dropzone.addEventListener('click', () => document.getElementById('csvInput').click());
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', e => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+    document.getElementById('csvInput').addEventListener('change', e => handleFiles(e.target.files));
   </script>
 </body>
 </html>
+

@@ -1,677 +1,191 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CapyConverter - CapyUniverse</title>
-    <!-- Tailwind and fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Favicon -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
-    <!-- jsPDF for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-9Ck6hbSdvxFeaO2+RzkNwC7t975WsZLXiZNIvzLA2bpiPc5vpWdoXk0xgjufyGaXBefguvXtbT4GfkdovxG24Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- JSZip for ZIP creation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js" integrity="sha512-pt/pI4sNqknKQqJ/3BKV+Yy4WivJM/kSZ2yxUECZnQTgQf2hZS3zp2G0t7Exa0H2Zyydb34Pt5NWm2ZxVegXwQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+    <link rel="stylesheet" href="cu-style.css">
+    <script src="cu-navigation.js" defer></script>
+
     <style>
-        /* Root variables to match CapyUniverse aesthetic */
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-accent: #fbbf24;
-        }
-
-        html {
-            background: var(--dark-gradient);
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--text-primary);
-            background: var(--dark-gradient);
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .font-syne { font-family: 'Syne', sans-serif; }
-        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
-
-        /* Glass effect utilities */
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 1.5rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .glass:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .sidebar-glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid var(--glass-border);
-        }
-
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); }
-
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .category-content.expanded { max-height: 1500px; }
-        .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; }
-
-        /* Converter specific styling */
-        .dropzone {
-            position: relative;
-            border: 2px dashed rgba(71, 85, 105, 0.5);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .dropzone.dragover {
-            outline: 2px dashed #7c5cff;
-            outline-offset: -6px;
-        }
-
-        .hidden-input { position: absolute; inset: 0; opacity: 0; }
-
-        .grid-card {
-            display: flex;
-            flex-direction: column;
-            border-radius: 1rem;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .grid-card img {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-        }
-
-        .grid-card .card-body {
-            padding: 1rem;
-            font-size: 0.875rem;
-        }
+        .dropzone { border: 2px dashed #ffffff33; transition: background-color 0.3s; }
+        .dropzone.dragover { background-color: #ffffff11; }
+        .grid-card { display: flex; flex-direction: column; border-radius: var(--cu-radius); overflow: hidden; background: var(--cu-card); }
     </style>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-3FFD7ZEBN1');
-    </script>
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
 
-<body class="dark min-h-screen flex flex-col text-[15px]">
-    <!-- Header as in CapyUniverse -->
-    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-        <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+<body class="min-h-screen flex flex-col">
+    <header class="cu-header">
+        <div class="cu-brand">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+            </a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyConverter</span>
         </div>
-        <div class="flex items-center">
-            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        <div class="flex items-center gap-2">
+            <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
         </div>
     </header>
 
-    <div class="flex flex-1 pt-16">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    <div class="flex flex-1">
+        <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+            <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
         </aside>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
-        <!-- Main content area -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+            <section class="cu-panel p-4 sm:p-6 flex flex-col h-full">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-blue-400">CapyConverter 🌀</h1>
-                    <p class="text-zinc-300 mt-1">Converta imagens, documentos e outros arquivos com a calma de uma capivara.</p>
+                    <h1 class="text-3xl font-bold" style="color: var(--cu-cyan);">CapyConverter 🌀</h1>
+                    <p class="text-cu-text-dim mt-1">Converta imagens, documentos e outros arquivos.</p>
                 </div>
 
                 <div class="max-w-4xl mx-auto w-full space-y-8">
-                    <!-- Controls -->
-                    <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
+                    <div class="cu-panel bg-transparent p-4">
                         <div class="grid md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
-                                <label class="text-sm text-zinc-300">Formato de saída</label>
-                                <div class="mt-1 grid grid-cols-2 sm:grid-cols-6 gap-2">
-                                    <button data-format="image/png" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">PNG</button>
-                                    <button data-format="image/jpeg" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">JPG</button>
-                                    <button data-format="image/webp" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">WebP</button>
-                                    <button data-format="image/avif" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">AVIF*</button>
-                                    <button data-format="application/pdf" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">PDF</button>
-                                    <button data-format="application/zip" class="fmt btnfmt px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 ring-1 ring-zinc-700">ZIP</button>
+                                <label class="text-sm text-cu-text-dim">Formato de saída</label>
+                                <div class="mt-1 grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                    <button data-format="image/png" class="fmt cu-btn">PNG</button>
+                                    <button data-format="image/jpeg" class="fmt cu-btn">JPG</button>
+                                    <button data-format="image/webp" class="fmt cu-btn">WebP</button>
+                                    <button data-format="application/pdf" class="fmt cu-btn">PDF</button>
+                                    <button data-format="application/zip" class="fmt cu-btn">ZIP</button>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-sm text-zinc-300">Qualidade (JPG/WebP/AVIF)</label>
-                                <input id="quality" type="range" min="0.1" max="1" step="0.05" value="0.9" class="w-full accent-indigo-500" />
-                                <div class="text-xs text-slate-400 mt-1"><span id="qval">0.90</span></div>
+                                <label class="text-sm text-cu-text-dim">Qualidade</label>
+                                <input id="quality" type="range" min="0.1" max="1" step="0.05" value="0.9" class="w-full accent-purple-500">
+                                <div class="text-xs text-cu-text-dim mt-1"><span id="qval">0.90</span></div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="text-sm text-zinc-300">Largura máx.</label>
-                                    <input id="maxW" type="number" inputmode="numeric" class="w-full mt-1 px-3 py-2 rounded-xl bg-white/5 ring-1 ring-zinc-700" placeholder="auto" />
-                                </div>
-                                <div>
-                                    <label class="text-sm text-zinc-300">Altura máx.</label>
-                                    <input id="maxH" type="number" inputmode="numeric" class="w-full mt-1 px-3 py-2 rounded-xl bg-white/5 ring-1 ring-zinc-700" placeholder="auto" />
-                                </div>
-                                <label class="col-span-2 inline-flex items-center gap-2 text-sm text-zinc-300 mt-1">
-                                    <input id="keepExif" type="checkbox" disabled class="accent-indigo-500"> Manter EXIF (não suportado — canvas remove metadados)
-                                </label>
+                                <div><label class="text-sm text-cu-text-dim">Largura</label><input id="maxW" type="number" class="cu-input w-full mt-1" placeholder="auto"></div>
+                                <div><label class="text-sm text-cu-text-dim">Altura</label><input id="maxH" type="number" class="cu-input w-full mt-1" placeholder="auto"></div>
                             </div>
                         </div>
                         <div class="mt-4 flex items-center gap-3">
-                            <button id="btnConvertAll" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Converter tudo</button>
-                            <a href="#" id="btnExportAll" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white ring-1 ring-zinc-700"><i class="fa-solid fa-download mr-2"></i>Baixar convertidos</a>
-                            <span id="supportBadge" class="text-xs text-zinc-400">Suporte AVIF: <em id="avifSupport">testando…</em></span>
+                            <button id="btnConvertAll" class="cu-btn primary"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Converter tudo</button>
+                            <a href="#" id="btnExportAll" class="cu-btn"><i class="fa-solid fa-download mr-2"></i>Baixar tudo</a>
                         </div>
                     </div>
 
-                    <!-- Dropzone -->
-                    <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
-                        <div id="dropzone" class="dropzone">
-                            <input id="fileInput" type="file" accept="*/*" multiple class="hidden-input" />
-                            <p class="text-zinc-300"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste e solte seus arquivos aqui ou <span class="underline">clique para selecionar</span>.</p>
-                            <p class="text-xs text-zinc-400 mt-2">Suporta imagens (PNG, JPG/JPEG, WebP, GIF, SVG, AVIF*), PDFs, arquivos de texto (TXT, CSV), ZIP e outros tipos básicos. AVIF depende do suporte do navegador.</p>
-                        </div>
+                    <div id="dropzone" class="dropzone cu-panel bg-transparent p-5 text-center">
+                        <input id="fileInput" type="file" multiple class="absolute inset-0 opacity-0 cursor-pointer" />
+                        <p class="text-cu-text-dim"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste e solte ou <span class="underline">clique para selecionar</span>.</p>
                     </div>
 
-                    <!-- Lista de arquivos convertidos -->
                     <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
-                    <!-- Template para cartão -->
                     <template id="cardTmpl">
                         <div class="grid-card">
-                            <div class="aspect-video bg-black/30 grid place-items-center overflow-hidden">
-                                <img class="preview max-h-full" alt="preview" />
-                                <span class="icon-placeholder text-4xl"></span>
-                            </div>
-                            <div class="card-body space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <div class="truncate text-sm text-slate-300 filename">arquivo</div>
-                                    <span class="text-xs px-2 py-1 rounded-lg bg-white/5 ring-1 ring-zinc-700 mono format">—</span>
+                            <div class="aspect-video bg-black/30 grid place-items-center overflow-hidden"><img class="preview max-h-full"/><span class="icon-placeholder text-4xl"></span></div>
+                            <div class="p-4 space-y-2 text-sm">
+                                <div class="flex justify-between"><div class="truncate filename"></div><span class="format badge"></span></div>
+                                <div class="text-xs text-cu-text-dim dims"></div>
+                                <div class="flex gap-2 pt-1">
+                                    <button class="btnConvert cu-btn primary text-sm"><i class="fa-solid fa-repeat mr-2"></i>Converter</button>
+                                    <a class="btnDownload cu-btn text-sm" download><i class="fa-solid fa-download mr-2"></i>Baixar</a>
                                 </div>
-                                <div class="text-xs text-slate-400 dims">—</div>
-                                <div class="flex items-center gap-2 pt-1">
-                                    <button class="btnConvert px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm"><i class="fa-solid fa-repeat mr-2"></i>Converter</button>
-                                    <a class="btnDownload px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white ring-1 ring-zinc-700 text-sm" download><i class="fa-solid fa-download mr-2"></i>Baixar</a>
-                                </div>
-                                <div class="text-xs text-slate-400 status"></div>
+                                <div class="text-xs text-cu-text-dim status"></div>
                             </div>
                         </div>
                     </template>
-
-                    <footer class="text-center text-xs text-slate-400 pt-4">
-                        *O formato AVIF depende do suporte do navegador. Novos formatos como PDF e ZIP podem exigir bibliotecas extras. Nada sai do seu dispositivo.
-                    </footer>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Modal de Chaves API -->
-    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
-
     <script>
-        // === State and selectors ===
-        const $ = (sel, el=document) => el.querySelector(sel);
-        const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
-        const state = {
-            fmt: localStorage.getItem('capyconv_fmt') || 'image/png',
-            quality: parseFloat(localStorage.getItem('capyconv_q') || '0.9'),
-            maxW: parseInt(localStorage.getItem('capyconv_w') || '') || null,
-            maxH: parseInt(localStorage.getItem('capyconv_h') || '') || null,
-            files: [],
-            avifSupported: false,
-        };
+        const $ = sel => document.querySelector(sel), $$ = sel => Array.from(document.querySelectorAll(sel));
+        const state = { fmt: 'image/png', quality: 0.9, maxW: null, maxH: null, files: [] };
 
-        // === Helper functions ===
-        function setFmt(fmt){
+        function setFmt(fmt) {
             state.fmt = fmt;
-            localStorage.setItem('capyconv_fmt', fmt);
-            $$('.btnfmt').forEach(b=>{
-                if(b.dataset.format===fmt){ b.classList.add('bg-indigo-600','text-white'); }
-                else { b.classList.remove('bg-indigo-600','text-white'); }
-            });
+            $$('.btnfmt').forEach(b => b.classList.toggle('primary', b.dataset.format === fmt));
         }
 
-        function formatBytes(bytes){
-            if(bytes===0) return '0 B';
-            const k=1024, sizes=['B','KB','MB','GB'];
-            const i=Math.floor(Math.log(bytes)/Math.log(k));
-            return parseFloat((bytes/Math.pow(k,i)).toFixed(2))+' '+sizes[i];
-        }
-
-        async function detectAVIF(){
-            return new Promise(resolve=>{
-                const c=document.createElement('canvas');
-                const ok = !!c.toDataURL && c.toDataURL('image/avif').startsWith('data:image/avif');
-                resolve(ok);
-            });
-        }
-
-        function readFileAsDataURL(file){
-            return new Promise((res, rej)=>{
-                const r=new FileReader();
-                r.onload = ()=> res(r.result);
-                r.onerror = rej;
-                r.readAsDataURL(file);
-            });
-        }
-
-        function drawToCanvas(img, maxW, maxH){
-            let {width, height} = img;
-            if(maxW || maxH){
-                const ratio = width/height;
-                if(maxW && (!maxH || width/height >= maxW/(maxH||maxW))){
-                    if(width>maxW){ height = Math.round(maxW/ratio); width = maxW; }
-                } else if(maxH){
-                    if(height>maxH){ width = Math.round(maxH*ratio); height = maxH; }
-                }
-            }
-            const canvas=document.createElement('canvas');
-            canvas.width = Math.max(1, width);
-            canvas.height = Math.max(1, height);
-            const ctx=canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            return canvas;
-        }
-
-        async function convertFile(file, filename){
-            // Convert according to selected output format (state.fmt)
-            const mimeOut = state.fmt;
-            // If the output is image and input is image
-            if(mimeOut.startsWith('image/')){
-                // If input is not image, skip
-                if(!file.type.startsWith('image/') && !/\.svg$/i.test(file.name)){
-                    throw new Error('Apenas imagens podem ser convertidas para este formato.');
-                }
+        async function convertFile(file, filename) {
+            if (state.fmt.startsWith('image/')) {
+                if (!file.type.startsWith('image/')) throw new Error('Apenas imagens podem ser convertidas.');
                 const img = await createImageBitmap(file);
-                const canvas = drawToCanvas(img, state.maxW, state.maxH);
-                let mime = mimeOut;
-                if(mime==='image/avif' && !state.avifSupported){ mime = 'image/webp'; }
-                let q = state.quality;
-                if(mime==='image/png') q = undefined;
-                return new Promise((resolve)=>{
-                    if(canvas.toBlob){
-                        canvas.toBlob((blob)=>{
-                            const ext = mime.split('/')[1] || 'bin';
-                            const outName = filename.replace(/\.[^.]+$/, '') + '.' + (mime==='image/jpeg'?'jpg':ext);
-                            resolve({blob, outName, width: canvas.width, height: canvas.height});
-                        }, mime, q);
-                    } else {
-                        const data = canvas.toDataURL(mime, q);
-                        const arr = atob(data.split(',')[1]);
-                        const u8 = new Uint8Array(arr.length);
-                        for(let i=0;i<arr.length;i++) u8[i] = arr.charCodeAt(i);
-                        const blob = new Blob([u8], {type:mime});
-                        const ext = mime.split('/')[1] || 'bin';
-                        const outName = filename.replace(/\.[^.]+$/, '') + '.' + (mime==='image/jpeg'?'jpg':ext);
-                        resolve({blob, outName, width: canvas.width, height: canvas.height});
-                    }
-                });
-            }
-            // PDF conversion
-            if(mimeOut === 'application/pdf'){
-                // Use jsPDF library (already loaded) to create PDF
+                const canvas = document.createElement('canvas');
+                let { width, height } = img;
+                if (state.maxW && width > state.maxW) { height *= state.maxW / width; width = state.maxW; }
+                if (state.maxH && height > state.maxH) { width *= state.maxH / height; height = state.maxH; }
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                return new Promise(resolve => canvas.toBlob(blob => resolve({ blob, outName: filename.replace(/\.[^.]+$/, `.${state.fmt.split('/')[1]}`), width, height }), state.fmt, state.fmt === 'image/png' ? undefined : state.quality));
+            } else if (state.fmt === 'application/pdf') {
                 const { jsPDF } = window.jspdf;
-                if(file.type.startsWith('image/')){
-                    // Convert image to PDF
-                    const dataURL = await readFileAsDataURL(file);
+                const pdf = new jsPDF({ unit: 'pt' });
+                if (file.type.startsWith('image/')) {
+                    const dataURL = await new Promise(r => { const reader = new FileReader(); reader.onload = () => r(reader.result); reader.readAsDataURL(file); });
                     const imgObj = await createImageBitmap(file);
-                    const pdf = new jsPDF({ unit: 'pt', format: [imgObj.width, imgObj.height] });
-                    // Determine image type (JPEG, PNG, WebP, AVIF) for addImage
-                    let imgType = 'PNG';
-                    if(/image\/(jpeg|jpg)/i.test(file.type)) imgType = 'JPEG';
-                    else if(/image\/webp/i.test(file.type)) imgType = 'WEBP';
-                    else if(/image\/png/i.test(file.type)) imgType = 'PNG';
-                    // jsPDF expects DataURI
-                    pdf.addImage(dataURL, imgType, 0, 0, imgObj.width, imgObj.height);
-                    const pdfBlob = pdf.output('blob');
-                    const outName = filename.replace(/\.[^.]+$/, '') + '.pdf';
-                    return { blob: pdfBlob, outName };
-                } else if(file.type.startsWith('text/') || /\.(csv|txt|md)$/i.test(file.name)){
-                    // Convert text to PDF
-                    const text = await file.text();
-                    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
-                    const margin = 40;
-                    const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
-                    const lines = pdf.splitTextToSize(text, pageWidth);
-                    pdf.setFontSize(12);
-                    pdf.text(lines, margin, margin);
-                    const pdfBlob = pdf.output('blob');
-                    const outName = filename.replace(/\.[^.]+$/, '') + '.pdf';
-                    return { blob: pdfBlob, outName };
+                    pdf.addImage(dataURL, file.type.split('/')[1].toUpperCase(), 0, 0, imgObj.width, imgObj.height);
                 } else {
-                    throw new Error('Formato de entrada não suportado para PDF.');
+                    pdf.text(await file.text(), 40, 40);
                 }
-            }
-            // ZIP conversion: create a zip containing the original file
-            if(mimeOut === 'application/zip'){
+                return { blob: pdf.output('blob'), outName: filename.replace(/\.[^.]+$/, '.pdf') };
+            } else if (state.fmt === 'application/zip') {
                 const zip = new JSZip();
-                const arrayBuffer = await file.arrayBuffer();
-                zip.file(filename, arrayBuffer);
-                const blob = await zip.generateAsync({ type: 'blob' });
-                const outName = filename.replace(/\.[^.]+$/, '') + '.zip';
-                return { blob, outName };
+                zip.file(filename, await file.arrayBuffer());
+                return { blob: await zip.generateAsync({ type: 'blob' }), outName: filename.replace(/\.[^.]+$/, '.zip') };
             }
-            throw new Error('Formato de saída não suportado.');
+            throw new Error('Formato não suportado.');
         }
 
-        function downloadBlob(blob, name){
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = name;
-            a.click();
-            setTimeout(()=> URL.revokeObjectURL(url), 2000);
-        }
-
-        function createCard(file){
-            const tpl = $('#cardTmpl');
-            const node = tpl.content.firstElementChild.cloneNode(true);
+        function createCard(file) {
+            const node = $('#cardTmpl').content.firstElementChild.cloneNode(true);
             $('.filename', node).textContent = file.name;
             $('.format', node).textContent = file.type || 'desconhecido';
-            const imgEl = $('.preview', node);
-            const iconEl = $('.icon-placeholder', node);
-            const dimsEl = $('.dims', node);
-            const status = $('.status', node);
-            const btnConv = $('.btnConvert', node);
-            const btnDown = $('.btnDownload', node);
-
-            // Show preview or icon depending on type
-            if(file.type.startsWith('image/') || /\.svg$/i.test(file.name)){
-                readFileAsDataURL(file).then(async (data)=>{
-                    imgEl.src = data;
-                    iconEl.remove();
-                    try{
-                        const bmp = await createImageBitmap(file);
-                        dimsEl.textContent = `${bmp.width}×${bmp.height} • ${formatBytes(file.size)}`;
-                    }catch{ dimsEl.textContent = `${formatBytes(file.size)}`; }
-                });
+            if (file.type.startsWith('image/')) {
+                $('.preview', node).src = URL.createObjectURL(file);
+                $('.icon-placeholder', node).remove();
             } else {
-                // Use FontAwesome icons for other types
-                imgEl.remove();
-                const ext = file.name.split('.').pop().toLowerCase();
-                let ic = 'fa-file';
-                if(ext === 'pdf') ic = 'fa-file-pdf';
-                else if(ext === 'zip') ic = 'fa-file-zipper';
-                else if(['txt','csv','md'].includes(ext)) ic = 'fa-file-lines';
-                iconEl.innerHTML = `<i class="fa-solid ${ic}"></i>`;
-                dimsEl.textContent = `${formatBytes(file.size)}`;
+                $('.preview', node).remove();
+                $('.icon-placeholder', node).innerHTML = '<i class="fas fa-file"></i>';
             }
-
-            btnConv.addEventListener('click', async ()=>{
-                status.textContent = 'Convertendo...';
-                btnConv.disabled = true;
-                try{
+            $('.btnConvert', node).onclick = async () => {
+                const status = $('.status', node); status.textContent = 'Convertendo...';
+                try {
                     const result = await convertFile(file, file.name);
                     const url = URL.createObjectURL(result.blob);
-                    btnDown.href = url;
-                    btnDown.download = result.outName;
-                    let msg = `Pronto: ${result.outName}`;
-                    if(result.width && result.height){ msg += ` (${result.width}×${result.height}, ${formatBytes(result.blob.size)})`; }
-                    status.textContent = msg;
-                }catch(err){
-                    console.error(err);
-                    status.textContent = err.message || 'Falha ao converter.';
-                }finally{
-                    btnConv.disabled = false;
-                }
-            });
+                    const btnDown = $('.btnDownload', node); btnDown.href = url; btnDown.download = result.outName;
+                    status.textContent = `Pronto: ${result.outName}`;
+                } catch (err) { status.textContent = err.message; }
+            };
             return node;
         }
 
-        function addFiles(fileList){
-            const grid = $('#grid');
-            const files = Array.from(fileList);
+        function addFiles(files) {
             state.files.push(...files);
-            files.forEach(f=> grid.appendChild(createCard(f)));
-        }
-
-        // === UI Wiring ===
-        const fileInput = $('#fileInput');
-        const dropzone = $('#dropzone');
-        const btnConvertAll = $('#btnConvertAll');
-        const btnExportAll = $('#btnExportAll');
-        const qInput = $('#quality');
-        const qVal = $('#qval');
-
-        // load persisted controls
-        qInput.value = state.quality;
-        qVal.textContent = state.quality.toFixed(2);
-        if(state.maxW) $('#maxW').value = state.maxW;
-        if(state.maxH) $('#maxH').value = state.maxH;
-        setFmt(state.fmt);
-
-        detectAVIF().then(s=>{
-            state.avifSupported = s;
-            $('#avifSupport').textContent = s? 'Sim' : 'Não';
-        });
-
-        $$('#maxW, #maxH').forEach(inp=>{
-            inp.addEventListener('change', ()=>{
-                state.maxW = parseInt($('#maxW').value)||null;
-                state.maxH = parseInt($('#maxH').value)||null;
-                localStorage.setItem('capyconv_w', state.maxW||'');
-                localStorage.setItem('capyconv_h', state.maxH||'');
-            });
-        });
-
-        qInput.addEventListener('input', (e)=>{
-            state.quality = parseFloat(e.target.value);
-            qVal.textContent = state.quality.toFixed(2);
-            localStorage.setItem('capyconv_q', state.quality);
-        });
-
-        $$('.btnfmt').forEach(b=> b.addEventListener('click', ()=> setFmt(b.dataset.format)));
-
-        dropzone.addEventListener('click', ()=> fileInput.click());
-        fileInput.addEventListener('change', (e)=> addFiles(e.target.files));
-        ['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev, (e)=>{ e.preventDefault(); dropzone.classList.add('dragover'); }));
-        ['dragleave','drop'].forEach(ev=> dropzone.addEventListener(ev, (e)=>{ e.preventDefault(); dropzone.classList.remove('dragover'); }));
-        dropzone.addEventListener('drop', (e)=>{ addFiles(e.dataTransfer.files); });
-
-        btnConvertAll.addEventListener('click', async ()=>{
-            const cards = $$('#grid > div');
-            for(const card of cards){
-                const btn = $('.btnConvert', card);
-                if(btn){ btn.click(); await new Promise(r=> setTimeout(r, 30)); }
-            }
-        });
-
-        btnExportAll.addEventListener('click', ()=>{
-            const links = $$('#grid .btnDownload[href]');
-            if(!links.length){ alert('Nenhum arquivo convertido ainda. Clique em Converter tudo primeiro.'); return; }
-            let i=0;
-            const next=()=>{
-                if(i>=links.length) return;
-                links[i++].click();
-                setTimeout(next, 200);
-            };
-            next();
-        });
-
-        // === Sidebar and API Modal logic (copied from CapyBulário) ===
-        const currentPageId = 'CapyConverter';
-        let apiKey = '';
-        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
-        const dom = {
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            apiKeysModal: document.getElementById('apiKeysModal'),
-            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-            errorMessage: null
-        };
-
-        async function renderSidebar() {
-            if (!dom.sidebar) return;
-            try {
-                const response = await fetch('tools.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} ao tentar carregar tools.json`);
-                }
-                const toolsData = await response.json();
-                const categories = {};
-                toolsData.forEach(tool => {
-                    let toolCategories = tool.category;
-                    if (typeof toolCategories === 'string') {
-                        toolCategories = [toolCategories];
-                    }
-                    if (Array.isArray(toolCategories)) {
-                        toolCategories.forEach(cat => {
-                            if (!categories[cat]) categories[cat] = [];
-                            categories[cat].push(tool);
-                        });
-                    }
-                });
-                dom.sidebar.innerHTML = '';
-                // Home link
-                const homeLinkSidebar = document.createElement('a');
-                homeLinkSidebar.href = 'index.html';
-                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-gray-700 transition-colors duration-150 text-gray-300`;
-                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-                dom.sidebar.appendChild(homeLinkSidebar);
-                for (const categoryName in categories) {
-                    const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'mb-1';
-                    const categoryButton = document.createElement('button');
-                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-gray-700 rounded-md focus:outline-none transition-colors duration-150';
-                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                    const categoryContent = document.createElement('div');
-                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
-                    categories[categoryName].forEach(tool => {
-                        const link = document.createElement('a');
-                        link.href = tool.pageUrl;
-                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-gray-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
-                        categoryContent.appendChild(link);
-                    });
-                    categoryButton.addEventListener('click', () => {
-                        categoryContent.classList.toggle('expanded');
-                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
-                    });
-                    if (categories[categoryName].some(tool => tool.id === currentPageId)) {
-                        categoryContent.classList.add('expanded');
-                        categoryButton.querySelector('svg').classList.add('rotate-180');
-                    }
-                    categoryDiv.appendChild(categoryButton);
-                    categoryDiv.appendChild(categoryContent);
-                    dom.sidebar.appendChild(categoryDiv);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar ferramentas para a sidebar:', error);
-                dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu. Verifique "tools.json".</p>';
-            }
-        }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) { apiKey = savedKey; }
-        }
-
-        function setupApiKeyModal() {
-            const modalHTML = `
-                <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
-                        <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                            <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                             <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
-                            <div class="flex">
-                                <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
-                                <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>
-                            </div>
-                            <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada para as funcionalidades de IA.</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            if(dom.apiKeysModal) dom.apiKeysModal.innerHTML = modalHTML;
-            const closeBtn = document.getElementById('closeApiKeysModalButton');
-            const saveBtn = document.getElementById('saveGeminiKey');
-            const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
-            if (dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-            if (closeBtn) closeBtn.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-            if (saveBtn && apiKeyInput) {
-                saveBtn.addEventListener('click', () => {
-                    const key = apiKeyInput.value.trim();
-                    if(key) { 
-                        localStorage.setItem(API_KEY_STORAGE_KEY, key); 
-                        apiKey = key; 
-                        alert('Chave API do Gemini salva!'); 
-                        dom.apiKeysModal.classList.add('hidden'); 
-                    } else { 
-                        alert('Por favor, insira uma chave API.');
-                    }
-                });
-            }
+            files.forEach(f => $('#grid').appendChild(createCard(f)));
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar();
-            setupApiKeyModal();
-            loadApiKey();
-            if(dom.sidebarToggleBtn){
-                dom.sidebarToggleBtn.addEventListener('click', () => { 
-                    dom.sidebar.classList.toggle('-translate-x-full'); 
-                    dom.sidebarOverlay.classList.toggle('hidden'); 
-                });
-            }
-            if(dom.sidebarOverlay){
-                dom.sidebarOverlay.addEventListener('click', () => { 
-                    dom.sidebar.classList.add('-translate-x-full'); 
-                    dom.sidebarOverlay.classList.add('hidden'); 
-                });
-            }
+            setFmt(state.fmt);
+            $('#quality').oninput = e => { state.quality = +e.target.value; $('#qval').textContent = state.quality.toFixed(2); };
+            $('#maxW').onchange = () => state.maxW = parseInt($('#maxW').value) || null;
+            $('#maxH').onchange = () => state.maxH = parseInt($('#maxH').value) || null;
+            $$('.btnfmt').forEach(b => b.onclick = () => setFmt(b.dataset.format));
+            $('#dropzone').onclick = () => $('#fileInput').click();
+            $('#fileInput').onchange = e => addFiles(e.target.files);
+            const dz = $('#dropzone');
+            ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+            ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+            dz.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+            $('#btnConvertAll').onclick = () => $$('#grid .btnConvert').forEach(btn => btn.click());
+            $('#btnExportAll').onclick = () => $$('#grid .btnDownload[href]').forEach((link, i) => setTimeout(() => link.click(), i * 200));
         });
     </script>
 </body>
 </html>
+

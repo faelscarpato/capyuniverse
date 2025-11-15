@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,157 +8,98 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+    <link rel="stylesheet" href="cu-style.css">
+    <script src="cu-navigation.js" defer></script>
 
     <style>
-        html { background: #121217; }
-        body {
-            font-family: 'Inter', sans-serif;
-            color: #e5e7eb;
-            background-image: url('https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/patter4.png');
-            background-repeat: repeat;
-            background-size: 300px;
-            background-color: #18181b;
-        }
-        .font-syne { font-family: 'Syne', sans-serif; }
+        /* Scoped styles for CapyConciliador */
         .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
-        .glass {
-            background: rgba(24, 24, 27, 0.6);
-            backdrop-filter: blur(12px);
-            border-radius: 1.2rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(63, 63, 70, 0.4);
-        }
-        .sidebar-glass { 
-             background: rgba(39, 39, 42, 0.7);
-             backdrop-filter: blur(15px);
-             border-right: 1px solid rgba(63, 63, 70, 0.3);
-        }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 60px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(24, 24, 27, 0.1); }
-        
-        .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .category-content.expanded { max-height: 1500px; }
-        .sidebar-link.active { background-color: #6366f1; color: white; font-weight: 600; }
 
         .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .input-field, .input-textarea {
-            background-color: #27272a; border: 1px solid #3f3f46; color: #e4e4e7;
-            font-family: 'JetBrains Mono', monospace; border-radius: 0.375rem; padding: 0.625rem 0.75rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        /* Custom styles for range inputs to match UI 3.0 */
+        input[type=range] {
+            -webkit-appearance: none; appearance: none; width: 100%; background: transparent;
         }
-        .input-field:focus, .input-textarea:focus {
-            outline: none; border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
-        }
-
-        .action-button, .export-button, .draft-button {
-            transition: background-color 0.3s;
-        }
-        .action-button { background-color: #4f46e5; color: white; }
-        .action-button:hover { background-color: #4338ca; }
-        .action-button:disabled { background-color: #3730a3; opacity: 0.7; cursor: not-allowed; }
-        .export-button { background-color: #059669; color: white; }
-        .export-button:hover { background-color: #047857; }
-        .export-button:disabled { background-color: #065f46; opacity: 0.7; cursor: not-allowed; }
-        .draft-button { background-color: #8b5cf6; color: white; font-size: 0.75rem; padding: 0.5rem 0.75rem;}
-        .draft-button:hover { background-color: #7c3aed; }
-
-        .suggestion-card {
-            background-color: #1f2937; border: 1px solid #374151;
-        }
-        .suggestion-card h3 { color: #93c5fd; }
-        .suggestion-card strong { color: #a5b4fc; }
-
-        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track {
-            background: #3f3f46; height: 4px; border-radius: 2px;
+            background: var(--cu-bg-1); height: 6px; border-radius: 3px; border: 1px solid #ffffff1a;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; margin-top: -6px;
-            background: #818cf8; height: 16px; width: 16px; border-radius: 50%;
-            cursor: pointer; border: 2px solid #312e81;
+            -webkit-appearance: none; appearance: none; margin-top: -7px;
+            background: var(--premium-gradient); height: 20px; width: 20px; border-radius: 50%;
+            cursor: pointer; border: 2px solid var(--cu-bg-0);
+            transition: transform .2s;
         }
-        input[type=range]::-moz-range-track {
-            background: #3f3f46; height: 4px; border-radius: 2px;
+        input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.1); }
+        input[type=range]::-moz-range-track { 
+            background: var(--cu-bg-1); height: 6px; border-radius: 3px; border: 1px solid #ffffff1a;
         }
         input[type=range]::-moz-range-thumb {
-            background: #818cf8; height: 16px; width: 16px; border-radius: 50%;
-            cursor: pointer; border: 2px solid #312e81;
+            background: var(--premium-gradient); height: 20px; width: 20px; border-radius: 50%;
+            cursor: pointer; border: 2px solid var(--cu-bg-0);
         }
-
     </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3FFD7ZEBN1');
-</script>
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
 </head>
 
-<body class="dark min-h-screen flex flex-col text-[15px]">
+<body class="min-h-screen flex flex-col">
 
-    <header class="bg-zinc-900/80 backdrop-blur-md shadow-lg flex justify-between items-center fixed top-0 left-0 right-0 z-40 h-16 px-4 sm:px-6">
-        <div class="flex items-center">
-            <button id="sidebarToggleBtn" class="lg:hidden mr-3 p-2 rounded-md text-gray-300 hover:bg-zinc-700 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <a href="index.html" class="text-xl sm:text-2xl font-bold text-gray-100 hover:text-purple-400 transition-colors font-syne">CapyUniverse IA</a>
+    <header class="cu-header">
+        <div class="cu-brand">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+            </a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyConciliador</span>
         </div>
-        <div class="flex items-center">
-            <button onclick="window.location.href='index.html'" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white mr-2 transition-colors">Início</button>
-            <button id="openApiKeysModalButton" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md text-xs sm:text-sm font-semibold text-white transition-colors">Chaves API</button>
+        <div class="flex items-center gap-2">
+            <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
         </div>
     </header>
     
-    <div class="flex flex-1 pt-16"> 
-        <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-            <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
-        </aside>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+    <div id="notificationArea"></div>
 
-        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full"> 
-            <section class="glass border-zinc-800 p-6 flex flex-col h-full">
+    <div class="flex flex-1">
+        <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+            <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
+        </aside>
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+            <section class="cu-panel p-4 sm:p-6 flex flex-col h-full">
                 <div class="text-center mb-8">
-                    <h1 class="text-3xl font-bold font-syne text-indigo-400">CapyConcilia Fácil 🤝</h1>
-                    <p class="text-zinc-300 mt-1">Gere sugestões de acordo com a inteligência e serenidade de uma capivara mediadora.</p>
+                    <h1 class="text-3xl font-bold" style="color: var(--cu-purple)">CapyConcilia Fácil 🤝</h1>
+                    <p class="text-cu-text-dim mt-1">Gere sugestões de acordo com a inteligência e serenidade de uma capivara mediadora.</p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
                     <!-- Painel Esquerdo: Entrada e Parâmetros -->
                     <div class="lg:col-span-2 flex flex-col space-y-6">
-                        <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
-                             <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4">1. Descrição do Caso</h2>
-                             <textarea id="caseDescription" class="input-textarea w-full" rows="8" placeholder="Insira a descrição completa do caso aqui, incluindo os fatos, as alegações das partes e os valores envolvidos..."></textarea>
+                        <div class="cu-panel bg-transparent p-5">
+                             <h2 class="text-xl font-bold text-cu-text pb-2 mb-4">1. Descrição do Caso</h2>
+                             <textarea id="caseDescription" class="cu-textarea w-full" rows="8" placeholder="Insira a descrição completa do caso aqui, incluindo os fatos, as alegações das partes e os valores envolvidos..."></textarea>
                         </div>
-                         <div class="bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
-                             <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4">2. Parâmetros da Negociação</h2>
+                         <div class="cu-panel bg-transparent p-5">
+                             <h2 class="text-xl font-bold text-cu-text pb-2 mb-4">2. Parâmetros da Negociação</h2>
                              <div class="space-y-4">
                                 <div>
-                                    <label for="riskSlider" class="flex justify-between text-sm font-medium text-zinc-400 mb-1"><span>Risco do Caso</span><span id="riskValue" class="font-jetbrains text-indigo-300">50%</span></label>
+                                    <label for="riskSlider" class="flex justify-between text-sm font-medium text-cu-text-dim mb-1"><span>Risco do Caso</span><span id="riskValue" class="font-jetbrains text-purple-300">50%</span></label>
                                     <input type="range" id="riskSlider" min="0" max="100" value="50" class="w-full">
                                 </div>
                                  <div>
-                                    <label for="urgencySlider" class="flex justify-between text-sm font-medium text-zinc-400 mb-1"><span>Urgência de Resolução</span><span id="urgencyValue" class="font-jetbrains text-indigo-300">50%</span></label>
+                                    <label for="urgencySlider" class="flex justify-between text-sm font-medium text-cu-text-dim mb-1"><span>Urgência de Resolução</span><span id="urgencyValue" class="font-jetbrains text-purple-300">50%</span></label>
                                     <input type="range" id="urgencySlider" min="0" max="100" value="50" class="w-full">
                                 </div>
                                  <div>
-                                    <label for="costSlider" class="flex justify-between text-sm font-medium text-zinc-400 mb-1"><span>Custo do Litígio</span><span id="costValue" class="font-jetbrains text-indigo-300">50%</span></label>
+                                    <label for="costSlider" class="flex justify-between text-sm font-medium text-cu-text-dim mb-1"><span>Custo do Litígio</span><span id="costValue" class="font-jetbrains text-purple-300">50%</span></label>
                                     <input type="range" id="costSlider" min="0" max="100" value="50" class="w-full">
                                 </div>
                              </div>
                         </div>
-                        <button id="generateSuggestionsButton" class="action-button font-bold py-2.5 px-4 rounded-md text-base w-full flex items-center justify-center">
+                        <button id="generateSuggestionsButton" class="cu-btn primary text-base w-full">
                             <span class="btn-text">Gerar Sugestões de Acordo</span>
                             <div class="loader hidden ml-2"></div>
                         </button>
@@ -167,25 +108,25 @@
                     <!-- Painel Direito: Resultados -->
                     <div class="lg:col-span-3 space-y-4">
                         <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-syne text-zinc-100">3. Sugestões Geradas pela IA</h2>
-                            <button id="exportSuggestionsButton" class="export-button font-bold py-2 px-3 rounded-md text-xs flex items-center justify-center invisible">
-                                <i class="fas fa-file-word mr-2"></i>Exportar (DOCX)
+                            <h2 class="text-xl font-bold text-cu-text">3. Sugestões Geradas</h2>
+                            <button id="exportSuggestionsButton" class="cu-btn invisible">
+                                <i class="fas fa-file-word mr-2"></i>Exportar
                             </button>
                         </div>
                         <div id="suggestionsContainer" class="space-y-4 max-h-[70vh] overflow-y-auto scrollbar-thin pr-2">
-                           <div class="text-center text-zinc-500 pt-16 flex flex-col items-center">
+                           <div class="text-center text-cu-text-dim pt-16 flex flex-col items-center">
                                <i class="fas fa-gavel text-4xl mb-3"></i>
                                <p>As sugestões de acordo aparecerão aqui.</p>
                            </div>
                         </div>
                         <p id="errorMessage" class="text-red-400 text-sm mt-2 text-center"></p>
 
-                        <!-- Nova Seção para a Minuta -->
-                        <div id="draftContainer" class="hidden mt-6 bg-zinc-800/50 p-5 rounded-lg border border-zinc-700">
-                             <h2 class="text-xl font-syne text-zinc-100 pb-2 mb-4">4. Minuta do Acordo Gerada pela IA</h2>
-                             <div id="draftLoader" class="text-center text-zinc-400 py-8 hidden"><div class="loader inline-block"></div><p class="mt-2">CapyAdvogado está redigindo a minuta...</p></div>
-                             <textarea id="draftOutput" class="input-textarea w-full hidden" rows="12"></textarea>
-                             <button id="copyDraftButton" class="mt-3 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md w-full hidden">
+                        <!-- Seção para a Minuta -->
+                        <div id="draftContainer" class="hidden mt-6 cu-panel bg-transparent p-5">
+                             <h2 class="text-xl font-bold text-cu-text pb-2 mb-4">4. Minuta do Acordo</h2>
+                             <div id="draftLoader" class="text-center text-cu-text-dim py-8 hidden"><div class="loader inline-block"></div><p class="mt-2">CapyAdvogado está redigindo a minuta...</p></div>
+                             <textarea id="draftOutput" class="cu-textarea w-full hidden" rows="12"></textarea>
+                             <button id="copyDraftButton" class="mt-3 cu-btn w-full hidden">
                                 <i class="fas fa-copy mr-2"></i>Copiar Texto da Minuta
                              </button>
                         </div>
@@ -196,8 +137,6 @@
         </main>
     </div>
 
-    <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
-
     <script>
         const currentPageId = 'CapyConciliaFacil'; 
         let apiKey = '';
@@ -206,11 +145,6 @@
 
         const dom = {
             sidebar: document.getElementById('sidebar'),
-            sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-            sidebarOverlay: document.getElementById('sidebarOverlay'),
-            apiKeysModal: document.getElementById('apiKeysModal'),
-            openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-            
             caseDescription: document.getElementById('caseDescription'),
             riskSlider: document.getElementById('riskSlider'),
             urgencySlider: document.getElementById('urgencySlider'),
@@ -218,12 +152,10 @@
             riskValue: document.getElementById('riskValue'),
             urgencyValue: document.getElementById('urgencyValue'),
             costValue: document.getElementById('costValue'),
-            
             generateSuggestionsButton: document.getElementById('generateSuggestionsButton'),
             suggestionsContainer: document.getElementById('suggestionsContainer'),
             exportSuggestionsButton: document.getElementById('exportSuggestionsButton'),
             errorMessage: document.getElementById('errorMessage'),
-
             draftContainer: document.getElementById('draftContainer'),
             draftLoader: document.getElementById('draftLoader'),
             draftOutput: document.getElementById('draftOutput'),
@@ -257,7 +189,7 @@
             }
 
             toggleLoading(dom.generateSuggestionsButton, true, "Gerando...");
-            dom.suggestionsContainer.innerHTML = `<div class="text-center text-zinc-400 pt-16 flex flex-col items-center"><div class="loader"></div><p class="mt-3">CapyConciliador está analisando o caso...</p></div>`;
+            dom.suggestionsContainer.innerHTML = `<div class="text-center text-cu-text-dim pt-16 flex flex-col items-center"><div class="loader"></div><p class="mt-3">CapyConciliador está analisando o caso...</p></div>`;
             dom.exportSuggestionsButton.classList.add('invisible');
             dom.draftContainer.classList.add('hidden');
             lastSuggestions = null;
@@ -327,40 +259,40 @@
         function displaySuggestions(suggestions) {
             dom.suggestionsContainer.innerHTML = '';
             if (!suggestions || suggestions.length === 0) {
-                dom.suggestionsContainer.innerHTML = `<p class="text-center text-zinc-500">Nenhuma sugestão gerada.</p>`;
+                dom.suggestionsContainer.innerHTML = `<p class="text-center text-cu-text-dim">Nenhuma sugestão gerada.</p>`;
                 return;
             }
 
             suggestions.forEach((sugg, index) => {
                 const card = document.createElement('div');
-                card.className = 'suggestion-card p-4 rounded-lg flex flex-col space-y-3 animate-fade-in';
+                card.className = 'cu-panel bg-transparent p-4 flex flex-col space-y-3';
                 
                 card.innerHTML = `
                     <div>
-                        <span class="text-xs font-bold text-indigo-400 uppercase">Sugestão ${index + 1}</span>
+                        <span class="text-xs font-bold text-purple-400 uppercase">Sugestão ${index + 1}</span>
                         <p class="text-2xl font-bold text-white mt-1">${sugg.valorSugerido}</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                             <h3 class="font-semibold text-emerald-300 mb-1">Pontos Fortes</h3>
-                            <ul class="list-disc list-inside text-zinc-300 space-y-1">${sugg.pontosFortes.map(p => `<li>${p}</li>`).join('')}</ul>
+                            <ul class="list-disc list-inside text-cu-text-dim space-y-1">${sugg.pontosFortes.map(p => `<li>${p}</li>`).join('')}</ul>
                         </div>
                         <div>
                             <h3 class="font-semibold text-red-300 mb-1">Pontos Fracos / Concessões</h3>
-                            <ul class="list-disc list-inside text-zinc-300 space-y-1">${sugg.pontosFracos.map(p => `<li>${p}</li>`).join('')}</ul>
+                            <ul class="list-disc list-inside text-cu-text-dim space-y-1">${sugg.pontosFracos.map(p => `<li>${p}</li>`).join('')}</ul>
                         </div>
                     </div>
                     <div>
                         <h3 class="font-semibold text-sky-300 mb-1">Impacto Legal Previsto</h3>
-                        <p class="text-sm text-zinc-300">${sugg.impactoLegal}</p>
+                        <p class="text-sm text-cu-text-dim">${sugg.impactoLegal}</p>
                     </div>
                      <div class="mt-2 self-start">
-                        <button class="draft-button font-semibold rounded-md flex items-center justify-center">
+                        <button class="cu-btn text-sm">
                            ✨ Elaborar Minuta do Acordo
                         </button>
                     </div>
                 `;
-                card.querySelector('.draft-button').addEventListener('click', (e) => {
+                card.querySelector('.cu-btn').addEventListener('click', (e) => {
                     handleDraftAgreement(sugg, e.currentTarget);
                 });
                 dom.suggestionsContainer.appendChild(card);
@@ -441,10 +373,9 @@
         function copyDraftText() {
             dom.draftOutput.select();
             document.execCommand('copy');
-            dom.copyDraftButton.textContent = "Copiado!";
+            dom.copyDraftButton.innerHTML = `<i class="fas fa-check mr-2"></i> Copiado!`;
             setTimeout(() => { dom.copyDraftButton.innerHTML = `<i class="fas fa-copy mr-2"></i>Copiar Texto da Minuta`; }, 2000);
         }
-
 
         function exportSuggestions() {
             if (!lastSuggestions || lastSuggestions.length === 0) {
@@ -490,17 +421,14 @@
         async function renderSidebar() {
             if (!dom.sidebar) return;
             try {
-                const response = await fetch('tools.json'); 
+                const response = await fetch('tools.json');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const toolsData = await response.json();
                 
                 const categories = {};
                 toolsData.forEach(tool => {
-                     // Suporte a múltiplas categorias (array ou string)
                     let toolCategories = tool.category;
-                    if (typeof toolCategories === 'string') {
-                        toolCategories = [toolCategories];
-                    }
+                    if (typeof toolCategories === 'string') toolCategories = [toolCategories];
                     if (Array.isArray(toolCategories)) {
                         toolCategories.forEach(cat => {
                             if (!categories[cat]) categories[cat] = [];
@@ -508,40 +436,38 @@
                         });
                     }
                 });
-                dom.sidebar.innerHTML = ''; 
-                
-                const homeLinkSidebar = document.createElement('a');
-                homeLinkSidebar.href = 'index.html';
-                homeLinkSidebar.className = `sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-zinc-700 transition-colors duration-150 text-gray-300`;
-                homeLinkSidebar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-                dom.sidebar.appendChild(homeLinkSidebar);
+                dom.sidebar.innerHTML = '';
+
+                const homeLink = document.createElement('a');
+                homeLink.href = 'index.html';
+                homeLink.className = 'sidebar-link flex items-center gap-2 p-2 rounded-md';
+                homeLink.innerHTML = `<i class="fas fa-home w-5 text-center text-purple-400"></i><span>Página Inicial</span>`;
+                dom.sidebar.appendChild(homeLink);
 
                 for (const categoryName in categories) {
                     const categoryDiv = document.createElement('div');
-                    categoryDiv.className = 'mb-1';
                     const categoryButton = document.createElement('button');
-                    categoryButton.className = 'w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-zinc-700 rounded-md focus:outline-none transition-colors duration-150';
-                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    categoryButton.className = 'w-full flex justify-between items-center p-2 text-left text-cu-text-dim hover:text-cu-text hover:bg-white/5 rounded-md';
+                    categoryButton.innerHTML = `<span class="font-semibold text-sm">${categoryName}</span><i class="fas fa-chevron-down w-4 h-4 transform transition-transform duration-200"></i>`;
                     const categoryContent = document.createElement('div');
-                    categoryContent.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+                    categoryContent.className = 'category-content pl-3 pt-1 space-y-1';
                     
                     categories[categoryName].forEach(tool => {
                         const link = document.createElement('a');
                         link.href = tool.pageUrl;
-                        const sidebarIconHTML = tool.icon ? tool.icon.replace('w-10 h-10', 'w-5 h-5').replace('mb-2', 'mr-2') : '<span class="w-5 h-5 mr-2"></span>';
-                        link.className = `sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600 hover:text-white transition-colors duration-150 ${tool.id === currentPageId ? 'active' : 'text-gray-400'}`;
-                        link.innerHTML = sidebarIconHTML + `<span>${tool.title}</span>`;
+                        link.className = `sidebar-link flex items-center gap-2 p-1.5 rounded-md text-xs ${tool.id === currentPageId ? 'active' : ''}`;
+                        link.innerHTML = `<span class="w-5 text-center">${tool.icon || '✨'}</span><span>${tool.title}</span>`;
                         categoryContent.appendChild(link);
                     });
 
                     categoryButton.addEventListener('click', () => {
                         categoryContent.classList.toggle('expanded');
-                        categoryButton.querySelector('svg').classList.toggle('rotate-180');
+                        categoryButton.querySelector('i').classList.toggle('rotate-180');
                     });
                     
                     if (categories[categoryName].some(tool => tool.id === currentPageId)) {
                         categoryContent.classList.add('expanded');
-                        categoryButton.querySelector('svg').classList.add('rotate-180');
+                        categoryButton.querySelector('i').classList.add('rotate-180');
                     }
 
                     categoryDiv.appendChild(categoryButton);
@@ -550,68 +476,21 @@
                 }
             } catch (error) {
                 console.error("Erro ao carregar ferramentas para a sidebar:", error);
-                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-500 p-2">Erro ao carregar menu.</p>';
+                if(dom.sidebar) dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
             }
         }
 
         function loadApiKey() {
             const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) { 
-                apiKey = savedKey; 
-                const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
-                if(apiKeyInput) apiKeyInput.value = savedKey; 
+            if(savedKey) {
+                apiKey = savedKey;
             } else {
-                dom.errorMessage.textContent = "Atenção: Chave API Gemini não configurada. A análise de IA não funcionará. Configure-a no menu 'Chaves API'.";
-            }
-        }
-        
-        function setupApiKeyModal() {
-            const modalHTML = `
-                <div class="glass border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-purple-400 font-syne">Gerenciar Chaves de API</h2>
-                        <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
-                            <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
-                             <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">Sua Chave API Gemini:</label>
-                            <div class="flex">
-                                <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave API aqui" class="input-field w-full rounded-r-none">
-                                <button id="saveGeminiKey" class="bg-sky-600 hover:bg-sky-700 px-3 py-1.5 rounded-l-none rounded-r-md text-xs text-white">Salvar</button>
-                            </div>
-                            <p class="text-xs text-zinc-400 mt-2">Sua chave é salva localmente e usada para as funcionalidades de IA.</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            if(dom.apiKeysModal) dom.apiKeysModal.innerHTML = modalHTML;
-
-            const closeBtn = document.getElementById('closeApiKeysModalButton');
-            const saveBtn = document.getElementById('saveGeminiKey');
-            const apiKeyInput = document.getElementById('geminiApiKeyInputModal');
-
-            if (dom.openApiKeysModalButton) dom.openApiKeysModalButton.addEventListener('click', () => dom.apiKeysModal.classList.remove('hidden'));
-            if (closeBtn) closeBtn.addEventListener('click', () => dom.apiKeysModal.classList.add('hidden'));
-            if (saveBtn && apiKeyInput) {
-                saveBtn.addEventListener('click', () => {
-                    const key = apiKeyInput.value.trim();
-                    if(key) { 
-                        localStorage.setItem(API_KEY_STORAGE_KEY, key); 
-                        apiKey = key; 
-                        alert("Chave API do Gemini salva!"); 
-                        dom.apiKeysModal.classList.add('hidden'); 
-                        dom.errorMessage.textContent = "";
-                    } else { 
-                        alert("Por favor, insira uma chave API.");
-                    }
-                });
+                dom.errorMessage.textContent = "Atenção: Chave API Gemini não configurada. A análise de IA não funcionará.";
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderSidebar(); 
-            setupApiKeyModal();
+            renderSidebar();
             loadApiKey();
             
             dom.riskSlider.addEventListener('input', () => updateSliderValue(dom.riskSlider, dom.riskValue));
@@ -621,302 +500,8 @@
             dom.generateSuggestionsButton.addEventListener('click', generateAgreementSuggestions);
             dom.exportSuggestionsButton.addEventListener('click', exportSuggestions);
             dom.copyDraftButton.addEventListener('click', copyDraftText);
-
-
-            if(dom.sidebarToggleBtn){
-                dom.sidebarToggleBtn.addEventListener('click', () => { 
-                    dom.sidebar.classList.toggle('-translate-x-full'); 
-                    dom.sidebarOverlay.classList.toggle('hidden'); 
-                });
-            }
-            if(dom.sidebarOverlay){
-                 dom.sidebarOverlay.addEventListener('click', () => { 
-                    dom.sidebar.classList.add('-translate-x-full'); 
-                    dom.sidebarOverlay.classList.add('hidden'); 
-                });
-            }
         });
     </script>
-<script>
-/* ===== CapyLink v2 – interliga ferramentas, estado no localStorage e UI auxiliar ===== */
-(function () {
-  const LS_KEY = 'capy:audiencia:summary';
-  const NOTIFY_MS = 10000; // 10s
-  const IS_AUDIENCIAS = /CapyAudiências|CapyAudiencias/i.test(document.title);
-  const IS_CONCILIADOR = /CapyConcilia|CapyConciliador/i.test(document.title);
-  const IS_CRONOS = /CapyCronos/i.test(document.title);
-  const IS_CLT = /CapyCLT/i.test(document.title);
-
-  /* ---------- helpers UI ---------- */
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const on = (el, ev, fn) => el && el.addEventListener(ev, fn);
-  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-  function ensureArea() {
-    // Reaproveita notificationArea das páginas que já têm, senão cria o nosso.
-    let area = document.getElementById('notificationArea');
-    if (!area) {
-      area = document.createElement('div');
-      area.id = 'capyLinkNotifyArea';
-      area.style.position = 'fixed';
-      area.style.top = '16px';
-      area.style.right = '16px';
-      area.style.zIndex = '2147483647';
-      document.body.appendChild(area);
-    }
-    return area;
-  }
-
-  function showToast(html, ms = NOTIFY_MS) {
-    const area = ensureArea();
-    const box = document.createElement('div');
-    box.style.cssText =
-      'max-width:360px;background:rgba(17,17,20,.96);border:1px solid rgba(99,102,241,.4);' +
-      'padding:12px 14px;margin-bottom:10px;border-radius:14px;color:#e5e7eb;' +
-      'box-shadow:0 10px 30px rgba(0,0,0,.5);font:500 14px/1.35 Inter,system-ui;';
-    box.innerHTML = html;
-    area.appendChild(box);
-    setTimeout(() => box.remove(), ms);
-  }
-
-  function createDock() {
-    if (document.getElementById('capyDock')) return;
-    const dock = document.createElement('div');
-    dock.id = 'capyDock';
-    dock.style.cssText = `
-      position:fixed; right:18px; bottom:18px; z-index:2147483647;
-      display:flex; flex-direction:column; gap:10px;
-    `;
-    const btnStyle = `
-      width:52px; height:52px; border-radius:9999px; border:1px solid rgba(63,63,70,.6);
-      background:rgba(24,24,27,.88); color:#fff; display:flex; align-items:center; justify-content:center;
-      box-shadow:0 6px 18px rgba(0,0,0,.45); cursor:pointer; backdrop-filter: blur(8px);
-      transition: transform .15s ease, opacity .15s ease;
-    `;
-
-    function makeBtn(title, icon, click) {
-      const b = document.createElement('button');
-      b.setAttribute('aria-label', title);
-      b.title = title;
-      b.style.cssText = btnStyle;
-      b.innerHTML = icon;
-      on(b, 'click', click);
-      on(b, 'mouseenter', () => (b.style.transform = 'translateY(-2px)'));
-      on(b, 'mouseleave', () => (b.style.transform = 'translateY(0)'));
-      return b;
-    }
-
-    const icoConcilia = '<i class="fas fa-handshake"></i>';
-    const icoCronos   = '<i class="fas fa-stopwatch"></i>';
-    const icoCLT      = '<i class="fas fa-scale-balanced"></i>';
-    const icoClose    = '<i class="fas fa-times"></i>';
-
-    dock.appendChild(makeBtn('Abrir CapyConciliador', icoConcilia, () => openTool('concilia')));
-    dock.appendChild(makeBtn('Abrir CapyCronos',     icoCronos,   () => openTool('cronos')));
-    dock.appendChild(makeBtn('Abrir CapyCLT',        icoCLT,      () => openTool('clt')));
-    dock.appendChild(makeBtn('Ocultar atalhos',      icoClose,    () => dock.remove()));
-
-    document.body.appendChild(dock);
-  }
-
-  /* ---------- estado compartilhado ---------- */
-  function saveSharedState(state) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch {}
-  }
-  function loadSharedState() {
-    try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch { return null; }
-  }
-
-  /* ---------- modal embutindo ferramenta (versão “compacta” porém completa) ---------- */
-  function openTool(which) {
-    const map = {
-      concilia: 'capyconciliador.html?embed=1',
-      cronos:   'capycronos.html?embed=1',
-      clt:      'capyclt.html?embed=1'
-    };
-    const src = map[which];
-    if (!src) return;
-
-    const wrap = document.createElement('div');
-    wrap.id = 'capyLinkModal';
-    wrap.style.cssText = `
-      position:fixed; inset:0; background:rgba(0,0,0,.7);
-      display:flex; align-items:center; justify-content:center; z-index:2147483647;
-    `;
-    const panel = document.createElement('div');
-    panel.style.cssText = `
-      width:min(100vw - 40px, 1100px); height:min(100vh - 40px, 720px);
-      background:#0b0b0e; border:1px solid rgba(99,102,241,.4); border-radius:16px; overflow:hidden;
-      box-shadow:0 20px 80px rgba(0,0,0,.6);
-    `;
-    const bar = document.createElement('div');
-    bar.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:rgba(24,24,27,.9); color:#e5e7eb;';
-    bar.innerHTML = `<strong style="font:600 14px Inter,system-ui">CapyLink</strong>
-      <button id="capyClose" style="background:#27272a;border:1px solid #3f3f46;border-radius:8px;padding:6px 10px;color:#fff;cursor:pointer">
-        Fechar
-      </button>`;
-
-    const iframe = document.createElement('iframe');
-    iframe.src = src;
-    iframe.style.cssText = 'width:100%; height:100%; border:0; display:block;';
-    panel.appendChild(bar);
-    panel.appendChild(iframe);
-    wrap.appendChild(panel);
-    document.body.appendChild(wrap);
-
-    on($('#capyClose', bar), 'click', () => wrap.remove());
-    // Prefill após carregar
-    on(iframe, 'load', () => {
-      const shared = loadSharedState();
-      if (!shared) return;
-      try {
-        const doc = iframe.contentWindow.document;
-        if (which === 'concilia') {
-          const ta = doc.getElementById('caseDescription');
-          if (ta) ta.value = shared.prefillForCase || '';
-        } else if (which === 'cronos') {
-          const ta = doc.getElementById('documentInput');
-          if (ta) ta.value = shared.prefillForDeadlines || '';
-        } else if (which === 'clt') {
-          // Não vou disparar automaticamente chat; só deixo o texto pronto no input para não assustar
-          const inp = doc.getElementById('user-input');
-          if (inp) inp.value = shared.prefillForCLT || '';
-        }
-      } catch (e) { /* cross-origin? ignore */ }
-    });
-  }
-
-  /* ---------- lógica: CapyAudiências detecta “resumo pronto”, notifica e cria Dock ---------- */
-  async function initAudiencias() {
-    const decisions = document.getElementById('decisionsOutput');
-    const steps     = document.getElementById('nextStepsOutput');
-    const parties   = document.getElementById('partiesOutput');
-    const ataInput  = document.getElementById('ataInput');
-
-    if (!decisions || !steps || !parties) return;
-
-    function isMeaningful(text) {
-      if (!text) return false;
-      const t = text.trim().toLowerCase();
-      return t && !/^analisando\.\.\.|erro|nenhuma/.test(t);
-    }
-    function extractListText(el) {
-      // pega texto limpo das ULs/PLAIN
-      const clone = el.cloneNode(true);
-      // remove tags e junta linhas
-      return (clone.textContent || '').trim();
-    }
-
-    function buildSharedPayload() {
-      const src = (window.parsedResultCache || null); // global no CapyAudiências
-      const decisionsTxt = extractListText(decisions);
-      const stepsTxt     = extractListText(steps);
-      const partiesTxt   = extractListText(parties);
-      const resumoOk = src || (isMeaningful(decisionsTxt) || isMeaningful(stepsTxt));
-      if (!resumoOk) return null;
-
-      // Prefills para cada ferramenta
-      const prefillForCase =
-        `-- Principais Decisões:\n${decisionsTxt || '- (não informado)'}\n\n` +
-        `-- Próximos Passos:\n${stepsTxt || '- (não informado)'}\n\n` +
-        `-- Partes:\n${partiesTxt || '- (não informado)'}\n`;
-
-      const prefillForDeadlines =
-        `${decisionsTxt ? 'PRINCIPAIS TRECHOS RELEVANTES:\n' + decisionsTxt + '\n\n' : ''}` +
-        `${stepsTxt ? 'POSSÍVEIS PRAZOS / PRÓXIMOS PASSOS:\n' + stepsTxt + '\n\n' : ''}` +
-        `${partiesTxt ? 'PARTES ENVOLVIDAS:\n' + partiesTxt + '\n' : ''}`;
-
-      const prefillForCLT =
-        `Analise sob a ótica da CLT o resumo abaixo (contrato/emprego/FGTS etc.). ` +
-        `Aponte obrigações, direitos e riscos:\n\n${prefillForCase}`;
-
-      return {
-        from: 'CapyAudiências',
-        rawAta: (ataInput && ataInput.value) || '',
-        parsed: window.parsedResultCache || null,
-        decisionsTxt, stepsTxt, partiesTxt,
-        prefillForCase, prefillForDeadlines, prefillForCLT,
-        ts: Date.now()
-      };
-    }
-
-    let alreadyNotified = false;
-    const observer = new MutationObserver(async () => {
-      const payload = buildSharedPayload();
-      if (!payload || alreadyNotified) return;
-      // Debounce curto para evitar pegar “meio render”
-      await sleep(350);
-      const again = buildSharedPayload();
-      if (!again) return;
-
-      saveSharedState(again);
-      alreadyNotified = true;
-
-      // Toast com call-to-actions
-      showToast(`
-        <div style="display:flex; gap:10px; align-items:flex-start">
-          <div style="font-size:18px;margin-top:2px">✅</div>
-          <div>
-            <div style="font-weight:700;color:#a5b4fc;margin-bottom:4px">Resumo pronto!</div>
-            <div style="opacity:.9;margin-bottom:8px">Você pode avançar para a próxima etapa sem sair desta página.</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap">
-              <button data-open="concilia" style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyConciliador</button>
-              <button data-open="cronos"   style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCronos</button>
-              <button data-open="clt"      style="padding:6px 10px;border:1px solid #3f3f46;border-radius:8px;background:#1f1f24;color:#fff;cursor:pointer">Abrir CapyCLT</button>
-            </div>
-          </div>
-        </div>
-      `, NOTIFY_MS);
-
-      // clique nos botões do toast
-      const area = document.getElementById('notificationArea') || document.getElementById('capyLinkNotifyArea');
-      if (area) {
-        area.querySelectorAll('[data-open]').forEach(btn =>
-          btn.addEventListener('click', (e) => {
-            const w = e.currentTarget.getAttribute('data-open');
-            openTool(w);
-          })
-        );
-      }
-
-      // Cria dock flutuante amigável à leitura
-      createDock();
-    });
-    observer.observe(decisions, { subtree:true, childList:true, characterData:true });
-    observer.observe(steps,     { subtree:true, childList:true, characterData:true });
-    observer.observe(parties,   { subtree:true, childList:true, characterData:true });
-  }
-
-  /* ---------- nas outras páginas: se houver state salvo, sugere continuar ---------- */
-  function initOtherPages() {
-    const shared = loadSharedState();
-    if (!shared) return;
-
-    // CapyConciliador: se o textarea estiver vazio, sugira prefill
-    if (IS_CONCILIADOR) {
-      const ta = document.getElementById('caseDescription');
-      if (ta && !ta.value.trim()) ta.value = shared.prefillForCase || '';
-    }
-    // CapyCronos
-    if (IS_CRONOS) {
-      const ta = document.getElementById('documentInput');
-      if (ta && !ta.value.trim()) ta.value = shared.prefillForDeadlines || '';
-    }
-    // CapyCLT – só prepara o prompt
-    if (IS_CLT) {
-      const inp = document.getElementById('user-input');
-      if (inp && !inp.value.trim()) inp.value = shared.prefillForCLT || '';
-    }
-  }
-
-  /* ---------- boot ---------- */
-  document.addEventListener('DOMContentLoaded', () => {
-    if (IS_AUDIENCIAS) initAudiencias();
-    else initOtherPages();
-  });
-})();
-</script>
-
-
 </body>
 </html>
+

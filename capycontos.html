@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyContos — Máquina de Narrativas</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+  <link
+    rel="icon"
+    href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png"
+    type="image/png"
+  />
+
+  <!-- Estética CapyUniverse -->
+  <style>
+    :root {
+      --cu-bg-0: #050816;
+      --cu-bg-1: #0b0f1f;
+      --cu-card: #0f1024cc;
+      --cu-grid: #272a55;
+      --cu-cyan: #22d3ee;
+      --cu-magenta: #f472d0;
+      --cu-amber: #fbbf24;
+      --cu-text: #e5e7eb;
+      --cu-text-dim: #9ca3af;
+      --cu-radius: 16px;
+      --cu-radius-lg: 22px;
+      --cu-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    html { background: var(--cu-bg-0); }
+
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--cu-text);
+      background:
+        radial-gradient(1000px 600px at 70% -10%, rgba(244,114,182,0.27), transparent 60%),
+        radial-gradient(900px 600px at -10% 50%, rgba(56,189,248,0.22), transparent 60%),
+        var(--cu-bg-0);
+    }
+
+    .cu-stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.16) 0 1px, transparent 2px) 0 0/180px 180px,
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,0.12) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle at 40% 80%, rgba(255,255,255,0.10) 0 1px, transparent 2px) 0 0/260px 260px;
+    }
+
+    .cu-stage {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 40vh;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        linear-gradient(to top, rgba(5,8,22,0.8), transparent 70%),
+        repeating-linear-gradient(to right, transparent 0 40px, var(--cu-grid) 40px 41px),
+        repeating-linear-gradient(to top, transparent 0 40px, var(--cu-grid) 40px 41px);
+      mask: linear-gradient(to top, black, transparent 80%);
+    }
+
+    .sidebar-glass {
+      background: linear-gradient(180deg, rgba(17,24,39,0.85), rgba(15,23,42,0.6));
+      backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(148,163,184,0.35);
+    }
+
+    .cu-panel {
+      background: radial-gradient(circle at 0 0, rgba(56,189,248,0.16), transparent 55%),
+                  radial-gradient(circle at 100% 0, rgba(244,114,182,0.18), transparent 55%),
+                  rgba(15,23,42,0.92);
+      border-radius: var(--cu-radius-lg);
+      box-shadow: var(--cu-shadow);
+      border: 1px solid rgba(148,163,184,0.45);
+    }
+
+    .cu-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(to bottom, rgba(15,23,42,0.96), rgba(15,23,42,0.6), transparent);
+      border-bottom: 1px solid rgba(148,163,184,0.35);
+      backdrop-filter: blur(18px);
+    }
+
+    .cu-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cu-appname {
+      font-family: Syne, system-ui, sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.95rem;
+    }
+
+    .cu-chip {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.55);
+      color: #e5e7eb;
+      background: radial-gradient(circle at 0 0, rgba(56,189,248,0.4), transparent 60%);
+    }
+
+    .cu-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      background: radial-gradient(circle at 0 0, rgba(148,163,184,0.28), transparent 55%),
+                  rgba(15,23,42,0.9);
+      color: #e5e7eb;
+      transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+    }
+    .cu-btn:hover {
+      background: radial-gradient(circle at 0 0, rgba(248,250,252,0.22), transparent 55%),
+                  rgba(15,23,42,0.98);
+      border-color: rgba(248,250,252,0.85);
+      transform: translateY(-0.5px);
+    }
+    .cu-btn.primary {
+      border-color: rgba(56,189,248,0.9);
+      background: radial-gradient(circle at 0 0, rgba(56,189,248,0.40), transparent 55%),
+                  linear-gradient(135deg, #0369a1, #0f172a);
+    }
+
+    .cu-input, .cu-select, .cu-textarea {
+      width: 100%;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.9);
+      padding: 0.5rem 0.7rem;
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+    .cu-input:focus, .cu-select:focus, .cu-textarea:focus {
+      border-color: rgba(56,189,248,0.95);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.6);
+      background: rgba(15,23,42,1);
+    }
+    .cu-textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: linear-gradient(120deg, #22d3ee, #8b5cf6);
+      border-radius: 999px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(15,23,42,0.75);
+    }
+  </style>
+
+  <!-- Shared Styles & JS -->
+  <link rel="stylesheet" href="cu-style.css" />
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
+  <div class="cu-stars"></div>
+  <div class="cu-stage"></div>
+
+  <!-- HEADER -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-sm sm:text-base">CapyContos</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">
+        <i class="fas fa-home text-xs"></i>
+        Início
+      </button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 pt-4 min-h-0">
+    <!-- SIDEBAR -->
+    <aside
+      id="sidebar"
+      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full
+             lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg
+             overflow-y-auto pt-4 scrollbar-thin"
+    >
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full" style="padding-top: 1rem;">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8 flex flex-col space-y-6">
+        <!-- Hero / topo -->
+        <header class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-2">
+          <div>
+            <p class="text-xs uppercase tracking-[0.18em] text-sky-300/80 mb-1">
+              Laboratório de Tramas · Obscuras & Afins
+            </p>
+            <h1 class="text-2xl sm:text-3xl font-bold" style="color:#fbbf24;">
+              CapyContos · Máquina de narrativa em episódios
+            </h1>
+            <p class="text-sm text-zinc-300 mt-2 max-w-xl">
+              Configure a persona, o tom e o estilo. A IA escreve cena por cena,
+              mantendo o <span class="text-sky-300 font-semibold">estado da trama</span>.
+              Você decide quando avançar para o próximo trecho ou reescrever o momento atual.
+            </p>
+          </div>
+          <div class="border border-amber-400/50 rounded-2xl px-4 py-3 bg-black/40 text-xs text-amber-100 max-w-xs">
+            <p class="font-semibold text-amber-300 mb-1 flex items-center gap-1">
+              <i class="fas fa-triangle-exclamation text-amber-400"></i>
+              Dica de uso
+            </p>
+            <p class="text-amber-100/90">
+              Ideal para contos sombrios, thrillers psicológicos, diários narrativos
+              e experimentos com as suas próprias personas.
+            </p>
+          </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[380px,1fr] gap-6 min-h-0">
+          <!-- COLUNA ESQUERDA: Configuração da trama -->
+          <aside class="cu-panel p-4 sm:p-5 flex flex-col space-y-4">
+            <h2 class="text-sm font-semibold text-sky-300 mb-1">
+              Configuração da história
+            </h2>
+
+            <div>
+              <label class="block text-xs text-zinc-300 mb-1" for="contoPersonaInput">
+                Protagonista / Persona central
+              </label>
+              <textarea
+                id="contoPersonaInput"
+                class="cu-textarea"
+                rows="3"
+                placeholder="Ex.: Investigadora forense obcecada por padrões de crime ritual, fala em tom contido e analítico, mas com fissuras de obsessão."
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs text-zinc-300 mb-1" for="contoMetaInput">
+                Tema ou motivo central
+              </label>
+              <input
+                id="contoMetaInput"
+                class="cu-input"
+                placeholder="Ex.: culpa, identidade fragmentada, sanatório experimental, IA que manipula lembranças..."
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-zinc-300 mb-1" for="contoGeneroSelect">
+                  Gênero principal
+                </label>
+                <select id="contoGeneroSelect" class="cu-select">
+                  <option value="psicológico sombrio" selected>Psicológico sombrio</option>
+                  <option value="suspense investigativo">Suspense investigativo</option>
+                  <option value="fantasia estranha">Fantasia estranha</option>
+                  <option value="ficção científica">Ficção científica</option>
+                  <option value="diário íntimo">Diário íntimo</option>
+                  <option value="terror sutil">Terror sutil</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-zinc-300 mb-1" for="contoTonalidadeSelect">
+                  Tom emocional
+                </label>
+                <select id="contoTonalidadeSelect" class="cu-select">
+                  <option value="neutro">Neutro controlado</option>
+                  <option value="melancólico" selected>Melancólico</option>
+                  <option value="tenso e paranoico">Tenso e paranoico</option>
+                  <option value="confessional">Confessional</option>
+                  <option value="onírico">Onírico</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-zinc-300 mb-1" for="contoEstiloSelect">
+                  Estilo de linguagem
+                </label>
+                <select id="contoEstiloSelect" class="cu-select">
+                  <option value="enxuto e cinematográfico">Enxuto e cinematográfico</option>
+                  <option value="poético e sensorial">Poético e sensorial</option>
+                  <option value="clínico e técnico">Clínico e técnico</option>
+                  <option value="fluxo de consciência">Fluxo de consciência</option>
+                  <option value="relato policial">Relato policial</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-zinc-300 mb-1" for="contoTamanhoSelect">
+                  Tamanho de cada trecho
+                </label>
+                <select id="contoTamanhoSelect" class="cu-select">
+                  <option value="curto">Curto (~200 palavras)</option>
+                  <option value="medio" selected>Médio (~400 palavras)</option>
+                  <option value="longo">Longo (~700 palavras)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="border border-zinc-700/80 rounded-xl p-3 bg-black/40 text-xs text-zinc-300 space-y-2">
+              <p class="font-semibold text-sky-300 flex items-center gap-1">
+                <i class="fas fa-circle-nodes text-sky-400"></i>
+                Estado da trama
+              </p>
+              <p id="contoStatusText" class="text-zinc-300">
+                Nenhum conto ativo. Configure acima e inicie o primeiro trecho.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button id="btnContoNovo" class="cu-btn primary text-sm">
+                <i class="fas fa-play"></i>
+                Iniciar novo conto
+              </button>
+              <button id="btnContoProximo" class="cu-btn text-sm" disabled>
+                <i class="fas fa-forward-step"></i>
+                Próximo trecho
+              </button>
+              <button id="btnContoReescrever" class="cu-btn text-sm" disabled>
+                <i class="fas fa-pen-nib"></i>
+                Reescrever trecho atual
+              </button>
+            </div>
+          </aside>
+
+          <!-- COLUNA DIREITA: Texto + timeline + áudio -->
+          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <h2 class="text-sm font-semibold text-sky-300 mb-1">Trecho atual</h2>
+                <p class="text-xs text-zinc-400">
+                  A cena abaixo é o último estado da narrativa. Você pode editar manualmente antes de pedir o próximo trecho.
+                </p>
+              </div>
+              <div class="text-right text-xs text-zinc-300">
+                <p id="contoMetaResumo" class="text-[0.7rem] text-zinc-400 italic">
+                  Sem tema definido.
+                </p>
+              </div>
+            </div>
+
+            <textarea
+              id="contoTrechoAtual"
+              class="cu-textarea flex-1 mb-3"
+              placeholder="O primeiro trecho vai aparecer aqui..."
+            ></textarea>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              <button id="btnContoOuvir" class="cu-btn text-sm" disabled>
+                <i class="fas fa-volume-high"></i>
+                Ouvir com CapyNarrativas
+              </button>
+              <button id="btnContoExport" class="cu-btn text-sm" disabled>
+                <i class="fas fa-download"></i>
+                Exportar conto (.txt)
+              </button>
+              <button id="btnContoLimpar" class="cu-btn text-sm" disabled>
+                <i class="fas fa-trash"></i>
+                Limpar conto
+              </button>
+            </div>
+
+            <div class="border border-zinc-700/80 rounded-xl p-3 bg-black/40 flex-1 min-h-[140px]">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-semibold text-zinc-200">
+                  Linha do tempo · Trechos anteriores
+                </h3>
+                <span class="text-[0.7rem] text-zinc-400">
+                  Clique em um trecho para carregá-lo no painel.
+                </span>
+              </div>
+              <ol id="contoTimeline" class="space-y-1 text-xs text-zinc-300 max-h-52 overflow-y-auto scrollbar-thin">
+                <li class="text-zinc-500 text-[0.7rem]">
+                  Nenhum trecho ainda. Gere o primeiro para começar o histórico.
+                </li>
+              </ol>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FAB API (mobile) -->
+  <button
+    id="fabApi"
+    class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50"
+    title="Chaves API"
+  >
+    🔑
+  </button>
+
+  <!-- MODAL API KEY -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] hidden p-4"></div>
+
+  <!-- WIDGET: CapyNarrativas em IFRAME -->
+  <div
+    id="capyNarrOverlay"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-[70] p-4 flex items-center justify-center"
+  >
+    <div class="relative w-full max-w-3xl h-[520px] cu-panel p-2 bg-[#050816]/95 rounded-2xl shadow-2xl">
+      <button
+        id="closeNarrOverlay"
+        class="absolute top-2 right-2 cu-btn"
+        style="padding:.25rem .6rem;font-size:0.75rem;"
+      >
+        ✕
+      </button>
+      <div class="h-full rounded-xl overflow-hidden border border-zinc-700/80 bg-black">
+        <iframe
+          id="capyNarrIframe"
+          src=""
+          class="w-full h-full border-0 bg-black"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const currentPageId = 'CapyContos';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    const STORY_STORAGE_KEY = 'capycontos_state_v1';
+
+    let apiKey = '';
+    let storyState = {
+      id: null,
+      createdAt: null,
+      config: null,
+      trechos: [],
+      currentIndex: -1
+    };
+    let isGenerating = false;
+    let narrIframeInitialized = false;
+
+    const dom = {
+      // shell
+      sidebar: document.getElementById('sidebar'),
+      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+      sidebarOverlay: document.getElementById('sidebarOverlay'),
+      apiKeysModal: document.getElementById('apiKeysModal'),
+      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+      fabApi: document.getElementById('fabApi'),
+
+      // CapyContos
+      contoPersonaInput: null,
+      contoMetaInput: null,
+      contoGeneroSelect: null,
+      contoTonalidadeSelect: null,
+      contoEstiloSelect: null,
+      contoTamanhoSelect: null,
+      contoStatusText: null,
+      contoTrechoAtual: null,
+      contoMetaResumo: null,
+      contoTimeline: null,
+      btnContoNovo: null,
+      btnContoProximo: null,
+      btnContoReescrever: null,
+      btnContoOuvir: null,
+      btnContoExport: null,
+      btnContoLimpar: null,
+
+      // widget CapyNarrativas
+      capyNarrOverlay: document.getElementById('capyNarrOverlay'),
+      capyNarrIframe: document.getElementById('capyNarrIframe'),
+      closeNarrOverlay: document.getElementById('closeNarrOverlay')
+    };
+
+    function setupApiKeyModal() {
+      const html = `
+        <div class="w-full max-w-md">
+          <div class="cu-panel p-6">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-lg font-bold text-sky-400">
+                Chave API — Google Gemini
+              </h2>
+              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
+            </div>
+            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">
+              Sua Chave:
+            </label>
+            <div class="flex">
+              <input
+                id="geminiApiKeyInputModal"
+                type="password"
+                placeholder="Cole sua chave aqui"
+                class="cu-input rounded-r-none"
+              >
+              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">
+                Salvar
+              </button>
+            </div>
+            <p class="text-xs text-zinc-400 mt-2">
+              A chave é armazenada localmente e usada pelas ferramentas de IA.
+            </p>
+          </div>
+        </div>
+      `;
+      dom.apiKeysModal.innerHTML = html;
+
+      const close = () => dom.apiKeysModal.classList.add('hidden');
+      const closeBtn = dom.apiKeysModal.querySelector('#closeApiKeysModalButton');
+      const saveBtn = dom.apiKeysModal.querySelector('#saveGeminiKey');
+      const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
+
+      dom.openApiKeysModalButton?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.remove('hidden');
+      });
+      dom.fabApi?.addEventListener('click', () => {
+        dom.apiKeysModal.classList.remove('hidden');
+      });
+
+      dom.apiKeysModal.addEventListener('click', (e) => {
+        if (e.target === dom.apiKeysModal) close();
+      });
+      closeBtn?.addEventListener('click', close);
+
+      saveBtn?.addEventListener('click', () => {
+        const key = (input.value || '').trim();
+        if (!key) {
+          alert('Insira uma chave válida.');
+          return;
+        }
+        localStorage.setItem(API_KEY_STORAGE_KEY, key);
+        apiKey = key;
+        alert('Chave API salva!');
+        close();
+      });
+
+      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+      if (saved) {
+        input.value = saved;
+        apiKey = saved;
+      }
+    }
+
+    async function renderSidebar() {
+      if (!dom.sidebar) return;
+      try {
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Falha ao carregar tools.json');
+        const toolsData = await res.json();
+        const categories = {};
+        toolsData.forEach(tool => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          (cats || []).forEach(cat => {
+            (categories[cat] ??= []).push(tool);
+          });
+        });
+
+        dom.sidebar.innerHTML = '';
+
+        // link home
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className =
+          'sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm ' +
+          'hover:bg-white/10 transition-colors duration-150 text-gray-300';
+        home.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="text-purple-400">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Página Inicial</span>
+        `;
+        dom.sidebar.appendChild(home);
+
+        for (const cat in categories) {
+          const wrap = document.createElement('div');
+          wrap.className = 'mb-1';
+
+          const btn = document.createElement('button');
+          btn.className =
+            'w-full flex justify-between items-center p-2.5 text-left text-gray-300 ' +
+            'hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
+          btn.innerHTML = `
+            <span class="font-semibold text-sm">${cat}</span>
+            <svg class="w-4 h-4 transform transition-transform duration-200"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          `;
+
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-0.5 space-y-0.5';
+
+          categories[cat].forEach(tool => {
+            const a = document.createElement('a');
+            a.href = tool.pageUrl;
+            const iconHtml = tool.icon
+              ? tool.icon
+                  .replace('w-10 h-10','w-5 h-5')
+                  .replace('mb-2','mr-2')
+              : '<span class="w-5 h-5 mr-2"></span>';
+            a.className =
+              'sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs ' +
+              'hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ' +
+              (tool.id === currentPageId ? 'active bg-zinc-600/70 text-white' : 'text-gray-400');
+            a.innerHTML = iconHtml + `<span>${tool.title}</span>`;
+            content.appendChild(a);
+          });
+
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('svg').classList.toggle('rotate-180');
+          });
+
+          if (categories[cat].some(t => t.id === currentPageId)) {
+            content.classList.add('expanded');
+            btn.querySelector('svg').classList.add('rotate-180');
+          }
+
+          wrap.appendChild(btn);
+          wrap.appendChild(content);
+          dom.sidebar.appendChild(wrap);
+        }
+      } catch (e) {
+        console.error(e);
+        dom.sidebar.innerHTML =
+          '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+
+    function initSidebarToggle() {
+      function toggle(show) {
+        if (show === undefined) {
+          dom.sidebar.classList.toggle('-translate-x-full');
+          dom.sidebarOverlay.classList.toggle('hidden');
+          return;
+        }
+        if (show) {
+          dom.sidebar.classList.remove('-translate-x-full');
+          dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+          dom.sidebar.classList.add('-translate-x-full');
+          dom.sidebarOverlay.classList.add('hidden');
+        }
+      }
+      dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+      dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+      toggle(false);
+    }
+
+    function initContosDomRefs() {
+      dom.contoPersonaInput   = document.getElementById('contoPersonaInput');
+      dom.contoMetaInput      = document.getElementById('contoMetaInput');
+      dom.contoGeneroSelect   = document.getElementById('contoGeneroSelect');
+      dom.contoTonalidadeSelect = document.getElementById('contoTonalidadeSelect');
+      dom.contoEstiloSelect   = document.getElementById('contoEstiloSelect');
+      dom.contoTamanhoSelect  = document.getElementById('contoTamanhoSelect');
+      dom.contoStatusText     = document.getElementById('contoStatusText');
+      dom.contoTrechoAtual    = document.getElementById('contoTrechoAtual');
+      dom.contoMetaResumo     = document.getElementById('contoMetaResumo');
+      dom.contoTimeline       = document.getElementById('contoTimeline');
+
+      dom.btnContoNovo        = document.getElementById('btnContoNovo');
+      dom.btnContoProximo     = document.getElementById('btnContoProximo');
+      dom.btnContoReescrever  = document.getElementById('btnContoReescrever');
+      dom.btnContoOuvir       = document.getElementById('btnContoOuvir');
+      dom.btnContoExport      = document.getElementById('btnContoExport');
+      dom.btnContoLimpar      = document.getElementById('btnContoLimpar');
+    }
+
+    function ensureGeminiKey() {
+      if (!apiKey) {
+        const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+        if (saved) apiKey = saved;
+      }
+      if (!apiKey) {
+        alert('Configure a chave da API Gemini primeiro.');
+        dom.openApiKeysModalButton?.click();
+        return null;
+      }
+      return apiKey;
+    }
+
+    function saveStoryState() {
+      try {
+        localStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(storyState));
+      } catch (e) {
+        console.warn('Não foi possível salvar o estado do conto:', e);
+      }
+    }
+
+    function loadStoryState() {
+      try {
+        const raw = localStorage.getItem(STORY_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.trechos)) return;
+        storyState = parsed;
+        if (typeof storyState.currentIndex !== 'number') {
+          storyState.currentIndex = storyState.trechos.length - 1;
+        }
+      } catch (e) {
+        console.warn('Erro ao carregar estado do conto:', e);
+      }
+    }
+
+    function syncCurrentTextIntoState() {
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) return;
+      if (storyState.currentIndex < 0 || storyState.currentIndex >= storyState.trechos.length) return;
+      if (!dom.contoTrechoAtual) return;
+      storyState.trechos[storyState.currentIndex].text = dom.contoTrechoAtual.value;
+      saveStoryState();
+    }
+
+    function updateStoryUI() {
+      const hasTrechos = storyState && storyState.trechos && storyState.trechos.length > 0;
+      const totalTrechos = hasTrechos ? storyState.trechos.length : 0;
+
+      // status texto
+      if (dom.contoStatusText) {
+        if (!hasTrechos) {
+          dom.contoStatusText.textContent =
+            'Nenhum conto ativo. Configure os campos acima e clique em "Iniciar novo conto".';
+        } else {
+          const totalPalavras = storyState.trechos.reduce((acc, t) => {
+            if (!t.text) return acc;
+            return acc + t.text.trim().split(/\s+/).length;
+          }, 0);
+          dom.contoStatusText.textContent =
+            `Trechos: ${totalTrechos} · ~${totalPalavras} palavras · Iniciado em ` +
+            new Date(storyState.createdAt || Date.now()).toLocaleString('pt-BR');
+        }
+      }
+
+      // meta resumo
+      if (dom.contoMetaResumo) {
+        const meta = storyState.config?.meta || '';
+        dom.contoMetaResumo.textContent = meta
+          ? `Tema: ${meta}`
+          : 'Sem tema definido.';
+      }
+
+      // textarea atual
+      if (dom.contoTrechoAtual) {
+        if (!hasTrechos) {
+          dom.contoTrechoAtual.value = '';
+        } else {
+          if (storyState.currentIndex < 0 || storyState.currentIndex >= storyState.trechos.length) {
+            storyState.currentIndex = storyState.trechos.length - 1;
+          }
+          dom.contoTrechoAtual.value = storyState.trechos[storyState.currentIndex].text || '';
+        }
+      }
+
+      // timeline
+      if (dom.contoTimeline) {
+        dom.contoTimeline.innerHTML = '';
+        if (!hasTrechos) {
+          const li = document.createElement('li');
+          li.className = 'text-zinc-500 text-[0.7rem]';
+          li.textContent = 'Nenhum trecho ainda. Gere o primeiro para começar o histórico.';
+          dom.contoTimeline.appendChild(li);
+        } else {
+          storyState.trechos.forEach((t, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            const isCurrent = idx === storyState.currentIndex;
+            btn.className =
+              'w-full text-left rounded-md px-2 py-1 text-[0.75rem] border ' +
+              (isCurrent
+                ? 'border-sky-400 bg-sky-500/15 text-sky-100'
+                : 'border-transparent hover:border-zinc-500 bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-200');
+            const ts = t.createdAt ? new Date(t.createdAt).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            const preview = (t.text || '').trim().replace(/\s+/g,' ');
+            const previewShort = preview.length > 80 ? preview.slice(0,77)+'…' : preview || '(vazio)';
+            btn.textContent = `Trecho ${idx+1} · ${ts} · ${previewShort}`;
+            btn.addEventListener('click', () => {
+              syncCurrentTextIntoState();
+              storyState.currentIndex = idx;
+              saveStoryState();
+              updateStoryUI();
+            });
+            dom.contoTimeline.appendChild(btn);
+          });
+        }
+      }
+
+      // botões
+      const hasStory = hasTrechos;
+      if (dom.btnContoProximo)    dom.btnContoProximo.disabled    = !hasStory || isGenerating;
+      if (dom.btnContoReescrever) dom.btnContoReescrever.disabled = !hasStory || isGenerating;
+      if (dom.btnContoOuvir)      dom.btnContoOuvir.disabled      = !hasStory;
+      if (dom.btnContoExport)     dom.btnContoExport.disabled     = !hasStory;
+      if (dom.btnContoLimpar)     dom.btnContoLimpar.disabled     = !hasStory;
+      if (dom.btnContoNovo)       dom.btnContoNovo.disabled       = isGenerating;
+    }
+
+    function getWordsLimit() {
+      const tamanho = dom.contoTamanhoSelect?.value || 'medio';
+      if (tamanho === 'curto') return 200;
+      if (tamanho === 'longo') return 700;
+      return 400;
+    }
+
+    async function generateFirstTrecho() {
+      const key = ensureGeminiKey();
+      if (!key) return;
+
+      const persona = dom.contoPersonaInput?.value.trim() || '';
+      const meta    = dom.contoMetaInput?.value.trim() || '';
+      const genero  = dom.contoGeneroSelect?.value || 'psicológico sombrio';
+      const tom     = dom.contoTonalidadeSelect?.value || 'melancólico';
+      const estilo  = dom.contoEstiloSelect?.value || 'enxuto e cinematográfico';
+      const maxWords = getWordsLimit();
+
+      if (!persona && !meta) {
+        alert('Descreva pelo menos a persona/protagonista ou o tema central.');
+        return;
+      }
+
+      isGenerating = true;
+      updateStoryUI();
+
+      const prompt = `
+Você é um autor de contos em português brasileiro, especializado em narrativas ${genero}.
+
+Crie o INÍCIO de um conto original seguindo a configuração:
+
+- Persona / protagonista: ${persona || 'não especificada'}
+- Gênero: ${genero}
+- Tom emocional: ${tom}
+- Estilo de linguagem: ${estilo}
+- Tema ou motivo central: ${meta || 'não especificado'}
+
+Regras:
+- Escreva apenas a PRIMEIRA CENA do conto, com no máximo ${maxWords} palavras.
+- Termine em um ponto de leve tensão ou dúvida, como se fosse um corte de episódio.
+- Não faça resumo do que virá depois.
+- Não escreva título de capítulo nem numeração. Apenas o texto corrido da cena.
+
+Responda SOMENTE com o texto da cena, sem comentários adicionais.
+      `.trim();
+
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`;
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errTxt = await res.text();
+          throw new Error(errTxt || `Erro HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const textPart = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!textPart) throw new Error('Resposta vazia da IA.');
+
+        storyState = {
+          id: 'conto-' + Date.now(),
+          createdAt: Date.now(),
+          config: {
+            persona,
+            meta,
+            genero,
+            tom,
+            estilo,
+            tamanho: dom.contoTamanhoSelect?.value || 'medio'
+          },
+          trechos: [{
+            index: 1,
+            text: textPart,
+            createdAt: Date.now()
+          }],
+          currentIndex: 0
+        };
+
+        saveStoryState();
+        updateStoryUI();
+      } catch (err) {
+        console.error('Erro ao gerar primeiro trecho:', err);
+        alert('Erro ao gerar o primeiro trecho: ' + (err.message || err));
+      } finally {
+        isGenerating = false;
+        updateStoryUI();
+      }
+    }
+
+    async function generateNextTrecho() {
+      const key = ensureGeminiKey();
+      if (!key) return;
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) {
+        alert('Nenhum conto ativo. Gere o primeiro trecho antes de continuar.');
+        return;
+      }
+
+      syncCurrentTextIntoState();
+
+      const maxWords = getWordsLimit();
+      const genero = storyState.config?.genero || 'psicológico sombrio';
+      const tom    = storyState.config?.tom || 'melancólico';
+      const estilo = storyState.config?.estilo || 'enxuto e cinematográfico';
+
+      const fullStory = storyState.trechos.map(t => t.text || '').join('\n\n***\n\n');
+
+      isGenerating = true;
+      updateStoryUI();
+
+      const prompt = `
+Você está continuando um conto em andamento em português brasileiro.
+
+Abaixo está a HISTÓRIA COMPLETA até agora, entre as marcas <historia> e </historia>:
+
+<historia>
+${fullStory}
+</historia>
+
+Produza APENAS A PRÓXIMA CENA, seguindo as mesmas características:
+
+- Gênero: ${genero}
+- Tom emocional: ${tom}
+- Estilo de linguagem: ${estilo}
+
+Regras:
+- Continue exatamente de onde o último trecho parou.
+- Não repita cenas anteriores.
+- Não faça resumo nem explicação metalinguística.
+- Use no máximo ${maxWords} palavras neste novo trecho.
+- Termine de forma a ainda permitir continuação (não encerre definitivamente a história).
+
+Responda SOMENTE com o texto do novo trecho.
+      `.trim();
+
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`;
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errTxt = await res.text();
+          throw new Error(errTxt || `Erro HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const textPart = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!textPart) throw new Error('Resposta vazia da IA.');
+
+        const newIndex = storyState.trechos.length;
+        storyState.trechos.push({
+          index: newIndex + 1,
+          text: textPart,
+          createdAt: Date.now()
+        });
+        storyState.currentIndex = newIndex;
+
+        saveStoryState();
+        updateStoryUI();
+      } catch (err) {
+        console.error('Erro ao gerar próximo trecho:', err);
+        alert('Erro ao gerar próximo trecho: ' + (err.message || err));
+      } finally {
+        isGenerating = false;
+        updateStoryUI();
+      }
+    }
+
+    async function rewriteCurrentTrecho() {
+      const key = ensureGeminiKey();
+      if (!key) return;
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) {
+        alert('Nenhum trecho para reescrever.');
+        return;
+      }
+
+      syncCurrentTextIntoState();
+      const idx = storyState.currentIndex;
+      const current = storyState.trechos[idx]?.text || '';
+      if (!current.trim()) {
+        alert('O trecho atual está vazio.');
+        return;
+      }
+
+      const genero = storyState.config?.genero || 'psicológico sombrio';
+      const tom    = storyState.config?.tom || 'melancólico';
+      const estilo = storyState.config?.estilo || 'enxuto e cinematográfico';
+
+      isGenerating = true;
+      updateStoryUI();
+
+      const prompt = `
+Você é um editor de estilo em português brasileiro.
+
+Reescreva o trecho abaixo mantendo:
+- os mesmos eventos,
+- a mesma cena
+- e a mesma perspectiva narrativa,
+
+mas melhorando:
+- ritmo,
+- tensão psicológica
+- e detalhes sensoriais.
+
+Não adicione novos personagens ou acontecimentos grandes. Apenas refine a escrita.
+
+Gênero de referência: ${genero}
+Tom emocional: ${tom}
+Estilo desejado: ${estilo}
+
+Trecho a reescrever:
+<trecho>
+${current}
+</trecho>
+
+Responda SOMENTE com o novo texto do trecho, sem comentários.
+      `.trim();
+
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`;
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errTxt = await res.text();
+          throw new Error(errTxt || `Erro HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const textPart = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+        if (!textPart) throw new Error('Resposta vazia da IA.');
+
+        storyState.trechos[idx].text = textPart;
+        saveStoryState();
+        updateStoryUI();
+      } catch (err) {
+        console.error('Erro ao reescrever trecho:', err);
+        alert('Erro ao reescrever trecho: ' + (err.message || err));
+      } finally {
+        isGenerating = false;
+        updateStoryUI();
+      }
+    }
+
+    function exportStoryTxt() {
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) {
+        alert('Nenhum conto para exportar.');
+        return;
+      }
+      syncCurrentTextIntoState();
+
+      const header = `CapyContos — Exportação\n\n` +
+        `ID: ${storyState.id}\n` +
+        `Iniciado em: ${new Date(storyState.createdAt || Date.now()).toLocaleString('pt-BR')}\n` +
+        `Gênero: ${storyState.config?.genero || '-'}\n` +
+        `Tom: ${storyState.config?.tom || '-'}\n` +
+        `Estilo: ${storyState.config?.estilo || '-'}\n` +
+        `Tema: ${storyState.config?.meta || '-'}\n\n` +
+        `---\n\n`;
+
+      const body = storyState.trechos
+        .map((t, i) => `Trecho ${i+1}\n\n${t.text || ''}\n\n---\n\n`)
+        .join('');
+
+      const text = header + body;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const ts = new Date().toISOString().replace(/[:.-]/g, '').slice(0,15);
+      a.download = `capycontos_${ts}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function clearStory() {
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) return;
+      if (!confirm('Isso apagará o conto atual desta tela. Deseja continuar?')) return;
+      storyState = {
+        id: null,
+        createdAt: null,
+        config: null,
+        trechos: [],
+        currentIndex: -1
+      };
+      try { localStorage.removeItem(STORY_STORAGE_KEY); } catch {}
+      updateStoryUI();
+    }
+
+    // Widget CapyNarrativas: abre iframe, injeta texto e dispara "Ouvir"
+    function openCapyNarrWidget() {
+      if (!storyState || !storyState.trechos || storyState.trechos.length === 0) {
+        alert('Nenhum trecho para narrar.');
+        return;
+      }
+      syncCurrentTextIntoState();
+      const currentText = storyState.trechos[storyState.currentIndex]?.text || '';
+      const cleanText = currentText.trim();
+      if (!cleanText) {
+        alert('O trecho atual está vazio.');
+        return;
+      }
+
+      dom.capyNarrOverlay.classList.remove('hidden');
+
+      const ensureIframeReady = () => {
+        try {
+          const win = dom.capyNarrIframe.contentWindow;
+          const doc = win.document;
+          const narrResult = doc.getElementById('narrResult');
+          const btnOuvir = doc.getElementById('btnNarrOuvir');
+
+          if (!narrResult) {
+            console.warn('CapyNarrativas ainda não carregou completamente.');
+            return;
+          }
+
+          narrResult.value = cleanText;
+
+          if (btnOuvir) {
+            btnOuvir.disabled = false;
+          }
+
+          // se a função speakNarr estiver exposta, usa direto; se não, simula clique
+          if (typeof win.speakNarr === 'function') {
+            win.speakNarr();
+          } else if (btnOuvir) {
+            btnOuvir.click();
+          }
+        } catch (e) {
+          console.error('Erro ao injetar texto no iframe do CapyNarrativas:', e);
+        }
+      };
+
+      if (!narrIframeInitialized || !dom.capyNarrIframe.src) {
+        dom.capyNarrIframe.src = 'capynarrativas.html';
+        dom.capyNarrIframe.onload = () => {
+          narrIframeInitialized = true;
+          ensureIframeReady();
+        };
+      } else {
+        ensureIframeReady();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSidebar();
+      setupApiKeyModal();
+      initSidebarToggle();
+      initContosDomRefs();
+      loadStoryState();
+      updateStoryUI();
+
+      dom.btnContoNovo?.addEventListener('click', () => {
+        if (storyState && storyState.trechos && storyState.trechos.length > 0) {
+          if (!confirm('Isso iniciará um novo conto e apagará o atual desta tela. Continuar?')) {
+            return;
+          }
+        }
+        generateFirstTrecho();
+      });
+
+      dom.btnContoProximo?.addEventListener('click', () => generateNextTrecho());
+      dom.btnContoReescrever?.addEventListener('click', () => rewriteCurrentTrecho());
+      dom.btnContoExport?.addEventListener('click', () => exportStoryTxt());
+      dom.btnContoLimpar?.addEventListener('click', () => clearStory());
+      dom.btnContoOuvir?.addEventListener('click', () => openCapyNarrWidget());
+
+      dom.contoTrechoAtual?.addEventListener('input', () => {
+        // só atualiza estado local; não precisa salvar a cada tecla
+        if (!storyState || !storyState.trechos || storyState.trechos.length === 0) return;
+        if (storyState.currentIndex < 0 || storyState.currentIndex >= storyState.trechos.length) return;
+        storyState.trechos[storyState.currentIndex].text = dom.contoTrechoAtual.value;
+      });
+
+      dom.closeNarrOverlay?.addEventListener('click', () => {
+        dom.capyNarrOverlay.classList.add('hidden');
+      });
+      dom.capyNarrOverlay?.addEventListener('click', (e) => {
+        if (e.target === dom.capyNarrOverlay) {
+          dom.capyNarrOverlay.classList.add('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
