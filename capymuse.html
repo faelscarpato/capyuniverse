@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CapyMuse — Curadoria Criativa com IA</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+
+  <!-- Tema CapyUniverse -->
+  <link rel="stylesheet" href="cu-style.css">
+  <link rel="stylesheet" href="tool-styles.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+  <script src="cu-navigation.js" defer></script>
+
+  <style>
+    html { background:#050816; }
+    body {
+      font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:#e5e7eb;
+      background-color:#050816;
+    }
+    .font-jetbrains { font-family:'JetBrains Mono',monospace; }
+
+    .loader {
+      border-radius:999px;
+      border-width:2px;
+      border-style:solid;
+      border-color:rgba(248,250,252,0.35);
+      border-top-color:transparent;
+      width:16px;
+      height:16px;
+      animation:spin .8s linear infinite;
+      display:inline-block;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    .card-subtle {
+      background:
+        radial-gradient(circle at 0 0, rgba(56,189,248,.18), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(244,114,182,.18), transparent 55%),
+        rgba(24,24,27,.85);
+      border-radius:1.1rem;
+      border:1px solid rgba(63,63,70,.5);
+      box-shadow:0 18px 45px rgba(0,0,0,.6);
+    }
+    .tag-pill {
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.85);
+      padding:.25rem .6rem;
+      font-size:.7rem;
+      letter-spacing:.02em;
+    }
+    .color-dot {
+      width:18px; height:18px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.9);
+      box-shadow:0 0 0 1px rgba(15,23,42,.4),0 0 18px rgba(148,163,184,.35);
+    }
+    .cu-section-title {
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.7rem;
+      color:#9ca3af;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 text-white flex flex-col min-h-screen" data-cu-skip-shell="true">
+  <!-- HEADER -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn"
+              class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapyMuse</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <!-- Layout principal -->
+  <div class="flex flex-1 pt-16 min-h-0">
+    <!-- SIDEBAR -->
+    <aside
+      id="sidebar"
+      class="sidebar-glass text-gray-300 w-64 space-y-1 p-3
+             fixed inset-y-0 left-0 transform -translate-x-full
+             lg:translate-x-0 lg:static lg:inset-0
+             transition-transform duration-300 ease-in-out
+             z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
+      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
+    </aside>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
+
+    <!-- MAIN -->
+    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="cu-panel p-5 sm:p-6 lg:p-8">
+        <!-- Hero -->
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+          <div class="max-w-xl">
+            <p class="cu-section-title mb-2">Laboratório de inspiração</p>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-sky-300">
+              CapyMuse · Pacotes criativos em um clique
+            </h1>
+            <p class="mt-3 text-sm sm:text-base text-gray-300">
+              Cole um mini-briefing e deixe o CapyMuse montar:
+              <span class="text-sky-400 font-semibold">galeria de referências</span>,
+              <span class="text-violet-400 font-semibold">desafio criativo</span>
+              e
+              <span class="text-emerald-400 font-semibold">ideias extras rápidas</span>.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2 text-xs text-gray-400">
+              <span class="tag-pill border-sky-500/40 text-sky-300">Design & Branding</span>
+              <span class="tag-pill border-violet-500/40 text-violet-300">Texto & Roteiro</span>
+              <span class="tag-pill border-emerald-500/40 text-emerald-300">Conteúdo Digital</span>
+            </div>
+          </div>
+
+          <div class="shrink-0 w-full md:w-64 card-subtle p-4">
+            <p class="cu-section-title mb-1">Status da IA</p>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="api-status-indicator api-status-unset" id="geminiStatusDot"></span>
+              <span id="geminiStatusText" class="text-xs text-gray-300">
+                Aguardando chave do Gemini
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 mb-2">
+              Usa <span class="text-sky-300 font-semibold">Gemini 2.0 Flash</span>
+              com saída em <span class="font-jetbrains">JSON</span>.
+            </p>
+            <button id="openApiKeysModalButton2"
+                    class="cu-btn primary w-full justify-center text-xs mt-1">
+              Configurar chave Gemini
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid principal -->
+        <div class="grid gap-6 lg:grid-cols-3">
+          <!-- Coluna esquerda: Briefing -->
+          <div class="space-y-4 lg:col-span-1">
+            <div class="card-subtle p-4 sm:p-5">
+              <h2 class="text-sm font-semibold text-sky-300 mb-1">Brief criativo</h2>
+              <p class="text-xs text-gray-400 mb-3">
+                Foque em tipo de projeto, tema e sensação que quer passar.
+              </p>
+
+              <label class="block mb-3">
+                <span class="text-xs text-gray-300">Tipo de projeto</span>
+                <input id="tipoProjetoInput"
+                       type="text"
+                       class="mt-1 w-full rounded-lg bg-zinc-900/70 border border-zinc-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500/70 focus:border-sky-400"
+                       placeholder="Ex.: landing page, logo, carrossel, roteiro de vídeo..." />
+              </label>
+
+              <label class="block mb-3">
+                <span class="text-xs text-gray-300">Tema / contexto</span>
+                <textarea id="temaInput"
+                          rows="4"
+                          class="mt-1 w-full rounded-lg bg-zinc-900/70 border border-zinc-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-500/70 focus:border-sky-400 resize-none"
+                          placeholder="Ex.: app de organização para freelancers cansados, estética neon, foco em produtividade sem culpa."></textarea>
+              </label>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <label class="block">
+                  <span class="text-xs text-gray-300">Tom emocional</span>
+                  <select id="tomSelect"
+                          class="mt-1 w-full rounded-lg bg-zinc-900/70 border border-zinc-700 px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-sky-500/70 focus:border-sky-400">
+                    <option value="neutro">Neutro / flexível</option>
+                    <option value="leve">Leve e acolhedor</option>
+                    <option value="épico">Épico e cinematográfico</option>
+                    <option value="sombrio">Sombrio e dramático</option>
+                    <option value="poético">Poético e contemplativo</option>
+                    <option value="lúdico">Lúdico e bem-humorado</option>
+                  </select>
+                </label>
+
+                <label class="block">
+                  <span class="text-xs text-gray-300">Nível de detalhe</span>
+                  <select id="nivelDetalheSelect"
+                          class="mt-1 w-full rounded-lg bg-zinc-900/70 border border-zinc-700 px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-sky-500/70 focus:border-sky-400">
+                    <option value="rápido">Rápido</option>
+                    <option value="médio" selected>Médio</option>
+                    <option value="profundo">Profundo</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <fieldset>
+                  <legend class="text-xs text-gray-300 mb-1.5">Formato principal</legend>
+                  <div class="space-y-1.5 text-xs">
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="formato" value="imagem" class="text-sky-500" checked />
+                      <span>Imagem / visual</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="formato" value="texto" class="text-sky-500" />
+                      <span>Texto / roteiro / copy</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="formato" value="imagem+texto" class="text-sky-500" />
+                      <span>Mix imagem + texto</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <label class="block">
+                  <span class="text-xs text-gray-300">Seu nível como criador</span>
+                  <select id="nivelUsuarioSelect"
+                          class="mt-1 w-full rounded-lg bg-zinc-900/70 border border-zinc-700 px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-sky-500/70 focus:border-sky-400">
+                    <option value="iniciante">Iniciante</option>
+                    <option value="intermediário" selected>Intermediário</option>
+                    <option value="avançado">Avançado / profissional</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="flex items-start gap-2 text-xs text-gray-300 mb-4">
+                <input id="incluirExtrasCheckbox" type="checkbox" class="mt-0.5 text-sky-500" checked />
+                <span>Também quero uma lista de ideias extras rápidas para testar em série.</span>
+              </label>
+
+              <button id="generatePackButton"
+                      class="cu-btn primary w-full justify-center text-sm mt-1">
+                <span class="btn-text">Gerar pacote criativo com IA</span>
+                <span class="ml-2 loader hidden" id="generateLoader"></span>
+              </button>
+
+              <p id="errorMessage" class="mt-3 text-xs text-red-400 hidden"></p>
+            </div>
+
+            <!-- Histórico -->
+            <div id="historyWrapper" class="card-subtle p-4 sm:p-5 hidden">
+              <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xs font-semibold text-gray-200">Últimos briefings usados</h2>
+                <button id="clearHistoryButton"
+                        class="text-[0.65rem] text-gray-400 hover:text-rose-300 underline-offset-2 hover:underline bg-transparent">
+                  Limpar
+                </button>
+              </div>
+              <div id="historyList" class="flex flex-wrap gap-2 text-xs"></div>
+            </div>
+          </div>
+
+          <!-- Coluna direita: Resultados -->
+          <div class="space-y-4 lg:col-span-2">
+            <div class="card-subtle p-4 sm:p-5">
+              <div id="resultsEmpty" class="text-sm text-gray-400">
+                <p class="mb-1">Nenhum pacote gerado ainda.</p>
+                <p class="text-xs text-gray-500">
+                  Preencha o brief ao lado e clique em
+                  <span class="text-sky-300 font-semibold">“Gerar pacote criativo com IA”</span>.
+                </p>
+              </div>
+
+              <div id="resultsArea" class="space-y-4 hidden">
+                <!-- Galeria -->
+                <div class="border border-zinc-700/80 rounded-xl p-3 sm:p-4 bg-zinc-900/60">
+                  <div class="flex items-start justify-between gap-3 mb-2">
+                    <div>
+                      <p class="cu-section-title mb-1">Bloco 1 · Galeria temática</p>
+                      <h2 id="galleryTitle" class="text-sm sm:text-base font-semibold text-sky-300">—</h2>
+                    </div>
+                  </div>
+                  <p id="galleryDescription" class="text-xs sm:text-sm text-gray-300 mb-3"></p>
+                  <div>
+                    <p class="text-[0.7rem] uppercase tracking-[0.12em] text-gray-500 mb-1">Palavras-chave</p>
+                    <div id="galleryKeywords" class="flex flex-wrap gap-1.5 text-[0.7rem]"></div>
+                  </div>
+                </div>
+
+                <!-- Desafio -->
+                <div class="border border-violet-700/70 rounded-xl p-3 sm:p-4 bg-zinc-900/70">
+                  <div class="flex items-start justify-between gap-3 mb-2">
+                    <div>
+                      <p class="cu-section-title mb-1">Bloco 2 · Desafio criativo principal</p>
+                      <h2 id="challengeTitle" class="text-sm sm:text-base font-semibold text-violet-300">—</h2>
+                    </div>
+                  </div>
+                  <p id="challengeBrief" class="text-xs sm:text-sm text-gray-300 mb-3"></p>
+
+                  <div class="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <p class="text-[0.7rem] uppercase tracking-[0.12em] text-gray-500 mb-1">
+                        Prompt para imagem
+                      </p>
+                      <p id="challengeImagePrompt"
+                         class="text-[0.75rem] text-gray-200 font-jetbrains bg-black/30 border border-violet-700/40 rounded-lg p-2 leading-snug">
+                      </p>
+
+                      <!-- BOTÕES NOVOS -->
+                      <div class="mt-2 flex flex-wrap gap-2 text-[0.7rem]">
+                        <button id="copyImagePromptBtn" type="button"
+                                class="cu-btn px-2 py-1 text-xs">
+                          <i class="fas fa-copy mr-1"></i> Copiar prompt
+                        </button>
+                        <button id="openInCapyImgBtn" type="button"
+                                class="cu-btn px-2 py-1 text-xs">
+                          <i class="fas fa-up-right-from-square mr-1"></i> Abrir no CapyIMG
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p class="text-[0.7rem] uppercase tracking-[0.12em] text-gray-500 mb-1">
+                        Gatilho de texto / narrativa
+                      </p>
+                      <p id="challengeTextTrigger"
+                         class="text-[0.75rem] text-gray-200 bg-black/20 border border-emerald-700/40 rounded-lg p-2 leading-snug">
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 grid gap-3 md:grid-cols-2">
+                    <div>
+                      <p class="text-[0.7rem] uppercase tracking-[0.12em] text-gray-500 mb-1">Paleta sugerida</p>
+                      <div id="challengePalette" class="flex flex-wrap items-center gap-2 text-[0.7rem]"></div>
+                    </div>
+                    <div>
+                      <p class="text-[0.7rem] uppercase tracking-[0.12em] text-gray-500 mb-1">Técnicas sugeridas</p>
+                      <div id="challengeTechniques" class="flex flex-wrap gap-1.5 text-[0.7rem]"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Extras -->
+                <div class="border border-emerald-700/70 rounded-xl p-3 sm:p-4 bg-zinc-900/60">
+                  <p class="cu-section-title mb-1">Bloco 3 · Ideias extras rápidas</p>
+                  <ul id="extrasList" class="list-disc list-inside text-xs sm:text-sm text-gray-200 space-y-1.5"></ul>
+                </div>
+
+                <!-- JSON bruto (debug) -->
+                <details class="mt-3 border border-zinc-700/70 rounded-lg bg-black/40 p-2">
+                  <summary class="text-xs text-gray-400 cursor-pointer">Ver JSON bruto (debug)</summary>
+                  <pre id="rawJsonOutput"
+                       class="mt-2 text-[0.7rem] text-gray-300 font-jetbrains whitespace-pre-wrap break-words max-h-64 overflow-y-auto bg-black/60 rounded-md p-2 border border-zinc-800">
+                  </pre>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL DE CHAVE GEMINI -->
+  <div id="apiKeysModal"
+       class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1050] hidden p-4">
+    <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-purple-400">Gerenciar Chaves de API (Global)</h2>
+        <button id="closeApiKeysModalButton"
+                class="text-gray-400 hover:text-white text-2xl leading-none bg-transparent shadow-none">&times;</button>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+          <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+          <label for="geminiApiKeyInputModal"
+                 class="block text-xs font-medium text-gray-300 mb-1">
+            API Key Gemini:
+          </label>
+          <div class="flex">
+            <input id="geminiApiKeyInputModal"
+                   type="password"
+                   placeholder="Sua API Key Gemini"
+                   class="font-jetbrains p-1.5 text-xs rounded-l-md border border-zinc-700 flex-1 focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white" />
+            <button id="saveGeminiKey"
+                    data-provider="gemini"
+                    class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white shadow-none">
+              Salvar
+            </button>
+          </div>
+          <p class="text-xs text-zinc-400 mt-1">
+            Esta chave será usada por todas as ferramentas CapyUniverse que requerem Gemini.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+      const HISTORY_KEY = 'capymuse_history_v1';
+      const currentPageId = 'CapyMuse';
+
+      let apiKey = '';
+      let lastResult = null;
+
+      const dom = {
+        sidebar: document.getElementById('sidebar'),
+        sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+        sidebarOverlay: document.getElementById('sidebarOverlay'),
+
+        apiKeysModal: document.getElementById('apiKeysModal'),
+        openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
+        openApiKeysModalButton2: document.getElementById('openApiKeysModalButton2'),
+        closeApiKeysModalButton: document.getElementById('closeApiKeysModalButton'),
+        geminiApiKeyInput: document.getElementById('geminiApiKeyInputModal'),
+        saveGeminiKeyBtn: document.getElementById('saveGeminiKey'),
+
+        geminiStatusDot: document.getElementById('geminiStatusDot'),
+        geminiStatusText: document.getElementById('geminiStatusText'),
+
+        tipoProjetoInput: document.getElementById('tipoProjetoInput'),
+        temaInput: document.getElementById('temaInput'),
+        tomSelect: document.getElementById('tomSelect'),
+        nivelDetalheSelect: document.getElementById('nivelDetalheSelect'),
+        nivelUsuarioSelect: document.getElementById('nivelUsuarioSelect'),
+        formatoRadios: document.querySelectorAll('input[name="formato"]'),
+        incluirExtrasCheckbox: document.getElementById('incluirExtrasCheckbox'),
+
+        generateButton: document.getElementById('generatePackButton'),
+        generateLoader: document.getElementById('generateLoader'),
+        errorMessage: document.getElementById('errorMessage'),
+
+        resultsEmpty: document.getElementById('resultsEmpty'),
+        resultsArea: document.getElementById('resultsArea'),
+        galleryTitle: document.getElementById('galleryTitle'),
+        galleryDescription: document.getElementById('galleryDescription'),
+        galleryKeywords: document.getElementById('galleryKeywords'),
+        challengeTitle: document.getElementById('challengeTitle'),
+        challengeBrief: document.getElementById('challengeBrief'),
+        challengeImagePrompt: document.getElementById('challengeImagePrompt'),
+        challengeTextTrigger: document.getElementById('challengeTextTrigger'),
+        challengePalette: document.getElementById('challengePalette'),
+        challengeTechniques: document.getElementById('challengeTechniques'),
+        extrasList: document.getElementById('extrasList'),
+        rawJsonOutput: document.getElementById('rawJsonOutput'),
+
+        historyWrapper: document.getElementById('historyWrapper'),
+        historyList: document.getElementById('historyList'),
+        clearHistoryButton: document.getElementById('clearHistoryButton'),
+
+        // NOVOS BOTÕES
+        copyImagePromptBtn: document.getElementById('copyImagePromptBtn'),
+        openInCapyImgBtn: document.getElementById('openInCapyImgBtn'),
+      };
+
+      function updateGeminiStatus(status) {
+        if (!dom.geminiStatusDot || !dom.geminiStatusText) return;
+        dom.geminiStatusDot.classList.remove('api-status-unset', 'api-status-ok', 'api-status-error');
+        if (status === 'ok') {
+          dom.geminiStatusDot.classList.add('api-status-ok');
+          dom.geminiStatusText.textContent = 'Chave configurada · pronto para criar';
+        } else if (status === 'error') {
+          dom.geminiStatusDot.classList.add('api-status-error');
+          dom.geminiStatusText.textContent = 'Erro ao validar chave do Gemini';
+        } else {
+          dom.geminiStatusDot.classList.add('api-status-unset');
+          dom.geminiStatusText.textContent = 'Aguardando chave do Gemini';
+        }
+      }
+
+      function showError(message) {
+        if (!dom.errorMessage) return;
+        dom.errorMessage.textContent = message;
+        dom.errorMessage.classList.remove('hidden');
+      }
+
+      function clearError() {
+        if (!dom.errorMessage) return;
+        dom.errorMessage.textContent = '';
+        dom.errorMessage.classList.add('hidden');
+      }
+
+      function setLoading(isLoading) {
+        if (!dom.generateButton || !dom.generateLoader) return;
+        dom.generateButton.disabled = isLoading;
+        dom.generateLoader.classList.toggle('hidden', !isLoading);
+      }
+
+      function getSelectedFormat() {
+        let value = 'imagem+texto';
+        dom.formatoRadios.forEach(radio => {
+          if (radio.checked) value = radio.value;
+        });
+        return value;
+      }
+
+      function loadApiKeyFromStorage() {
+        try {
+          const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
+          if (saved) {
+            apiKey = saved;
+            if (dom.geminiApiKeyInput) dom.geminiApiKeyInput.value = saved;
+            updateGeminiStatus('ok');
+          } else {
+            updateGeminiStatus('unset');
+          }
+        } catch {
+          updateGeminiStatus('unset');
+        }
+      }
+
+      function setupApiKeyModal() {
+        const openModal = () => {
+          dom.apiKeysModal?.classList.remove('hidden');
+        };
+
+        dom.openApiKeysModalButton?.addEventListener('click', openModal);
+        dom.openApiKeysModalButton2?.addEventListener('click', openModal);
+
+        dom.closeApiKeysModalButton?.addEventListener('click', () => {
+          dom.apiKeysModal?.classList.add('hidden');
+        });
+
+        dom.saveGeminiKeyBtn?.addEventListener('click', () => {
+          if (!dom.geminiApiKeyInput) return;
+          const key = dom.geminiApiKeyInput.value.trim();
+          if (!key) {
+            alert('Por favor, insira uma chave API do Gemini.');
+            return;
+          }
+          apiKey = key;
+          try {
+            localStorage.setItem(API_KEY_STORAGE_KEY, key);
+          } catch {}
+          updateGeminiStatus('ok');
+          dom.apiKeysModal?.classList.add('hidden');
+          alert('Chave Gemini salva com sucesso!');
+        });
+      }
+
+      async function ensureApiKey() {
+        if (!apiKey) loadApiKeyFromStorage();
+        if (!apiKey) {
+          showError('Configure a chave da API Gemini para usar o CapyMuse.');
+          dom.apiKeysModal?.classList.remove('hidden');
+          return null;
+        }
+        return apiKey;
+      }
+
+      function addHistoryEntry(entry) {
+        try {
+          const raw = localStorage.getItem(HISTORY_KEY);
+          const list = raw ? JSON.parse(raw) : [];
+          list.unshift(entry);
+          const trimmed = list.slice(0, 8);
+          localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+          renderHistory();
+        } catch {}
+      }
+
+      function renderHistory() {
+        if (!dom.historyList || !dom.historyWrapper) return;
+
+        let list = [];
+        try {
+          const raw = localStorage.getItem(HISTORY_KEY);
+          list = raw ? JSON.parse(raw) : [];
+        } catch {}
+
+        if (!list.length) {
+          dom.historyWrapper.classList.add('hidden');
+          dom.historyList.innerHTML = '';
+          return;
+        }
+
+        dom.historyWrapper.classList.remove('hidden');
+        dom.historyList.innerHTML = '';
+
+        list.forEach(item => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'tag-pill bg-slate-900/80 hover:bg-slate-800/90 text-[0.65rem] flex items-center gap-1';
+          const label = (item.tipoProjeto || 'Projeto') + ' · ' + (item.temaCurto || 'sem tema');
+          btn.textContent = label.length > 80 ? label.slice(0, 77) + '...' : label;
+          btn.title = label;
+          btn.addEventListener('click', () => {
+            if (dom.tipoProjetoInput) dom.tipoProjetoInput.value = item.tipoProjeto || '';
+            if (dom.temaInput) dom.temaInput.value = item.tema || '';
+            if (dom.tomSelect && item.tom) dom.tomSelect.value = item.tom;
+            if (dom.nivelDetalheSelect && item.nivelDetalhe) dom.nivelDetalheSelect.value = item.nivelDetalhe;
+            if (dom.nivelUsuarioSelect && item.nivelUsuario) dom.nivelUsuarioSelect.value = item.nivelUsuario;
+            if (item.formato) {
+              dom.formatoRadios.forEach(r => { r.checked = (r.value === item.formato); });
+            }
+          });
+          dom.historyList.appendChild(btn);
+        });
+      }
+
+      function clearHistory() {
+        try { localStorage.removeItem(HISTORY_KEY); } catch {}
+        renderHistory();
+      }
+
+      function renderListChips(items, container, fallback) {
+        container.innerHTML = '';
+        if (!items || !Array.isArray(items) || !items.length) {
+          if (fallback) {
+            const span = document.createElement('span');
+            span.className = 'text-[0.7rem] text-gray-500';
+            span.textContent = fallback;
+            container.appendChild(span);
+          }
+          return;
+        }
+        items.forEach(text => {
+          if (!text) return;
+          const span = document.createElement('span');
+          span.className = 'tag-pill';
+          span.textContent = text;
+          container.appendChild(span);
+        });
+      }
+
+      function renderPalette(colors, container) {
+        container.innerHTML = '';
+        if (!colors || !Array.isArray(colors) || !colors.length) {
+          const span = document.createElement('span');
+          span.className = 'text-[0.7rem] text-gray-500';
+          span.textContent = 'A IA não sugeriu uma paleta específica.';
+          container.appendChild(span);
+          return;
+        }
+        colors.forEach(col => {
+          const wrap = document.createElement('div');
+          wrap.className = 'flex items-center gap-1.5';
+
+          const dot = document.createElement('div');
+          dot.className = 'color-dot';
+          dot.style.backgroundColor = col;
+
+          const label = document.createElement('span');
+          label.className = 'text-[0.7rem] text-gray-200 font-jetbrains';
+          label.textContent = col;
+
+          wrap.appendChild(dot);
+          wrap.appendChild(label);
+          container.appendChild(wrap);
+        });
+      }
+
+      function renderExtras(ideas, container) {
+        container.innerHTML = '';
+        if (!ideas || !Array.isArray(ideas) || !ideas.length) {
+          const li = document.createElement('li');
+          li.className = 'text-xs text-gray-500';
+          li.textContent = 'Nenhuma ideia extra sugerida para este briefing.';
+          container.appendChild(li);
+          return;
+        }
+        ideas.forEach(text => {
+          if (!text) return;
+          const li = document.createElement('li');
+          li.textContent = text;
+          container.appendChild(li);
+        });
+      }
+
+      function renderResult(data) {
+        lastResult = data;
+
+        dom.resultsEmpty?.classList.add('hidden');
+        dom.resultsArea?.classList.remove('hidden');
+
+        const galeria = data.galeria || {};
+        const desafio = data.desafio || {};
+        const extras = data.extras || {};
+
+        if (dom.galleryTitle) dom.galleryTitle.textContent = galeria.titulo || 'Galeria sem título';
+        if (dom.galleryDescription) dom.galleryDescription.textContent = galeria.descricao_curta || 'A IA não descreveu a galeria em detalhes.';
+        if (dom.galleryKeywords) renderListChips(galeria.palavras_chave, dom.galleryKeywords, 'Nenhuma palavra-chave sugerida.');
+
+        if (dom.challengeTitle) dom.challengeTitle.textContent = desafio.titulo || 'Desafio sem título';
+        if (dom.challengeBrief) dom.challengeBrief.textContent = desafio.brief || 'A IA não trouxe um brief detalhado para o desafio.';
+        if (dom.challengeImagePrompt) dom.challengeImagePrompt.textContent = desafio.imagem_prompt || '';
+        if (dom.challengeTextTrigger) dom.challengeTextTrigger.textContent = desafio.texto_gatilho || '';
+        if (dom.challengePalette) renderPalette(desafio.paleta_sugerida, dom.challengePalette);
+        if (dom.challengeTechniques) renderListChips(desafio.tecnicas_sugeridas, dom.challengeTechniques, 'Nenhuma técnica específica sugerida.');
+        if (dom.extrasList) renderExtras(extras.ideias_rapidas, dom.extrasList);
+
+        if (dom.rawJsonOutput) dom.rawJsonOutput.textContent = JSON.stringify(data, null, 2);
+      }
+
+      async function handleGeneratePack(event) {
+        event.preventDefault();
+        clearError();
+
+        const key = await ensureApiKey();
+        if (!key) return;
+
+        const tipoProjeto = dom.tipoProjetoInput?.value.trim() || '';
+        const tema = dom.temaInput?.value.trim() || '';
+        const tom = dom.tomSelect?.value || 'neutro';
+        const nivelDetalhe = dom.nivelDetalheSelect?.value || 'médio';
+        const nivelUsuario = dom.nivelUsuarioSelect?.value || 'intermediário';
+        const formato = getSelectedFormat();
+        const incluirExtras = !!dom.incluirExtrasCheckbox?.checked;
+
+        if (!tipoProjeto && !tema) {
+          showError('Descreva pelo menos o tipo de projeto ou o tema/contexto.');
+          return;
+        }
+
+        const temaCurto = tema.length > 80 ? tema.slice(0, 77) + '...' : tema;
+
+        const prompt = `
+Você é o CapyMuse, a curadora criativa do ecossistema CapyUniverse.
+Sua função é transformar um pequeno briefing em um pacote criativo pronto para uso.
+
+- Escreva em português brasileiro.
+- Seja específico, visual e acionável.
+- Adapte o nível de detalhamento ao perfil do usuário.
+
+Dados do briefing:
+- Tipo de projeto: ${tipoProjeto || 'não informado'}
+- Tema ou contexto: ${tema || 'não informado'}
+- Tom emocional: ${tom}
+- Formato desejado: ${formato}
+- Nível de detalhe: ${nivelDetalhe}
+- Nível de experiência do usuário: ${nivelUsuario}
+- Deve incluir bloco de ideias extras rápidas? ${incluirExtras ? 'Sim' : 'Não'}
+
+Tarefa:
+
+1. Defina uma "galeria" temática de referências.
+2. Proponha um único "desafio" criativo principal, com prompt de imagem e gatilho de texto.
+3. Sugira "extras" com ideias rápidas que possam ser combinadas depois (se o usuário pediu).
+
+Responda OBRIGATORIAMENTE somente em JSON, sem comentários e sem texto fora do JSON, seguindo exatamente esta estrutura:
+
+{
+  "galeria": {
+    "titulo": "string",
+    "descricao_curta": "string",
+    "palavras_chave": ["string"]
+  },
+  "desafio": {
+    "titulo": "string",
+    "brief": "string",
+    "imagem_prompt": "string",
+    "texto_gatilho": "string",
+    "paleta_sugerida": ["string"],
+    "tecnicas_sugeridas": ["string"]
+  },
+  "extras": {
+    "ideias_rapidas": ["string"]
+  }
+}
+        `.trim();
+
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                galeria: {
+                  type: "OBJECT",
+                  properties: {
+                    titulo: { type: "STRING" },
+                    descricao_curta: { type: "STRING" },
+                    palavras_chave: { type: "ARRAY", items: { type: "STRING" } }
+                  },
+                  required: ["titulo", "descricao_curta", "palavras_chave"]
+                },
+                desafio: {
+                  type: "OBJECT",
+                  properties: {
+                    titulo: { type: "STRING" },
+                    brief: { type: "STRING" },
+                    imagem_prompt: { type: "STRING" },
+                    texto_gatilho: { type: "STRING" },
+                    paleta_sugerida: { type: "ARRAY", items: { type: "STRING" } },
+                    tecnicas_sugeridas: { type: "ARRAY", items: { type: "STRING" } }
+                  },
+                  required: ["titulo", "brief", "imagem_prompt", "texto_gatilho", "paleta_sugerida", "tecnicas_sugeridas"]
+                },
+                extras: {
+                  type: "OBJECT",
+                  properties: {
+                    ideias_rapidas: { type: "ARRAY", items: { type: "STRING" } }
+                  },
+                  required: ["ideias_rapidas"]
+                }
+              },
+              required: ["galeria", "desafio", "extras"]
+            }
+          }
+        };
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`;
+
+        setLoading(true);
+
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            let message = `Erro na API (${response.status})`;
+            try {
+              const errorData = await response.json();
+              if (errorData?.error?.message) message = errorData.error.message;
+            } catch {}
+            throw new Error(message);
+          }
+
+          const result = await response.json();
+          const textPart = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!textPart) throw new Error('Resposta da IA vazia ou em formato inesperado.');
+
+          const parsed = JSON.parse(textPart);
+          renderResult(parsed);
+
+          addHistoryEntry({
+            tipoProjeto,
+            tema,
+            temaCurto,
+            tom,
+            nivelDetalhe,
+            nivelUsuario,
+            formato,
+            ts: Date.now()
+          });
+
+          updateGeminiStatus('ok');
+        } catch (err) {
+          console.error('Erro ao chamar Gemini em CapyMuse:', err);
+          showError(`Erro ao gerar pacote criativo: ${err.message || err}`);
+          updateGeminiStatus('error');
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      async function renderSidebar() {
+        if (!dom.sidebar) return;
+        try {
+          const response = await fetch('tools.json');
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const tools = await response.json();
+
+          const categories = {};
+          tools.forEach(tool => {
+            const category = tool.category || 'Outros';
+            if (!categories[category]) categories[category] = [];
+            categories[category].push(tool);
+          });
+
+          dom.sidebar.innerHTML = '';
+
+          const homeLink = document.createElement('a');
+          homeLink.href = 'index.html';
+          homeLink.className = 'sidebar-link w-full flex items-center space-x-2 px-3 py-2 rounded-md text-sm text-gray-200 hover:bg-white/10 transition-colors duration-150';
+          homeLink.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 12l9-9 9 9M4.5 10.5V21h6v-6h3v6h6V10.5" />
+            </svg>
+            <span>Página Inicial</span>
+          `;
+          dom.sidebar.appendChild(homeLink);
+
+          Object.keys(categories).sort().forEach(categoryName => {
+            const group = document.createElement('div');
+            group.className = 'mt-3';
+
+            const title = document.createElement('p');
+            title.className = 'text-[0.65rem] uppercase tracking-[0.16em] text-gray-500 px-3 mb-1';
+            title.textContent = categoryName;
+            group.appendChild(title);
+
+            categories[categoryName].forEach(tool => {
+              const link = document.createElement('a');
+              link.href = tool.pageUrl || '#';
+              link.className = 'sidebar-link flex items-center gap-2 px-3 py-1.5 rounded-md text-[0.8rem] text-gray-200 hover:bg-white/10 transition-colors';
+              link.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400/80"></span>
+                <span>${tool.title || tool.id}</span>
+              `;
+              if (tool.id === currentPageId) link.classList.add('bg-white/10');
+              group.appendChild(link);
+            });
+
+            dom.sidebar.appendChild(group);
+          });
+        } catch (err) {
+          console.error('Erro ao renderizar sidebar CapyMuse:', err);
+          dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu de ferramentas.</p>';
+        }
+      }
+
+      function initSidebarToggle() {
+        function toggle(show) {
+          if (!dom.sidebar || !dom.sidebarOverlay) return;
+          if (show === undefined) {
+            dom.sidebar.classList.toggle('-translate-x-full');
+            dom.sidebarOverlay.classList.toggle('hidden');
+            return;
+          }
+          if (show) {
+            dom.sidebar.classList.remove('-translate-x-full');
+            dom.sidebarOverlay.classList.remove('hidden');
+          } else {
+            dom.sidebar.classList.add('-translate-x-full');
+            dom.sidebarOverlay.classList.add('hidden');
+          }
+        }
+        dom.sidebarToggleBtn?.addEventListener('click', () => toggle());
+        dom.sidebarOverlay?.addEventListener('click', () => toggle(false));
+        toggle(false);
+      }
+
+      // BOTÕES NOVOS: copiar e abrir no CapyIMG
+      dom.copyImagePromptBtn?.addEventListener('click', () => {
+        const text = dom.challengeImagePrompt?.textContent?.trim();
+        if (!text) {
+          alert('Gere primeiro um pacote criativo para ter um prompt de imagem.');
+          return;
+        }
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(text)
+            .then(() => alert('Prompt copiado para a área de transferência!'))
+            .catch(() => alert('Não foi possível copiar automaticamente. Copie manualmente do bloco de prompt.'));
+        } else {
+          alert('Seu navegador não suporta cópia automática. Copie manualmente do bloco de prompt.');
+        }
+      });
+
+      dom.openInCapyImgBtn?.addEventListener('click', () => {
+        const text = dom.challengeImagePrompt?.textContent?.trim();
+        if (!text) {
+          alert('Gere primeiro um pacote criativo para ter um prompt de imagem.');
+          return;
+        }
+        const url = new URL('capyimg.html', window.location.href);
+        url.searchParams.set('prompt', text);
+        window.open(url.toString(), '_blank');
+      });
+
+      // Event bindings
+      dom.generateButton?.addEventListener('click', handleGeneratePack);
+      dom.clearHistoryButton?.addEventListener('click', clearHistory);
+
+      // Inicialização
+      loadApiKeyFromStorage();
+      setupApiKeyModal();
+      renderSidebar();
+      initSidebarToggle();
+      renderHistory();
+    });
+  </script>
+</body>
+</html>

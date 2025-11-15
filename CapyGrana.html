@@ -1,547 +1,204 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+﻿<!DOCTYPE html>
+<html lang="pt-br" data-theme="capyuniverse">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapyDindin - Gestão Financeira</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CapyGrana - Gestor Financeiro Pessoal com IA</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Estilos globais para a fonte e transições de cor para o modo escuro */
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        /* Estilos específicos para o modo escuro */
-        body.dark {
-            background-color: #1a202c; /* Fundo escuro */
-            color: #e2e8f0; /* Texto claro */
-        }
-        body.dark .bg-white {
-            background-color: #2d3748; /* Fundo de card mais escuro */
-        }
-        body.dark .text-gray-700 {
-            color: #cbd5e0; /* Cor de texto ajustada para modo escuro */
-        }
-        body.dark .border-gray-200 {
-            border-color: #4a5568; /* Cor da borda ajustada */
-        }
-        body.dark .hover\:bg-gray-100:hover {
-            background-color: #4a5568; /* Cor de hover ajustada */
-        }
-        body.dark .text-blue-600 {
-            color: #90cdf4; /* Cor de destaque para modo escuro */
-        }
-        body.dark .shadow-md {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1); /* Sombra mais escura */
-        }
-        /* Estilos personalizados para a barra de rolagem para melhor estética */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        /* Estilos da barra de rolagem no modo escuro */
-        body.dark ::-webkit-scrollbar-track {
-            background: #2d3748;
-        }
-        body.dark ::-webkit-scrollbar-thumb {
-            background: #4a5568;
-        }
-        body.dark ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280;
-        }
-        /* Estilo para o toggle de modo escuro */
-        .dot {
-            left: 0.25rem; /* Posição inicial do "dot" */
-        }
-        #dark-mode-toggle:checked + .block {
-            background-color: #48bb78; /* Cor de fundo do toggle quando ativado */
-        }
-        #dark-mode-toggle:checked + .block + .dot {
-            transform: translateX(100%); /* Move o "dot" para a direita */
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+    <link rel="stylesheet" href="cu-style.css">
+    <script src="cu-navigation.js" defer></script>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-3FFD7ZEBN1', { 'page_path': location.pathname });
-</script>
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
+    <style>
+        .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+        .loader { border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .markdown-output h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--cu-text); }
+        .markdown-output p { margin-bottom: 0.75rem; line-height: 1.6; color: var(--cu-text-dim); }
+        .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; }
+        .markdown-output strong { font-weight: bold; color: var(--cu-text); }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 transition-colors duration-300">
-    <div class="flex h-screen">
-        <aside class="w-64 bg-white shadow-lg p-4 flex flex-col justify-between transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full fixed md:relative z-40" id="sidebar">
-            <div>
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-2xl font-bold text-blue-600">CapyDindin</h1>
-                    <button id="close-sidebar-btn" class="md:hidden text-gray-600 hover:text-gray-800 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <nav>
-                    <ul class="space-y-2">
-                        <li><a href="#general-report" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="general-report">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                            Relatório Geral
-                        </a></li>
-                        <li><a href="#payments" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="payments">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            Pagamentos
-                        </a></li>
-                        <li><a href="#receipts" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="receipts">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 0h.01M9 12h6m-5 0h.01M9 16h6m-5 0h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Recebimentos
-                        </a></li>
-                        <li><a href="#accounts-payable" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="accounts-payable">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v6"></path></svg>
-                            Contas a Pagar
-                        </a></li>
-                        <li><a href="#accounts-receivable" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="accounts-receivable">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m7 0V5a2 2 0 012-2h2a2 2 0 012 2v6"></path></svg>
-                            Contas a Receber
-                        </a></li>
-                        <li><a href="#recurring-expenses" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="recurring-expenses">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            Gastos Recorrentes
-                        </a></li>
-                        <li><a href="#add-entry" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="add-entry">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Adicionar Entrada/Saída
-                        </a></li>
-                        <li><a href="#statement" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="statement">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                            Extrato
-                        </a></li>
-                        <li><a href="#register" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="register">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9a2 2 0 00-2-2h-7m-2 4H5a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2v3m-7 4v4m-2 2h4"></path></svg>
-                            Cadastro
-                        </a></li>
-                        <li><a href="#ai-chat" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="ai-chat">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                            Chat com IA
-                        </a></li>
-                        <li><a href="#settings" class="flex items-center p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200" data-module="settings">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            Configurações
-                        </a></li>
-                    </ul>
-                </nav>
-            </div>
-            <div class="p-3">
-                <label for="dark-mode-toggle" class="flex items-center cursor-pointer">
-                    <div class="relative">
-                        <input type="checkbox" id="dark-mode-toggle" class="sr-only">
-                        <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                        <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform"></div>
-                    </div>
-                    <div class="ml-3 text-gray-700 font-medium">
-                        Modo Escuro
-                    </div>
-                </label>
-            </div>
+<body class="min-h-screen flex flex-col">
+
+    <header class="cu-header">
+        <div class="cu-brand">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
+            </a>
+            <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyGrana</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="openManageApiKeyModalButtonHeader" class="cu-btn primary">Chaves API</button>
+        </div>
+    </header>
+
+    <div id="notificationArea"></div>
+
+    <div class="flex flex-1">
+        <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+            <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
         </aside>
 
-        <main class="flex-1 p-6 md:p-8 overflow-y-auto relative">
-            <button id="open-sidebar-btn" class="md:hidden fixed top-4 left-4 bg-blue-600 text-white p-2 rounded-full shadow-lg z-50">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-            <div id="content" class="min-h-full bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Bem-vindo ao CapyDindin!</h2>
-                <p class="text-gray-600">Selecione um módulo no menu lateral para começar.</p>
-                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-200">
-                        <h3 class="text-xl font-semibold text-blue-700 mb-2">Gestão Financeira Intuitiva</h3>
-                        <p class="text-blue-600">Organize suas finanças de forma simples e eficiente.</p>
-                    </div>
-                    <div class="bg-green-50 p-6 rounded-lg shadow-sm border border-green-200">
-                        <h3 class="text-xl font-semibold text-green-700 mb-2">Automação com IA</h3>
-                        <p class="text-green-600">Deixe a inteligência artificial categorizar e analisar seus dados.</p>
-                    </div>
-                    <div class="bg-purple-50 p-6 rounded-lg shadow-sm border border-purple-200">
-                        <h3 class="text-xl font-semibold text-purple-700 mb-2">Relatórios Detalhados</h3>
-                        <p class="text-purple-600">Obtenha insights claros sobre sua saúde financeira.</p>
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
+            <section class="cu-panel p-4 sm:p-6 flex flex-col h-full max-w-3xl mx-auto">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold" style="color: var(--cu-cyan)">CapyGrana 💸</h1>
+                    <p class="text-cu-text-dim mt-1">O teu consultor financeiro pessoal com a sabedoria de uma capivara próspera!</p>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div class="cu-panel bg-transparent p-4 space-y-3">
+                        <div>
+                            <label for="financial-goal" class="block text-sm font-semibold mb-1 text-cu-text-dim">1. Principal Objetivo Financeiro:</label>
+                            <input type="text" id="financial-goal" placeholder="Ex: Poupar para uma viagem" class="cu-input font-jetbrains">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="income" class="block text-sm font-semibold mb-1 text-cu-text-dim">2. Rendimento Mensal:</label>
+                                <input type="number" id="income" placeholder="Ex: 3500" class="cu-input font-jetbrains">
+                            </div>
+                            <div>
+                                <label for="expenses" class="block text-sm font-semibold mb-1 text-cu-text-dim">3. Despesas Fixas:</label>
+                                <input type="number" id="expenses" placeholder="Ex: 2000" class="cu-input font-jetbrains">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="financial-situation" class="block text-sm font-semibold mb-1 text-cu-text-dim">4. Descreva sua situação (opcional):</label>
+                            <textarea id="financial-situation" rows="3" placeholder="Ex: Tenho dívidas de cartão de crédito..." class="cu-textarea font-jetbrains"></textarea>
+                        </div>
+                        <div>
+                            <label for="advice-type" class="block text-sm font-semibold mb-1 text-cu-text-dim">5. Tipo de Conselho:</label>
+                            <select id="advice-type" class="cu-select font-jetbrains">
+                                <option value="orcamento" selected>Criação de Orçamento</option>
+                                <option value="poupanca_investimento">Estratégias de Poupança e Investimento</option>
+                                <option value="gestao_dividas">Gestão de Dívidas</option>
+                                <option value="planeamento_objetivo">Planeamento para o Objetivo</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <button id="get-advice-button" class="cu-btn primary w-full text-lg">
+                    <span class="btn-text">Pedir Conselho Financeiro</span>
+                    <div class="loader hidden"></div>
+                </button>
+
+                <div id="output-section" class="cu-panel bg-transparent p-4 mt-6 hidden">
+                    <h3 class="text-lg font-semibold text-cyan-300">Conselho Financeiro da Capy-IA:</h3>
+                    <div id="advice-output" class="markdown-output text-sm font-jetbrains text-cu-text-dim max-h-[400px] overflow-y-auto scrollbar-thin pr-2">
+                        <p class="text-center">Os conselhos financeiros aparecerão aqui...</p>
+                    </div>
+                    <button id="copy-advice-button" class="mt-4 cu-btn text-sm hidden">Copiar Conselho</button>
+                </div>
+            </section>
         </main>
     </div>
 
     <script>
-        // Função para simular o armazenamento local de dados financeiros
-        // Em uma aplicação real, isso seria mais robusto, talvez com IndexedDB ou Firestore
-        function getFinancialData(key) {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : [];
-        }
+        const currentPageId = 'CapyGrana';
+        let apiKey = localStorage.getItem('capyUniverseApiKey_gemini') || '';
 
-        function saveFinancialData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        // Simula algumas transações para o relatório geral
-        if (getFinancialData('transactions').length === 0) {
-            saveFinancialData('transactions', [
-                { id: 1, date: '2023-05-01', description: 'Salário de Abril', type: 'income', amount: 4500, category: 'Salário' },
-                { id: 2, date: '2023-05-05', description: 'Aluguel', type: 'expense', amount: 1500, category: 'Moradia' },
-                { id: 3, date: '2023-05-10', description: 'Supermercado', type: 'expense', amount: 350, category: 'Alimentação' },
-                { id: 4, date: '2023-05-12', description: 'Internet', type: 'expense', amount: 100, category: 'Contas' },
-                { id: 5, date: '2023-05-15', description: 'Freelance Design', type: 'income', amount: 800, category: 'Trabalho Extra' },
-                { id: 6, date: '2023-05-18', description: 'Cinema com amigos', type: 'expense', amount: 80, category: 'Lazer' },
-                { id: 7, date: '2023-05-20', description: 'Transporte público', type: 'expense', amount: 50, category: 'Transporte' },
-                { id: 8, date: '2023-05-22', description: 'Restaurante', type: 'expense', amount: 120, category: 'Alimentação' },
-            ]);
-        }
-
-        // Função para chamar a API de IA (simplificada para demonstração)
-        async function callAIApi(prompt) {
-            const apiKey = localStorage.getItem('aiApiKey');
-            const aiProvider = localStorage.getItem('aiProvider') || 'gemini'; // Padrão para Gemini
-
-            if (!apiKey) {
-                return 'Erro: Chave da API da IA não configurada. Por favor, vá em Configurações.';
-            }
-
-            let apiUrl = '';
-            let model = '';
-            let headers = { 'Content-Type': 'application/json' };
-            let payload = {};
-
-            // Configuração da API baseada no provedor selecionado
-            if (aiProvider === 'gemini') {
-                model = 'gemini-2.0-flash';
-                // A chave da API é injetada automaticamente pelo ambiente Canvas se for vazia
-                apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-                payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
-            } else if (aiProvider === 'openai') {
-                model = 'gpt-3.5-turbo'; // Exemplo de modelo OpenAI
-                apiUrl = 'https://api.openai.com/v1/chat/completions';
-                headers['Authorization'] = `Bearer ${apiKey}`;
-                payload = {
-                    model: model,
-                    messages: [{ role: "user", content: prompt }]
-                };
-            } else if (aiProvider === 'claude') {
-                model = 'claude-3-opus-20240229'; // Exemplo de modelo Claude
-                apiUrl = 'https://api.anthropic.com/v1/messages';
-                headers['x-api-key'] = apiKey;
-                headers['anthropic-version'] = '2023-06-01'; // Versão da API Anthropic
-                payload = {
-                    model: model,
-                    max_tokens: 1024,
-                    messages: [{ role: "user", content: prompt }]
-                };
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            financialGoalInput: document.getElementById('financial-goal'),
+            incomeInput: document.getElementById('income'),
+            expensesInput: document.getElementById('expenses'),
+            financialSituationArea: document.getElementById('financial-situation'),
+            adviceTypeSelect: document.getElementById('advice-type'),
+            getAdviceButton: document.getElementById('get-advice-button'),
+            outputSection: document.getElementById('output-section'),
+            adviceOutput: document.getElementById('advice-output'),
+            copyAdviceButton: document.getElementById('copy-advice-button')
+        };
+        
+        function toggleLoading(isLoading) {
+            const btnText = dom.getAdviceButton.querySelector('.btn-text');
+            const loader = dom.getAdviceButton.querySelector('.loader');
+            dom.getAdviceButton.disabled = isLoading;
+            if(isLoading) {
+                if(btnText) btnText.classList.add('hidden');
+                if(loader) loader.classList.remove('hidden');
             } else {
-                return 'Provedor de IA não suportado.';
+                if(btnText) btnText.classList.remove('hidden');
+                if(loader) loader.classList.add('hidden');
+            }
+        }
+        
+        function basicMarkdownToHtml(md) {
+            let html = md.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/^###\s+(.+)$/gm, '<h3 class="text-lg font-semibold mt-3 mb-1">$1</h3>');
+            html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+            if (html.includes('<li>')) html = `<ul>${html}</ul>`;
+            return html.split(/\n\s*\n/).map(p => `<p>${p}</p>`).join('');
+        }
+
+        async function handleGetFinancialAdvice() {
+            if (!apiKey) {
+                alert("Por favor, configure a sua chave API do Gemini primeiro.");
+                return;
+            }
+            if (!dom.financialGoalInput.value.trim()) {
+                alert("Defina o seu principal objetivo financeiro.");
+                return;
             }
 
+            toggleLoading(true);
+            dom.outputSection.classList.remove('hidden');
+            dom.adviceOutput.innerHTML = '<p class="text-center">Analisando suas finanças...</p>';
+
+            const prompt = `
+                Aja como CapyGrana, um consultor financeiro pessoal. Analise os seguintes dados:
+                - Objetivo: "${dom.financialGoalInput.value.trim()}"
+                - Rendimento Mensal: ${dom.incomeInput.value.trim() || "Não informado"}
+                - Despesas Fixas: ${dom.expensesInput.value.trim() || "Não informado"}
+                - Situação Adicional: ${dom.financialSituationArea.value.trim() || "Nenhuma"}
+                - Tipo de Conselho: "${dom.adviceTypeSelect.value}"
+                Forneça conselhos claros e acionáveis. Use Markdown.
+            `;
+            
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
                     method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Erro na resposta da API de IA:', errorData);
-                    return `Erro na API de IA: ${response.status} - ${errorData.error?.message || response.statusText}`;
+                if (!response.ok) throw new Error(`Erro na API: ${response.status} - ${(await response.json()).error.message}`);
+                
+                const data = await response.json();
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const adviceText = data.candidates[0].content.parts[0].text.trim();
+                    dom.adviceOutput.innerHTML = basicMarkdownToHtml(adviceText);
+                    dom.copyAdviceButton.classList.remove('hidden');
+                } else {
+                    throw new Error("Resposta da API inválida. Motivo: " + (data.promptFeedback?.blockReason || "Desconhecido"));
                 }
-
-                const result = await response.json();
-
-                // Extrai o texto da resposta baseado no provedor
-                if (aiProvider === 'gemini' && result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                } else if (aiProvider === 'openai' && result.choices && result.choices.length > 0 && result.choices[0].message) {
-                    return result.choices[0].message.content;
-                } else if (aiProvider === 'claude' && result.content && result.content.length > 0) {
-                    return result.content[0].text;
-                }
-
-                return 'Não foi possível obter insights da IA.';
 
             } catch (error) {
-                console.error('Erro ao chamar a API da IA:', error);
-                return 'Erro ao gerar insights da IA. Verifique a chave da API e a conexão.';
+                dom.adviceOutput.innerHTML = `<p class="text-center text-red-400">Erro: ${error.message}</p>`;
+            } finally {
+                toggleLoading(false);
             }
         }
-
-        // Função para carregar o conteúdo de um módulo na área principal
-        function loadModule(moduleName) {
-            const contentDiv = document.getElementById('content');
-            let moduleContent = '';
-
-            // Conteúdo simulado para cada módulo
-            switch (moduleName) {
-                case 'general-report':
-                    moduleContent = `
-                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Relatório Geral</h2>
-                        <p class="text-gray-600 mb-4">Visão geral da sua saúde financeira.</p>
-                        <div class="bg-blue-100 p-4 rounded-lg shadow-sm">
-                            <h3 class="text-xl font-semibold text-blue-700 mb-2">Dados do Relatório</h3>
-                            <div id="report-data" class="mt-4 text-gray-800">
-                                <p>Carregando dados financeiros...</p>
-                            </div>
-                            <button id="generate-report-btn" class="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">Gerar Relatório com IA</button>
-                        </div>
-                    `;
-                    break;
-                case 'payments':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Pagamentos</h2><p class="text-gray-600">Gerencie seus pagamentos aqui.</p>`;
-                    break;
-                case 'receipts':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Recebimentos</h2><p class="text-gray-600">Acompanhe seus recebimentos.</p>`;
-                    break;
-                case 'accounts-payable':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Contas a Pagar</h2><p class="text-gray-600">Visualize suas contas a pagar.</p>`;
-                    break;
-                case 'accounts-receivable':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Contas a Receber</h2><p class="text-gray-600">Visualize suas contas a receber.</p>`;
-                    break;
-                case 'recurring-expenses':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Gastos Recorrentes</h2><p class="text-gray-600">Configure e monitore seus gastos recorrentes.</p>`;
-                    break;
-                case 'add-entry':
-                    moduleContent = `
-                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Adicionar Entrada/Saída</h2>
-                        <p class="text-gray-600 mb-4">Registre suas transações financeiras.</p>
-                        <div class="bg-green-100 p-4 rounded-lg shadow-sm">
-                            <h3 class="text-xl font-semibold text-green-700 mb-2">Nova Transação</h3>
-                            <form class="space-y-4">
-                                <div>
-                                    <label for="transaction-type" class="block text-gray-700 text-sm font-bold mb-2">Tipo:</label>
-                                    <select id="transaction-type" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                        <option value="income">Receita</option>
-                                        <option value="expense">Despesa</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="transaction-amount" class="block text-gray-700 text-sm font-bold mb-2">Valor:</label>
-                                    <input type="number" id="transaction-amount" placeholder="0.00" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                </div>
-                                <div>
-                                    <label for="transaction-description" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-                                    <input type="text" id="transaction-description" placeholder="Ex: Aluguel, Salário" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                </div>
-                                <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200">Salvar Transação</button>
-                            </form>
-                        </div>
-                    `;
-                    break;
-                case 'statement':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Extrato</h2><p class="text-gray-600">Visualize seu extrato por período.</p>`;
-                    break;
-                case 'register':
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Cadastro</h2><p class="text-gray-600">Gerencie suas contas, categorias e bancos.</p>`;
-                    break;
-                case 'ai-chat':
-                    moduleContent = `
-                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Chat com IA</h2>
-                        <p class="text-gray-600 mb-4">Converse com a IA para registrar dados e obter insights.</p>
-                        <div class="bg-purple-100 p-4 rounded-lg shadow-sm flex flex-col h-96">
-                            <div id="chat-messages" class="flex-1 overflow-y-auto p-2 border border-purple-200 rounded-lg mb-4 bg-white">
-                                <div class="text-gray-700 mb-2"><span class="font-semibold text-purple-700">IA:</span> Olá! Como posso ajudar com suas finanças hoje?</div>
-                            </div>
-                            <div class="flex">
-                                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." class="flex-1 shadow appearance-none border rounded-l-lg py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <button id="send-chat-btn" class="px-6 py-3 bg-purple-600 text-white rounded-r-lg shadow-md hover:bg-purple-700 transition-colors duration-200">Enviar</button>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                case 'settings':
-                    moduleContent = `
-                        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Configurações</h2>
-                        <p class="text-gray-600 mb-4">Gerencie as configurações da aplicação, incluindo a chave da API de IA.</p>
-                        <div class="bg-yellow-100 p-4 rounded-lg shadow-sm">
-                            <h3 class="text-xl font-semibold text-yellow-700 mb-2">Chave da API de IA</h3>
-                            <p class="text-yellow-600 mb-4 text-sm">
-                                <strong class="text-red-600">Atenção:</strong> Armazenar chaves de API diretamente no navegador (localStorage) não é seguro para ambientes de produção. Para aplicações reais, considere um proxy de servidor para gerenciar e proteger suas chaves.
-                            </p>
-                            <form class="space-y-4">
-                                <div>
-                                    <label for="ai-api-key" class="block text-gray-700 text-sm font-bold mb-2">Chave da API:</label>
-                                    <input type="password" id="ai-api-key" placeholder="Sua chave de API da IA" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                </div>
-                                <div>
-                                    <label for="ai-provider" class="block text-gray-700 text-sm font-bold mb-2">Provedor de IA:</label>
-                                    <select id="ai-provider" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                        <option value="gemini">Google Gemini</option>
-                                        <option value="openai">OpenAI</option>
-                                        <option value="claude">Anthropic Claude</option>
-                                    </select>
-                                </div>
-                                <button id="save-api-key-btn" type="button" class="px-6 py-3 bg-yellow-600 text-white rounded-lg shadow-md hover:bg-yellow-700 transition-colors duration-200">Salvar Chave</button>
-                            </form>
-                        </div>
-                    `;
-                    break;
-                default:
-                    moduleContent = `<h2 class="text-3xl font-semibold text-gray-800 mb-6">Módulo Não Encontrado</h2><p class="text-gray-600">O módulo solicitado não pôde ser carregado.</p>`;
-            }
-            contentDiv.innerHTML = moduleContent;
-
-            // Adiciona event listener para o botão "Gerar Relatório com IA" se for o módulo Relatório Geral
-            if (moduleName === 'general-report') {
-                const aiInsightsDiv = document.getElementById('ai-insights');
-                const reportDataElement = document.getElementById('report-data');
-                const generateReportBtn = document.getElementById('generate-report-btn');
-
-                const loadAndDisplayReport = async () => {
-                    reportDataElement.innerHTML = '<p>Carregando dados financeiros...</p>';
-                    aiInsightsDiv.textContent = 'Aguardando análise da IA...';
-
-                    try {
-                        const allTransactions = getFinancialData('transactions');
-                        
-                        // Agrega dados para o resumo financeiro
-                        const financialSummary = {
-                            totalRevenue: 0,
-                            totalExpenses: 0,
-                            balance: 0,
-                            recentTransactions: []
-                        };
-
-                        const parsedTransactions = allTransactions.map(JSON.parse);
-                        parsedTransactions.forEach(t => {
-                            if (t.type === 'income') {
-                                financialSummary.totalRevenue += t.amount;
-                            } else if (t.type === 'expense') {
-                                financialSummary.totalExpenses += t.amount;
-                            }
-                        });
-                        financialSummary.balance = financialSummary.totalRevenue - financialSummary.totalExpenses;
-                        financialSummary.recentTransactions = parsedTransactions.slice(-5); // Últimas 5 transações
-
-                        // Atualiza a UI com os dados financeiros básicos
-                        reportDataElement.innerHTML = `
-                            <p><strong>Receitas Totais:</strong> R$ ${financialSummary.totalRevenue.toFixed(2)}</p>
-                            <p><strong>Despesas Totais:</strong> R$ ${financialSummary.totalExpenses.toFixed(2)}</p>
-                            <p><strong>Saldo Atual:</strong> R$ ${financialSummary.balance.toFixed(2)}</p>
-                            <p class="mt-4 font-semibold text-green-700">Insights da IA:</p>
-                            <p id="ai-insights" class="text-gray-700">Aguardando análise da IA...</p>
-                        `;
-                        
-                        const prompt = `Analise os seguintes dados financeiros e forneça um resumo conciso com insights sobre a saúde financeira do usuário, destacando pontos fortes e áreas de melhoria.
-                        Dados: ${JSON.stringify(financialSummary, null, 2)}
-                        `;
-
-                        const aiText = await callAIApi(prompt);
-                        aiInsightsDiv.textContent = aiText;
-
-                    } catch (error) {
-                        console.error('Erro ao carregar ou gerar relatório:', error);
-                        reportDataElement.innerHTML = '<p class="text-red-600">Erro ao carregar o relatório. Tente novamente.</p>';
-                        aiInsightsDiv.textContent = '';
-                    }
-                };
-
-                if (generateReportBtn) {
-                    generateReportBtn.addEventListener('click', loadAndDisplayReport);
-                }
-                loadAndDisplayReport(); // Carrega o relatório ao entrar no módulo
-            }
-
-            // Adiciona event listener para o botão "Salvar Chave" no módulo de configurações
-            if (moduleName === 'settings') {
-                const apiKeyInput = document.getElementById('ai-api-key');
-                const aiProviderSelect = document.getElementById('ai-provider');
-                const saveApiKeyBtn = document.getElementById('save-api-key-btn');
-
-                if (saveApiKeyBtn) {
-                    saveApiKeyBtn.addEventListener('click', () => {
-                        localStorage.setItem('aiApiKey', apiKeyInput.value);
-                        localStorage.setItem('aiProvider', aiProviderSelect.value);
-                        // Substituindo alert por uma mensagem na UI para melhor UX
-                        const messageDiv = document.createElement('div');
-                        messageDiv.textContent = 'Chave da API e Provedor salvos com sucesso!';
-                        messageDiv.className = 'bg-green-200 text-green-800 p-3 rounded-lg mt-4';
-                        apiKeyInput.closest('form').appendChild(messageDiv);
-                        setTimeout(() => messageDiv.remove(), 3000); // Remove a mensagem após 3 segundos
-                    });
-                }
-                // Carrega a chave e o provedor salvos, se existirem
-                apiKeyInput.value = localStorage.getItem('aiApiKey') || '';
-                aiProviderSelect.value = localStorage.getItem('aiProvider') || 'gemini';
-            }
-        }
-
-        // Função para lidar com a mudança de hash na URL (roteamento simples)
-        function handleHashChange() {
-            const hash = window.location.hash.substring(1); // Remove o '#'
-            const moduleName = hash || 'general-report'; // Padrão para 'general-report' se nenhum hash for especificado
-            loadModule(moduleName);
-
-            // Fecha a sidebar em telas menores após a navegação
-            if (window.innerWidth < 768) { // O breakpoint 'md' do Tailwind é 768px
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-            }
-        }
-
-        // Event listeners para os links de navegação da sidebar
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault(); // Evita o comportamento padrão do link de recarregar a página
-                const moduleName = e.target.dataset.module;
-                window.location.hash = moduleName; // Atualiza o hash da URL, o que acionará 'handleHashChange'
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('capyUniverseApiKey_gemini');
+            if(savedKey) apiKey = savedKey;
+            
+            dom.getAdviceButton.addEventListener('click', handleGetFinancialAdvice);
+            dom.copyAdviceButton.addEventListener('click', () => {
+                if(dom.adviceOutput.innerText) navigator.clipboard.writeText(dom.adviceOutput.innerText).then(() => alert('Conselho copiado!'));
             });
         });
-
-        // Lógica para o Toggle de Modo Escuro/Claro
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        darkModeToggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark', darkModeToggle.checked);
-            localStorage.setItem('darkMode', darkModeToggle.checked); // Salva a preferência do usuário
-        });
-
-        // Carrega a preferência de modo escuro ao iniciar a aplicação
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark');
-            darkModeToggle.checked = true;
-        }
-
-        // Lógica para abrir e fechar a sidebar em dispositivos móveis
-        const openSidebarBtn = document.getElementById('open-sidebar-btn');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-        const sidebar = document.getElementById('sidebar');
-
-        openSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.remove('-translate-x-full'); // Mostra a sidebar
-        });
-
-        closeSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full'); // Esconde a sidebar
-        });
-
-        // Fecha a sidebar se o usuário clicar fora dela em telas pequenas
-        document.addEventListener('click', (event) => {
-            // Verifica se está em tela pequena, se o clique não foi na sidebar ou no botão de abrir, e se a sidebar está aberta
-            if (window.innerWidth < 768 && !sidebar.contains(event.target) && !openSidebarBtn.contains(event.target) && !sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.add('-translate-x-full');
-            }
-        });
-
-        // Carrega o módulo inicial ao carregar a página ou quando o hash da URL muda
-        window.addEventListener('hashchange', handleHashChange);
-        window.addEventListener('load', handleHashChange); // Garante que o módulo inicial seja carregado na primeira carga da página
     </script>
 </body>
 </html>
+

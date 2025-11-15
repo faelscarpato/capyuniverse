@@ -83,6 +83,7 @@
   </style>
   <script src="cu-init.js"></script>
   <script src="cu-app.js" defer></script>
+  <script src="cu-navigation.js" defer></script>
 </head>
 
 <body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
@@ -302,7 +303,7 @@
       }
     }
 
-    /* Modal Chaves API (para manter padrão do ecossistema) */
+    /* Modal Chaves API */
     function setupApiKeyModal(){
       const html = `
         <div class="w-full max-w-md">
@@ -403,7 +404,11 @@
       STYLES.forEach(s=>{
         const b=document.createElement('button');
         b.className='px-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300';
-        b.textContent=s; b.onclick=()=>{ const base=el.prompt.value.trim(); el.prompt.value = base?`${base}, ${s}`:s; };
+        b.textContent=s;
+        b.onclick=()=>{
+          const base=el.prompt.value.trim();
+          el.prompt.value = base?`${base}, ${s}`:s;
+        };
         el.styleChips.appendChild(b);
       });
     }
@@ -413,7 +418,9 @@
       const img=node.querySelector('img'); const sk=node.querySelector('.animate-pulse');
       img.src=dataUrl; img.classList.remove('hidden'); if(sk) sk.classList.add('hidden');
       node.querySelector('.btn-open').onclick=()=>window.open(dataUrl,'_blank');
-      node.querySelector('.btn-dl').onclick=()=>{ const a=document.createElement('a'); a.href=dataUrl; a.download=`capyimg_${Date.now()}_${idx+1}.png`; a.click(); };
+      node.querySelector('.btn-dl').onclick=()=>{
+        const a=document.createElement('a'); a.href=dataUrl; a.download=`capyimg_${Date.now()}_${idx+1}.png`; a.click();
+      };
     }
 
     async function generateWithPollinations(prompt, {count,size,negative,seed}){
@@ -429,7 +436,9 @@
           if(!res.ok) throw new Error('status '+res.status);
           const blob=await res.blob();
           out.push(URL.createObjectURL(blob));
-        }catch(e){ out.push(u.toString()); }
+        }catch(e){
+          out.push(u.toString());
+        }
       }
       return out;
     }
@@ -456,7 +465,24 @@
     }
     async function downloadAllVisible(){
       const imgs=[...el.grid.querySelectorAll('img')].map(im=>im.src); if(!imgs.length) return;
-      for(let i=0;i<imgs.length;i++){ const a=document.createElement('a'); a.href=imgs[i]; a.download=`capyimg_${String(i+1).padStart(2,'0')}.png`; a.click(); await new Promise(r=>setTimeout(r,120)); }
+      for(let i=0;i<imgs.length;i++){
+        const a=document.createElement('a'); a.href=imgs[i]; a.download=`capyimg_${String(i+1).padStart(2,'0')}.png`; a.click();
+        await new Promise(r=>setTimeout(r,120));
+      }
+    }
+
+    /* NOVO: aplicar prompt vindo do CapyMuse */
+    function applyPromptFromQuery(){
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const p = params.get('prompt');
+        if (p && el.prompt) {
+          el.prompt.value = p;
+          addHistoryItem(p);
+        }
+      } catch (e) {
+        console.warn('Erro ao ler prompt da URL em CapyIMG:', e);
+      }
     }
 
     /* Boot */
@@ -464,9 +490,15 @@
       renderSidebar(); setupApiKeyModal(); initSidebarToggle();
       renderHistory(); renderStyleChips();
 
+      // aplicar prompt vindo do CapyMuse, se houver
+      applyPromptFromQuery();
+
       el.generate.addEventListener('click', onGenerate);
       el.downloadAll.addEventListener('click', downloadAllVisible);
-      el.clearHistory.addEventListener('click', ()=>{ localStorage.removeItem('capyimg_history'); renderHistory(); });
+      el.clearHistory.addEventListener('click', ()=>{
+        localStorage.removeItem('capyimg_history');
+        renderHistory();
+      });
       el.ratio.addEventListener('change', updateSizeInfo);
       el.longSide.addEventListener('change', updateSizeInfo);
       updateSizeInfo();
