@@ -572,4 +572,321 @@ function initCapyPromptToggle(){
 // init
 if(!state.sessionId) startNewSession();
 initCapyPromptToggle();
+loadTools();elFileInput.onchange = async (e)=>{
+  const f = e.target.files?.[0]; if(!f) return;
+  const holder = addAI('<div style="opacity:.8;margin-bottom:6px">Imagem anexada</div>');
+  const url = URL.createObjectURL(f);
+  const img = new Image(); img.style.maxWidth='50%'; img.style.borderRadius='12px'; img.style.display='block'; img.src=url;
+  img.onload = ()=> URL.revokeObjectURL(url);
+  holder.appendChild(img);
+
+  // Ações
+  const actions = document.createElement('div'); actions.className='row'; actions.style.marginTop='8px';
+  const bMakePrompt = btn('Gerar prompt (Vision)', async ()=>{
+    const p = await generatePromptFromImage(f);
+    const block = renderPromptBlock(p, [{label:'Melhorar com CapyPrompt', action: async (val)=>{ const better = await capyPromptRefine(val); const upgraded = renderPromptBlock(better, [ {label:'Gerar com CapyIMG', action:(v)=>{ showImagePills(); flowImage(v); }}, {label:'Copiar', action:(v)=> navigator.clipboard.writeText(v) } ]); addAI(upgraded); }},
+      {label:'Gerar com CapyIMG', action:(val)=>{ showImagePills(); flowImage(val); }},
+      {label:'Copiar', action:(val)=> navigator.clipboard.writeText(val) }
+    ]);
+    addAI(block); saveSessionContent();
+  });
+  actions.appendChild(bMakePrompt);
+  holder.appendChild(actions);
+};
+
+// ===== flows =====
+async function flowImage(userText){
+  const {style, ratio, model, seed} = state.img;
+  const styleLabel = getStyleLabel(style);
+  const effect     = getStyleEffect(style);
+  const negatives  = 'low quality, blurry, oversaturated, extra fingers, watermark, text artifact';
+
+  const base = typeof userText==='string' ? userText : String(userText||'');
+  const core = cleanPrompt(base.replace(/^\/\*img\s*/, ''));
+
+  const prompt = `${core}, style: ${styleLabel}, ${effect}, high detail, crisp focus, ${ratio}, --negatives: ${negatives}`.trim();
+  const [w,h] = ratioToSize(ratio);
+  const holder = addAI(`Gerando imagem…<br><small>${styleLabel} • ${ratio} • ${model} • seed ${seed}</small>`);
+  await renderPollinations(prompt, w, h, model, seed, holder);
+  saveSessionContent();
+}
+async function flowCode(userText){
+  const holder = addAI(`<b>Escrevendo código…</b><div id="editor" class="editor"></div><div class="actions" style="margin-top:8px"></div>`);
+  const ed = await ensureMonaco('#editor','html');
+  const raw = await codeGenerator(userText);
+  const {code, notes} = extractCodeAndNotes(raw);
+  await typeInto(ed, code);
+  const actions = holder.querySelector('.actions');
+  if(notes){ addAI('<small><em>Notas</em></small><div class="bubble">'+escapeHTML(notes)+'</div>'); }
+  const prev = btn('Preview', ()=> preview(ed.getValue()));
+  const down = btn('Download', ()=> download('index.html', ed.getValue()));
+  actions.appendChild(prev); actions.appendChild(down);
+  saveSessionContent();
+}
+async function flowText(userText){
+  const holder = addAI('<em>Escrevendo…</em>');
+  const txt = await textGenerator(userText);
+  holder.textContent = txt; saveSessionContent();
+}
+
+// ===== Vision (CapyIMGtxt) =====
+async function generatePromptFromImage(file){
+  const dataUrl = await fileToDataURL(file);
+  const base64 = dataUrl.split(',')[1];
+  const gem = localStorage.getItem(KEYS.gemini);
+  const oa  = localStorage.getItem(KEYS.openai);
+  const instr = "Transforme esta imagem em um PROMPT de geração de imagens descritivo e objetivo, em português. Inclua composição, iluminação, estilo, lente e qualidade.";
+
+  if(gem){
+    try{
+      const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${gem}`;
+      const body={ contents:[{ role:"user", parts:[ {text: instr}, {inline_data:{mime_type:file.type, data: base64}} ] }], generationConfig:{temperature:0.6}};
+      const r = await fetch(url,{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await r.json(); const txt = j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || '';
+      if(txt) return txt;
+    }catch(e){ console.warn('Gemini Vision falhou', e); }
+  }
+  if(oa){
+    try{
+      const r = await fetch("https://api.openai.com/v1/chat/completions",{
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${oa}`},
+        body: JSON.stringify({ model:"gpt-4o-mini", messages:[{role:"user", content:[{type:"text", text: instr},{type:"image_url", image_url:{url:dataUrl}}]}] })
+      });
+      const j = await r.json(); const txt = j?.choices?.[0]?.message?.content || '';
+      if(txt) return txt;
+    }catch(e){ console.warn('OpenAI Vision falhou', e); }
+  }
+  return "Uma fotografia/ilustração de [assunto], composição [detalhes], iluminação [detalhes], estilo [detalhes], lente/qualidade [detalhes].";
+}
+
+// ===== CapyPrompt (refino de prompt) =====
+async function capyPromptRefine(baseText, opts={}){
+  const text = (baseText||'').trim();
+  if(!text) return text;
+  const action = opts.action||'refine';
+  const extra  = opts.extra||'';
+
+  const gem = localStorage.getItem(KEYS.gemini);
+  const oa  = localStorage.getItem(KEYS.openai);
+
+  const system = "Aja como CapyPrompt, um engenheiro de prompts. Reescreva para ficar claro, específico e focado no objetivo do usuário. Responda APENAS com o prompt resultante, em uma única peça de texto.";
+  let user = `Prompt Base: "${text}"\nAção: ${action}.`;
+  if(extra) user += `\nInformação adicional: ${extra}`;
+
+  if(gem){
+    try{
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${gem}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[ {role:'user', parts:[{text: system + "\n\n" + user}] } ], generationConfig:{temperature:0.5} })
+      });
+      const j = await r.json();
+      const t = j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')?.trim();
+      if(t) return cleanPrompt(t);
+    }catch(e){ console.warn('CapyPrompt Gemini falhou', e); }
+  }
+  if(oa){
+    try{
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${oa}`},
+        body: JSON.stringify({ model:'gpt-4o-mini', messages:[
+          {role:'system', content: system},
+          {role:'user', content: user}
+        ]})
+      });
+      const j = await r.json(); const t = j?.choices?.[0]?.message?.content?.trim();
+      if(t) return cleanPrompt(t);
+    }catch(e){ console.warn('CapyPrompt OpenAI falhou', e); }
+  }
+  return cleanPrompt(text + ", composição clara, iluminação coerente, alta qualidade, detalhes nítidos");
+}
+// ===== AI (texto/código) =====
+async function textGenerator(userText){
+  const gem = localStorage.getItem(KEYS.gemini);
+  const oa  = localStorage.getItem(KEYS.openai);
+  if(gem){
+    try{
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${gem}`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{role:'user',parts:[{text:userText}]}]})});
+      const j = await r.json(); const t = j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')||''; if(t) return t;
+    }catch{}
+  }
+  if(oa){
+    try{
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${oa}`}, body: JSON.stringify({model:'gpt-4o-mini', messages:[{role:'user',content:userText}]})});
+      const j = await r.json(); const t = j?.choices?.[0]?.message?.content || ''; if(t) return t;
+    }catch{}
+  }
+  // fallback simples
+  return 'Resumo: ' + userText;
+}
+
+async function codeGenerator(userText){
+  const gem = localStorage.getItem(KEYS.gemini);
+  const oa  = localStorage.getItem(KEYS.openai);
+  if(gem){
+    try{
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${gem}`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({contents:[{role:'user',parts:[{text:"Gere APENAS um arquivo HTML completo, auto-contido, com CSS e JS inline, para: "+userText}]}]})});
+      const j = await r.json(); const t = j?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')||''; if(t) return t;
+    }catch{}
+  }
+  if(oa){
+    try{
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${oa}`}, body: JSON.stringify({model:'gpt-4o-mini', messages:[{role:'system',content:'Responda **apenas** com um arquivo HTML completo, auto-contido (CSS e JS inline), sem comentários fora das tags e sem explicações. Não use markdown.'},{role:'user',content:userText}]})});
+      const j = await r.json(); const t = j?.choices?.[0]?.message?.content || ''; if(t) return t;
+    }catch{}
+  }
+  // fallback local
+  return `<!DOCTYPE html><html lang="pt-BR"><meta charset="utf-8"><title>App</title>
+  <style>body{font-family:Inter,system-ui;background:#f5f7fb;margin:0} header{background:#111;color:#fff;padding:14px} .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:12px} .card{background:#fff;border:1px solid #e5e8f0;border-radius:12px;padding:10px} .price{color:#0d6efd;font-weight:800}</style>
+  <header><h1>Exemplo</h1></header>
+  <main class="grid"><div class="card"><b>Bloco A</b></div><div class="card"><b>Bloco B</b></div></main>
+  <script>console.log('ok')</script></html>`;
+}
+
+
+// --- Code extraction: keep ONLY HTML in the editor ---
+function extractCodeAndNotes(raw){
+  let code = '';
+  let notes = '';
+
+  // Prefer fenced blocks ```html ... ``` or ``` ... ```
+  const fences = [];
+  const reFence = /```(?:html|htm|xml)?\s*([\s\S]*?)```/gi;
+  let m;
+  while((m = reFence.exec(raw))){ fences.push(m[1]); }
+  if(fences.length){
+    // choose the largest block
+    code = fences.sort((a,b)=>b.length-a.length)[0];
+  }
+
+  // If no fenced block, try grab from <!DOCTYPE> ... </html> or <html> ... </html>
+  if(!code){
+    let m2 = raw.match(/<!DOCTYPE[\s\S]*?<\/html>/i) || raw.match(/<html[\s\S]*?<\/html>/i);
+    if(m2) code = m2[0];
+  }
+
+  // If still empty, assume everything is code but strip leading markdown lines
+  if(!code){
+    code = raw.replace(/^.*?<\/?html[^>]*>/is, raw); // naive fallback
+  }
+
+  // Clean common markdown remnants
+  code = code.replace(/^```[\s\S]*?$/gm,'').trim();
+
+  // Notes = remainder if we found a fenced block
+  if(fences.length){
+    // remove the chosen fence from the raw to get notes
+    const chosen = fences.sort((a,b)=>b.length-a.length)[0];
+    const chosenBlock = "```" + chosen + "```";
+    notes = raw.replace(/```(?:html|htm|xml)?\s*[\s\S]*?```/gi, '').trim();
+  } else {
+    // rough notes: text before <!DOCTYPE or <html> plus trailing explanations after </html>
+    const start = raw.search(/<!DOCTYPE|<html/i);
+    const endMatch = raw.match(/<\/html>/i);
+    const end = endMatch ? raw.indexOf(endMatch[0]) + endMatch[0].length : raw.length;
+    if(start > 0 || end < raw.length){
+      notes = (start>0? raw.slice(0,start):'') + (end<raw.length ? raw.slice(end):'');
+      notes = notes.trim();
+    }
+  }
+
+  return { code: code.trim(), notes: notes };
+}
+
+// ===== Monaco / helpers =====
+async function ensureMonaco(sel, language='html'){
+  if(!state.monaco){
+    window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+    state.monaco = await new Promise(res=> window.require(['vs/editor/editor.main'], ()=> res(window.monaco)));
+  }
+  const n = $(sel);
+  if(state.editor) state.editor.dispose();
+  state.editor = state.monaco.editor.create(n,{value:'<!-- aguardando código -->',language,theme:'vs-dark',automaticLayout:true,minimap:{enabled:false}});
+  return state.editor;
+}
+async function typeInto(ed, text){
+  ed.setValue(''); let i=0;
+  const step = Math.max(1, Math.floor(text.length/200));
+  while(i<text.length){ i += step; ed.setValue(text.slice(0,i)); ed.revealLine(ed.getModel().getLineCount()); await sleep(8); }
+}
+function preview(code){
+  const blob = new Blob([code],{type:'text/html'}); const url = URL.createObjectURL(blob);
+  addAI('<b>Preview</b>'); const iframe = document.createElement('iframe'); iframe.className='preview'; iframe.src=url; iframe.onload=()=> setTimeout(()=>URL.revokeObjectURL(url),1000);
+  elChat.appendChild(iframe); elChat.scrollTop = elChat.scrollHeight;
+}
+function download(name, text){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+// ===== Pollinations =====
+function ratioToSize(r){ return r==='16:9'?[1280,720]: r==='9:16'?[1080,1920]:[1024,1024]; }
+
+async function renderPollinations(prompt, w, h, model, seed, holder){
+  const qs = new URLSearchParams({width:String(Math.min(w,1024)), height:String(Math.min(h,1024)), model, seed:String(seed), n:'1'});
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}.png?${qs.toString()}&noCache=${Date.now()}`;
+  try{
+    const blob = await withTimeout(fetch(url,{mode:'cors', cache:'no-store'}).then(r=>r.blob()), 60000);
+    const obj = URL.createObjectURL(blob);
+    const img = new Image(); img.loading='lazy'; img.style.maxWidth='100%'; img.style.borderRadius='12px'; img.alt=prompt; img.src=obj;
+    img.onload = ()=> URL.revokeObjectURL(obj);
+    holder.innerHTML=''; holder.appendChild(img);
+    const row = document.createElement('div'); row.style.marginTop='8px';
+    row.appendChild(btn('Regenerar', ()=>{ state.img.seed=randSeed(); renderPollinations(prompt, w, h, model, state.img.seed, holder);} ));
+    row.appendChild(btn('Abrir', ()=> window.open(url,'_blank')));
+    row.appendChild(btn('Baixar', ()=> { const a=document.createElement('a'); a.href=url; a.download=`capyimg_${seed}.png`; a.click(); }));
+    holder.appendChild(row);
+  }catch(e){
+    const img = new Image(); img.loading='lazy'; img.style.maxWidth='100%'; img.style.borderRadius='12px'; img.alt=prompt; img.src=url;
+    img.onload=()=>{ holder.innerHTML=''; holder.appendChild(img); };
+    img.onerror=()=>{ holder.innerHTML = `Falha ao gerar imagem. <a href="${url}" target="_blank">Abrir em nova aba</a>`; };
+  }
+}
+
+// ===== UI helpers =====
+function cleanPrompt(s){
+  // remove markdown bullets/asterisks and headings
+  s = s.replace(/\*\*?/g,'').replace(/^#+\s*/gm,'');
+  // turn line breaks into commas where appropriate
+  s = s.replace(/\n\s*\n/g, '\n').replace(/[\r\n]+/g, ', ').replace(/\s+,/g, ',').replace(/,,+/g, ',').replace(/\s{2,}/g,' ').trim();
+  // keep it concise but descriptive
+  return s;
+}
+
+function btn(label, onclick){
+  const b = document.createElement('button');
+  b.className = 'pill';
+  b.type = 'button';
+  b.textContent = label;
+  b.onclick = onclick;
+  return b;
+}
+function addUser(t){ const b=document.createElement('div'); b.className='bubble user'; b.textContent=t; elChat.appendChild(b); elChat.scrollTop=elChat.scrollHeight; return b; }
+function addAI(content){ const b=document.createElement('div'); b.className='bubble'; if(typeof content==='string'){ b.innerHTML=content; } else if(content instanceof Element){ b.appendChild(content); } elChat.appendChild(b); elChat.scrollTop=elChat.scrollHeight; return b; }
+function systemMsg(t){ addAI('<em>'+escapeHTML(t)+'</em>'); }
+function escapeHTML(s){ return s.replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function randSeed(){ return Math.floor(Math.random()*1e9); }
+function withTimeout(p, ms=45000){ return new Promise((res,rej)=>{ const id=setTimeout(()=>rej(new Error('timeout')),ms); p.then(v=>{clearTimeout(id);res(v)}).catch(e=>{clearTimeout(id);rej(e)}) }) }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function fileToDataURL(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
+function renderPromptBlock(text, actions=[]){
+  const cleaned = cleanPrompt(text);
+  const id = 'ta'+Math.random().toString(36).slice(2);
+  const wrapper = document.createElement('div');
+  const title = document.createElement('div'); title.textContent='Prompt gerado'; title.style.opacity='.7'; title.style.marginBottom='6px';
+  const ta = document.createElement('textarea');
+  ta.id = id; ta.rows = 8; ta.className='composer__input'; ta.style.height='170px'; ta.value = cleaned;
+  const row = document.createElement('div'); row.className='row'; row.style.marginTop='8px';
+  const copyBtn = btn('Copiar', ()=> navigator.clipboard.writeText(ta.value));
+  row.appendChild(copyBtn);
+  actions.forEach(a=>{ const b=btn(a.label, ()=>a.action(ta.value)); row.appendChild(b); });
+  wrapper.appendChild(title); wrapper.appendChild(ta); wrapper.appendChild(row);
+  return wrapper;
+}
+
+// CapyPrompt toggle
+function initCapyPromptToggle(){
+  if(!elCapyToggle) return;
+  elCapyToggle.style.display = 'inline-flex';
+  elCapyToggle.onclick = ()=> elCapyToggle.classList.toggle('active');
+}
+// init
+if(!state.sessionId) startNewSession();
+initCapyPromptToggle();
 loadTools();
