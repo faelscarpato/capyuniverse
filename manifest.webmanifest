@@ -7,14 +7,14 @@
   "theme_color": "#b530a0",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "icons/logo.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpg"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "icons/logo.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpg"
     }
   ],
   "description": "um superapp web que concentra diversos Agentes de IA"
