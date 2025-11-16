@@ -4,7 +4,7 @@
   "start_url": "https://capyuniverse.pages.dev/",
   "display": "standalone",
   "background_color": "#121217",
-  "theme_color": "#9333ea",
+  "theme_color": "#b530a0",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -16,5 +16,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "um superapp web que concentra diversos Agentes de IA"
 }
