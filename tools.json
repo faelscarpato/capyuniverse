@@ -763,6 +763,15 @@
     "iconUrl": ""
   },
   {
+  "id": "capy-storyboard",
+  "title": "CapyStoryboard",
+  "category": "Criatividade",
+  "description": "Geração de storyboards com IA a partir de roteiros, estilos e referências visuais.",
+  "url": "capystoryboard.html",
+  "icon": "🎬",
+  "tags": ["vídeo", "storyboard", "criatividade", "gemini"]
+},
+  {
   "id": "CapyStudio",
   "title": "CapyStudio",
   "iconUrl": "icon/capystudio.png",
