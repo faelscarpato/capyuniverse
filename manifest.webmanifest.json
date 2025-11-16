@@ -1,20 +1,21 @@
 {
-  "name": "CapyIDE Dinâmico",
-  "short_name": "CapyIDE",
+  "name": "CapyUniverse AI",
+  "short_name": "CapyUniverse",
   "start_url": "https://faelscarpato.github.io/capyuniverse/index.html",
   "display": "standalone",
   "background_color": "#121217",
   "theme_color": "#9333ea",
   "icons": [
     {
-      "src": "icons/icons-192.png",
+      "src": "icons/logo.jpg",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icons-512.png",
+      "src": "icons/logo.jpg",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 }
+
