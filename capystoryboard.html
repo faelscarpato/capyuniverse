@@ -1,0 +1,1147 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CapyStoryboard — CapyUniverse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            capy: {
+              bg: "#050810",
+              card: "#0b0f14",
+              soft: "#111827",
+              line: "#1f2937",
+              neon: "#39ff14",
+              cyan: "#32eafd",
+              pink: "#ff3ea5"
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body class="bg-capy-bg text-slate-100">
+  <div class="min-h-screen flex justify-center items-stretch p-4 md:p-8">
+    <div class="w-full max-w-6xl grid md:grid-cols-[260px,1fr] gap-6">
+      <!-- Sidebar -->
+      <aside class="bg-capy-card/80 border border-capy-line rounded-2xl p-4 md:p-6 flex flex-col gap-6 backdrop-blur">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-capy-neon to-capy-cyan flex items-center justify-center shadow-[0_0_25px_rgba(57,255,20,0.5)]">
+            <span class="text-2xl">🎬</span>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold tracking-tight">CapyStoryboard</h1>
+            <p class="text-xs text-slate-400 uppercase tracking-[0.18em]">Ferramenta CapyUniverse</p>
+          </div>
+        </div>
+
+        <div class="bg-capy-soft/80 border border-capy-line rounded-xl p-4 text-xs text-slate-300 space-y-2">
+          <p><span class="font-semibold text-capy-neon">Função:</span> gerar storyboards a partir de roteiros, com estilos visuais e prompts de imagem.</p>
+          <p class="text-slate-400">Use este app antes de ir para Veo, Runway, CapCut ou qualquer IA de vídeo.</p>
+        </div>
+
+        <nav class="space-y-2 text-sm">
+          <button data-section-btn="generator" class="capy-tab-btn w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-capy-line bg-capy-soft/80 hover:border-capy-neon/70 hover:bg-capy-soft text-left transition">
+            <span class="text-base">🧩</span>
+            <div>
+              <div class="font-medium text-sm">Gerador de storyboard</div>
+              <div class="text-[11px] text-slate-400">Roteiro → cenas → painéis</div>
+            </div>
+          </button>
+          <button data-section-btn="chat" class="capy-tab-btn w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-transparent bg-transparent hover:border-capy-line hover:bg-capy-soft/60 text-left transition">
+            <span class="text-base">💬</span>
+            <div>
+              <div class="font-medium text-sm">Chat IA de roteiro</div>
+              <div class="text-[11px] text-slate-400">Ajustar cenas, ritmos e ganchos</div>
+            </div>
+          </button>
+          <button data-section-btn="image" class="capy-tab-btn w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-transparent bg-transparent hover:border-capy-line hover:bg-capy-soft/60 text-left transition">
+            <span class="text-base">🧠</span>
+            <div>
+              <div class="font-medium text-sm">Analisador de imagem</div>
+              <div class="text-[11px] text-slate-400">Basear o storyboard em referências</div>
+            </div>
+          </button>
+        </nav>
+
+        <div class="mt-auto space-y-3 text-xs text-slate-400">
+          <div class="flex items-center justify-between gap-2">
+            <span>Chave Gemini</span>
+            <button id="openSettings" class="px-2 py-1 rounded-lg border border-capy-line hover:border-capy-neon text-[11px]">Configurar</button>
+          </div>
+          <p class="text-[11px] leading-relaxed">
+            A chave fica salva apenas neste navegador (localStorage). A CapyUniverse não envia nada para servidores próprios.
+          </p>
+        </div>
+      </aside>
+
+      <!-- Main area -->
+      <main class="bg-capy-card/80 border border-capy-line rounded-2xl p-4 md:p-6 flex flex-col gap-4 backdrop-blur">
+        <!-- Top bar -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h2 class="text-xl md:text-2xl font-semibold tracking-tight flex items-center gap-2">
+              <span id="sectionTitle">Gerador de storyboard</span>
+              <span class="inline-flex items-center rounded-full border border-capy-line px-2 py-[2px] text-[11px] text-slate-300 bg-capy-soft/60">v1 • modo CapyUniverse</span>
+            </h2>
+            <p id="sectionSubtitle" class="text-xs md:text-sm text-slate-400 mt-1">
+              Cole o roteiro, escolha um estilo e deixe a IA sugerir a divisão em cenas e painéis.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-[11px] md:text-xs text-slate-400">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+            <span>Gemini 2.0 Flash pronto para conectar</span>
+          </div>
+        </div>
+
+        <!-- Sections -->
+        <section id="section-generator" class="flex flex-col gap-4">
+          <!-- Stepper -->
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between text-xs md:text-sm">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-[2px] rounded-full bg-capy-soft text-[11px]">Passo <span id="stepLabel">1</span> de 3</span>
+                <span id="stepTitle" class="text-slate-300 font-medium">Roteiro base</span>
+              </div>
+              <div class="hidden md:flex gap-1 text-[11px] text-slate-500">
+                <span class="px-2 py-[2px] rounded-full border border-capy-line/60" data-step-pill="1">1. Roteiro</span>
+                <span class="px-2 py-[2px] rounded-full border border-capy-line/40" data-step-pill="2">2. Estilos</span>
+                <span class="px-2 py-[2px] rounded-full border border-capy-line/40" data-step-pill="3">3. Painéis</span>
+              </div>
+            </div>
+
+            <div class="w-full h-1.5 rounded-full bg-capy-soft overflow-hidden">
+              <div id="stepProgress" class="h-full w-1/3 bg-gradient-to-r from-capy-neon via-capy-cyan to-capy-pink transition-all"></div>
+            </div>
+          </div>
+
+          <!-- Step 1: script -->
+          <div data-step="1" class="grid md:grid-cols-[minmax(0,1.4fr),minmax(0,1fr)] gap-4 md:gap-6">
+            <div class="bg-capy-soft/80 border border-capy-line rounded-xl p-4 flex flex-col gap-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-sm font-semibold">Roteiro ou descrição da cena</h3>
+                  <p class="text-xs text-slate-400 mt-1">
+                    Pode ser um roteiro de filme, anúncio, reel, vídeo curto ou sequência de imagens.
+                  </p>
+                </div>
+                <label class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-capy-line text-[11px] cursor-pointer hover:border-capy-neon">
+                  <input id="scriptFileInput" type="file" accept=".txt" class="hidden" />
+                  <span>.txt</span>
+                </label>
+              </div>
+              <textarea id="scriptInput" class="mt-1 w-full h-52 resize-none rounded-lg bg-black/30 border border-capy-line/70 focus:border-capy-neon outline-none text-sm p-3 placeholder:text-slate-500 scrollbar-thin" placeholder="Exemplo:
+CENA 1 – Exterior da fábrica à noite. Câmera afastada, vemos o prédio enorme com poucas luzes acesas...
+
+CENA 2 – Close no crachá de Rafael sendo devolvido no balcão. Mãos tensas, silêncio constrangedor..."></textarea>
+              <div class="flex items-center justify-between gap-3 text-[11px] text-slate-400">
+                <span id="scriptCharCount">0 caracteres</span>
+                <button id="btnParseScript" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-capy-neon/90 text-black font-medium text-[11px] hover:bg-capy-neon">
+                  <span>Dividir em cenas</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-capy-soft/80 border border-capy-line rounded-xl p-4 flex flex-col gap-3 text-xs">
+              <h3 class="text-sm font-semibold">Como a divisão funciona?</h3>
+              <ul class="space-y-2 text-slate-300">
+                <li>• A IA procura por quebras de parágrafo, termos como <span class="text-capy-cyan font-mono text-[11px]">CENA X</span> ou mudanças de ação.</li>
+                <li>• Cada bloco vira um painel inicial de storyboard.</li>
+                <li>• Depois você escolhe o estilo visual e gera prompts de imagem específicos para cada painel.</li>
+              </ul>
+              <div class="mt-2 rounded-lg border border-dashed border-capy-line/60 p-3 text-[11px] text-slate-400 space-y-1.5">
+                <p class="font-semibold text-slate-300">Dica Capy:</p>
+                <p>Use frases curtas e objetivas por cena. Isso deixa os prompts mais claros e as imagens mais consistentes.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: styles -->
+          <div data-step="2" class="hidden flex-col gap-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold">Escolha um estilo visual principal</h3>
+                <p class="text-xs text-slate-400 mt-1">Você pode ajustar depois, mas comece com a vibe geral que você quer atingir.</p>
+              </div>
+            </div>
+            <div id="stylesGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+          </div>
+
+          <!-- Step 3: panels -->
+          <div data-step="3" class="hidden flex flex-col gap-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold">Painéis gerados</h3>
+                <p class="text-xs text-slate-400 mt-1">Revise, edite e, se quiser, peça para a IA refinar cenas específicas.</p>
+              </div>
+              <div class="flex flex-wrap gap-2 items-center text-[11px]">
+                <label class="flex items-center gap-1 border border-capy-line rounded-lg px-2 py-1 bg-capy-soft/60">
+                  <span class="text-slate-300">Painéis por linha</span>
+                  <select id="panelsPerRow" class="bg-transparent text-[11px] outline-none">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                  </select>
+                </label>
+                <button id="btnAskIaStoryboard" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-capy-line hover:border-capy-neon bg-capy-soft/70">
+                  <span>Gerar sugestões com IA</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="panelsContainer" class="mt-1 rounded-xl border border-capy-line/80 bg-black/20 p-3 md:p-4 min-h-[120px]">
+              <div id="panelsEmptyState" class="text-xs text-slate-500 text-center py-6">
+                Nenhuma cena ainda. Primeiro divida o roteiro no passo 1.
+              </div>
+              <div id="panelsGrid" class="hidden gap-3 md:gap-4"></div>
+            </div>
+
+            <!-- Export bar -->
+            <div class="flex flex-wrap justify-between items-center gap-2 mt-2 text-[11px]">
+              <span class="text-slate-500">Exportar storyboard:</span>
+              <div class="flex flex-wrap gap-2">
+                <button id="btnExportTxt" class="px-2.5 py-1 rounded-lg border border-capy-line bg-black/30 hover:border-capy-neon">
+                  .TXT
+                </button>
+                <button id="btnExportJson" class="px-2.5 py-1 rounded-lg border border-capy-line bg-black/30 hover:border-capy-neon">
+                  .JSON
+                </button>
+                <button id="btnCopyMarkdown" class="px-2.5 py-1 rounded-lg border border-capy-line bg-black/30 hover:border-capy-neon">
+                  Copiar Markdown
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-2 border-t border-capy-line/60 mt-2">
+            <button id="btnPrevStep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-capy-line bg-transparent text-xs text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span>◀</span><span>Voltar</span>
+            </button>
+            <button id="btnNextStep" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-capy-neon/90 text-black font-medium text-xs hover:bg-capy-neon">
+              <span>Avançar</span><span>▶</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Section: Chat -->
+        <section id="section-chat" class="hidden flex flex-col h-full gap-4">
+          <div class="bg-capy-soft/80 border border-capy-line rounded-xl flex-1 flex flex-col overflow-hidden">
+            <div class="px-4 py-3 border-b border-capy-line flex items-center justify-between gap-3">
+              <div>
+                <h3 class="text-sm font-semibold">Chat IA sobre o roteiro</h3>
+                <p class="text-xs text-slate-400 mt-1">Pergunte sobre ritmo, ganchos, cortes, narrativa visual e alternativas de cena.</p>
+              </div>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin text-sm"></div>
+            <div class="px-3 py-3 border-t border-capy-line">
+              <form id="chatForm" class="flex items-end gap-2">
+                <textarea id="chatInput" rows="2" class="flex-1 rounded-lg bg-black/30 border border-capy-line/70 focus:border-capy-neon outline-none text-xs p-2.5 placeholder:text-slate-500" placeholder="Ex: sugira três formas diferentes de abrir esse vídeo usando o roteiro atual..."></textarea>
+                <button class="shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-lg bg-capy-neon/90 text-black text-xs font-medium hover:bg-capy-neon" type="submit">
+                  Enviar
+                </button>
+              </form>
+              <p class="mt-1 text-[10px] text-slate-500">A IA usa o roteiro atual (se existir) como contexto.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Image analyzer -->
+        <section id="section-image" class="hidden flex flex-col gap-4">
+          <div class="grid md:grid-cols-[minmax(0,1.1fr),minmax(0,1fr)] gap-4 md:gap-6">
+            <div class="bg-capy-soft/80 border border-capy-line rounded-xl p-4 flex flex-col gap-3">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-sm font-semibold">Imagem de referência</h3>
+                  <p class="text-xs text-slate-400 mt-1">Suba um frame, foto ou concept art para a IA descrever e sugerir como transformar em sequência.</p>
+                </div>
+                <label class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-capy-line text-[11px] cursor-pointer hover:border-capy-neon">
+                  <input id="imageInput" type="file" accept="image/*" class="hidden" />
+                  <span>Escolher</span>
+                </label>
+              </div>
+              <div id="imagePreview" class="mt-2 rounded-lg border border-capy-line/80 bg-black/20 min-h-[180px] flex items-center justify-center text-xs text-slate-500">
+                Nenhuma imagem carregada.
+              </div>
+              <button id="btnAnalyzeImage" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-capy-neon/90 text-black text-xs font-medium hover:bg-capy-neon disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                Analisar com IA
+              </button>
+            </div>
+            <div class="bg-capy-soft/80 border border-capy-line rounded-xl p-4 flex flex-col gap-3 text-xs">
+              <h3 class="text-sm font-semibold">Resumo da IA</h3>
+              <div id="imageAnalysis" class="min-h-[160px] text-slate-300 text-xs whitespace-pre-wrap"></div>
+              <p class="mt-auto text-[11px] text-slate-500">
+                Use isso para alinhar estilo entre referências visuais e o storyboard gerado.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div id="settingsOverlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 items-center justify-center">
+    <div class="w-full max-w-sm bg-capy-card border border-capy-line rounded-2xl p-5 shadow-xl">
+      <h3 class="text-sm font-semibold mb-1">Configurar chave da API Gemini</h3>
+      <p class="text-xs text-slate-400 mb-4">
+        Cole aqui sua chave da API Gemini. Ela será usada apenas no navegador para chamar os modelos (ex: <span class="font-mono text-[10px]">gemini-2.0-flash</span>).
+      </p>
+      <label class="block text-xs text-slate-300 mb-1">Chave da API</label>
+      <input id="settingsApiKey" type="password" class="w-full rounded-lg bg-black/40 border border-capy-line/80 focus:border-capy-neon outline-none text-xs px-3 py-2 mb-3" placeholder="AIza..." />
+      <div class="flex items-center justify-between gap-3 text-[11px] text-slate-500 mb-3">
+        <label class="inline-flex items-center gap-1">
+          <input id="settingsShowKey" type="checkbox" class="rounded border-capy-line bg-transparent" />
+          <span>Mostrar chave</span>
+        </label>
+        <button id="settingsClear" class="text-[11px] underline underline-offset-2">Limpar chave</button>
+      </div>
+      <div class="flex justify-end gap-2 text-xs mt-2">
+        <button id="settingsCancel" class="px-3 py-1.5 rounded-lg border border-capy-line bg-transparent">Cancelar</button>
+        <button id="settingsSave" class="px-3 py-1.5 rounded-lg bg-capy-neon/90 text-black font-medium hover:bg-capy-neon">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Estado e utilidades
+    // -----------------------------
+    const state = {
+      currentSection: "generator",
+      step: 1,
+      maxStep: 3,
+      scriptText: "",
+      scenes: [],
+      styles: [
+        {
+          id: "realista",
+          name: "Realista cinematográfico",
+          description: "Iluminação dramática, câmeras de cinema, tons mais sóbrios.",
+          prompt: "cinematic realistic, high dynamic range, detailed lighting, 35mm film look"
+        },
+        {
+          id: "anime",
+          name: "Anime dramático",
+          description: "Cenas com foco em expressão, speedlines e composição dinâmica.",
+          prompt: "anime storyboard frame, strong expressions, dynamic angles, cel shading, detailed backgrounds"
+        },
+        {
+          id: "storyboard-limpo",
+          name: "Storyboard limpo",
+          description: "Quadros em preto e branco, focados em enquadramento e ação.",
+          prompt: "clean storyboard sketch, black and white, simple lines, focus on framing and motion"
+        },
+        {
+          id: "social",
+          name: "Vídeo social vertical",
+          description: "Composição pensada para Reels/TikTok, foco no centro e no rosto.",
+          prompt: "vertical 9:16 frame for social media video, focus on main character, clean background"
+        }
+      ],
+      selectedStyleId: "realista",
+      panelsPerRow: 2,
+      chatMessages: [],
+      imageFile: null,
+      isCallingIa: false
+    };
+
+    function getApiKey() {
+      return localStorage.getItem("capy_gemini_key") || "";
+    }
+
+    function setApiKey(key) {
+      if (key) {
+        localStorage.setItem("capy_gemini_key", key.trim());
+      }
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem("capy_gemini_key");
+    }
+
+    function requireApiKey() {
+      const key = getApiKey();
+      if (!key) {
+        alert("Configure a chave da API Gemini primeiro na lateral em 'Configurar'.");
+        return null;
+      }
+      return key;
+    }
+
+    function updateScriptCharCount() {
+      const el = document.getElementById("scriptInput");
+      const countEl = document.getElementById("scriptCharCount");
+      const len = el.value.length;
+      countEl.textContent = len + (len === 1 ? " caractere" : " caracteres");
+    }
+
+    function setStep(step) {
+      state.step = Math.min(Math.max(step, 1), state.maxStep);
+      const stepLabel = document.getElementById("stepLabel");
+      const stepTitle = document.getElementById("stepTitle");
+      const progress = document.getElementById("stepProgress");
+      const pills = document.querySelectorAll("[data-step-pill]");
+
+      stepLabel.textContent = String(state.step);
+      pills.forEach((pill) => {
+        const s = Number(pill.getAttribute("data-step-pill"));
+        if (s === state.step) {
+          pill.classList.add("border-capy-line");
+          pill.classList.remove("border-capy-line/40");
+        } else {
+          pill.classList.remove("border-capy-line");
+          pill.classList.add("border-capy-line/40");
+        }
+      });
+
+      const widths = { 1: "33%", 2: "66%", 3: "100%" };
+      progress.style.width = widths[state.step] || "33%";
+
+      document.querySelectorAll("[data-step]").forEach((el) => {
+        const s = Number(el.getAttribute("data-step"));
+        el.classList.toggle("hidden", s !== state.step);
+      });
+
+      if (state.step === 1) {
+        stepTitle.textContent = "Roteiro base";
+      } else if (state.step === 2) {
+        stepTitle.textContent = "Estilo visual";
+      } else {
+        stepTitle.textContent = "Painéis de storyboard";
+      }
+
+      document.getElementById("btnPrevStep").disabled = state.step === 1;
+      document.getElementById("btnNextStep").textContent = state.step === 3 ? "Concluir" : "Avançar ▶";
+    }
+
+    function switchSection(section) {
+      state.currentSection = section;
+      document.querySelectorAll("[id^='section-']").forEach((el) => {
+        el.classList.toggle("hidden", el.id !== "section-" + section);
+      });
+      document.querySelectorAll(".capy-tab-btn").forEach((btn) => {
+        const id = btn.getAttribute("data-section-btn");
+        if (id === section) {
+          btn.classList.add("border-capy-line", "bg-capy-soft/80");
+          btn.classList.remove("border-transparent", "bg-transparent");
+        } else {
+          btn.classList.remove("border-capy-line", "bg-capy-soft/80");
+          btn.classList.add("border-transparent");
+        }
+      });
+
+      const titleEl = document.getElementById("sectionTitle");
+      const subEl = document.getElementById("sectionSubtitle");
+
+      if (section === "generator") {
+        titleEl.textContent = "Gerador de storyboard";
+        subEl.textContent = "Cole o roteiro, escolha um estilo e deixe a IA sugerir a divisão em cenas e painéis.";
+      } else if (section === "chat") {
+        titleEl.textContent = "Chat IA de roteiro";
+        subEl.textContent = "Discuta estrutura, cortes e alternativas de cena usando o roteiro atual como contexto.";
+      } else {
+        titleEl.textContent = "Analisador de imagem";
+        subEl.textContent = "Envie referências visuais para a IA descrever e ajudar a alinhar o storyboard.";
+      }
+    }
+
+    // -----------------------------
+    // Exportações
+    // -----------------------------
+    function buildStoryboardData() {
+      const style = state.styles.find((s) => s.id === state.selectedStyleId) || state.styles[0];
+
+      return {
+        tool: "CapyStoryboard",
+        version: "1.0",
+        generatedAt: new Date().toISOString(),
+        style: {
+          id: style.id,
+          name: style.name,
+          prompt: style.prompt
+        },
+        scriptText: state.scriptText,
+        totalScenes: state.scenes.length,
+        scenes: state.scenes.map((scene, index) => ({
+          index: index + 1,
+          title: scene.title || ("Cena " + (index + 1)),
+          text: scene.text,
+          iaSuggestion: scene.iaSuggestion
+        }))
+      };
+    }
+
+    function downloadFile(filename, content, mimeType = "text/plain;charset=utf-8") {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportStoryboardTxt() {
+      if (!state.scenes.length) {
+        alert("Não há cenas para exportar. Gere ou divida o roteiro primeiro.");
+        return;
+      }
+
+      const data = buildStoryboardData();
+      let txt = "";
+
+      txt += "CapyStoryboard — CapyUniverse\n";
+      txt += "Gerado em: " + data.generatedAt + "\n";
+      txt += "Estilo: " + data.style.name + " (" + data.style.id + ")\n";
+      txt += "Prompt base: " + data.style.prompt + "\n";
+      txt += "Total de cenas: " + data.totalScenes + "\n\n";
+
+      if (data.scriptText) {
+        txt += "=== Roteiro original ===\n";
+        txt += data.scriptText + "\n\n";
+      }
+
+      data.scenes.forEach((scene) => {
+        txt += "=== CENA " + scene.index + " ===\n";
+        txt += "Descrição original:\n";
+        txt += (scene.text || "").trim() + "\n\n";
+        if (scene.iaSuggestion) {
+          txt += "Sugestão IA (storyboard / prompt):\n";
+          txt += scene.iaSuggestion.trim() + "\n";
+        } else {
+          txt += "Sugestão IA: (não gerada)\n";
+        }
+        txt += "\n";
+      });
+
+      downloadFile("capy-storyboard.txt", txt);
+    }
+
+    function exportStoryboardJson() {
+      if (!state.scenes.length) {
+        alert("Não há cenas para exportar. Gere ou divida o roteiro primeiro.");
+        return;
+      }
+      const data = buildStoryboardData();
+      const json = JSON.stringify(data, null, 2);
+      downloadFile("capy-storyboard.json", json, "application/json;charset=utf-8");
+    }
+
+    function buildStoryboardMarkdown() {
+      const data = buildStoryboardData();
+      let md = "";
+
+      md += "# CapyStoryboard — CapyUniverse\n\n";
+      md += "- Gerado em: `" + data.generatedAt + "`\n";
+      md += "- Estilo: **" + data.style.name + "** (`" + data.style.id + "`)\n";
+      md += "- Prompt base: `" + data.style.prompt + "`\n";
+      md += "- Total de cenas: **" + data.totalScenes + "**\n\n";
+
+      if (data.scriptText) {
+        md += "## Roteiro original\n\n";
+        md += "```text\n" + data.scriptText + "\n```\n\n";
+      }
+
+      data.scenes.forEach((scene) => {
+        md += "## Cena " + scene.index + "\n\n";
+        md += "**Descrição original**\n\n";
+        md += (scene.text || "").trim() + "\n\n";
+        if (scene.iaSuggestion) {
+          md += "**Sugestão IA (storyboard / prompt)**\n\n";
+          md += "```text\n" + scene.iaSuggestion.trim() + "\n```\n\n";
+        } else {
+          md += "_Sugestão IA não gerada ainda._\n\n";
+        }
+      });
+
+      return md;
+    }
+
+    async function copyStoryboardMarkdown() {
+      if (!state.scenes.length) {
+        alert("Não há cenas para exportar. Gere ou divida o roteiro primeiro.");
+        return;
+      }
+      const md = buildStoryboardMarkdown();
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(md);
+          alert("Markdown copiado para a área de transferência.");
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = md;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          alert("Markdown copiado (método alternativo).");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Não foi possível copiar o Markdown. Tente exportar como .TXT.");
+      }
+    }
+
+    // -----------------------------
+    // Renderização dos estilos
+    // -----------------------------
+    function renderStyles() {
+      const grid = document.getElementById("stylesGrid");
+      grid.innerHTML = "";
+      state.styles.forEach((style) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className =
+          "group relative text-left rounded-xl border px-3 py-3 flex flex-col gap-1 transition bg-black/20 border-capy-line/70 hover:border-capy-neon/70 hover:bg-capy-soft/80 text-xs";
+        btn.dataset.styleId = style.id;
+
+        const selected = style.id === state.selectedStyleId;
+        if (selected) {
+          btn.classList.add("border-capy-neon", "shadow-[0_0_20px_rgba(57,255,20,0.25)]");
+        }
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-100">
+              <span class="h-2 w-2 rounded-full ${selected ? "bg-capy-neon" : "bg-slate-500"}"></span>
+              ${style.name}
+            </span>
+            <span class="px-1.5 py-[1px] rounded-full border border-capy-line/70 text-[10px] text-slate-400">estilo IA</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">${style.description}</p>
+          <p class="mt-1 text-[10px] text-capy-cyan/80 break-words font-mono">"${style.prompt}"</p>
+        `;
+
+        btn.addEventListener("click", () => {
+          state.selectedStyleId = style.id;
+          renderStyles();
+        });
+
+        grid.appendChild(btn);
+      });
+    }
+
+    // -----------------------------
+    // Script → cenas
+    // -----------------------------
+    function parseScriptToScenes() {
+      const text = document.getElementById("scriptInput").value.trim();
+      state.scriptText = text;
+      if (!text) {
+        alert("Cole um roteiro ou descrição primeiro.");
+        return;
+      }
+
+      const blocks = text
+        .split(/\n\s*\n+/)
+        .map((b) => b.trim())
+        .filter(Boolean);
+
+      if (blocks.length === 0) {
+        alert("Não consegui encontrar cenas. Tente separar o roteiro com quebras de linha em branco.");
+        return;
+      }
+
+      state.scenes = blocks.map((b, idx) => {
+        return {
+          id: "scene-" + (idx + 1),
+          title: "Cena " + (idx + 1),
+          text: b,
+          iaSuggestion: ""
+        };
+      });
+
+      renderPanels();
+      setStep(2);
+    }
+
+    // -----------------------------
+    // Painéis
+    // -----------------------------
+    function renderPanels() {
+      const empty = document.getElementById("panelsEmptyState");
+      const grid = document.getElementById("panelsGrid");
+
+      if (!state.scenes.length) {
+        empty.classList.remove("hidden");
+        grid.classList.add("hidden");
+        grid.innerHTML = "";
+        return;
+      }
+
+      empty.classList.add("hidden");
+      grid.classList.remove("hidden");
+
+      grid.style.display = "grid";
+      grid.style.gridTemplateColumns = `repeat(${state.panelsPerRow}, minmax(0, 1fr))`;
+
+      grid.innerHTML = "";
+      state.scenes.forEach((scene, index) => {
+        const card = document.createElement("div");
+        card.className = "rounded-xl border border-capy-line/80 bg-capy-soft/80 p-3 flex flex-col gap-2 text-xs";
+
+        const iaText = scene.iaSuggestion
+          ? `<div class="mt-2 rounded-lg bg-black/30 border border-capy-line/60 p-2 text-[11px] text-slate-300 whitespace-pre-wrap">${scene.iaSuggestion}</div>`
+          : "";
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-2 py-[2px] rounded-full bg-black/40 border border-capy-line/70 text-[10px]">Cena ${index + 1}</span>
+            <span class="text-[10px] text-slate-500">${state.selectedStyleId}</span>
+          </div>
+          <textarea data-scene-text="${scene.id}" class="mt-1 w-full min-h-[90px] rounded-lg bg-black/30 border border-capy-line/70 focus:border-capy-neon outline-none text-[11px] p-2 placeholder:text-slate-500">${scene.text}</textarea>
+          <div class="flex flex-wrap gap-2 mt-1">
+            <button data-btn-ia-scene="${scene.id}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-capy-line/70 bg-black/40 hover:border-capy-neon text-[11px]">
+              Prompt da cena com IA
+            </button>
+          </div>
+          ${iaText}
+        `;
+
+        grid.appendChild(card);
+      });
+
+      document.querySelectorAll("[data-scene-text]").forEach((ta) => {
+        ta.addEventListener("input", () => {
+          const id = ta.getAttribute("data-scene-text");
+          const scene = state.scenes.find((s) => s.id === id);
+          if (scene) {
+            scene.text = ta.value;
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-btn-ia-scene]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-btn-ia-scene");
+          await askIaForSingleScene(id);
+        });
+      });
+    }
+
+    // -----------------------------
+    // Chamadas Gemini
+    // -----------------------------
+    async function callGemini(contents) {
+      const apiKey = requireApiKey();
+      if (!apiKey) return null;
+
+      const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(apiKey);
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents })
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Erro Gemini:", text);
+        throw new Error("Falha ao chamar a API Gemini. Verifique a chave e o limite de uso.");
+      }
+
+      const data = await res.json();
+      const candidates = data.candidates || [];
+      const parts = candidates[0]?.content?.parts || [];
+      return parts.map((p) => p.text || "").join("");
+    }
+
+    async function askIaForStoryboard() {
+      if (!state.scenes.length) {
+        alert("Primeiro divida o roteiro em cenas.");
+        return;
+      }
+      if (state.isCallingIa) return;
+      state.isCallingIa = true;
+      document.getElementById("btnAskIaStoryboard").disabled = true;
+      document.getElementById("btnAskIaStoryboard").textContent = "Gerando com IA...";
+
+      try {
+        const style = state.styles.find((s) => s.id === state.selectedStyleId) || state.styles[0];
+        const promptText = `
+Você é um assistente de pré-produção de vídeo especializado em storyboard.
+
+Receberá uma lista de cenas e deve devolver, em português, um texto organizado para cada cena com:
+
+- Foco visual principal
+- Tipo de enquadramento (plano geral, médio, close, etc.)
+- Movimento de câmera (se houver)
+- Sugestão de prompt de imagem para IA de geração de imagem
+
+Responda NO FORMATO A SEGUIR, sem comentários adicionais:
+
+CENA 1:
+Foco visual:
+Enquadramento:
+Movimento de câmera:
+Prompt de imagem:
+---
+
+CENA 2:
+Foco visual:
+Enquadramento:
+Movimento de câmera:
+Prompt de imagem:
+---
+
+Estilo visual base: "${style.name}" com o seguinte direcionamento de prompt: ${style.prompt}
+
+Cenas:
+${state.scenes.map((s, i) => "CENA " + (i + 1) + ": " + s.text).join("\n")}
+        `.trim();
+
+        const text = await callGemini([
+          { role: "user", parts: [{ text: promptText }] }
+        ]);
+        if (!text) return;
+
+        const blocks = text.split(/CENA\s+\d+:/i).map((b) => b.trim()).filter(Boolean);
+        blocks.forEach((block, idx) => {
+          if (!state.scenes[idx]) return;
+          state.scenes[idx].iaSuggestion = "CENA " + (idx + 1) + ":\n" + block;
+        });
+
+        renderPanels();
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao gerar sugestões de storyboard com a IA.");
+      } finally {
+        state.isCallingIa = false;
+        document.getElementById("btnAskIaStoryboard").disabled = false;
+        document.getElementById("btnAskIaStoryboard").textContent = "Gerar sugestões com IA";
+      }
+    }
+
+    async function askIaForSingleScene(sceneId) {
+      const scene = state.scenes.find((s) => s.id === sceneId);
+      if (!scene) return;
+
+      const style = state.styles.find((s) => s.id === state.selectedStyleId) || state.styles[0];
+      const promptText = `
+Gere um resumo estruturado de storyboard PARA ESTA ÚNICA CENA, em português, com:
+
+Foco visual:
+Enquadramento:
+Movimento de câmera:
+Prompt de imagem detalhado:
+
+Estilo visual base: "${style.name}" (${style.prompt})
+
+Cena:
+${scene.text}
+      `.trim();
+
+      try {
+        const text = await callGemini([{ role: "user", parts: [{ text: promptText }] }]);
+        if (!text) return;
+        scene.iaSuggestion = text.trim();
+        renderPanels();
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao pedir ajuda da IA para esta cena.");
+      }
+    }
+
+    async function sendChat(message) {
+      if (!message.trim()) return;
+      const container = document.getElementById("chatMessages");
+      const msgUser = {
+        role: "user",
+        text: message
+      };
+      state.chatMessages.push(msgUser);
+
+      const bubble = document.createElement("div");
+      bubble.className = "flex justify-end";
+      bubble.innerHTML = '<div class="max-w-[80%] rounded-2xl bg-capy-neon text-black text-xs px-3 py-2 whitespace-pre-wrap">' + message.replace(/</g, "&lt;") + "</div>";
+      container.appendChild(bubble);
+      container.scrollTop = container.scrollHeight;
+
+      const contextScript = state.scriptText
+        ? "\n\nRoteiro atual:\n" + state.scriptText.slice(0, 4000)
+        : "";
+
+      const iaPrompt = `
+Você é um roteirista e consultor de storyboard. Responda em português, de forma objetiva e útil.
+
+Pergunta do usuário:
+${message}
+
+Use o seguinte contexto, se disponível:
+${contextScript}
+      `.trim();
+
+      try {
+        const text = await callGemini([{ role: "user", parts: [{ text: iaPrompt }] }]);
+        if (!text) return;
+
+        state.chatMessages.push({ role: "model", text });
+        const bubbleIa = document.createElement("div");
+        bubbleIa.className = "flex justify-start";
+        bubbleIa.innerHTML =
+          '<div class="max-w-[80%] rounded-2xl bg-black/40 border border-capy-line/70 text-xs px-3 py-2 whitespace-pre-wrap">' +
+          text.replace(/</g, "&lt;") +
+          "</div>";
+        container.appendChild(bubbleIa);
+        container.scrollTop = container.scrollHeight;
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao conversar com a IA. Verifique a chave Gemini.");
+      }
+    }
+
+    async function analyzeImage() {
+      if (!state.imageFile) return;
+      const apiKey = requireApiKey();
+      if (!apiKey) return;
+
+      const btn = document.getElementById("btnAnalyzeImage");
+      const output = document.getElementById("imageAnalysis");
+      btn.disabled = true;
+      btn.textContent = "Analisando...";
+      output.textContent = "";
+
+      try {
+        const file = state.imageFile;
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const res = reader.result;
+            if (typeof res === "string") {
+              const base64Data = res.split(",")[1] || "";
+              resolve(base64Data);
+            } else {
+              reject(new Error("Falha ao ler arquivo"));
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(apiKey);
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  { text: "Descreva esta imagem em detalhes e sugira como ela poderia virar uma sequência de 3 a 5 painéis de storyboard. Responda em português." },
+                  {
+                    inline_data: {
+                      mime_type: file.type,
+                      data: base64
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error("Erro Gemini visão:", txt);
+          throw new Error("Falha ao chamar IA de visão.");
+        }
+
+        const data = await res.json();
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const text = parts.map((p) => p.text || "").join("");
+        output.textContent = text || "Não foi possível gerar uma análise.";
+      } catch (e) {
+        console.error(e);
+        alert("Erro ao analisar imagem com a IA.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Analisar com IA";
+      }
+    }
+
+    // -----------------------------
+    // Inicialização e eventos
+    // -----------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      // Navegação lateral
+      document.querySelectorAll("[data-section-btn]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-section-btn");
+          if (id) switchSection(id);
+        });
+      });
+      switchSection("generator");
+
+      // Stepper e botões
+      document.getElementById("btnPrevStep").addEventListener("click", () => {
+        if (state.step > 1) setStep(state.step - 1);
+      });
+      document.getElementById("btnNextStep").addEventListener("click", () => {
+        if (state.step < state.maxStep) {
+          if (state.step === 1 && !state.scenes.length) {
+            alert("Divida o roteiro em cenas primeiro.");
+            return;
+          }
+          setStep(state.step + 1);
+        } else {
+          alert("Fluxo concluído. Você pode continuar ajustando os painéis ou exportar para outro lugar.");
+        }
+      });
+
+      // Script input
+      const scriptInput = document.getElementById("scriptInput");
+      scriptInput.addEventListener("input", updateScriptCharCount);
+      updateScriptCharCount();
+
+      document.getElementById("scriptFileInput").addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          scriptInput.value = reader.result || "";
+          updateScriptCharCount();
+        };
+        reader.readAsText(file, "utf-8");
+      });
+
+      document.getElementById("btnParseScript").addEventListener("click", parseScriptToScenes);
+
+      // Styles
+      renderStyles();
+
+      // Panels per row
+      document.getElementById("panelsPerRow").addEventListener("change", (e) => {
+        state.panelsPerRow = Number(e.target.value) || 2;
+        renderPanels();
+      });
+
+      // IA storyboard
+      document.getElementById("btnAskIaStoryboard").addEventListener("click", askIaForStoryboard);
+
+      // Chat
+      document.getElementById("chatForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const input = document.getElementById("chatInput");
+        const text = input.value;
+        input.value = "";
+        sendChat(text);
+      });
+
+      // Image analyzer
+      const imageInput = document.getElementById("imageInput");
+      const preview = document.getElementById("imagePreview");
+      const btnAnalyze = document.getElementById("btnAnalyzeImage");
+
+      imageInput.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        state.imageFile = file || null;
+        if (!file) {
+          preview.textContent = "Nenhuma imagem carregada.";
+          btnAnalyze.disabled = true;
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        preview.innerHTML = '<img src="' + url + '" class="max-h-64 w-full object-contain rounded-lg" />';
+        btnAnalyze.disabled = false;
+      });
+
+      btnAnalyze.addEventListener("click", analyzeImage);
+
+      // Settings modal
+      const overlay = document.getElementById("settingsOverlay");
+      const openSettings = document.getElementById("openSettings");
+      const saveBtn = document.getElementById("settingsSave");
+      const cancelBtn = document.getElementById("settingsCancel");
+      const clearBtn = document.getElementById("settingsClear");
+      const showKey = document.getElementById("settingsShowKey");
+      const apiInput = document.getElementById("settingsApiKey");
+
+      function syncApiInput() {
+        apiInput.value = getApiKey();
+      }
+
+      openSettings.addEventListener("click", () => {
+        syncApiInput();
+        overlay.classList.remove("hidden");
+        overlay.classList.add("flex");
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("flex");
+      });
+
+      saveBtn.addEventListener("click", () => {
+        setApiKey(apiInput.value);
+        overlay.classList.add("hidden");
+        overlay.classList.remove("flex");
+      });
+
+      clearBtn.addEventListener("click", () => {
+        clearApiKey();
+        apiInput.value = "";
+      });
+
+      showKey.addEventListener("change", () => {
+        apiInput.type = showKey.checked ? "text" : "password";
+      });
+
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          overlay.classList.add("hidden");
+          overlay.classList.remove("flex");
+        }
+      });
+
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        setTimeout(() => {
+          overlay.classList.remove("hidden");
+          overlay.classList.add("flex");
+        }, 600);
+      }
+
+      // Exportações - listeners
+      const btnExportTxt = document.getElementById("btnExportTxt");
+      const btnExportJson = document.getElementById("btnExportJson");
+      const btnCopyMarkdown = document.getElementById("btnCopyMarkdown");
+
+      if (btnExportTxt) {
+        btnExportTxt.addEventListener("click", exportStoryboardTxt);
+      }
+      if (btnExportJson) {
+        btnExportJson.addEventListener("click", exportStoryboardJson);
+      }
+      if (btnCopyMarkdown) {
+        btnCopyMarkdown.addEventListener("click", () => {
+          copyStoryboardMarkdown();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
