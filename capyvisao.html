@@ -49,7 +49,16 @@
     </div>
   </header>
 
-  <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+  <!--
+    Estrutura principal: adiciona uma sidebar dinâmica e ajusta o main para ocupar o restante.
+  -->
+  <div class="flex flex-1">
+    <!-- Sidebar dinâmica -->
+    <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+      <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
+    </aside>
+    <!-- Conteúdo principal -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full lg:ml-64">
     <section class="glass p-6 border border-zinc-800">
       <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
         <div>
@@ -293,6 +302,7 @@
       </section>
     </section>
   </main>
+  </div>
 
   <!-- Modal API -->
   <div id="keysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
@@ -619,6 +629,80 @@ Inclua CTA. ${extra?('Diretriz extra: '+extra):''}`;
       $('#closeKeys').addEventListener('click', ()=>$('#keysModal').classList.add('hidden'));
       $('#saveKey').addEventListener('click', ()=>{ const k=$('#gemKey').value.trim(); if(k){ localStorage.setItem('capyUniverseApiKey_gemini',k); alert('Chave salva localmente.'); $('#keysModal').classList.add('hidden'); } });
     });
+
+    // ===== Sidebar dinâmico =====
+    async function renderSidebar() {
+      const side = document.getElementById('sidebar');
+      if (!side) return;
+      try {
+        const res = await fetch('tools.json');
+        if (!res.ok) throw new Error('Erro ao carregar menu');
+        const tools = await res.json();
+        const categories = {};
+        tools.forEach(tool => {
+          let cats = tool.category;
+          if (typeof cats === 'string') cats = [cats];
+          if (Array.isArray(cats)) {
+            cats.forEach(cat => {
+              if (!categories[cat]) categories[cat] = [];
+              categories[cat].push(tool);
+            });
+          }
+        });
+        side.innerHTML = '';
+        const home = document.createElement('a');
+        home.href = 'index.html';
+        home.className = 'sidebar-link flex items-center gap-2 p-2 rounded-md';
+        home.innerHTML = '<i class="fas fa-home w-5 text-center text-cyan-400"></i><span>Página Inicial</span>';
+        side.appendChild(home);
+        for (const catName in categories) {
+          const div = document.createElement('div');
+          const btn = document.createElement('button');
+          btn.className = 'w-full flex justify-between items-center p-2 text-left text-cu-text-dim hover:text-cu-text hover:bg-white/5 rounded-md';
+          btn.innerHTML = `<span class="font-semibold text-sm">${catName}</span><i class="fas fa-chevron-down w-4 h-4 transform transition-transform duration-200"></i>`;
+          const content = document.createElement('div');
+          content.className = 'category-content pl-3 pt-1 space-y-1';
+          categories[catName].forEach(tool => {
+            const link = document.createElement('a');
+            link.href = tool.pageUrl;
+            link.className = 'sidebar-link flex items-center gap-2 p-1.5 rounded-md text-xs' + (tool.id === 'CapyVisao' ? ' active' : '');
+            link.innerHTML = `<span class="w-5 text-center">${tool.icon || '✨'}</span><span>${tool.title}</span>`;
+            content.appendChild(link);
+          });
+          btn.addEventListener('click', () => {
+            content.classList.toggle('expanded');
+            btn.querySelector('i').classList.toggle('rotate-180');
+          });
+          if (categories[catName].some(t => t.id === 'CapyVisao')) {
+            content.classList.add('expanded');
+            btn.querySelector('i').classList.add('rotate-180');
+          }
+          div.appendChild(btn);
+          div.appendChild(content);
+          side.appendChild(div);
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('sidebar').innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+      }
+    }
+
+    // Aviso para dispositivos móveis no Canvas
+    function checkDeviceForCanvas() {
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+      if (isMobile) {
+        const canvasSection = document.getElementById('canvas');
+        if (canvasSection && !canvasSection.dataset.mobileWarned) {
+          const notice = document.createElement('p');
+          notice.className = 'text-red-400 text-xs mb-2';
+          notice.textContent = 'Para melhor experiência ao editar o Canvas, use um computador ou tablet.';
+          canvasSection.prepend(notice);
+          canvasSection.dataset.mobileWarned = 'true';
+        }
+      }
+    }
+    document.addEventListener('DOMContentLoaded', renderSidebar);
+    document.addEventListener('DOMContentLoaded', checkDeviceForCanvas);
   </script>
 </body>
 </html>
