@@ -31,63 +31,75 @@
     </div>
   </header>
 
-  <div class="w-full max-w-5xl mx-auto px-4 pt-4">
-      <div class="flex items-center justify-center gap-2 text-xs text-cu-text-dim overflow-x-auto">
-        <div class="step active" data-step="1">1. Cenário</div><span>&bull;</span>
-        <div class="step" data-step="2">2. Interpretações</div><span>&bull;</span>
-        <div class="step" data-step="3">3. Pesos</div><span>&bull;</span>
-        <div class="step" data-step="4">4. Opções</div><span>&bull;</span>
-        <div class="step" data-step="5">5. Exportar</div>
+  <!--
+    Estrutura principal agora usa flex container para acomodar a sidebar dinâmica.
+    A navegação por etapas e as seções principais ficam dentro da tag <main>.
+  -->
+  <div class="flex flex-1">
+    <!-- Sidebar dinâmica (preenchida via tools.json) -->
+    <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
+      <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
+    </aside>
+    <!-- Área principal -->
+    <main class="flex-1 lg:ml-64">
+      <div class="w-full max-w-5xl mx-auto px-4 pt-4">
+        <div class="flex items-center justify-center gap-2 text-xs text-cu-text-dim overflow-x-auto">
+          <div class="step active" data-step="1">1. Cenário</div><span>&bull;</span>
+          <div class="step" data-step="2">2. Interpretações</div><span>&bull;</span>
+          <div class="step" data-step="3">3. Pesos</div><span>&bull;</span>
+          <div class="step" data-step="4">4. Opções</div><span>&bull;</span>
+          <div class="step" data-step="5">5. Exportar</div>
+        </div>
       </div>
+
+      <section id="step1" class="cu-panel p-4">
+        <h2 class="font-bold text-lg mb-2">Descreva seu cenário</h2>
+        <p class="text-sm text-cu-text-dim mb-3">Explique a decisão a ser tomada. A IA irá te guiar.</p>
+        <textarea id="scenario" rows="6" class="cu-textarea" placeholder="Ex: Devo aceitar uma proposta de trabalho em outra cidade?"></textarea>
+        <div class="mt-3"><button id="btnInterpret" class="cu-btn primary">Gerar Interpretações A/B</button></div>
+      </section>
+
+      <section id="step2" class="hidden cu-panel p-4">
+        <h2 class="font-bold text-lg mb-2">Interpretações do seu cenário</h2>
+        <div id="interpWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+        <div class="mt-3"><button id="confirmInterp" disabled class="cu-btn">Confirmar interpretação</button></div>
+      </section>
+
+      <section id="step3" class="hidden cu-panel p-4">
+        <h2 class="font-bold text-lg mb-2">Critérios e Restrições</h2>
+        <div id="weightsWrap" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        <div class="mt-3 flex items-center gap-3">
+          <label class="flex items-center gap-2 text-sm"><input id="binaryToggle" type="checkbox" class="accent-cyan-400"> Decisão Sim/Não</label>
+          <button id="btnGenerateOptions" class="ml-auto cu-btn primary">Gerar Opções</button>
+        </div>
+      </section>
+
+      <section id="step4" class="hidden cu-panel p-4">
+        <h2 class="font-bold text-lg mb-2">Opções e Consequências</h2>
+        <div id="optionsWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+        <div class="mt-4 flex justify-between items-center"><span class="text-xs">Histórico: <span id="pathCount">0</span></span><button id="goExport" class="cu-btn">Ir para Exportar</button></div>
+      </section>
+
+      <section id="step5" class="hidden cu-panel p-4">
+        <h2 class="font-bold text-lg mb-2">Exportar Caminho de Decisão</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div class="cu-panel bg-transparent p-3">
+            <h3 class="font-semibold mb-2">Mapa Mental</h3>
+            <div id="mindmap" class="relative rounded-xl bg-white/5 min-h-[280px]"></div>
+            <div class="mt-3 flex gap-2"><button id="btnDownloadMapPNG" class="cu-btn">Baixar PNG</button></div>
+          </div>
+          <div class="cu-panel bg-transparent p-3">
+            <h3 class="font-semibold mb-2">Resumo & Taglines</h3>
+            <div id="summary" class="text-sm whitespace-pre-wrap"></div>
+            <div class="mt-3 flex gap-2"><button id="btnExportSummaryPDF" class="cu-btn">Resumo PDF</button><button id="btnGenTaglines" class="cu-btn">Gerar Taglines</button></div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <main class="w-full max-w-5xl mx-auto px-4 py-4 space-y-4">
-    <section id="step1" class="cu-panel p-4">
-      <h2 class="font-bold text-lg mb-2">Descreva seu cenário</h2>
-      <p class="text-sm text-cu-text-dim mb-3">Explique a decisão a ser tomada. A IA irá te guiar.</p>
-      <textarea id="scenario" rows="6" class="cu-textarea" placeholder="Ex: Devo aceitar uma proposta de trabalho em outra cidade?"></textarea>
-      <div class="mt-3"><button id="btnInterpret" class="cu-btn primary">Gerar Interpretações A/B</button></div>
-    </section>
-
-    <section id="step2" class="hidden cu-panel p-4">
-      <h2 class="font-bold text-lg mb-2">Interpretações do seu cenário</h2>
-      <div id="interpWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
-      <div class="mt-3"><button id="confirmInterp" disabled class="cu-btn">Confirmar interpretação</button></div>
-    </section>
-
-    <section id="step3" class="hidden cu-panel p-4">
-      <h2 class="font-bold text-lg mb-2">Critérios e Restrições</h2>
-      <div id="weightsWrap" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-      <div class="mt-3 flex items-center gap-3">
-        <label class="flex items-center gap-2 text-sm"><input id="binaryToggle" type="checkbox" class="accent-cyan-400"> Decisão Sim/Não</label>
-        <button id="btnGenerateOptions" class="ml-auto cu-btn primary">Gerar Opções</button>
-      </div>
-    </section>
-
-    <section id="step4" class="hidden cu-panel p-4">
-      <h2 class="font-bold text-lg mb-2">Opções e Consequências</h2>
-      <div id="optionsWrap" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
-      <div class="mt-4 flex justify-between items-center"><span class="text-xs">Histórico: <span id="pathCount">0</span></span><button id="goExport" class="cu-btn">Ir para Exportar</button></div>
-    </section>
-
-    <section id="step5" class="hidden cu-panel p-4">
-      <h2 class="font-bold text-lg mb-2">Exportar Caminho de Decisão</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div class="cu-panel bg-transparent p-3">
-          <h3 class="font-semibold mb-2">Mapa Mental</h3>
-          <div id="mindmap" class="relative rounded-xl bg-white/5 min-h-[280px]"></div>
-          <div class="mt-3 flex gap-2"><button id="btnDownloadMapPNG" class="cu-btn">Baixar PNG</button></div>
-        </div>
-        <div class="cu-panel bg-transparent p-3">
-          <h3 class="font-semibold mb-2">Resumo & Taglines</h3>
-          <div id="summary" class="text-sm whitespace-pre-wrap"></div>
-          <div class="mt-3 flex gap-2"><button id="btnExportSummaryPDF" class="cu-btn">Resumo PDF</button><button id="btnGenTaglines" class="cu-btn">Gerar Taglines</button></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
+  <!-- Toast para mensagens temporárias -->
   <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden px-4 py-2 rounded-xl cu-panel text-sm"></div>
+  <!-- O restante desta página é definido na área principal acima -->
 
   <script>
     const state = { provider: 'gemini', model: 'gemini-2.0-flash', apiKey: localStorage.getItem('capyUniverseApiKey_gemini') || '', scenario: '', interpretations: [], selectedInterp: null, criteria: {'Impacto financeiro':7, 'Tempo':6, 'Risco':5, 'Bem-estar':8}, isBinary: false, options: [], decisionPath: [] };
@@ -147,6 +159,66 @@
     $('#goExport').onclick = () => setStep(5);
 
     document.addEventListener('DOMContentLoaded', () => setStep(1));
+
+    // Sidebar dinâmica com tools.json
+    async function renderSidebar() {
+        const side = document.getElementById('sidebar');
+        if (!side) return;
+        try {
+            const res = await fetch('tools.json');
+            if (!res.ok) throw new Error('Erro ao carregar menu');
+            const tools = await res.json();
+            const categories = {};
+            tools.forEach(tool => {
+                let cats = tool.category;
+                if (typeof cats === 'string') cats = [cats];
+                if (Array.isArray(cats)) {
+                    cats.forEach(cat => {
+                        if (!categories[cat]) categories[cat] = [];
+                        categories[cat].push(tool);
+                    });
+                }
+            });
+            side.innerHTML = '';
+            // Home link
+            const home = document.createElement('a');
+            home.href = 'index.html';
+            home.className = 'sidebar-link flex items-center gap-2 p-2 rounded-md';
+            home.innerHTML = '<i class="fas fa-home w-5 text-center text-cyan-400"></i><span>Página Inicial</span>';
+            side.appendChild(home);
+            for (const catName in categories) {
+                const div = document.createElement('div');
+                const btn = document.createElement('button');
+                btn.className = 'w-full flex justify-between items-center p-2 text-left text-cu-text-dim hover:text-cu-text hover:bg-white/5 rounded-md';
+                btn.innerHTML = `<span class="font-semibold text-sm">${catName}</span><i class="fas fa-chevron-down w-4 h-4 transform transition-transform duration-200"></i>`;
+                const content = document.createElement('div');
+                content.className = 'category-content pl-3 pt-1 space-y-1';
+                categories[catName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    link.className = 'sidebar-link flex items-center gap-2 p-1.5 rounded-md text-xs' + (tool.id === 'CapyBussola' ? ' active' : '');
+                    link.innerHTML = `<span class="w-5 text-center">${tool.icon || '✨'}</span><span>${tool.title}</span>`;
+                    content.appendChild(link);
+                });
+                btn.addEventListener('click', () => {
+                    content.classList.toggle('expanded');
+                    btn.querySelector('i').classList.toggle('rotate-180');
+                });
+                // Expand current category
+                if (categories[catName].some(t => t.id === 'CapyBussola')) {
+                    content.classList.add('expanded');
+                    btn.querySelector('i').classList.add('rotate-180');
+                }
+                div.appendChild(btn);
+                div.appendChild(content);
+                side.appendChild(div);
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('sidebar').innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+        }
+    }
+    document.addEventListener('DOMContentLoaded', renderSidebar);
   </script>
 </body>
 </html>

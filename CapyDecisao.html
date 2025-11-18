@@ -14,6 +14,14 @@
     <link rel="stylesheet" href="cu-style.css">
     <script src="cu-navigation.js" defer></script>
 
+    <!-- Bibliotecas para exportação -->
+    <!-- jsPDF: gera PDFs em texto, sem depender de imagens -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Docx: biblioteca para criar documentos DOCX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.1/docx.umd.min.js"></script>
+    <!-- FileSaver: permite salvar arquivos gerados no navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
         .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
@@ -86,9 +94,21 @@
                         <div class="cu-panel bg-transparent p-4">
                             <div class="flex justify-between items-center">
                                 <h3 class="text-lg font-semibold text-amber-300">Rascunho de Petição/Minuta</h3>
-                                <button id="copy-draft-button" title="Copiar Rascunho" class="cu-btn text-xs p-2">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                                <!-- Ações de rascunho: copiar e exportar em vários formatos -->
+                                <div class="flex space-x-2 items-center">
+                                    <button id="copy-draft-button" title="Copiar texto" class="cu-btn text-xs p-2">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button id="download-draft-txt" title="Exportar TXT" class="cu-btn text-xs p-2">
+                                        <i class="fas fa-file-alt"></i>
+                                    </button>
+                                    <button id="download-draft-pdf" title="Exportar PDF" class="cu-btn text-xs p-2">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                    <button id="download-draft-docx" title="Exportar DOCX" class="cu-btn text-xs p-2">
+                                        <i class="fas fa-file-word"></i>
+                                    </button>
+                                </div>
                             </div>
                             <textarea id="draft-output" rows="8" readonly class="mt-2 cu-textarea w-full font-jetbrains"></textarea>
                         </div>
@@ -215,6 +235,47 @@
             dom.copyDraftButton.addEventListener('click', () => {
                 if(dom.draftOutputArea.value) navigator.clipboard.writeText(dom.draftOutputArea.value).then(() => alert('Rascunho copiado!'));
             });
+
+            // Exportação do rascunho
+            const exportDraft = async (format) => {
+                const draftText = (dom.draftOutputArea.value || '').trim();
+                if (!draftText) {
+                    alert('Nenhum rascunho disponível para exportar.');
+                    return;
+                }
+                if (format === 'txt') {
+                    // Exporta como texto simples
+                    const blob = new Blob([draftText], { type: 'text/plain;charset=utf-8' });
+                    saveAs(blob, 'rascunho_capydecisao.txt');
+                } else if (format === 'pdf') {
+                    // Gera PDF baseado em texto usando jsPDF
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+                    const margin = 10;
+                    const maxWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+                    const lines = pdf.splitTextToSize(draftText, maxWidth);
+                    pdf.text(lines, margin, margin + 10);
+                    pdf.save('rascunho_capydecisao.pdf');
+                } else if (format === 'docx') {
+                    // Converte o texto do rascunho em um documento DOCX usando a biblioteca docx
+                    try {
+                        const doc = new window.docx.Document();
+                        const paragraphs = draftText.split(/\n/).map(line => new window.docx.Paragraph(line || ''));
+                        doc.addSection({ children: paragraphs });
+                        const blob = await window.docx.Packer.toBlob(doc);
+                        saveAs(blob, 'rascunho_capydecisao.docx');
+                    } catch (err) {
+                        console.error('Erro ao exportar DOCX:', err);
+                        alert('Erro ao exportar DOCX: ' + err.message);
+                    }
+                }
+            };
+            const btnTxt = document.getElementById('download-draft-txt');
+            const btnPdf = document.getElementById('download-draft-pdf');
+            const btnDocx = document.getElementById('download-draft-docx');
+            if (btnTxt) btnTxt.addEventListener('click', () => exportDraft('txt'));
+            if (btnPdf) btnPdf.addEventListener('click', () => exportDraft('pdf'));
+            if (btnDocx) btnDocx.addEventListener('click', () => exportDraft('docx'));
         });
     </script>
 </body>

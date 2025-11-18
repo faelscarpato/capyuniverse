@@ -19,6 +19,7 @@
         .loader { border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .markdown-output ul { list-style-type: disc; margin-left: 1.5rem; }
+        .markdown-output code { background-color: #00000033; padding: 0.1em 0.3em; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -26,7 +27,7 @@
     <header class="cu-header">
         <div class="cu-brand">
             <a href="index.html" class="flex items-center gap-2 group">
-                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png" alt="CapyUniverse logo"></div>
                 <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
             </a>
             <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyCurriculo</span>
@@ -61,7 +62,7 @@
                     </div>
                 </div>
 
-                <button id="analyze-button" class="w-full md:w-1/2 mx-auto cu-btn primary text-lg">
+                <button id="analyze-button" class="w-full md:w-1/2 mx-auto cu-btn primary text-lg flex items-center justify-center gap-2">
                     <span class="btn-text">Analisar e Otimizar</span>
                     <div class="loader hidden"></div>
                 </button>
@@ -103,26 +104,69 @@
     </div>
 
     <script>
-        let apiKey = localStorage.getItem('capyUniverseApiKey_gemini') || '';
+        // Chave de armazenamento
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
         let skillsRadarChartInstance = null;
 
-        const dom = { /* DOM elements */ }; // Simplified for brevity
+        // Função para exibir ou esconder o loader
+        function toggleLoading(isLoading) {
+            const btn = document.getElementById('analyze-button');
+            if (!btn) return;
+            const loader = btn.querySelector('.loader');
+            const textSpan = btn.querySelector('.btn-text');
+            if (isLoading) {
+                btn.disabled = true;
+                btn.classList.add('opacity-60', 'cursor-not-allowed');
+                if (loader) loader.classList.remove('hidden');
+                if (textSpan) textSpan.textContent = 'Analisando...';
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                if (loader) loader.classList.add('hidden');
+                if (textSpan) textSpan.textContent = 'Analisar e Otimizar';
+            }
+        }
 
-        function toggleLoading(isLoading) { /* ... */ }
-
+        // Renderiza gráfico radar
         function renderSkillsRadar(skillsData) {
             if (skillsRadarChartInstance) skillsRadarChartInstance.destroy();
             const ctx = document.getElementById('skills-radar-chart').getContext('2d');
             skillsRadarChartInstance = new Chart(ctx, {
-                type: 'radar', data: { labels: skillsData.jobSkills, datasets: [{ label: 'Alinhamento', data: skillsData.cvSkillsMatchScore, backgroundColor: '#00f6ff33', borderColor: '#00f6ff', pointBackgroundColor: '#00f6ff' }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#ffffff22' }, grid: { color: '#ffffff22' }, pointLabels: { color: '#f0f0f5' }, ticks: { backdropColor: 'transparent', color: '#a0a0b5' } } } }
+                type: 'radar',
+                data: {
+                    labels: skillsData.jobSkills,
+                    datasets: [
+                        {
+                            label: 'Alinhamento',
+                            data: skillsData.cvSkillsMatchScore,
+                            backgroundColor: '#00f6ff33',
+                            borderColor: '#00f6ff',
+                            pointBackgroundColor: '#00f6ff'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#ffffff22' },
+                            grid: { color: '#ffffff22' },
+                            pointLabels: { color: '#f0f0f5' },
+                            ticks: { backdropColor: 'transparent', color: '#a0a0b5' }
+                        }
+                    }
+                }
             });
         }
 
+        // Popula lista de itens
         function populateList(element, items) {
-            element.innerHTML = items?.length ? items.map(item => `<li>${item}</li>`).join('') : '<li>N/A</li>';
+            element.innerHTML = items && items.length ? items.map(item => `<li>${String(item).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</li>`).join('') : '<li>N/A</li>';
         }
 
+        // Mostra resultados no DOM
         function displayAnalysis(data) {
             document.getElementById('match-score').textContent = `${data.matchScore || 0}%`;
             document.getElementById('match-rationale').textContent = data.matchRationale || 'N/A';
@@ -134,36 +178,135 @@
             document.getElementById('output-section').classList.remove('hidden');
         }
 
-        async function handleAnalyze() {
-            if (!apiKey) return alert("Configure a chave API do Gemini.");
-            const cvText = document.getElementById('cv-text').value.trim();
-            const jobDescription = document.getElementById('job-description').value.trim();
-            if (!cvText || !jobDescription) return alert("Preencha o CV e a descrição da vaga.");
-
-            toggleLoading(true);
-            document.getElementById('output-section').classList.add('hidden');
-
-            const prompt = `Analise o CV em relação à vaga. CV: "${cvText}". Vaga: "${jobDescription}". Responda em JSON com chaves: matchScore, matchRationale, cvStrengths, cvImprovements, missingKeywordsFromJob, suggestedSkillsForRadar (com jobSkills e cvSkillsMatchScore), e coverLetterDraft.`;
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
-                });
-                if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-                const result = JSON.parse((await response.json()).candidates[0].content.parts[0].text);
-                displayAnalysis(result);
-            } catch (error) { alert(`Erro: ${error.message}`); } 
-            finally { toggleLoading(false); }
+        // Extrai JSON da resposta do Gemini
+        function extractJsonFromGeminiResponse(result) {
+            if (!result || !result.candidates || !result.candidates.length) return '';
+            const content = result.candidates[0].content;
+            if (!content || !content.parts || !content.parts.length) return '';
+            const textParts = [];
+            for (const part of content.parts) {
+                if (part && typeof part.text === 'string') {
+                    textParts.push(part.text);
+                }
+            }
+            return textParts.join('\n');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedKey = localStorage.getItem('capyUniverseApiKey_gemini');
+        // Função principal para analisar CV e vaga
+        async function handleAnalyze() {
+            if (!apiKey) {
+                alert('Configure a chave API do Gemini nas Chaves API do CapyUniverse.');
+                return;
+            }
+            const cvEl = document.getElementById('cv-text');
+            const jobEl = document.getElementById('job-description');
+            if (!cvEl || !jobEl) return;
+            const cvText = cvEl.value.trim();
+            const jobDescription = jobEl.value.trim();
+            if (!cvText || !jobDescription) {
+                alert('Preencha o CV e a descrição da vaga.');
+                return;
+            }
+            toggleLoading(true);
+            // Esconde resultados antigos
+            document.getElementById('output-section').classList.add('hidden');
+            // Construir prompt detalhado
+            const promptLines = [];
+            promptLines.push('Você é o CapyCurriculo, um especialista em análise de currículos e compatibilidade de vagas.');
+            promptLines.push('Sua tarefa é avaliar o currículo de um candidato em relação à descrição de uma vaga de emprego.');
+            promptLines.push('Siga as instruções abaixo e responda **somente** em JSON válido, sem texto adicional.');
+            promptLines.push('');
+            promptLines.push('Instruções:');
+            promptLines.push('- Leia atentamente o texto do CV e a descrição da vaga.');
+            promptLines.push('- Calcule um *matchScore* (0 a 100) representando o quão alinhado o candidato está com as qualificações exigidas na vaga.');
+            promptLines.push('- Escreva *matchRationale*, um resumo em português explicando por que o score foi atribuído (ponto fortes e fraquezas).');
+            promptLines.push('- Liste *cvStrengths*: pontos fortes do candidato que estão diretamente relacionados à vaga.');
+            promptLines.push('- Liste *cvImprovements*: sugestões específicas de melhoria no CV para se alinhar melhor à vaga (como incluir projetos, ajustar linguagem ou enfatizar competências).');
+            promptLines.push('- Liste *missingKeywordsFromJob*: palavras-chave importantes da descrição da vaga que não aparecem no CV, para o candidato considerar adicionar.');
+            promptLines.push('- Para *suggestedSkillsForRadar*, produza um objeto com duas propriedades:');
+            promptLines.push('  - jobSkills: um array de até 6 competências essenciais extraídas da vaga (nomes de habilidades).');
+            promptLines.push('  - cvSkillsMatchScore: um array de números com o mesmo tamanho de jobSkills, indicando a porcentagem (0-100) de match de cada habilidade no CV.');
+            promptLines.push('- Crie *coverLetterDraft*: um rascunho de carta de apresentação em português que destaque as principais qualificações do candidato em relação à vaga. Seja conciso (4-6 parágrafos curtos) e use tom profissional.');
+            promptLines.push('');
+            promptLines.push('Formato de Resposta:');
+            promptLines.push('{');
+            promptLines.push('  "matchScore": 75,');
+            promptLines.push('  "matchRationale": "...",');
+            promptLines.push('  "cvStrengths": ["...", "..."],');
+            promptLines.push('  "cvImprovements": ["..."],');
+            promptLines.push('  "missingKeywordsFromJob": ["..."],');
+            promptLines.push('  "suggestedSkillsForRadar": { "jobSkills": ["..."], "cvSkillsMatchScore": [80, 40, ...] },');
+            promptLines.push('  "coverLetterDraft": "..."');
+            promptLines.push('}');
+            promptLines.push('');
+            promptLines.push('Currículo (CV):');
+            promptLines.push(cvText);
+            promptLines.push('');
+            promptLines.push('Descrição da vaga:');
+            promptLines.push(jobDescription);
+            const prompt = promptLines.join('\n');
+            try {
+                const response = await fetch(
+                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [ { parts: [ { text: prompt } ] } ],
+                            generationConfig: { responseMimeType: 'application/json' }
+                        })
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error('Erro na API: ' + response.status + ' ' + response.statusText);
+                }
+                const rawResult = await response.json();
+                const jsonString = extractJsonFromGeminiResponse(rawResult);
+                if (!jsonString) {
+                    throw new Error('Resposta da IA vazia ou em formato inesperado.');
+                }
+                let data;
+                try {
+                    data = JSON.parse(jsonString);
+                } catch (e) {
+                    console.error('Falha ao parsear JSON retornado:', e, jsonString);
+                    throw new Error('O formato retornado pelo Gemini não é um JSON válido.');
+                }
+                displayAnalysis(data);
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao analisar CV: ' + error.message);
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
             if (savedKey) apiKey = savedKey;
-            document.getElementById('analyze-button').addEventListener('click', handleAnalyze);
-            document.getElementById('copy-letter-button').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('cover-letter-output').value).then(() => alert('Copiado!')));
+            const btn = document.getElementById('analyze-button');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    handleAnalyze();
+                });
+            }
+            const copyBtn = document.getElementById('copy-letter-button');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    const textarea = document.getElementById('cover-letter-output');
+                    if (!textarea) return;
+                    const text = textarea.value || '';
+                    if (!text.trim()) {
+                        alert('Não há texto para copiar.');
+                        return;
+                    }
+                    navigator.clipboard
+                        .writeText(text)
+                        .then(() => alert('Rascunho copiado!'))
+                        .catch(() => alert('Não foi possível copiar o texto.'));
+                });
+            }
         });
     </script>
 </body>
 </html>
-

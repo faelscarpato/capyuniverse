@@ -1,26 +1,46 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-br" data-theme="capyuniverse">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CapyCSV — CapyUniverse</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" />
+  <!-- Estilos e navegação padrão CapyUniverse -->
   <link rel="stylesheet" href="cu-style.css">
   <script src="cu-navigation.js" defer></script>
+  <!-- bibliotecas para CSV e XLSX -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- FileSaver para exportar arquivos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
   <style>
-    .dropzone { border: 2px dashed #ffffff33; transition: background-color 0.3s; }
+    .dropzone { border: 2px dashed #ffffff33; transition: background-color 0.3s; position: relative; }
     .dropzone.dragover { background-color: #ffffff11; }
+    /* Ajuste de tabela para responsividade e quebra de texto */
+    #preview table { width: 100%; border-collapse: collapse; }
+    #preview th, #preview td {
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 0.35rem;
+        text-align: left;
+        white-space: normal;
+        word-break: break-word;
+    }
+    #preview th { background-color: rgba(255,255,255,0.05); font-weight: 600; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
+  <!-- Cabeçalho -->
   <header class="cu-header">
     <div class="cu-brand">
         <a href="index.html" class="flex items-center gap-2 group">
-            <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+            <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png" alt="CapyUniverse"></div>
             <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
         </a>
         <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyCSV</span>
@@ -31,6 +51,7 @@
   </header>
 
   <div class="flex flex-1">
+    <!-- Sidebar dinâmico -->
     <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
       <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
     </aside>
@@ -38,11 +59,12 @@
     <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
       <section class="cu-panel p-4 sm:p-6">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold" style="color: var(--cu-cyan);">CapyCSV 🧹</h1>
-          <p class="text-cu-text-dim mt-1">Limpe, una e exporte dados CSV/XLSX no navegador.</p>
+          <h1 class="text-3xl font-bold" style="color: var(--cu-cyan)">CapyCSV 🧹</h1>
+          <p class="text-cu-text-dim mt-1">Limpe, una e exporte dados CSV/XLSX diretamente no navegador.</p>
         </div>
 
         <div class="grid lg:grid-cols-3 gap-5">
+          <!-- Painel de arquivos e ações principais -->
           <div class="lg:col-span-2 space-y-4">
             <div class="cu-panel bg-transparent p-4">
               <div id="csvDrop" class="dropzone p-5 text-center">
@@ -50,24 +72,41 @@
                 <p class="text-cu-text-dim"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Arraste CSV/XLSX ou <span class="underline">clique</span>.</p>
               </div>
             </div>
-
             <div class="cu-panel bg-transparent p-3">
               <div class="flex flex-wrap gap-2 mb-2">
-                <select id="delim" class="cu-select text-xs"><option value="auto">Delimitador: Auto</option><option value=",">,</option><option value=";">;</option><option value="\t">Tab</option></select>
+                <select id="delim" class="cu-select text-xs">
+                  <option value="auto">Delimitador: Auto</option>
+                  <option value=",">,</option>
+                  <option value=";">;</option>
+                  <option value="\t">Tab</option>
+                </select>
                 <label class="cu-chip text-xs"><input id="trimCells" type="checkbox" class="accent-purple-500 mr-2">Trim</label>
                 <label class="cu-chip text-xs"><input id="removeEmpty" type="checkbox" class="accent-purple-500 mr-2">Remover vazias</label>
-                <select id="headerCase" class="cu-select text-xs"><option value="keep">Cabeçalho: Manter</option><option value="title">Title Case</option><option value="snake">snake_case</option></select>
+                <select id="headerCase" class="cu-select text-xs">
+                  <option value="keep">Cabeçalho: Manter</option>
+                  <option value="title">Title Case</option>
+                  <option value="snake">snake_case</option>
+                </select>
+                <label class="cu-chip text-xs"><input id="removeDuplicates" type="checkbox" class="accent-purple-500 mr-2">Remover duplicatas</label>
               </div>
-              <div class="flex gap-2">
-                <button id="btnApply" class="cu-btn primary"><i class="fa-solid fa-broom mr-2"></i>Limpar</button>
+              <div class="flex flex-wrap gap-2 mb-2">
+                <label class="text-xs flex items-center gap-1">Ordenar por:
+                  <select id="sortColumn" class="cu-select text-xs ml-1"></select>
+                </label>
+                <button id="btnSort" class="cu-btn text-xs"><i class="fa-solid fa-sort mr-1"></i>Ordenar</button>
+                <button id="btnRemoveDup" class="cu-btn text-xs"><i class="fa-solid fa-filter mr-1"></i>Remover duplicatas</button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button id="btnApply" class="cu-btn primary"><i class="fa-solid fa-broom mr-2"></i>Limpar/Aplicar</button>
                 <button id="btnExportCSV" class="cu-btn"><i class="fa-solid fa-file-csv mr-2"></i>CSV</button>
                 <button id="btnExportXLSX" class="cu-btn"><i class="fa-solid fa-file-excel mr-2"></i>XLSX</button>
+                <button id="btnExportJSON" class="cu-btn"><i class="fa-solid fa-file-code mr-2"></i>JSON</button>
               </div>
             </div>
-
-            <div id="preview" class="overflow-auto cu-panel bg-transparent p-3 max-h-[60vh] scrollbar-thin"></div>
+            <!-- Preview dos dados -->
+            <div id="preview" class="overflow-x-auto overflow-y-auto cu-panel bg-transparent p-3 max-h-[60vh] scrollbar-thin"></div>
           </div>
-
+          <!-- Painel de arquivos carregados e status -->
           <div class="space-y-4">
             <div class="cu-panel bg-transparent p-4">
               <h3 class="font-semibold mb-2">Arquivos</h3>
@@ -83,93 +122,265 @@
       </section>
     </main>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    const $ = s => document.querySelector(s);
-    const state = { datasets: [], headers: [], merged: [] };
-
-    async function readFile(file) {
-        if (file.name.toLowerCase().endsWith('.xlsx')) {
-            const ab = await file.arrayBuffer();
-            const wb = XLSX.read(ab, {type: 'array'});
-            return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1});
-        } else {
-            const text = await file.text();
-            const delim = $('#delim').value === 'auto' ? Papa.parse(text, {preview: 1}).meta.delimiter : $('#delim').value;
-            return Papa.parse(text, {delimiter: delim, skipEmptyLines: false}).data;
-        }
-    }
-
-    function renderFiles() {
-        $('#fileList').innerHTML = state.datasets.map(d => `<li><span class="cu-chip text-xs">${d.name}</span></li>`).join('');
-        $('#status').textContent = `${state.datasets.length} arquivo(s) carregado(s).`;
-    }
-
-    function preview(rows) {
-        const wrap = $('#preview');
-        if (!rows.length) return wrap.innerHTML = '<p>Sem dados.</p>';
-        const table = `<table><thead><tr>${rows[0].map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.slice(1, 100).map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-        wrap.innerHTML = table;
-    }
-
-    function clean(rows) {
-        let out = $('#trimCells').checked ? rows.map(r => r.map(c => String(c || '').trim())) : rows;
-        if ($('#removeEmpty').checked) out = out.filter((r, i) => i === 0 || r.some(c => String(c || '').trim()));
-        const headerCase = $('#headerCase').value;
-        if (headerCase !== 'keep') out[0] = out[0].map(h => headerCase === 'lower' ? h.toLowerCase() : headerCase === 'snake' ? h.toLowerCase().replace(/\W+/g, '_') : h.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()));
-        return out;
-    }
-
-    async function handleFiles(files) {
-        for (const f of files) {
-            const rows = await readFile(f);
-            state.datasets.push({ name: f.name, rows });
-        }
-        renderFiles();
-        preview(state.datasets[0].rows);
-    }
-
-    document.getElementById('btnApply').addEventListener('click', () => {
-        state.datasets = state.datasets.map(ds => ({ ...ds, rows: clean(ds.rows) }));
-        preview(state.datasets[0].rows);
+  /* =====================================
+     Estado da aplicação
+  ===================================== */
+  const state = { datasets: [], merged: [], currentRows: [] };
+  /* =====================================
+     Helpers DOM
+  ===================================== */
+  const $ = sel => document.querySelector(sel);
+  function populateSortOptions(headers) {
+    const select = $('#sortColumn');
+    select.innerHTML = '';
+    headers.forEach((h, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = h;
+      select.appendChild(opt);
     });
-
-    document.getElementById('btnMerge').addEventListener('click', () => {
-        if (state.datasets.length < 2) return alert('Carregue pelo menos 2 arquivos para unir.');
-        const allRows = state.datasets.flatMap(ds => ds.rows.slice(1));
-        state.merged = [state.datasets[0].rows[0], ...allRows];
-        preview(state.merged);
-    });
-
-    function exportFile(format) {
-        const rows = state.merged.length ? state.merged : state.datasets[0]?.rows;
-        if (!rows) return alert('Nenhum dado para exportar.');
-        const filename = `capy.${format}`;
-        if (format === 'csv') {
-            const csv = Papa.unparse(rows);
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
-        } else if (format === 'xlsx') {
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Dados');
-            const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            const blob = new Blob([out], { type: 'application/octet-stream' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
-        }
+  }
+  function renderFiles() {
+    $('#fileList').innerHTML = state.datasets.map(d => `<li><span class="cu-chip text-xs">${d.name}</span></li>`).join('');
+    $('#status').textContent = `${state.datasets.length} arquivo(s) carregado(s).`;
+  }
+  function renderPreview(rows) {
+    const wrap = $('#preview');
+    if (!rows || !rows.length) {
+      wrap.innerHTML = '<p class="text-cu-text-dim">Sem dados.</p>';
+      return;
     }
-
-    document.getElementById('btnExportCSV').addEventListener('click', () => exportFile('csv'));
-    document.getElementById('btnExportXLSX').addEventListener('click', () => exportFile('xlsx'));
-
-    const dropzone = document.getElementById('csvDrop');
-    dropzone.addEventListener('click', () => document.getElementById('csvInput').click());
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-    dropzone.addEventListener('dragleave', e => dropzone.classList.remove('dragover'));
-    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-    document.getElementById('csvInput').addEventListener('change', e => handleFiles(e.target.files));
+    // Build table HTML with limited rows for performance
+    const headerRow = rows[0];
+    let table = '<table><thead><tr>' + headerRow.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+    rows.slice(1, 200).forEach(r => {
+      table += '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>';
+    });
+    table += '</tbody></table>';
+    wrap.innerHTML = table;
+  }
+  /* =====================================
+     Leitura de arquivos CSV/XLSX
+  ===================================== */
+  async function readFile(file) {
+    if (file.name.toLowerCase().endsWith('.xlsx')) {
+      const ab = await file.arrayBuffer();
+      const wb = XLSX.read(ab, { type: 'array' });
+      return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+    } else {
+      const text = await file.text();
+      const delimSelect = $('#delim');
+      const delim = delimSelect.value === 'auto' ? Papa.parse(text, { preview: 1 }).meta.delimiter : delimSelect.value;
+      return Papa.parse(text, { delimiter: delim, skipEmptyLines: false }).data;
+    }
+  }
+  /* =====================================
+     Limpeza dos dados
+  ===================================== */
+  function clean(rows) {
+    let out = $('#trimCells').checked ? rows.map(r => r.map(c => String(c ?? '').trim())) : rows.slice();
+    if ($('#removeEmpty').checked) {
+      out = out.filter((r, i) => i === 0 || r.some(c => String(c ?? '').trim()));
+    }
+    const headerCase = $('#headerCase').value;
+    if (headerCase !== 'keep') {
+      out[0] = out[0].map(h => {
+        const str = String(h || '');
+        if (headerCase === 'snake') return str.toLowerCase().replace(/\W+/g, '_');
+        if (headerCase === 'title') return str.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
+        return str;
+      });
+    }
+    return out;
+  }
+  /* =====================================
+     Remoção de duplicatas
+  ===================================== */
+  function removeDuplicates(rows) {
+    const seen = new Set();
+    const result = [rows[0]];
+    for (let i = 1; i < rows.length; i++) {
+      const key = JSON.stringify(rows[i]);
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(rows[i]);
+      }
+    }
+    return result;
+  }
+  /* =====================================
+     Ordenar por coluna
+  ===================================== */
+  function sortRows(rows, colIndex) {
+    if (!rows || rows.length < 2) return rows;
+    const header = rows[0];
+    const body = rows.slice(1).sort((a, b) => {
+      const aVal = a[colIndex] ?? '';
+      const bVal = b[colIndex] ?? '';
+      return String(aVal).localeCompare(String(bVal), 'pt-BR', { numeric: true });
+    });
+    return [header, ...body];
+  }
+  /* =====================================
+     Manipulação de arquivos carregados
+  ===================================== */
+  async function handleFiles(files) {
+    for (const file of files) {
+      const rows = await readFile(file);
+      state.datasets.push({ name: file.name, rows });
+    }
+    renderFiles();
+    const rowsToPreview = state.datasets[0]?.rows;
+    if (rowsToPreview) {
+      state.currentRows = rowsToPreview.slice();
+      populateSortOptions(rowsToPreview[0] || []);
+      renderPreview(rowsToPreview);
+    }
+  }
+  /* =====================================
+     Aplicar limpeza
+  ===================================== */
+  function applyCleaning() {
+    if (!state.datasets.length) return alert('Carregue um arquivo.');
+    state.datasets = state.datasets.map(ds => ({ ...ds, rows: clean(ds.rows) }));
+    const firstRows = state.datasets[0].rows;
+    state.currentRows = firstRows;
+    populateSortOptions(firstRows[0] || []);
+    renderPreview(firstRows);
+  }
+  /* =====================================
+     Unir arquivos
+  ===================================== */
+  function mergeFiles() {
+    if (state.datasets.length < 2) return alert('Carregue pelo menos 2 arquivos para unir.');
+    const headers = state.datasets[0].rows[0];
+    const body = state.datasets.flatMap(ds => ds.rows.slice(1));
+    state.merged = [headers, ...body];
+    state.currentRows = state.merged;
+    populateSortOptions(headers);
+    renderPreview(state.merged);
+  }
+  /* =====================================
+     Exportar dados
+  ===================================== */
+  function exportData(format) {
+    const rows = state.merged.length ? state.merged : state.datasets[0]?.rows;
+    if (!rows) return alert('Nenhum dado para exportar.');
+    const filenameBase = 'capy_dados';
+    if (format === 'csv') {
+      const csv = Papa.unparse(rows);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      saveAs(blob, filenameBase + '.csv');
+    } else if (format === 'xlsx') {
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+      const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([out], { type: 'application/octet-stream' });
+      saveAs(blob, filenameBase + '.xlsx');
+    } else if (format === 'json') {
+      const json = rows.slice(1).map(r => {
+        const obj = {};
+        rows[0].forEach((h, idx) => { obj[h] = r[idx]; });
+        return obj;
+      });
+      const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+      saveAs(blob, filenameBase + '.json');
+    }
+  }
+  /* =====================================
+     Eventos de interface
+  ===================================== */
+  document.getElementById('btnApply').addEventListener('click', () => {
+    applyCleaning();
+    if ($('#removeDuplicates').checked) {
+      state.currentRows = removeDuplicates(state.currentRows);
+      renderPreview(state.currentRows);
+    }
+  });
+  document.getElementById('btnMerge').addEventListener('click', mergeFiles);
+  document.getElementById('btnSort').addEventListener('click', () => {
+    if (!state.currentRows.length) return;
+    const colIndex = parseInt($('#sortColumn').value);
+    state.currentRows = sortRows(state.currentRows, colIndex);
+    renderPreview(state.currentRows);
+  });
+  document.getElementById('btnRemoveDup').addEventListener('click', () => {
+    if (!state.currentRows.length) return;
+    state.currentRows = removeDuplicates(state.currentRows);
+    renderPreview(state.currentRows);
+  });
+  document.getElementById('btnExportCSV').addEventListener('click', () => exportData('csv'));
+  document.getElementById('btnExportXLSX').addEventListener('click', () => exportData('xlsx'));
+  document.getElementById('btnExportJSON').addEventListener('click', () => exportData('json'));
+  /* File input & drag-and-drop */
+  const dropzone = document.getElementById('csvDrop');
+  dropzone.addEventListener('click', () => document.getElementById('csvInput').click());
+  dropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+  document.getElementById('csvInput').addEventListener('change', e => handleFiles(e.target.files));
+  /* Sidebar render */
+  async function renderSidebar() {
+    const side = document.getElementById('sidebar');
+    if (!side) return;
+    try {
+      const res = await fetch('tools.json');
+      if (!res.ok) throw new Error('Erro ao carregar menu');
+      const tools = await res.json();
+      const categories = {};
+      tools.forEach(tool => {
+        let cats = tool.category;
+        if (typeof cats === 'string') cats = [cats];
+        if (Array.isArray(cats)) {
+          cats.forEach(cat => {
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(tool);
+          });
+        }
+      });
+      side.innerHTML = '';
+      const home = document.createElement('a');
+      home.href = 'index.html';
+      home.className = 'sidebar-link flex items-center gap-2 p-2 rounded-md';
+      home.innerHTML = '<i class="fas fa-home w-5 text-center text-cyan-400"></i><span>Página Inicial</span>';
+      side.appendChild(home);
+      for (const catName in categories) {
+        const div = document.createElement('div');
+        const btn = document.createElement('button');
+        btn.className = 'w-full flex justify-between items-center p-2 text-left text-cu-text-dim hover:text-cu-text hover:bg-white/5 rounded-md';
+        btn.innerHTML = `<span class="font-semibold text-sm">${catName}</span><i class="fas fa-chevron-down w-4 h-4 transform transition-transform duration-200"></i>`;
+        const content = document.createElement('div');
+        content.className = 'category-content pl-3 pt-1 space-y-1';
+        categories[catName].forEach(tool => {
+          const link = document.createElement('a');
+          link.href = tool.pageUrl;
+          link.className = 'sidebar-link flex items-center gap-2 p-1.5 rounded-md text-xs' + (tool.id === 'CapyCSV' ? ' active' : '');
+          link.innerHTML = `<span class="w-5 text-center">${tool.icon || '✨'}</span><span>${tool.title}</span>`;
+          content.appendChild(link);
+        });
+        btn.addEventListener('click', () => {
+          content.classList.toggle('expanded');
+          btn.querySelector('i').classList.toggle('rotate-180');
+        });
+        div.appendChild(btn);
+        div.appendChild(content);
+        side.appendChild(div);
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('sidebar').innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', renderSidebar);
   </script>
 </body>
 </html>
-

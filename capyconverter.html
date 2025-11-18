@@ -57,6 +57,8 @@
                                     <button data-format="image/png" class="fmt cu-btn">PNG</button>
                                     <button data-format="image/jpeg" class="fmt cu-btn">JPG</button>
                                     <button data-format="image/webp" class="fmt cu-btn">WebP</button>
+                                    <button data-format="text/plain" class="fmt cu-btn">TXT</button>
+                                    <button data-format="text/markdown" class="fmt cu-btn">MD</button>
                                     <button data-format="application/pdf" class="fmt cu-btn">PDF</button>
                                     <button data-format="application/zip" class="fmt cu-btn">ZIP</button>
                                 </div>
@@ -104,86 +106,232 @@
     </div>
 
     <script>
-        const $ = sel => document.querySelector(sel), $$ = sel => Array.from(document.querySelectorAll(sel));
-        const state = { fmt: 'image/png', quality: 0.9, maxW: null, maxH: null, files: [] };
+        // Element selector helpers. Allows optional scope parameter for nested queries.
+        const $ = (sel, scope = document) => scope.querySelector(sel);
+        const $$ = (sel, scope = document) => Array.from(scope.querySelectorAll(sel));
 
+        // Internal state for conversion settings and loaded files
+        const state = {
+            fmt: 'image/png',
+            quality: 0.9,
+            maxW: null,
+            maxH: null,
+            files: []
+        };
+
+        // Update selected output format and highlight active button
         function setFmt(fmt) {
             state.fmt = fmt;
-            $$('.btnfmt').forEach(b => b.classList.toggle('primary', b.dataset.format === fmt));
+            $$('.fmt').forEach(b => {
+                if (b.dataset.format === fmt) {
+                    b.classList.add('primary');
+                } else {
+                    b.classList.remove('primary');
+                }
+            });
         }
 
+        // Convert a single file based on the selected output format
         async function convertFile(file, filename) {
+            // Image formats (PNG, JPEG, WebP)
             if (state.fmt.startsWith('image/')) {
-                if (!file.type.startsWith('image/')) throw new Error('Apenas imagens podem ser convertidas.');
+                if (!file.type.startsWith('image/')) {
+                    throw new Error('Apenas imagens podem ser convertidas neste formato.');
+                }
                 const img = await createImageBitmap(file);
                 const canvas = document.createElement('canvas');
                 let { width, height } = img;
-                if (state.maxW && width > state.maxW) { height *= state.maxW / width; width = state.maxW; }
-                if (state.maxH && height > state.maxH) { width *= state.maxH / height; height = state.maxH; }
-                canvas.width = width; canvas.height = height;
+                // Resize preserving aspect ratio based on user-specified max width/height
+                if (state.maxW && width > state.maxW) {
+                    height *= state.maxW / width;
+                    width = state.maxW;
+                }
+                if (state.maxH && height > state.maxH) {
+                    width *= state.maxH / height;
+                    height = state.maxH;
+                }
+                canvas.width = width;
+                canvas.height = height;
                 canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                return new Promise(resolve => canvas.toBlob(blob => resolve({ blob, outName: filename.replace(/\.[^.]+$/, `.${state.fmt.split('/')[1]}`), width, height }), state.fmt, state.fmt === 'image/png' ? undefined : state.quality));
-            } else if (state.fmt === 'application/pdf') {
+                return new Promise(resolve => {
+                    canvas.toBlob(blob => {
+                        const ext = state.fmt.split('/')[1];
+                        resolve({
+                            blob,
+                            outName: filename.replace(/\.[^.]+$/, `.${ext}`),
+                            width,
+                            height
+                        });
+                    }, state.fmt, state.fmt === 'image/png' ? undefined : state.quality);
+                });
+            }
+            // PDF export: generate text-based PDF for text, embed image for images
+            if (state.fmt === 'application/pdf') {
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({ unit: 'pt' });
                 if (file.type.startsWith('image/')) {
-                    const dataURL = await new Promise(r => { const reader = new FileReader(); reader.onload = () => r(reader.result); reader.readAsDataURL(file); });
-                    const imgObj = await createImageBitmap(file);
-                    pdf.addImage(dataURL, file.type.split('/')[1].toUpperCase(), 0, 0, imgObj.width, imgObj.height);
+                    const dataURL = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.readAsDataURL(file);
+                    });
+                    const imgBmp = await createImageBitmap(file);
+                    // Fit image to page while preserving aspect ratio
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const pageHeight = pdf.internal.pageSize.getHeight();
+                    let imgW = imgBmp.width;
+                    let imgH = imgBmp.height;
+                    const ratio = Math.min(pageWidth / imgW, pageHeight / imgH);
+                    imgW *= ratio;
+                    imgH *= ratio;
+                    pdf.addImage(dataURL, file.type.split('/')[1].toUpperCase(), 0, 0, imgW, imgH);
                 } else {
-                    pdf.text(await file.text(), 40, 40);
+                    const text = await file.text();
+                    // Split text into lines that fit on the page
+                    const margin = 40;
+                    const maxLineWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+                    const lines = pdf.splitTextToSize(text, maxLineWidth);
+                    pdf.text(lines, margin, margin);
                 }
-                return { blob: pdf.output('blob'), outName: filename.replace(/\.[^.]+$/, '.pdf') };
-            } else if (state.fmt === 'application/zip') {
+                return {
+                    blob: pdf.output('blob'),
+                    outName: filename.replace(/\.[^.]+$/, '.pdf')
+                };
+            }
+            // Plain text or Markdown
+            if (state.fmt === 'text/plain' || state.fmt === 'text/markdown') {
+                const text = await file.text();
+                const ext = state.fmt === 'text/plain' ? '.txt' : '.md';
+                const blob = new Blob([text], { type: `${state.fmt};charset=utf-8` });
+                return {
+                    blob,
+                    outName: filename.replace(/\.[^.]+$/, ext)
+                };
+            }
+            // ZIP: package the original file into a zip archive
+            if (state.fmt === 'application/zip') {
                 const zip = new JSZip();
                 zip.file(filename, await file.arrayBuffer());
-                return { blob: await zip.generateAsync({ type: 'blob' }), outName: filename.replace(/\.[^.]+$/, '.zip') };
+                return {
+                    blob: await zip.generateAsync({ type: 'blob' }),
+                    outName: filename.replace(/\.[^.]+$/, '.zip')
+                };
             }
-            throw new Error('Formato não suportado.');
+            throw new Error('Formato de saída não suportado.');
         }
 
+        // Create a card element for a selected file and attach event handlers
         function createCard(file) {
-            const node = $('#cardTmpl').content.firstElementChild.cloneNode(true);
-            $('.filename', node).textContent = file.name;
-            $('.format', node).textContent = file.type || 'desconhecido';
+            const template = document.getElementById('cardTmpl');
+            const node = template.content.firstElementChild.cloneNode(true);
+            // Populate filename and file type
+            node.querySelector('.filename').textContent = file.name;
+            node.querySelector('.format').textContent = file.type || 'desconhecido';
+            // Show preview for images or icon for other files
             if (file.type.startsWith('image/')) {
-                $('.preview', node).src = URL.createObjectURL(file);
-                $('.icon-placeholder', node).remove();
+                const previewImg = node.querySelector('.preview');
+                previewImg.src = URL.createObjectURL(file);
+                node.querySelector('.icon-placeholder').remove();
             } else {
-                $('.preview', node).remove();
-                $('.icon-placeholder', node).innerHTML = '<i class="fas fa-file"></i>';
+                // Remove the image element for non-image files
+                node.querySelector('.preview').remove();
+                node.querySelector('.icon-placeholder').innerHTML = '<i class="fas fa-file"></i>';
             }
-            $('.btnConvert', node).onclick = async () => {
-                const status = $('.status', node); status.textContent = 'Convertendo...';
+            // Convert button action
+            node.querySelector('.btnConvert').onclick = async () => {
+                const status = node.querySelector('.status');
+                status.textContent = 'Convertendo...';
                 try {
                     const result = await convertFile(file, file.name);
                     const url = URL.createObjectURL(result.blob);
-                    const btnDown = $('.btnDownload', node); btnDown.href = url; btnDown.download = result.outName;
+                    const downloadBtn = node.querySelector('.btnDownload');
+                    downloadBtn.href = url;
+                    downloadBtn.download = result.outName;
                     status.textContent = `Pronto: ${result.outName}`;
-                } catch (err) { status.textContent = err.message; }
+                } catch (err) {
+                    status.textContent = err.message;
+                }
             };
             return node;
         }
 
-        function addFiles(files) {
+        // Add selected files to the grid and internal state
+        function addFiles(fileList) {
+            const files = Array.from(fileList);
             state.files.push(...files);
-            files.forEach(f => $('#grid').appendChild(createCard(f)));
+            files.forEach(file => {
+                document.getElementById('grid').appendChild(createCard(file));
+            });
         }
 
+        // Initialize event listeners once the DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
+            // Set initial format button
             setFmt(state.fmt);
-            $('#quality').oninput = e => { state.quality = +e.target.value; $('#qval').textContent = state.quality.toFixed(2); };
-            $('#maxW').onchange = () => state.maxW = parseInt($('#maxW').value) || null;
-            $('#maxH').onchange = () => state.maxH = parseInt($('#maxH').value) || null;
-            $$('.btnfmt').forEach(b => b.onclick = () => setFmt(b.dataset.format));
-            $('#dropzone').onclick = () => $('#fileInput').click();
-            $('#fileInput').onchange = e => addFiles(e.target.files);
-            const dz = $('#dropzone');
-            ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('dragover'); }));
-            ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
-            dz.addEventListener('drop', e => addFiles(e.dataTransfer.files));
-            $('#btnConvertAll').onclick = () => $$('#grid .btnConvert').forEach(btn => btn.click());
-            $('#btnExportAll').onclick = () => $$('#grid .btnDownload[href]').forEach((link, i) => setTimeout(() => link.click(), i * 200));
+            // Quality slider updates
+            document.getElementById('quality').oninput = e => {
+                state.quality = parseFloat(e.target.value);
+                document.getElementById('qval').textContent = state.quality.toFixed(2);
+            };
+            // Dimension inputs
+            document.getElementById('maxW').onchange = () => {
+                const val = parseInt(document.getElementById('maxW').value);
+                state.maxW = isNaN(val) ? null : val;
+            };
+            document.getElementById('maxH').onchange = () => {
+                const val = parseInt(document.getElementById('maxH').value);
+                state.maxH = isNaN(val) ? null : val;
+            };
+            // Format button clicks
+            $$('.fmt').forEach(btn => {
+                btn.addEventListener('click', () => setFmt(btn.dataset.format));
+            });
+            // File input interactions
+            // O próprio input ocupa toda a área da dropzone (com opacity 0), portanto
+            // não precisamos disparar manualmente um click no dropzone. Basta ouvir
+            // o evento change do input e adicionar os arquivos selecionados. Isso
+            // evita que o seletor de arquivos abra duas vezes seguidas.
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', e => {
+                if (e.target.files && e.target.files.length) {
+                    addFiles(e.target.files);
+                    // Limpa o input após adicionar arquivos para permitir selecionar o mesmo arquivo novamente
+                    e.target.value = '';
+                }
+            });
+            // Drag-and-drop events
+            const dz = document.getElementById('dropzone');
+            ['dragenter', 'dragover'].forEach(eventType => {
+                dz.addEventListener(eventType, ev => {
+                    ev.preventDefault();
+                    dz.classList.add('dragover');
+                });
+            });
+            ['dragleave', 'drop'].forEach(eventType => {
+                dz.addEventListener(eventType, ev => {
+                    ev.preventDefault();
+                    dz.classList.remove('dragover');
+                });
+            });
+            dz.addEventListener('drop', ev => {
+                if (ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files.length) {
+                    addFiles(ev.dataTransfer.files);
+                }
+            });
+            // Convert all files at once
+            document.getElementById('btnConvertAll').addEventListener('click', () => {
+                document.querySelectorAll('#grid .btnConvert').forEach(btn => btn.click());
+            });
+            // Export all converted files sequentially with a small delay
+            document.getElementById('btnExportAll').addEventListener('click', e => {
+                e.preventDefault();
+                const links = document.querySelectorAll('#grid .btnDownload[href]');
+                links.forEach((link, i) => {
+                    setTimeout(() => {
+                        link.click();
+                    }, i * 200);
+                });
+            });
         });
     </script>
 </body>

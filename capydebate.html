@@ -29,7 +29,7 @@
     <header class="cu-header">
         <div class="cu-brand">
             <a href="index.html" class="flex items-center gap-2 group">
-                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png" alt="CapyUniverse logo"></div>
                 <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
             </a>
             <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyDebate</span>
@@ -77,15 +77,15 @@
                     </div>
 
                     <div class="lg:col-span-2 flex flex-col">
-                         <h2 id="chat-title" class="text-xl font-bold text-cu-text mb-2">Arena de Debate</h2>
+                        <h2 id="chat-title" class="text-xl font-bold text-cu-text mb-2">Arena de Debate</h2>
                         <div id="chat-interface" class="hidden flex-grow flex flex-col bg-[var(--cu-bg-1)] border border-white/10 rounded-lg">
                             <div id="chat-messages" class="flex-grow p-4 overflow-y-auto scrollbar-thin min-h-[350px] chat-bubble-container"></div>
                             <div class="p-2 border-t border-white/10 flex items-center gap-2">
                                 <textarea id="user-argument-input" placeholder="Seu argumento..." rows="2" class="cu-textarea flex-grow resize-none"></textarea>
-                                <button id="send-argument-button" class="cu-btn primary p-3"><i class="fas fa-paper-plane"></i></button>
+                                <button id="send-argument-button" class="cu-btn primary p-3" disabled><i class="fas fa-paper-plane"></i></button>
                             </div>
                         </div>
-                         <div id="chat-placeholder" class="flex-grow flex items-center justify-center cu-panel bg-transparent p-4 min-h-[400px]">
+                        <div id="chat-placeholder" class="flex-grow flex items-center justify-center cu-panel bg-transparent p-4 min-h-[400px]">
                             <p class="text-cu-text-dim text-center">Defina o tópico para iniciar.</p>
                         </div>
                     </div>
@@ -95,63 +95,123 @@
     </div>
 
     <script>
-        let apiKey = localStorage.getItem('capyUniverseApiKey_gemini') || '';
+        // Configuração geral
+        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+        let apiKey = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
         let debateChatHistory = [];
 
-        const dom = { /* DOM elements */ }; // Simplified
+        // Alterna o estado de carregamento de botões com loader
+        function toggleButtonLoading(button, isLoading, defaultText) {
+            const loader = button.querySelector('.loader');
+            const textSpan = button.querySelector('.btn-text');
+            if (isLoading) {
+                button.disabled = true;
+                if (loader) loader.classList.remove('hidden');
+                if (textSpan) textSpan.textContent = 'Aguarde...';
+            } else {
+                button.disabled = false;
+                if (loader) loader.classList.add('hidden');
+                if (textSpan) textSpan.textContent = defaultText;
+            }
+        }
 
-        function toggleButtonLoading(button, isLoading) { /* ... */ }
-        function appendChatMessage(text, sender) { /* ... */ }
+        // Adiciona mensagens no chat com classes apropriadas
+        function appendChatMessage(text, sender) {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ' + (sender === 'user' ? 'user-bubble' : 'ai-bubble');
+            bubble.textContent = text;
+            container.appendChild(bubble);
+            // rola até o final
+            container.scrollTop = container.scrollHeight;
+        }
 
+        // Inicia o debate com um prompt inicial customizado
         function handleStartDebate() {
             const debateTopic = document.getElementById('debate-topic').value.trim();
-            if (!debateTopic) return alert("Defina o tópico do debate.");
-
+            if (!debateTopic) {
+                alert('Defina o tópico do debate.');
+                return;
+            }
             const userStance = document.getElementById('user-stance').value;
-            const systemPrompt = `Aja como CapyDebate. Tópico: "${debateTopic}". O usuário está ${userStance}. Defenda a posição oposta.`;
-            debateChatHistory = [{ role: "user", parts: [{ text: systemPrompt }] }, { role: "model", parts: [{ text: `Debate iniciado. Qual seu argumento inicial?` }] }];
-
+            const systemLines = [
+                'Você é o CapyDebate, um debatedor de IA que participa de discussões em português do Brasil.',
+                'Seu papel é representar a posição oposta à do usuário sobre o tema indicado.',
+                'Apresente argumentos sólidos, lógicos e respeitosos. Utilize exemplos, referências históricas ou evidências quando apropriado, evitando ataques pessoais e falácias.',
+                'Cada resposta deve ter entre 2 e 4 frases concisas e pertinentes ao tema.',
+                '',
+                `Tópico do debate: "${debateTopic}".`,
+                `Posição do usuário: ${userStance}.`,
+                'Você responderá defendendo a posição oposta. Inicie convidando o usuário a apresentar seu primeiro argumento.'
+            ];
+            const systemPrompt = systemLines.join('\n');
+            // Reinicia histórico e interface
+            debateChatHistory = [ { role: 'user', parts: [ { text: systemPrompt } ] } ];
+            // Mostra a interface de chat
             document.getElementById('chat-interface').classList.remove('hidden');
             document.getElementById('chat-placeholder').classList.add('hidden');
             document.getElementById('chat-messages').innerHTML = '';
-            appendChatMessage(`Debate iniciado sobre "${debateTopic}". Apresente seu argumento.`, 'ai');
+            appendChatMessage(`Debate iniciado sobre "${debateTopic}". Apresente seu primeiro argumento.`, 'ai');
+            // Habilita envio
+            document.getElementById('send-argument-button').disabled = false;
         }
 
+        // Envia argumento do usuário e recebe resposta da IA
         async function handleSendArgument() {
-            if (!apiKey) return alert("Configure a chave API do Gemini.");
-            const userArgument = document.getElementById('user-argument-input').value.trim();
-            if (!userArgument) return;
-
-            appendChatMessage(userArgument, 'user');
-            debateChatHistory.push({ role: "user", parts: [{ text: userArgument }] });
-            document.getElementById('user-argument-input').value = '';
-            toggleButtonLoading(document.getElementById('send-argument-button'), true);
-
+            if (!apiKey) {
+                alert('Configure a chave API do Gemini.');
+                return;
+            }
+            const inputEl = document.getElementById('user-argument-input');
+            const argument = inputEl.value.trim();
+            if (!argument) return;
+            appendChatMessage(argument, 'user');
+            debateChatHistory.push({ role: 'user', parts: [ { text: argument } ] });
+            inputEl.value = '';
+            const sendBtn = document.getElementById('send-argument-button');
+            toggleButtonLoading(sendBtn, true, '');
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: debateChatHistory })
-                });
-                if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-                const data = await response.json();
-                const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text.trim();
-                if (aiResponse) {
-                    appendChatMessage(aiResponse, 'ai');
-                    debateChatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-                } else {
-                    appendChatMessage("Não obtive uma resposta.", 'ai');
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: debateChatHistory })
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error(`Erro na API: ${response.status}`);
                 }
-            } catch (error) { appendChatMessage(`Erro: ${error.message}`, 'ai'); }
-            finally { toggleButtonLoading(document.getElementById('send-argument-button'), false); }
+                const data = await response.json();
+                const aiText = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('\n').trim();
+                if (aiText) {
+                    appendChatMessage(aiText, 'ai');
+                    debateChatHistory.push({ role: 'model', parts: [ { text: aiText } ] });
+                } else {
+                    appendChatMessage('Não obtive uma resposta.', 'ai');
+                }
+            } catch (error) {
+                appendChatMessage(`Erro: ${error.message}`, 'ai');
+            } finally {
+                toggleButtonLoading(sendBtn, false, '');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedKey = localStorage.getItem('capyUniverseApiKey_gemini');
+            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
             if (savedKey) apiKey = savedKey;
             document.getElementById('start-debate-button').addEventListener('click', handleStartDebate);
             document.getElementById('send-argument-button').addEventListener('click', handleSendArgument);
+            // Render sidebar se disponível
+            if (window.CU_NAVIGATION && !window.CU_NAVIGATION.isInitialized) {
+                window.CU_NAVIGATION.init();
+                window.CU_NAVIGATION.isInitialized = true;
+            }
+            if (window.CU_NAVIGATION && window.CU_NAVIGATION.renderSidebar) {
+                window.CU_NAVIGATION.renderSidebar('CapyDebate');
+            }
         });
     </script>
 </body>
 </html>
-

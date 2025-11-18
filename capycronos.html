@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CapyCronos Legal - Gerenciador de Prazos IA</title>
+    <!-- Tailwind CSS para layout rápido -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Bibliotecas de exportação: jsPDF para PDF baseado em texto; docx para Word; FileSaver para download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.1/docx.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -16,20 +20,26 @@
 
     <style>
         .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
-        .loader { border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Hidden content for PDF export */
+        /* Oculta a área de detalhes do relatório para exportação */
         #pdfReportContentDetails { display: none; }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
-
+    <!-- Cabeçalho -->
     <header class="cu-header">
         <div class="cu-brand">
             <a href="index.html" class="flex items-center gap-2 group">
-                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png"></div>
+                <div class="cu-logo flex-shrink-0"><img src="icons/icon-512.png" alt="CapyUniverse"></div>
                 <span class="cu-appname text-lg sm:text-xl">CapyUniverse</span>
             </a>
             <span class="ml-3 text-xs text-zinc-400 hidden sm:inline">/ CapyCronos</span>
@@ -42,18 +52,20 @@
     <div id="notificationArea"></div>
 
     <div class="flex flex-1">
+        <!-- Sidebar -->
         <aside id="sidebar" class="hidden lg:block cu-panel w-64 space-y-1 p-3 fixed inset-y-0 left-0 z-30 overflow-y-auto pt-20 scrollbar-thin">
             <p class="text-xs text-center text-cu-text-dim p-2">Carregando menu...</p>
         </aside>
 
+        <!-- Conteúdo principal -->
         <main class="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-64 w-full">
             <section class="cu-panel p-4 sm:p-6 flex flex-col h-full">
                 <div class="text-center mb-8">
                     <h1 class="text-3xl font-bold" style="color: var(--cu-amber)">CapyCronos Legal ⏱️</h1>
                     <p class="text-cu-text-dim mt-1">Sua IA para gestão inteligente de prazos jurídicos.</p>
                 </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Área de entrada -->
                     <div class="flex flex-col space-y-4">
                         <div class="cu-panel bg-transparent p-4">
                             <label for="documentInput" class="block text-sm font-medium text-cu-text-dim mb-2">1. Documento Jurídico (Texto Completo):</label>
@@ -69,14 +81,14 @@
                                 <input type="date" id="referenceDate" class="cu-input w-full">
                             </div>
                         </div>
-                        <button id="analyzeDeadlinesButton" class="cu-btn primary text-base w-full">
+                        <button id="analyzeDeadlinesButton" class="cu-btn primary text-base w-full flex items-center justify-center gap-2">
                             <span class="btn-text">Analisar Prazos com IA</span>
                             <div class="loader hidden ml-2"></div>
                         </button>
                     </div>
-
+                    <!-- Área de resultados -->
                     <div class="space-y-4">
-                         <h2 class="text-xl font-bold text-cu-text mb-2">4. Análise de Prazos</h2>
+                        <h2 class="text-xl font-bold text-cu-text mb-2">4. Análise de Prazos</h2>
                         <div id="deadlineOutput" class="cu-panel bg-transparent p-4 min-h-[260px] space-y-3">
                             <div class="p-3 rounded-lg bg-white/5">
                                 <h3 class="text-lg font-semibold text-amber-300 mb-1">Prazo Identificado:</h3>
@@ -99,18 +111,21 @@
                                 <ul id="actionSuggestionsOutput" class="text-sm text-cu-text-dim list-disc pl-5"><li>Aguardando análise...</li></ul>
                             </div>
                         </div>
-                         <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                        <div class="flex flex-col sm:flex-row gap-3 mt-3">
                             <button id="downloadAnalysisTxtButton" class="cu-btn text-xs w-full sm:w-auto">
                                 <i class="fas fa-file-alt mr-1.5"></i>TXT
                             </button>
                             <button id="downloadAnalysisPdfButton" class="cu-btn text-xs w-full sm:w-auto">
                                 <i class="fas fa-file-pdf mr-1.5"></i>PDF
                             </button>
+                            <button id="downloadAnalysisDocxButton" class="cu-btn text-xs w-full sm:w-auto">
+                                <i class="fas fa-file-word mr-1.5"></i>DOCX
+                            </button>
                             <button id="exportToCalendarButton" class="cu-btn text-xs w-full sm:w-auto">
                                 <i class="fas fa-calendar-plus mr-1.5"></i>Calendário (ICS)
                             </button>
                         </div>
-                         <div id="loaderAi" class="text-center py-4 hidden">
+                        <div id="loaderAi" class="text-center py-4 hidden">
                             <div class="loader inline-block"></div>
                             <p class="text-sm text-amber-300 mt-2">CapyCronos IA está calculando os prazos...</p>
                         </div>
@@ -120,232 +135,357 @@
             </section>
         </main>
     </div>
-
     <div id="pdfReportContentDetails"></div>
 
     <script>
-        const currentPageId = 'CapyCronosLegal'; 
-        let apiKey = '';
-        const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
-        let lastDeadlineAnalysis = null;
-
-        const domElements = {
-            sidebar: document.getElementById('sidebar'),
-            documentInput: document.getElementById('documentInput'),
-            deadlineTypeInput: document.getElementById('deadlineType'),
-            referenceDateInput: document.getElementById('referenceDate'),
-            analyzeDeadlinesButton: document.getElementById('analyzeDeadlinesButton'),
-            identifiedDeadlineOutput: document.getElementById('identifiedDeadlineOutput'),
-            calculatedDueDateOutput: document.getElementById('calculatedDueDateOutput'),
-            countdownOutput: document.getElementById('countdownOutput'),
-            relevantTextOutput: document.getElementById('relevantTextOutput'),
-            actionSuggestionsOutput: document.getElementById('actionSuggestionsOutput'),
-            downloadTxtButton: document.getElementById('downloadAnalysisTxtButton'),
-            downloadPdfButton: document.getElementById('downloadAnalysisPdfButton'),
-            exportToCalendarButton: document.getElementById('exportToCalendarButton'),
-            pdfReportContentDetails: document.getElementById('pdfReportContentDetails'),
-            loaderAi: document.getElementById('loaderAi'),
-            errorMsg: document.getElementById('errorMsg')
-        };
-        
-        function toggleLoadingUI(buttonElement, isLoading) {
-            const btnText = buttonElement.querySelector('.btn-text');
-            const loaderIcon = buttonElement.querySelector('.loader');
-            buttonElement.disabled = isLoading;
-            domElements.loaderAi.classList.toggle('hidden', !isLoading);
-
-            if(isLoading) {
-                if(btnText) btnText.classList.add('hidden');
-                if(loaderIcon) loaderIcon.classList.remove('hidden');
-            } else {
-                if(btnText) btnText.classList.remove('hidden');
-                if(loaderIcon) loaderIcon.classList.add('hidden');
-            }
+    /* =====================================
+       Variáveis Globais
+    ===================================== */
+    const currentPageId = 'CapyCronosLegal';
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    let apiKey = '';
+    let lastDeadlineAnalysis = null;
+    /* =====================================
+       Mapeamento de DOM
+    ===================================== */
+    const dom = {
+        sidebar: document.getElementById('sidebar'),
+        documentInput: document.getElementById('documentInput'),
+        deadlineTypeInput: document.getElementById('deadlineType'),
+        referenceDateInput: document.getElementById('referenceDate'),
+        analyzeDeadlinesButton: document.getElementById('analyzeDeadlinesButton'),
+        identifiedDeadlineOutput: document.getElementById('identifiedDeadlineOutput'),
+        calculatedDueDateOutput: document.getElementById('calculatedDueDateOutput'),
+        countdownOutput: document.getElementById('countdownOutput'),
+        relevantTextOutput: document.getElementById('relevantTextOutput'),
+        actionSuggestionsOutput: document.getElementById('actionSuggestionsOutput'),
+        downloadTxtButton: document.getElementById('downloadAnalysisTxtButton'),
+        downloadPdfButton: document.getElementById('downloadAnalysisPdfButton'),
+        downloadDocxButton: document.getElementById('downloadAnalysisDocxButton'),
+        exportToCalendarButton: document.getElementById('exportToCalendarButton'),
+        pdfReportContentDetails: document.getElementById('pdfReportContentDetails'),
+        loaderAi: document.getElementById('loaderAi'),
+        errorMsg: document.getElementById('errorMsg')
+    };
+    /* =====================================
+       Utilitário: alternar estado de loading nos botões
+    ===================================== */
+    function toggleLoadingUI(button, isLoading) {
+        const btnText = button.querySelector('.btn-text');
+        const loaderIcon = button.querySelector('.loader');
+        button.disabled = isLoading;
+        dom.loaderAi.classList.toggle('hidden', !isLoading);
+        if (isLoading) {
+            if (btnText) btnText.classList.add('hidden');
+            if (loaderIcon) loaderIcon.classList.remove('hidden');
+        } else {
+            if (btnText) btnText.classList.remove('hidden');
+            if (loaderIcon) loaderIcon.classList.add('hidden');
         }
-
-        async function handleAnalyzeDeadlines() {
-            if (!apiKey) {
-                domElements.errorMsg.textContent = "Chave API Gemini não configurada. Por favor, configure-a no menu 'Chaves API'.";
-                return;
+    }
+    /* =====================================
+       Analisar prazos com IA
+    ===================================== */
+    async function handleAnalyzeDeadlines() {
+        if (!apiKey) {
+            dom.errorMsg.textContent = "Chave API Gemini não configurada. Por favor, configure-a no menu 'Chaves API'.";
+            return;
+        }
+        dom.errorMsg.textContent = '';
+        const docText = dom.documentInput.value.trim();
+        const deadlineType = dom.deadlineTypeInput.value.trim();
+        const referenceDateStr = dom.referenceDateInput.value;
+        if (!docText || !deadlineType || !referenceDateStr) {
+            dom.errorMsg.textContent = 'Por favor, preencha todos os campos: documento, tipo de prazo e data de referência.';
+            return;
+        }
+        const referenceDate = new Date(referenceDateStr + 'T00:00:00');
+        if (isNaN(referenceDate.getTime())) {
+            dom.errorMsg.textContent = 'Data de referência inválida.';
+            return;
+        }
+        toggleLoadingUI(dom.analyzeDeadlinesButton, true);
+        // Reinicia outputs
+        dom.identifiedDeadlineOutput.textContent = 'Analisando...';
+        dom.calculatedDueDateOutput.textContent = '-';
+        dom.countdownOutput.textContent = '-';
+        dom.relevantTextOutput.textContent = 'Analisando...';
+        dom.actionSuggestionsOutput.innerHTML = '<li>Analisando...</li>';
+        lastDeadlineAnalysis = null;
+        // Prompt melhorado para Gemini
+        const promptLines = [
+            'Você é CapyCronos, um assistente jurídico especializado em identificar e calcular prazos processuais e contratuais em documentos.',
+            'Analise o seguinte texto de um documento jurídico:',
+            '"""',
+            docText,
+            '"""',
+            '',
+            'O usuário está interessado em prazos relacionados a: "' + deadlineType + '".',
+            'A data de referência para contagem (ex: data da intimação, publicação ou assinatura) fornecida pelo usuário é: ' + referenceDate.toLocaleDateString('pt-BR') + '.',
+            '',
+            'Sua tarefa é identificar se existe algum prazo relevante no documento e fornecer as seguintes informações em JSON:',
+            '1. "prazoMencionado": Texto descrevendo o prazo legal/contratual encontrado (ex: "15 dias para apresentar contestação"). Se não houver prazo, indique "Nenhum prazo específico encontrado para ' + deadlineType + ' no texto.".',
+            '2. "baseCalculo": O evento que inicia a contagem do prazo (ex: "a partir da data da publicação desta intimação"). Se não houver base clara, use "Data de referência informada pelo usuário".',
+            '3. "duracaoPrazoDias": Número de dias corridos estimado para o prazo. Se o prazo for em dias úteis, multiplique por 7/5 para obter uma estimativa de dias corridos. Se houver data específica, retorne 0.',
+            '4. "dataLimiteTexto": Se o documento mencionar explicitamente uma data limite no formato DD/MM/AAAA, extraia-a; caso contrário, deixe em branco.',
+            '5. "trechoRelevante": O trecho exato do documento (máx. 200 caracteres) onde o prazo é mencionado ou inferido.',
+            '6. "sugestoesAcao": Lista com 2-3 sugestões práticas de ações a serem tomadas em relação ao prazo (ex: preparar recurso, agendar lembrete).',
+            '',
+            'Se faltar qualquer informação, deixe o campo em branco ou indique "Não identificado".',
+            'Responda APENAS com um objeto JSON contendo essas chaves.'
+        ];
+        const prompt = promptLines.join('\n');
+        try {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: 'application/json' }
+            };
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData?.error?.message || 'Erro na API: ' + response.status);
             }
-            domElements.errorMsg.textContent = "";
-
-            const docText = domElements.documentInput.value.trim();
-            const deadlineType = domElements.deadlineTypeInput.value.trim();
-            const referenceDateStr = domElements.referenceDateInput.value;
-
-            if (!docText || !deadlineType || !referenceDateStr) {
-                domElements.errorMsg.textContent = "Por favor, preencha todos os campos: documento, tipo de prazo e data de referência.";
-                return;
-            }
-            
-            const referenceDate = new Date(referenceDateStr + "T00:00:00");
-            if (isNaN(referenceDate.getTime())) {
-                 domElements.errorMsg.textContent = "Data de referência inválida.";
-                return;
-            }
-
-            toggleLoadingUI(domElements.analyzeDeadlinesButton, true);
-            ["identifiedDeadlineOutput", "calculatedDueDateOutput", "countdownOutput", "relevantTextOutput"].forEach(id => domElements[id].textContent = "Analisando...");
-            domElements.actionSuggestionsOutput.innerHTML = '<li>Analisando...</li>';
-            lastDeadlineAnalysis = null;
-
-            const promptToGemini = `
-                Você é CapyCronos, um assistente jurídico especializado em identificar e calcular prazos processuais e contratuais em documentos.
-                Analise o seguinte texto de um documento jurídico:
-                """
-                ${docText}
-                """
-
-                O usuário está interessado em prazos relacionados a: "${deadlineType}".
-                A data de referência para contagem (ex: data da intimação, publicação ou assinatura), fornecida pelo usuário, é: ${referenceDate.toLocaleDateString('pt-BR')}.
-
-                Com base no texto e na data de referência, identifique:
-                1.  "prazoMencionado": Descreva o prazo legal/contratual específico encontrado no texto relacionado a "${deadlineType}" (ex: "15 dias para apresentar contestação", "pagamento em 30 dias corridos"). Se não encontrar um prazo explícito para "${deadlineType}", indique "Nenhum prazo específico encontrado para '${deadlineType}' no texto.".
-                2.  "baseCalculo": O evento ou data que inicia a contagem do prazo, conforme o texto (ex: "a partir da data da publicação desta intimação", "contados da assinatura deste instrumento"). Se não explícito, indique "Data de referência informada pelo usuário".
-                3.  "duracaoPrazoDias": O número de dias CORRIDOS para o prazo. Se o prazo for em dias úteis, converta para uma estimativa de dias corridos (multiplique por 7/5 aproximadamente). Se for uma data específica, retorne 0. Se não houver duração em dias, retorne 0.
-                4.  "dataLimiteTexto": Se o texto mencionar uma data limite explícita para o prazo (formato DD/MM/AAAA), extraia-a. Caso contrário, deixe em branco.
-                5.  "trechoRelevante": O trecho exato do texto (máximo 200 caracteres) onde o prazo é mencionado ou pode ser inferido.
-                6.  "sugestoesAcao": Uma lista de 2-3 sugestões de ações que o usuário deveria considerar em relação a este prazo (ex: "Preparar a petição de apelação.", "Realizar o pagamento até a data.", "Agendar lembrete para o dia anterior ao vencimento.").
-
-                Se não encontrar informações claras para algum campo, retorne uma string vazia "" para esse campo ou uma indicação como "Não identificado".
-
-                Responda APENAS com um objeto JSON contendo estas chaves.
-            `;
-            
-            try {
-                const payload = {
-                    contents: [{ parts: [{ text: promptToGemini }] }],
-                    generationConfig: { responseMimeType: "application/json" }
-                };
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData?.error?.message || `Erro na API: ${response.status}`);
-                }
-                const result = await response.json();
-
-                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0].text) {
-                    const aiData = JSON.parse(result.candidates[0].content.parts[0].text);
-                    lastDeadlineAnalysis = { ...aiData, referenceDate };
-
-                    domElements.identifiedDeadlineOutput.textContent = aiData.prazoMencionado || "Não identificado";
-                    domElements.relevantTextOutput.textContent = aiData.trechoRelevante || "Nenhum trecho específico destacado.";
-                    domElements.actionSuggestionsOutput.innerHTML = aiData.sugestoesAcao?.length > 0 
-                        ? aiData.sugestoesAcao.map(s => `<li>${s}</li>`).join('') 
-                        : '<li>Nenhuma sugestão de ação específica.</li>';
-
-                    let calculatedDueDate = null;
-                    if (aiData.dataLimiteTexto) {
-                        const parts = aiData.dataLimiteTexto.split('/');
-                        if (parts.length === 3) calculatedDueDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                    } else if (aiData.duracaoPrazoDias > 0) {
-                        calculatedDueDate = new Date(referenceDate.getTime());
-                        calculatedDueDate.setDate(referenceDate.getDate() + aiData.duracaoPrazoDias);
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+                const aiData = JSON.parse(text);
+                lastDeadlineAnalysis = { ...aiData, referenceDate };
+                dom.identifiedDeadlineOutput.textContent = aiData.prazoMencionado || 'Não identificado';
+                dom.relevantTextOutput.textContent = aiData.trechoRelevante || 'Nenhum trecho específico destacado.';
+                dom.actionSuggestionsOutput.innerHTML = aiData.sugestoesAcao && aiData.sugestoesAcao.length
+                    ? aiData.sugestoesAcao.map(s => `<li>${s}</li>`).join('')
+                    : '<li>Nenhuma sugestão de ação específica.</li>';
+                // Calcular data limite
+                let calculatedDueDate = null;
+                if (aiData.dataLimiteTexto) {
+                    const parts = aiData.dataLimiteTexto.split('/');
+                    if (parts.length === 3) {
+                        calculatedDueDate = new Date(parts[2], parts[1] - 1, parts[0]);
                     }
-
-                    if (calculatedDueDate && !isNaN(calculatedDueDate.getTime())) {
-                        lastDeadlineAnalysis.calculatedDueDate = calculatedDueDate;
-                        domElements.calculatedDueDateOutput.textContent = calculatedDueDate.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                        
-                        const now = new Date();
-                        const diffTime = calculatedDueDate.getTime() - now.getTime();
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        
-                        domElements.countdownOutput.classList.remove('text-red-400', 'text-yellow-400', 'text-emerald-400', 'font-bold');
-                        if (diffDays < 0) {
-                            domElements.countdownOutput.textContent = `Expirado há ${Math.abs(diffDays)} dia(s).`;
-                            domElements.countdownOutput.classList.add('text-red-400');
-                        } else if (diffDays === 0) {
-                            domElements.countdownOutput.textContent = "Termina Hoje!";
-                            domElements.countdownOutput.classList.add('text-red-500','font-bold');
-                        } else {
-                            domElements.countdownOutput.textContent = `${diffDays} dia(s) restante(s).`;
-                            domElements.countdownOutput.classList.add(diffDays <= 7 ? 'text-yellow-400' : 'text-emerald-400');
-                        }
+                } else if (aiData.duracaoPrazoDias && aiData.duracaoPrazoDias > 0) {
+                    calculatedDueDate = new Date(referenceDate.getTime());
+                    calculatedDueDate.setDate(referenceDate.getDate() + aiData.duracaoPrazoDias);
+                }
+                if (calculatedDueDate && !isNaN(calculatedDueDate.getTime())) {
+                    lastDeadlineAnalysis.calculatedDueDate = calculatedDueDate;
+                    dom.calculatedDueDateOutput.textContent = calculatedDueDate.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    const now = new Date();
+                    const diffTime = calculatedDueDate.getTime() - now.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    dom.countdownOutput.classList.remove('text-red-400', 'text-yellow-400', 'text-emerald-400', 'font-bold');
+                    if (diffDays < 0) {
+                        dom.countdownOutput.textContent = `Expirado há ${Math.abs(diffDays)} dia(s).`;
+                        dom.countdownOutput.classList.add('text-red-400');
+                    } else if (diffDays === 0) {
+                        dom.countdownOutput.textContent = 'Termina Hoje!';
+                        dom.countdownOutput.classList.add('text-red-500', 'font-bold');
                     } else {
-                        domElements.calculatedDueDateOutput.textContent = "Não foi possível calcular.";
-                        domElements.countdownOutput.textContent = "-";
+                        dom.countdownOutput.textContent = `${diffDays} dia(s) restante(s).`;
+                        dom.countdownOutput.classList.add(diffDays <= 7 ? 'text-yellow-400' : 'text-emerald-400');
                     }
-
                 } else {
-                    throw new Error(result.promptFeedback?.blockReason ? `Conteúdo bloqueado: ${result.promptFeedback.blockReason}` : "Resposta da API inválida.");
+                    dom.calculatedDueDateOutput.textContent = 'Não foi possível calcular.';
+                    dom.countdownOutput.textContent = '-';
                 }
-
-            } catch (error) {
-                console.error("Erro ao analisar prazos:", error);
-                domElements.errorMsg.textContent = `Erro: ${error.message}`;
-            } finally {
-                toggleLoadingUI(domElements.analyzeDeadlinesButton, false);
-            }
-        }
-        
-        function formatICSDate(date) {
-            if (!date || isNaN(date.getTime())) return '';
-            return date.toISOString().split('T')[0].replace(/-/g, '');
-        }
-
-        function exportToCalendar() {
-            if (!lastDeadlineAnalysis?.calculatedDueDate) {
-                alert("Nenhum prazo calculado para exportar.");
-                return;
-            }
-            const { prazoMencionado, trechoRelevante, sugestoesAcao, calculatedDueDate } = lastDeadlineAnalysis;
-
-            const startDate = formatICSDate(calculatedDueDate);
-            const summary = `Prazo CapyCronos: ${prazoMencionado || 'Prazo Jurídico'}`;
-            let description = `Detalhes do Prazo:\nReferência no Documento: ${trechoRelevante || 'Não especificado'}\n\n`;
-            if (sugestoesAcao?.length > 0) {
-                description += "Sugestões de Ação:\n" + sugestoesAcao.map(s => `- ${s}`).join('\n');
-            }
-            description = description.replace(/\n/g, '\\n');
-
-            const uid = `capycronos-${Date.now()}@capyuniverse.com`;
-            const dtstamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15) + 'Z';
-
-            const icsContent = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CapyCronosLegal//CapyUniverse IA//PT\r\nBEGIN:VEVENT\r\nUID:${uid}\r\nDTSTAMP:${dtstamp}\r\nDTSTART;VALUE=DATE:${startDate}\r\nSUMMARY:${summary}\r\nDESCRIPTION:${description}\r\nEND:VEVENT\r\nEND:VCALENDAR`;
-
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `prazo_capycronos.ics`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-        }
-
-        function downloadAnalysis(format) {
-            if (!lastDeadlineAnalysis) {
-                alert("Nenhuma análise para exportar.");
-                return;
-            }
-            // ... (rest of the function remains the same, just ensure it uses the new class names if it manipulates the DOM)
-        }
-        
-        async function renderSidebar() { /* ... standard sidebar logic ... */ }
-
-        function loadApiKey() {
-            const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
-            if(savedKey) {
-                apiKey = savedKey;
             } else {
-                 domElements.errorMsg.textContent = "Atenção: Chave API Gemini não configurada.";
+                throw new Error('Resposta da IA vazia ou em formato inesperado.');
+            }
+        } catch (err) {
+            console.error(err);
+            dom.errorMsg.textContent = 'Erro: ' + err.message;
+        } finally {
+            toggleLoadingUI(dom.analyzeDeadlinesButton, false);
+        }
+    }
+    /* =====================================
+       Exportar para calendário (ICS)
+    ===================================== */
+    function formatICSDate(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        return date.toISOString().split('T')[0].replace(/-/g, '');
+    }
+    function exportToCalendar() {
+        if (!lastDeadlineAnalysis || !lastDeadlineAnalysis.calculatedDueDate) {
+            alert('Nenhum prazo calculado para exportar.');
+            return;
+        }
+        const { prazoMencionado, trechoRelevante, sugestoesAcao, calculatedDueDate } = lastDeadlineAnalysis;
+        const startDate = formatICSDate(calculatedDueDate);
+        const summary = `Prazo CapyCronos: ${prazoMencionado || 'Prazo Jurídico'}`;
+        let description = `Detalhes do Prazo:\nReferência no Documento: ${trechoRelevante || 'Não especificado'}\n\n`;
+        if (sugestoesAcao?.length) {
+            description += 'Sugestões de Ação:\n' + sugestoesAcao.map(s => '- ' + s).join('\n');
+        }
+        description = description.replace(/\n/g, '\n');
+        const uid = `capycronos-${Date.now()}@capyuniverse.com`;
+        const dtstamp = new Date().toISOString().replace(/[-:.]/g, '').substring(0, 15) + 'Z';
+        const ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//CapyCronosLegal//CapyUniverse IA//PT\r\nBEGIN:VEVENT\r\nUID:' + uid + '\r\nDTSTAMP:' + dtstamp + '\r\nDTSTART;VALUE=DATE:' + startDate + '\r\nSUMMARY:' + summary + '\r\nDESCRIPTION:' + description + '\r\nEND:VEVENT\r\nEND:VCALENDAR';
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'prazo_capycronos.ics';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+    /* =====================================
+       Exportar análise (TXT, PDF ou DOCX)
+    ===================================== */
+    async function downloadAnalysis(format) {
+        if (!lastDeadlineAnalysis) {
+            alert('Nenhuma análise para exportar.');
+            return;
+        }
+        const { prazoMencionado, baseCalculo, duracaoPrazoDias, dataLimiteTexto, trechoRelevante, sugestoesAcao, referenceDate, calculatedDueDate } = lastDeadlineAnalysis;
+        // Construir um relatório em HTML para PDF ou como string para TXT
+        const reportHtml = document.createElement('div');
+        reportHtml.innerHTML = `
+            <h1 style="font-size:18pt;text-align:center;border-bottom:2px solid #000;padding-bottom:10px;">Relatório de Análise de Prazo</h1>
+            <p><strong>Documento analisado:</strong></p>
+            <pre style="white-space:pre-wrap;font-size:12pt;font-family:'Times New Roman', Times, serif;">${dom.documentInput.value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+            <h2 style="font-size:16pt;margin-top:20px;">Resumo</h2>
+            <p><strong>Prazo Identificado:</strong> ${prazoMencionado || 'Não identificado'}</p>
+            <p><strong>Base para Cálculo:</strong> ${baseCalculo || 'Não identificada'}</p>
+            <p><strong>Duração estimada (dias):</strong> ${duracaoPrazoDias || '-'}</p>
+            <p><strong>Data limite no texto:</strong> ${dataLimiteTexto || '-'}</p>
+            <p><strong>Data limite calculada:</strong> ${calculatedDueDate ? calculatedDueDate.toLocaleDateString('pt-BR') : '-'}</p>
+            <h2 style="font-size:16pt;margin-top:20px;">Trecho Relevante</h2>
+            <p style="font-size:12pt;font-family:'Times New Roman', Times, serif;">${(trechoRelevante || '-').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+            <h2 style="font-size:16pt;margin-top:20px;">Sugestões de Ação</h2>
+            <ul style="font-size:12pt;font-family:'Times New Roman', Times, serif;">
+                ${(sugestoesAcao && sugestoesAcao.length ? sugestoesAcao.map(s => '<li>' + s + '</li>').join('') : '<li>Não identificado</li>')}
+            </ul>
+        `;
+        const reportText = [
+            'Relatório de Análise de Prazo - CapyCronos Legal',
+            '',
+            'Documento analisado:',
+            dom.documentInput.value,
+            '',
+            'Prazo identificado: ' + (prazoMencionado || 'Não identificado'),
+            'Base para cálculo: ' + (baseCalculo || 'Não identificada'),
+            'Duração estimada (dias): ' + (duracaoPrazoDias || '-'),
+            'Data limite no texto: ' + (dataLimiteTexto || '-'),
+            'Data limite calculada: ' + (calculatedDueDate ? calculatedDueDate.toLocaleDateString('pt-BR') : '-'),
+            '',
+            'Trecho relevante:',
+            trechoRelevante || '-',
+            '',
+            'Sugestões de ação:',
+            sugestoesAcao && sugestoesAcao.length ? sugestoesAcao.map(s => '- ' + s).join('\n') : '- Não identificado'
+        ].join('\n');
+        if (format === 'txt') {
+            const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+            saveAs(blob, 'analise_prazo_capycronos.txt');
+        } else if (format === 'pdf') {
+            // Gera um PDF baseado em texto usando jsPDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const margin = 10;
+            const maxWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+            const lines = pdf.splitTextToSize(reportText, maxWidth);
+            pdf.text(lines, margin, margin + 10);
+            pdf.save('analise_prazo_capycronos.pdf');
+        } else if (format === 'docx') {
+            // Converte o relatório em um documento DOCX usando a biblioteca docx
+            try {
+                const doc = new window.docx.Document();
+                const paragraphs = [];
+                paragraphs.push(new window.docx.Paragraph({ text: 'Relatório de Análise de Prazo', heading: window.docx.HeadingLevel.TITLE }));
+                reportText.split(/\n/).forEach(line => {
+                    paragraphs.push(new window.docx.Paragraph(line || ''));
+                });
+                doc.addSection({ children: paragraphs });
+                const blob = await window.docx.Packer.toBlob(doc);
+                saveAs(blob, 'analise_prazo_capycronos.docx');
+            } catch (err) {
+                console.error('Erro ao exportar DOCX:', err);
+                alert('Erro ao exportar DOCX: ' + err.message);
             }
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // renderSidebar(); // This will be handled by the global script if needed
-            loadApiKey();
-            domElements.referenceDateInput.valueAsDate = new Date();
-            
-            domElements.analyzeDeadlinesButton.addEventListener('click', handleAnalyzeDeadlines);
-            domElements.downloadTxtButton.addEventListener('click', () => downloadAnalysis('txt'));
-            domElements.downloadPdfButton.addEventListener('click', () => downloadAnalysis('pdf'));
-            domElements.exportToCalendarButton.addEventListener('click', exportToCalendar);
-        });
+    }
+    /* =====================================
+       Sidebar dinâmica
+    ===================================== */
+    async function renderSidebar() {
+        if (!dom.sidebar) return;
+        try {
+            const response = await fetch('tools.json');
+            if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
+            const tools = await response.json();
+            const categories = {};
+            tools.forEach(tool => {
+                let cats = tool.category;
+                if (typeof cats === 'string') cats = [cats];
+                if (Array.isArray(cats)) {
+                    cats.forEach(cat => {
+                        if (!categories[cat]) categories[cat] = [];
+                        categories[cat].push(tool);
+                    });
+                }
+            });
+            dom.sidebar.innerHTML = '';
+            // Home link
+            const homeLink = document.createElement('a');
+            homeLink.href = 'index.html';
+            homeLink.className = 'sidebar-link flex items-center gap-2 p-2 rounded-md';
+            homeLink.innerHTML = '<i class="fas fa-home w-5 text-center text-amber-400"></i><span>Página Inicial</span>';
+            dom.sidebar.appendChild(homeLink);
+            for (const catName in categories) {
+                const catDiv = document.createElement('div');
+                const catBtn = document.createElement('button');
+                catBtn.className = 'w-full flex justify-between items-center p-2 text-left text-cu-text-dim hover:text-cu-text hover:bg-white/5 rounded-md';
+                catBtn.innerHTML = `<span class="font-semibold text-sm">${catName}</span><i class="fas fa-chevron-down w-4 h-4 transform transition-transform duration-200"></i>`;
+                const catContent = document.createElement('div');
+                catContent.className = 'category-content pl-3 pt-1 space-y-1';
+                categories[catName].forEach(tool => {
+                    const link = document.createElement('a');
+                    link.href = tool.pageUrl;
+                    link.className = 'sidebar-link flex items-center gap-2 p-1.5 rounded-md text-xs' + (tool.id === currentPageId ? ' active' : '');
+                    link.innerHTML = `<span class="w-5 text-center">${tool.icon || '✨'}</span><span>${tool.title}</span>`;
+                    catContent.appendChild(link);
+                });
+                catBtn.addEventListener('click', () => {
+                    catContent.classList.toggle('expanded');
+                    catBtn.querySelector('i').classList.toggle('rotate-180');
+                });
+                if (categories[catName].some(t => t.id === currentPageId)) {
+                    catContent.classList.add('expanded');
+                    catBtn.querySelector('i').classList.add('rotate-180');
+                }
+                catDiv.appendChild(catBtn);
+                catDiv.appendChild(catContent);
+                dom.sidebar.appendChild(catDiv);
+            }
+        } catch (err) {
+            console.error(err);
+            dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
+        }
+    }
+    /* =====================================
+       Carrega a chave da API Gemini
+    ===================================== */
+    function loadApiKey() {
+        const savedKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+        if (savedKey) apiKey = savedKey;
+        else dom.errorMsg.textContent = 'Atenção: Chave API Gemini não configurada.';
+    }
+    /* =====================================
+       Configuração inicial
+    ===================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+        renderSidebar();
+        loadApiKey();
+        dom.referenceDateInput.valueAsDate = new Date();
+        dom.analyzeDeadlinesButton.addEventListener('click', handleAnalyzeDeadlines);
+        dom.downloadTxtButton.addEventListener('click', () => downloadAnalysis('txt'));
+        dom.downloadPdfButton.addEventListener('click', () => downloadAnalysis('pdf'));
+        dom.downloadDocxButton.addEventListener('click', () => downloadAnalysis('docx'));
+        dom.exportToCalendarButton.addEventListener('click', exportToCalendar);
+    });
     </script>
 </body>
 </html>
-
