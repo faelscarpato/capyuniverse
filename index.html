@@ -286,7 +286,12 @@
                 <i class="ph-duotone ph-spinner-gap text-4xl text-purple-500 animate-spin mb-3"></i>
                 <span class="text-xs text-gray-500 font-mono uppercase tracking-widest">Inicializando Neural Link...</span>
             </div>
-            <iframe id="appIframe" sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation" allow="camera; microphone; clipboard-read; clipboard-write"></iframe>
+            <iframe id="appIframe" 
+    class="w-full h-full border-none" 
+    sandbox="allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-presentation allow-downloads" 
+    allow="camera; microphone; clipboard-read; clipboard-write; accelerometer; gyroscope; autoplay">
+</iframe>
+
         </div>
     </div>
   </div>
