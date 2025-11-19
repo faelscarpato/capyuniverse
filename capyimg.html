@@ -1,508 +1,622 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="capyuniverse">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CapyIMG — Gerar Imagens com IA</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyVision | Nano Banana Core 🍌</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+    <style>
+        /* --- DNA VISUAL (AURORA) --- */
+        :root {
+            --bg-deep: #050511;
+            --glass-surface: rgba(20, 20, 35, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: #fbbf24; /* Amarelo Banana Nano */
+            --secondary-glow: #d946ef; /* Magenta Artístico */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
 
-  <!-- Tema CapyUniverse -->
-  <style>
-    :root{
-      --cu-bg-0:#0b0b14; --cu-bg-1:#0f1024; --cu-grid:#2a2e63; --cu-card:#0f0f22cc;
-      --cu-cyan:#22d3ee; --cu-magenta:#f472d0; --cu-amber:#f59e0b; --cu-text:#e6e6f0; --cu-text-dim:#aab;
-      --cu-radius:16px; --cu-radius-lg:22px; --cu-blur:12px;
-      --cu-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
-    }
-    html{ background:var(--cu-bg-0); }
-    body{
-      font-family:Inter,system-ui,sans-serif; color:var(--cu-text);
-      background:
-        radial-gradient(1200px 700px at 70% -10%, rgba(139,92,246,.25), transparent 60%),
-        radial-gradient(900px 600px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
-        var(--cu-bg-0);
-    }
-    .cu-stars{ position:fixed; inset:0; pointer-events:none; z-index:-2;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(255,255,255,.12) 0 1px, transparent 2px) 0 0/180px 180px,
-        radial-gradient(circle at 75% 35%, rgba(255,255,255,.10) 0 1px, transparent 2px) 0 0/220px 220px,
-        radial-gradient(circle at 40% 70%, rgba(255,255,255,.08) 0 1px, transparent 2px) 0 0/260px 260px; }
-    .cu-stage{ position:fixed; inset:auto 0 0 0; height:38vh; pointer-events:none; z-index:-1;
-      background: linear-gradient( to top, rgba(10,10,22,.65), transparent 70%),
-        repeating-linear-gradient( to right, transparent 0 38px, var(--cu-grid) 38px 39px),
-        repeating-linear-gradient( to top,   transparent 0 38px, var(--cu-grid) 38px 39px);
-      mask: linear-gradient(to top, black, transparent 80%); }
+        * { box-sizing: border-box; outline: none; }
 
-    /* Header */
-    .cu-header{ position:fixed; top:0; left:0; right:0; z-index:40; height:64px;
-      display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:0 .9rem;
-      backdrop-filter: blur(10px); background: linear-gradient(180deg, rgba(10,10,30,.7), rgba(10,10,30,.35));
-      border-bottom:1px solid rgba(255,255,255,.06); }
-    .cu-brand{ display:flex; align-items:center; gap:.6rem; }
-    .cu-appname{ font-family:Syne,Inter,sans-serif; font-weight:800; letter-spacing:.4px; }
-    .cu-chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .6rem; border-radius:999px;
-      border:1px solid rgba(255,255,255,.12); background:linear-gradient(120deg, rgba(34,211,238,.16), rgba(139,92,246,.16)); }
+        body {
+            margin: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.1), transparent 40%), 
+                radial-gradient(circle at 80% 70%, rgba(217, 70, 239, 0.15), transparent 40%);
+            background-attachment: fixed;
+        }
 
-    /* Componentes */
-    .cu-panel{ background:var(--cu-card); backdrop-filter: blur(var(--cu-blur));
-      border-radius:var(--cu-radius-lg); box-shadow:var(--cu-shadow); border:1px solid rgba(255,255,255,.06); }
-    .cu-btn{ display:inline-flex; align-items:center; gap:.55rem; padding:.6rem .9rem; border-radius:14px; font-weight:600;
-      border:1px solid rgba(255,255,255,.10);
-      background:linear-gradient(130deg, rgba(34,211,238,.18), rgba(244,114,208,.18));
-      box-shadow:var(--cu-shadow); backdrop-filter: blur(6px); transition:.2s transform, .2s filter; }
-    .cu-btn:hover{ transform: translateY(-1px);
-      filter: drop-shadow(0 0 10px rgba(34,211,238,.45)) drop-shadow(0 0 24px rgba(244,114,208,.35)); }
-    .cu-btn.primary{ background: linear-gradient(140deg, #0ea5e9 0%, #22d3ee 40%, #a855f7 78%, #f59e0b 100%); color:white; border-color:transparent; }
-    .cu-input, .cu-select, .cu-textarea{ width:100%; background:rgba(15,15,40,.6);
-      border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:.75rem .9rem; color:var(--cu-text); outline:none; }
-    .cu-input:focus, .cu-select:focus, .cu-textarea:focus{ border-color: var(--cu-cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0;
+            width: 80px;
+            background: rgba(5, 5, 17, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px 0; gap: 20px;
+            z-index: 50;
+        }
+        
+        .brand-icon { font-size: 2rem; color: var(--primary-glow); margin-bottom: 20px; animation: float 3s infinite ease-in-out; }
+        
+        .nav-btn {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: grid; place-items: center;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
+            cursor: pointer; transition: all 0.2s;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+        }
 
-    /* Sidebar */
-    .sidebar-glass{
-      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
-      backdrop-filter: blur(15px);
-      border-right:1px solid rgba(255,255,255,.06);
-    }
+        /* --- MAIN CANVAS --- */
+        .main-canvas {
+            margin-left: 80px;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center;
+        }
 
-    /* Grid/galeria */
-    .card{ position:relative; overflow:hidden; border-radius:16px; border:1px solid rgba(255,255,255,.08); background:#0f1024; }
-    .card img{ width:100%; height:100%; object-fit:contain; display:block; background:#0b0b14; }
-    .card .toolbar{ position:absolute; bottom:.5rem; left:.5rem; right:.5rem; display:flex; justify-content:space-between; gap:.5rem; }
-    .badge{ padding:.25rem .6rem; border-radius:999px; background:rgba(0,0,0,.55); font-size:.75rem; }
+        .header-art {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: floatDown 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .header-art h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(to right, #fff, var(--primary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
+        .header-art p { color: var(--text-muted); margin-top: 5px; }
 
-    /* Scrollbar */
-    .scrollbar-thin::-webkit-scrollbar{ width:8px; height:8px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb{ background:linear-gradient(120deg,#22d3ee,#8b5cf6); border-radius:999px; }
-    .scrollbar-thin::-webkit-scrollbar-track{ background:rgba(255,255,255,.06); }
-  </style>
-  <script src="cu-init.js"></script>
-  <script src="cu-app.js" defer></script>
-  <script src="cu-navigation.js" defer></script>
+        /* --- COMPOSER AREA --- */
+        .composer-container {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 40px;
+        }
+
+        .glass-panel {
+            background: rgba(30, 30, 45, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .prompt-box {
+            display: flex; gap: 10px;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 5px;
+            border: 1px solid transparent;
+            transition: border-color 0.3s;
+        }
+        .prompt-box:focus-within { border-color: var(--primary-glow); }
+
+        .prompt-input {
+            flex: 1; background: transparent; border: none;
+            color: #fff; padding: 12px 15px;
+            font-size: 1rem; font-family: 'Inter', sans-serif;
+        }
+        .prompt-input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .generate-btn {
+            background: linear-gradient(135deg, var(--primary-glow), #f59e0b);
+            color: #000; border: none;
+            padding: 10px 25px; border-radius: 12px;
+            font-weight: 800; cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
+        .generate-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+        .generate-btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(1); }
+
+        /* Settings Bar */
+        .settings-bar {
+            display: flex; flex-wrap: wrap; gap: 20px;
+            margin-top: 15px;
+            padding: 0 5px;
+        }
+
+        .control-group {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .control-label {
+            font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: bold;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .options-list { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .option-pill {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px; border-radius: 12px;
+            font-size: 0.8rem; color: var(--text-muted);
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .option-pill:hover, .option-pill.active {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fff; border-color: var(--primary-glow);
+        }
+        .option-pill.active { box-shadow: 0 0 10px rgba(251, 191, 36, 0.1); }
+
+        /* Enhancer Toggle */
+        .enhancer-pill {
+            margin-left: auto;
+            background: rgba(139, 92, 246, 0.1) !important;
+            border-color: rgba(139, 92, 246, 0.3) !important;
+            color: #d8b4fe !important;
+        }
+        .enhancer-pill.active {
+            background: rgba(139, 92, 246, 0.3) !important;
+            color: #fff !important;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        /* --- GALLERY (Masonry) --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            padding-bottom: 100px;
+        }
+
+        .art-card {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #0f111a;
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: popIn 0.5s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .art-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: var(--primary-glow);
+        }
+
+        .art-img { 
+            width: 100%; height: auto; display: block; 
+            min-height: 200px; background: #1a1a2e; 
+            object-fit: cover;
+        }
+
+        /* Overlay Actions */
+        .art-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent 50%);
+            opacity: 0; transition: opacity 0.3s;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 15px;
+        }
+        .art-card:hover .art-overlay { opacity: 1; }
+
+        .art-prompt {
+            color: #fff; font-size: 0.8rem; margin-bottom: 10px;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0,0,0,1);
+        }
+
+        .action-row { display: flex; gap: 8px; }
+
+        .action-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white; padding: 6px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 5px;
+            transition: background 0.2s;
+        }
+        .action-btn:hover { background: var(--primary-glow); color: #000; border-color: var(--primary-glow); }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .lightbox.open { display: flex; opacity: 1; }
+        .lightbox img { max-height: 90vh; max-width: 95vw; border-radius: 8px; box-shadow: 0 0 60px rgba(251, 191, 36, 0.1); }
+        .close-lb { position: absolute; top: 20px; right: 20px; font-size: 2rem; color: white; cursor: pointer; padding: 10px; }
+
+        /* Loader */
+        .loader-container {
+            position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2;
+        }
+        .dna-spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary-glow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Modal API */
+        .api-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 200; display: none; place-items: center;
+            backdrop-filter: blur(8px);
+        }
+        .api-modal.open { display: grid; }
+        .modal-box {
+            background: #13131f; border: 1px solid var(--glass-border);
+            padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes floatDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        @media(max-width: 768px) {
+            .sidebar { width: 100%; height: 60px; top: auto; bottom: 0; flex-direction: row; justify-content: center; border-right: none; border-top: 1px solid var(--glass-border); }
+            .main-canvas { margin-left: 0; padding: 20px 20px 100px 20px; }
+            .header-art h1 { font-size: 2.5rem; }
+            .settings-bar { gap: 15px; }
+        }
+    </style>
 </head>
+<body>
 
-<body class="min-h-screen flex flex-col" data-cu-skip-shell="true">
-  <div class="cu-stars"></div><div class="cu-stage"></div>
+    <nav class="sidebar">
+        <div class="brand-icon"><i class="ph-fill ph-aperture"></i></div>
+        <div class="nav-btn active" title="Criar"><i class="ph-bold ph-sparkle"></i></div>
+        <a href="index.html" class="nav-btn" title="Hub"><i class="ph-bold ph-house"></i></a>
+        <div class="nav-btn" onclick="openApiModal()" title="API Key"><i class="ph-bold ph-key"></i></div>
+    </nav>
 
-  <!-- HEADER -->
-  <header class="cu-header">
-    <div class="cu-brand">
-      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none">
-        <i class="fas fa-bars text-xl"></i>
-      </button>
-      <div class="flex items-center gap-2">
-        <svg class="w-7 h-7" viewBox="0 0 64 64" aria-hidden="true">
-          <defs><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#f472d0"/></linearGradient></defs>
-          <circle cx="32" cy="32" r="30" fill="url(#g2)" opacity=".25"/>
-          <path d="M18 40c7 6 21 6 28 0 2-2 2-6-1-8l-4-3c-1-5-5-9-9-9s-8 4-9 9l-4 3c-3 2-3 6-1 8z" fill="url(#g2)"/>
-          <rect x="23" y="28" rx="4" ry="4" width="18" height="14" fill="#0b0b14"/>
-          <text x="32" y="39" text-anchor="middle" font-size="9" font-family="Syne, Inter, sans-serif" fill="#fff">IMG</text>
-        </svg>
-        <span class="cu-appname text-xl">CapyIMG</span>
-        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
-      <button id="openApiKeysModalButton" class="cu-btn primary hidden sm:inline-flex">Chaves API</button>
-    </div>
-  </header>
-
-  <div class="flex flex-1 pt-16 min-h-0">
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto pt-4 scrollbar-thin">
-      <p class="text-xs text-center text-zinc-400 p-2">Carregando menu...</p>
-    </aside>
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden"></div>
-
-    <!-- MAIN -->
-    <main class="flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
-      <section class="cu-panel p-5 sm:p-6 lg:p-8">
-        <div class="text-center mb-6 sm:mb-8">
-          <h1 class="text-2xl sm:text-3xl font-bold" style="color:#a78bfa;">CapyIMG 🖼️</h1>
-          <p class="text-zinc-300 mt-1">Gere imagens com IA direto do navegador (modelo público <span class="font-mono">flux</span>).</p>
+    <main class="main-canvas">
+        
+        <div class="header-art">
+            <h1>CapyVision</h1>
+            <p>Motor <span style="color: var(--primary-glow); font-weight:bold;">Nano Banana</span> Híbrido.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[380px,1fr] gap-6 min-h-0">
-          <!-- CONTROLES -->
-          <aside class="cu-panel p-4 sm:p-5">
-            <div class="flex items-center gap-2 mb-3">
-              <i class="fas fa-image text-zinc-300"></i>
-              <h2 class="text-lg font-semibold">Briefing</h2>
-            </div>
-
-            <label class="block text-sm text-zinc-300">Descrição</label>
-            <textarea id="prompt" rows="5" class="cu-textarea mt-1" placeholder="Ex: ilustração digital de capivara astronauta, fundo branco, iluminação suave"></textarea>
-
-            <div class="mt-3 grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm text-zinc-300">Negativo (evitar)</label>
-                <input id="negative" class="cu-input mt-1" placeholder="granulado, arte borrada, texto" />
-              </div>
-              <div>
-                <label class="block text-sm text-zinc-300">Quantidade</label>
-                <input id="count" type="number" min="1" max="4" value="1" class="cu-input mt-1" />
-              </div>
-            </div>
-
-            <div class="mt-3 grid grid-cols-3 gap-3">
-              <div>
-                <label class="block text-sm text-zinc-300">Proporção</label>
-                <select id="ratio" class="cu-select mt-1">
-                  <option value="1:1">1:1</option><option value="16:9">16:9</option>
-                  <option value="9:16">9:16</option><option value="4:3">4:3</option>
-                  <option value="3:4">3:4</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm text-zinc-300">Lado maior</label>
-                <select id="longSide" class="cu-select mt-1">
-                  <option>1024</option><option>768</option><option>1536</option><option>2048</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm text-zinc-300">Seed (opcional)</label>
-                <input id="seed" class="cu-input mt-1" placeholder="ex: 42" />
-              </div>
-            </div>
-
-            <div class="mt-4">
-              <span class="block text-sm text-zinc-300 mb-1">Estilo rápido</span>
-              <div id="styleChips" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <div class="mt-4 flex items-center justify-between gap-3">
-              <label class="inline-flex items-center gap-2 text-sm text-zinc-200">
-                <input id="transparent" type="checkbox" class="rounded border-zinc-600 bg-transparent" /> Fundo transparente
-              </label>
-              <div class="text-xs text-zinc-400" id="sizeInfo">1024×1024</div>
-            </div>
-
-            <button id="btnGenerate" class="mt-4 w-full cu-btn primary justify-center">
-              <i class="fas fa-wand-magic-sparkles"></i> Gerar Imagem
-            </button>
-
-            <hr class="my-5 border-white/10" />
-            <div>
-              <div class="flex items-center gap-2 mb-2">
-                <i class="fas fa-clock text-zinc-300"></i>
-                <h3 class="font-medium">Histórico rápido</h3>
-              </div>
-              <div id="history" class="flex flex-wrap gap-2 text-xs"></div>
-              <button id="clearHistory" class="mt-2 text-xs text-zinc-400 hover:text-white underline">Limpar histórico</button>
-            </div>
-          </aside>
-
-          <!-- GALERIA -->
-          <section class="cu-panel p-4 sm:p-5 flex flex-col min-h-0">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-images text-zinc-300"></i>
-                <h2 class="text-lg font-semibold">Resultado</h2>
-              </div>
-              <div class="flex items-center gap-2">
-                <button id="btnDownloadAll" class="cu-btn px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
-                  <i class="fas fa-download"></i> Baixar tudo
+        <div class="composer-container glass-panel">
+            <div class="prompt-box">
+                <input type="text" id="promptInput" class="prompt-input" placeholder="Descreva sua imaginação..." autocomplete="off">
+                <button id="generateBtn" class="generate-btn">
+                    <i class="ph-bold ph-lightning"></i> <span class="btn-text">Criar</span>
                 </button>
-              </div>
             </div>
-            <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[200px] overflow-y-auto scrollbar-thin flex-1">
-              <!-- cards entram aqui -->
+
+            <div class="settings-bar">
+                
+                <div class="control-group">
+                    <span class="control-label"><i class="ph-bold ph-frame-corners"></i> Proporção</span>
+                    <div class="options-list" id="ratioSelector">
+                        <button class="option-pill active" data-w="1024" data-h="1024">1:1</button>
+                        <button class="option-pill" data-w="1280" data-h="720">16:9</button>
+                        <button class="option-pill" data-w="720" data-h="1280">9:16</button>
+                        <button class="option-pill" data-w="1024" data-h="768">4:3</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label"><i class="ph-bold ph-paint-brush"></i> Estilo</span>
+                    <div class="options-list" id="styleSelector">
+                        <button class="option-pill active" data-style="">Realista</button>
+                        <button class="option-pill" data-style="cyberpunk">Cyberpunk</button>
+                        <button class="option-pill" data-style="anime">Anime</button>
+                        <button class="option-pill" data-style="3d render">3D</button>
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin-left: auto;">
+                    <span class="control-label">&nbsp;</span>
+                    <button class="option-pill enhancer-pill active" id="enhanceToggle" onclick="toggleEnhance()">
+                        <i class="ph-fill ph-magic-wand"></i> Magic: ON
+                    </button>
+                </div>
+
             </div>
-          </section>
         </div>
-      </section>
+
+        <div class="gallery-grid" id="galleryGrid">
+            </div>
+
     </main>
-  </div>
 
-  <!-- FAB Chaves API (mobile) -->
-  <button id="fabApiImg" class="sm:hidden fixed bottom-4 right-4 cu-btn primary rounded-full p-3 shadow-xl z-50" title="Chaves API">🔑</button>
-
-  <!-- MODAL: API Gemini -->
-  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4"></div>
-
-  <!-- Template card -->
-  <template id="tplCard">
-    <div class="card">
-      <div class="w-full h-full aspect-square bg-[#12122a] animate-pulse"></div>
-      <img class="hidden" alt="geração IA"/>
-      <div class="toolbar">
-        <span class="badge">IA</span>
-        <div class="flex items-center gap-1">
-          <button class="btn-open cu-btn px-2 py-1" title="Abrir"><i class="fas fa-up-right-and-down-left-from-center"></i></button>
-          <button class="btn-dl cu-btn px-2 py-1" title="Baixar"><i class="fas fa-download"></i></button>
-        </div>
-      </div>
+    <div class="lightbox" id="lightbox">
+        <div class="close-lb" onclick="closeLightbox()">&times;</div>
+        <img id="lbImage" src="">
     </div>
-  </template>
 
-  <script>
-    const currentPageId = 'capyimg';
-    let apiKey = '';
-    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    <div class="api-modal" id="apiModal">
+        <div class="modal-box">
+            <i class="ph-fill ph-lock-key" style="font-size: 3rem; color: var(--primary-glow); margin-bottom: 15px;"></i>
+            <h3 style="color:#fff; margin:0 0 10px 0;">Gemini API Key</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Necessária para o modo "Magic" (Melhoria de Prompt).</p>
+            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:#fff; border-radius:10px; margin:15px 0;">
+            <button onclick="saveKey()" style="width:100%; padding:12px; background:var(--primary-glow); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Salvar</button>
+            <button onclick="closeApiModal()" style="margin-top:10px; background:transparent; color:var(--text-muted); border:none; cursor:pointer;">Fechar</button>
+        </div>
+    </div>
 
-    const dom = {
-      sidebar: document.getElementById('sidebar'),
-      sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
-      sidebarOverlay: document.getElementById('sidebarOverlay'),
-      apiKeysModal: document.getElementById('apiKeysModal'),
-      openApiKeysModalButton: document.getElementById('openApiKeysModalButton'),
-      fabApi: document.getElementById('fabApiImg'),
-    };
+    <script>
+        // --- STATE & CONFIG ---
+        const state = {
+            apiKey: localStorage.getItem('capyide_gemini_key') || '',
+            enhance: true,
+            width: 1024,
+            height: 1024,
+            style: ''
+        };
 
-    /* Sidebar dinâmica */
-    async function renderSidebar() {
-      if (!dom.sidebar) return;
-      try {
-        const res = await fetch('tools.json');
-        if (!res.ok) throw new Error('Falha ao carregar tools.json');
-        const toolsData = await res.json();
+        const els = {
+            prompt: document.getElementById('promptInput'),
+            btn: document.getElementById('generateBtn'),
+            grid: document.getElementById('galleryGrid'),
+            lightbox: document.getElementById('lightbox'),
+            lbImg: document.getElementById('lbImage'),
+            apiModal: document.getElementById('apiModal'),
+            keyInput: document.getElementById('apiKeyInput'),
+            ratios: document.querySelectorAll('#ratioSelector .option-pill'),
+            styles: document.querySelectorAll('#styleSelector .option-pill')
+        };
 
-        const categories = {};
-        toolsData.forEach(tool => {
-          let cats = tool.category;
-          if (typeof cats === 'string') cats = [cats];
-          (cats||[]).forEach(cat => (categories[cat] ??= []).push(tool));
+        // --- EVENT LISTENERS ---
+        
+        // Proporção
+        els.ratios.forEach(btn => {
+            btn.addEventListener('click', () => {
+                els.ratios.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.width = btn.dataset.w;
+                state.height = btn.dataset.h;
+            });
         });
 
-        dom.sidebar.innerHTML = '';
-        const home = document.createElement('a');
-        home.href='index.html';
-        home.className='sidebar-link w-full flex items-center space-x-2.5 p-2.5 mb-2 rounded-md text-sm hover:bg-white/10 transition-colors duration-150 text-gray-300';
-        home.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span>Página Inicial</span>`;
-        dom.sidebar.appendChild(home);
+        // Estilo
+        els.styles.forEach(btn => {
+            btn.addEventListener('click', () => {
+                els.styles.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.style = btn.dataset.style;
+            });
+        });
 
-        for (const cat in categories){
-          const wrap = document.createElement('div'); wrap.className='mb-1';
-          const btn = document.createElement('button');
-          btn.className='w-full flex justify-between items-center p-2.5 text-left text-gray-300 hover:bg-white/10 rounded-md focus:outline-none transition-colors duration-150';
-          btn.innerHTML=`<span class="font-semibold text-sm">${cat}</span><svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-          const content = document.createElement('div');
-          content.className='category-content pl-3 pt-0.5 space-y-0.5';
-
-          categories[cat].forEach(tool=>{
-            const a=document.createElement('a'); a.href=tool.pageUrl;
-            const icon=tool.icon?tool.icon.replace('w-10 h-10','w-5 h-5').replace('mb-2','mr-2'):'<span class="w-5 h-5 mr-2"></span>';
-            a.className=`sidebar-link w-full flex items-center space-x-2 py-1.5 px-2 rounded-md text-xs hover:bg-zinc-600/60 hover:text-white transition-colors duration-150 ${tool.id===currentPageId?'active':'text-gray-400'}`;
-            a.innerHTML=icon+`<span>${tool.title}</span>`;
-            content.appendChild(a);
-          });
-
-          btn.addEventListener('click',()=>{ content.classList.toggle('expanded'); btn.querySelector('svg').classList.toggle('rotate-180'); });
-          if (categories[cat].some(t=>t.id===currentPageId)){ content.classList.add('expanded'); btn.querySelector('svg').classList.add('rotate-180'); }
-          wrap.appendChild(btn); wrap.appendChild(content); dom.sidebar.appendChild(wrap);
-        }
-      } catch (e) {
-        console.error(e);
-        dom.sidebar.innerHTML = '<p class="text-xs text-red-400 p-2">Erro ao carregar menu.</p>';
-      }
-    }
-
-    /* Modal Chaves API */
-    function setupApiKeyModal(){
-      const html = `
-        <div class="w-full max-w-md">
-          <div class="cu-panel p-6">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-lg font-bold text-sky-400">Chave API — Google Gemini</h2>
-              <button id="closeApiKeysModalButton" class="cu-btn" style="padding:.25rem .6rem;">✕</button>
-            </div>
-            <label class="block text-sm text-gray-300 mb-1" for="geminiApiKeyInputModal">Sua Chave:</label>
-            <div class="flex">
-              <input id="geminiApiKeyInputModal" type="password" placeholder="Cole sua chave aqui" class="cu-input rounded-r-none">
-              <button id="saveGeminiKey" class="cu-btn primary rounded-l-none">Salvar</button>
-            </div>
-            <p class="text-xs text-zinc-400 mt-2">Salva localmente (localStorage). O CapyIMG não usa a chave, mas outras ferramentas sim.</p>
-          </div>
-        </div>`;
-      dom.apiKeysModal.innerHTML = html;
-
-      const close = ()=>dom.apiKeysModal.classList.add('hidden');
-      dom.openApiKeysModalButton?.addEventListener('click', ()=>dom.apiKeysModal.classList.remove('hidden'));
-      dom.fabApi?.addEventListener('click', ()=>dom.apiKeysModal.classList.remove('hidden'));
-      dom.apiKeysModal.addEventListener('click',(e)=>{ if(e.target===dom.apiKeysModal) close(); });
-      dom.apiKeysModal.querySelector('#closeApiKeysModalButton').addEventListener('click', close);
-      dom.apiKeysModal.querySelector('#saveGeminiKey').addEventListener('click', ()=>{
-        const input = dom.apiKeysModal.querySelector('#geminiApiKeyInputModal');
-        const key = (input.value||'').trim();
-        if(!key){ alert('Insira uma chave válida.'); return; }
-        localStorage.setItem(API_KEY_STORAGE_KEY, key);
-        alert('Chave API salva!'); close();
-      });
-
-      const saved = localStorage.getItem(API_KEY_STORAGE_KEY);
-      if (saved) dom.apiKeysModal.querySelector('#geminiApiKeyInputModal').value = saved;
-    }
-
-    /* Sidebar toggle */
-    function initSidebarToggle(){
-      function toggle(show){
-        if (show===undefined){ dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); return; }
-        if (show){ dom.sidebar.classList.remove('-translate-x-full'); dom.sidebarOverlay.classList.remove('hidden'); }
-        else { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); }
-      }
-      dom.sidebarToggleBtn?.addEventListener('click', ()=>toggle());
-      dom.sidebarOverlay?.addEventListener('click', ()=>toggle(false));
-      toggle(false);
-    }
-
-    /* ===== Lógica CapyIMG ===== */
-    const el = {
-      prompt: document.getElementById('prompt'),
-      negative: document.getElementById('negative'),
-      count: document.getElementById('count'),
-      ratio: document.getElementById('ratio'),
-      longSide: document.getElementById('longSide'),
-      seed: document.getElementById('seed'),
-      transparent: document.getElementById('transparent'),
-      sizeInfo: document.getElementById('sizeInfo'),
-      styleChips: document.getElementById('styleChips'),
-      generate: document.getElementById('btnGenerate'),
-      grid: document.getElementById('grid'),
-      cardTpl: document.getElementById('tplCard'),
-      history: document.getElementById('history'),
-      clearHistory: document.getElementById('clearHistory'),
-      downloadAll: document.getElementById('btnDownloadAll'),
-    };
-
-    const STYLES = ['ilustração digital','fotorrealista','3D render','flat minimalista','neon futurista','aquarela suave','pixel art','low poly','estúdio, fundo branco'];
-    const HIST_KEY = 'capyimg_history';
-
-    function ratioToWH(ratio, longSide){
-      const [a,b]=ratio.split(':').map(Number);
-      if(a>=b){ const w=Number(longSide); const h=Math.round(w*(b/a)); return [w,h]; }
-      const h=Number(longSide); const w=Math.round(h*(a/b)); return [w,h];
-    }
-    function updateSizeInfo(){ const [w,h]=ratioToWH(el.ratio.value, el.longSide.value); el.sizeInfo.textContent = `${w}×${h}`; }
-
-    function addHistoryItem(text){
-      if(!text?.trim()) return;
-      const arr = JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
-      const next = [text, ...arr.filter(x=>x!==text)].slice(0,12);
-      localStorage.setItem(HIST_KEY, JSON.stringify(next));
-      renderHistory();
-    }
-    function renderHistory(){
-      const arr = JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
-      el.history.innerHTML='';
-      for(const item of arr){
-        const b=document.createElement('button');
-        b.className='px-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300';
-        b.textContent=item.length>40?item.slice(0,40)+'…':item; b.title=item;
-        b.onclick=()=>{ el.prompt.value=item; };
-        el.history.appendChild(b);
-      }
-      el.clearHistory.classList.toggle('hidden', arr.length===0);
-    }
-    function renderStyleChips(){
-      el.styleChips.innerHTML='';
-      STYLES.forEach(s=>{
-        const b=document.createElement('button');
-        b.className='px-3 py-1 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300';
-        b.textContent=s;
-        b.onclick=()=>{
-          const base=el.prompt.value.trim();
-          el.prompt.value = base?`${base}, ${s}`:s;
+        // Magic Toggle
+        window.toggleEnhance = () => {
+            state.enhance = !state.enhance;
+            const btn = document.getElementById('enhanceToggle');
+            if(state.enhance) {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="ph-fill ph-magic-wand"></i> Magic: ON';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="ph-bold ph-magic-wand"></i> Magic: OFF';
+            }
         };
-        el.styleChips.appendChild(b);
-      });
-    }
 
-    function createCardSkeleton(){ return el.cardTpl.content.firstElementChild.cloneNode(true); }
-    function fillCard(node, dataUrl, idx){
-      const img=node.querySelector('img'); const sk=node.querySelector('.animate-pulse');
-      img.src=dataUrl; img.classList.remove('hidden'); if(sk) sk.classList.add('hidden');
-      node.querySelector('.btn-open').onclick=()=>window.open(dataUrl,'_blank');
-      node.querySelector('.btn-dl').onclick=()=>{
-        const a=document.createElement('a'); a.href=dataUrl; a.download=`capyimg_${Date.now()}_${idx+1}.png`; a.click();
-      };
-    }
+        // --- ENGINE ---
 
-    async function generateWithPollinations(prompt, {count,size,negative,seed}){
-      const [w,h]=size.split('x').map(Number);
-      const merged = negative?`${prompt}, negative prompt: ${negative}`:prompt;
-      const out=[];
-      for(let i=0;i<count;i++){
-        const u=new URL('https://image.pollinations.ai/prompt/'+encodeURIComponent(merged));
-        u.searchParams.set('model','flux'); u.searchParams.set('width',String(w)); u.searchParams.set('height',String(h)); u.searchParams.set('safe','true');
-        if(seed) u.searchParams.set('seed',String(seed));
-        try{
-          const res=await fetch(u.toString(),{cache:'no-store',mode:'cors'});
-          if(!res.ok) throw new Error('status '+res.status);
-          const blob=await res.blob();
-          out.push(URL.createObjectURL(blob));
-        }catch(e){
-          out.push(u.toString());
+        async function enhancePrompt(originalPrompt) {
+            if (!state.apiKey || !state.enhance) return originalPrompt;
+            
+            els.prompt.value = "✨ Otimizando prompt...";
+            els.prompt.disabled = true;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `You are an AI Art Prompt expert. Rewrite this simple user prompt into a highly detailed, English prompt suitable for Flux/Midjourney. Include details about lighting, texture, composition, and style. Keep it under 50 words. Return ONLY the prompt text.
+                                User Prompt: "${originalPrompt}"`
+                            }]
+                        }]
+                    })
+                });
+                const data = await response.json();
+                const enhanced = data.candidates?.[0]?.content?.parts?.[0]?.text || originalPrompt;
+                return enhanced.trim();
+
+            } catch (e) {
+                return originalPrompt;
+            } finally {
+                els.prompt.disabled = false;
+                els.prompt.value = originalPrompt;
+            }
         }
-      }
-      return out;
-    }
-    async function chooseProvider(){ return generateWithPollinations; }
 
-    async function onGenerate(){
-      const prompt=el.prompt.value.trim(); if(!prompt){ el.prompt.focus(); return; }
-      addHistoryItem(prompt);
-      const count=Math.max(1, Math.min(4, Number(el.count.value)||1));
-      const [w,h]=ratioToWH(el.ratio.value, el.longSide.value); const size=`${w}x${h}`;
-      const negative=el.negative.value.trim(); const seed=el.seed.value.trim();
+        // --- DOWNLOAD COM WATERMARK (FIX) ---
+        async function processAndDownload(url) {
+            // Notifica início do processamento
+            const btn = document.activeElement;
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i>';
+            
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Crucial para CORS
+            img.src = url;
 
-      el.grid.innerHTML=''; const nodes=Array.from({length:count},()=>createCardSkeleton()); nodes.forEach(n=>el.grid.appendChild(n));
-      el.downloadAll.disabled=true;
-      try{
-        const runner=await chooseProvider();
-        const urls=await runner(prompt,{count,size,negative,seed});
-        urls.forEach((u,i)=>fillCard(nodes[i],u,i));
-        el.downloadAll.disabled=false;
-      }catch(err){
-        console.error(err);
-        el.grid.innerHTML = `<div class="text-red-300">Erro: ${String(err.message||err)}</div>`;
-      }
-    }
-    async function downloadAllVisible(){
-      const imgs=[...el.grid.querySelectorAll('img')].map(im=>im.src); if(!imgs.length) return;
-      for(let i=0;i<imgs.length;i++){
-        const a=document.createElement('a'); a.href=imgs[i]; a.download=`capyimg_${String(i+1).padStart(2,'0')}.png`; a.click();
-        await new Promise(r=>setTimeout(r,120));
-      }
-    }
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
 
-    /* NOVO: aplicar prompt vindo do CapyMuse */
-    function applyPromptFromQuery(){
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const p = params.get('prompt');
-        if (p && el.prompt) {
-          el.prompt.value = p;
-          addHistoryItem(p);
+                // 1. Desenha imagem original
+                ctx.drawImage(img, 0, 0);
+
+                // 2. Adiciona Watermark
+                const fontSize = Math.max(24, img.width * 0.03); // Escala com a imagem
+                ctx.font = `bold ${fontSize}px "Space Grotesk", sans-serif`;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                
+                // Sombra para contraste
+                ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                ctx.fillText("CapyUniverse", img.width - 20, img.height - 20);
+
+                // 3. Exporta e Baixa
+                canvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `capy-art-${Date.now()}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Restaura botão
+                    btn.innerHTML = oldHtml;
+                }, 'image/jpeg', 0.95);
+            };
+
+            img.onerror = () => {
+                alert("Erro ao processar imagem (CORS). Tentando download direto.");
+                window.open(url, '_blank');
+                btn.innerHTML = oldHtml;
+            };
         }
-      } catch (e) {
-        console.warn('Erro ao ler prompt da URL em CapyIMG:', e);
-      }
-    }
 
-    /* Boot */
-    document.addEventListener('DOMContentLoaded', ()=>{
-      renderSidebar(); setupApiKeyModal(); initSidebarToggle();
-      renderHistory(); renderStyleChips();
+        els.btn.addEventListener('click', async () => {
+            const rawPrompt = els.prompt.value.trim();
+            if (!rawPrompt) return;
 
-      // aplicar prompt vindo do CapyMuse, se houver
-      applyPromptFromQuery();
+            if (state.enhance && !state.apiKey) {
+                openApiModal();
+                return;
+            }
 
-      el.generate.addEventListener('click', onGenerate);
-      el.downloadAll.addEventListener('click', downloadAllVisible);
-      el.clearHistory.addEventListener('click', ()=>{
-        localStorage.removeItem('capyimg_history');
-        renderHistory();
-      });
-      el.ratio.addEventListener('change', updateSizeInfo);
-      el.longSide.addEventListener('change', updateSizeInfo);
-      updateSizeInfo();
-    });
-  </script>
+            setLoading(true);
+
+            const magicPrompt = await enhancePrompt(rawPrompt);
+            const finalPrompt = state.style ? `${magicPrompt}, ${state.style} style` : magicPrompt;
+
+            // Incluindo width/height na URL
+            const seed = Math.floor(Math.random() * 999999);
+            const safePrompt = encodeURIComponent(finalPrompt);
+            const imageUrl = `https://image.pollinations.ai/prompt/${safePrompt}?width=${state.width}&height=${state.height}&seed=${seed}&nologo=true&model=flux`;
+
+            const card = createCardElement(imageUrl, finalPrompt, true);
+            els.grid.prepend(card);
+
+            const img = new Image();
+            img.src = imageUrl;
+            
+            img.onload = () => {
+                const loader = card.querySelector('.loader-container');
+                if(loader) loader.remove();
+                setLoading(false);
+            };
+            
+            img.onerror = () => {
+                card.remove();
+                alert("Erro na geração.");
+                setLoading(false);
+            };
+
+            els.prompt.value = '';
+        });
+
+        function createCardElement(url, prompt, isLoading) {
+            const div = document.createElement('div');
+            div.className = 'art-card';
+            
+            div.innerHTML = `
+                ${isLoading ? `
+                <div class="loader-container">
+                    <div class="dna-spinner"></div>
+                    <span style="margin-top:10px; color:rgba(255,255,255,0.7); font-size:0.8rem;">Renderizando...</span>
+                </div>` : ''}
+                
+                <img src="${url}" class="art-img" loading="lazy" onclick="openLightbox('${url}')">
+                
+                <div class="art-overlay">
+                    <p class="art-prompt">${prompt}</p>
+                    <div class="action-row">
+                        <button class="action-btn" onclick="processAndDownload('${url}')">
+                            <i class="ph-bold ph-download-simple"></i> Baixar
+                        </button>
+                        <button class="action-btn" onclick="copyUrl('${url}')">
+                            <i class="ph-bold ph-copy"></i> Link
+                        </button>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        function setLoading(bool) {
+            els.btn.disabled = bool;
+            els.btn.style.opacity = bool ? 0.7 : 1;
+            els.btn.querySelector('.btn-text').textContent = bool ? "Criando..." : "Criar";
+        }
+
+        // UTILS
+        window.openLightbox = (url) => { els.lbImg.src = url; els.lightbox.classList.add('open'); }
+        window.closeLightbox = () => els.lightbox.classList.remove('open');
+        
+        window.copyUrl = (url) => {
+            navigator.clipboard.writeText(url);
+            alert("Link copiado!");
+        };
+
+        window.openApiModal = () => { els.apiModal.classList.add('open'); if(state.apiKey) els.keyInput.value = state.apiKey; };
+        window.closeApiModal = () => els.apiModal.classList.remove('open');
+
+        window.saveKey = () => {
+            const k = els.keyInput.value.trim();
+            if(k) { localStorage.setItem('capyide_gemini_key', k); state.apiKey = k; closeApiModal(); }
+        };
+
+        els.prompt.addEventListener('keydown', (e) => { if(e.key === 'Enter') els.btn.click(); });
+
+        // Check API
+        if(!state.apiKey) setTimeout(() => {}, 1000);
+
+    </script>
 </body>
 </html>

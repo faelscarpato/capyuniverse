@@ -7,7 +7,7 @@
     "category": "Desenvolvimento & TI",
     "pageUrl": "capyapmaker.html",
     "color": "purple-400",
-    "iconUrl": "img/capyapmaker.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyAto",
@@ -16,13 +16,13 @@
     "category": "Jurídico",
 "imageUrl": "img/capyato.webp",
     "pageUrl": "capyato.html",
-    "icon": "<i class='fa-solid fa-scale-balanced w-5 h-5 mr-2 text-indigo-400'></i>",
+"iconUrl": "img/logo.png",
  "color": "indigo-400"
   },
   {
     "id": "CapyAudiencias",
     "title": "Analisador de Atas de Audiência",
-    "iconUrl": "icon/capybranding.png",
+"iconUrl": "img/logo.png",
     "imageUrl": "img/capyaudiencias.webp",
     "description": "Analise e resuma atas de audiência com precisão jurídica de IA.",
     "category": "Jurídico",
@@ -33,7 +33,7 @@
     "id": "CapyBranding",
     "title": "CapyBranding",
     "pageUrl": "capybranding.html",
-    "iconUrl": "icon/capybranding.png",
+"iconUrl": "img/logo.png",
     "imageUrl": "img/capybranding.webp",
     "description": "Consultas rápidas e seguras sobre identidade visual e branding.",
     "category": "Mídia & Marketing",
@@ -42,7 +42,7 @@
   {
     "id": "CapyBula",
     "title": "Bulário Inteligente",
-    "iconUrl": "icon/bula.webp",
+"iconUrl": "img/logo.png",
     "imageUrl": "img/capybula.webp",
     "description": "Consulte informações detalhadas sobre medicamentos de forma rápida e segura.",
     "category": "Saúde & Bem-Estar",
@@ -57,7 +57,7 @@
     "category": "Desenvolvimento & TI",
     "pageUrl": "capybussola.html",
     "color": "#A855F7",
-    "iconUrl": "img/capybussola.png"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyByte",
@@ -68,7 +68,7 @@
     "category": "Desenvolvimento & TI",
     "pageUrl": "capybyte.html",
     "color": "orange-400",
-    "iconUrl": "img/capybyte.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyCaption",
@@ -78,7 +78,7 @@
     "imageUrl": "img/capycaption.webp",
     "category": "Mídia & Marketing",
     "icon": "<i class='fa-solid fa-hashtag w-5 h-5 mr-2 text-pink-400'></i>",
-    "iconUrl": "img/capycaption.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyChart",
@@ -89,40 +89,37 @@
     "category": "Dados & Analytics",
     "pageUrl": "capychart.html",
     "color": "blue-400",
-    "iconUrl": "img/capychart.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyChat",
     "title": "Chat Geral",
-    "icon": "<svg class=\"w-5 h-5 mr-2 text-violet-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z\"></path></svg>",
     "imageUrl": "img/capychat.webp",
     "description": "Converse com uma IA sobre qualquer tópico que desejar.",
     "category": "Produtividade & Organização",
     "pageUrl": "capychat.html",
     "color": "violet-400",
-    "iconUrl": "img/capychat.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyCID",
     "title": "Informador de CID Médico",
-    "icon": "⚕️",
     "imageUrl": "img/capycid.webp",
     "description": "Informe-se detalhadamente sobre CIDs e medicamentos de atestados e receitas médicas.",
     "category": "Saúde & Bem-Estar",
     "pageUrl": "capycid.html",
     "color": "blue-400",
-    "iconUrl": "img/capycid.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyCLT",
     "title": "CapyCLT",
-    "icon": "<svg class=\"w-5 h-5 mr-2 text-pink-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M7 8L3 12l4 4\"/><path d=\"M21 8l-4 4 4 4\"/><path d=\"M14 4l-4 16\"/></svg>",
     "imageUrl": "img/capyclt.webp",
     "description": "Converse com as leis trabalhistas.",
     "category": "Jurídico",
     "pageUrl": "capyclt.html",
     "color": "pink-400",
-    "iconUrl": "img/capyclt.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyConciliaFacil",
@@ -133,13 +130,13 @@
     "category": "Jurídico",
     "pageUrl": "capyconciliador.html",
     "color": "indigo-400",
-    "iconUrl": "img/capyconciliador.webp"
+"iconUrl": "img/logo.png"
   },
   {
   "id": "CapyContos",
   "title": "Tecelão de Narrativas",
   "imageUrl": "img/capycontos.webp",
-  "iconUrl": "icon/capycontos.png",
+  "iconUrl": "img/logo.png",
   "description": "Crie histórias interativas, com personagens, cenários e decisões guiadas por IA.",
   "category": "Escrita & Storytelling",
   "pageUrl": "capycontos.html",
@@ -154,7 +151,7 @@
     "category": "Documentos & Leitura",
     "pageUrl": "capycontrato.html",
     "color": "violet-400",
-    "iconUrl": "img/capycontrato.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyConverter",
@@ -164,7 +161,7 @@
     "category": "Documentos & Leitura",
     "imageUrl": "img/capyconverter.webp",
     "icon": "<i class='fa-solid fa-file-arrow-right w-5 h-5 mr-2'></i>",
-    "iconUrl": "img/capyconverter.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyCopywriterAds",
@@ -175,7 +172,7 @@
     "category": "Mídia & Marketing",
     "pageUrl": "capycopy.html",
     "color": "pink-400",
-    "iconUrl": "img/capycopy.webp"
+    "iconUrl": "img/logo.png"
   },
   {
     "id": "CapyCronosLegal",

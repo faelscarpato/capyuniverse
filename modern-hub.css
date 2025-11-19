@@ -1,0 +1,145 @@
+/* Prepare-se para a descida ao abismo do CSS Moderno! */
+:root {
+    --bg-deep: #050511;
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --primary-glow: rgba(139, 92, 246, 0.5); /* Roxo Capivara Místico */
+    --secondary-glow: rgba(14, 165, 233, 0.5); /* Azul Cibernético */
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --font-display: 'Inter', sans-serif; /* Simples, limpa, eficaz */
+}
+
+body {
+    background-color: var(--bg-deep);
+    color: var(--text-main);
+    font-family: var(--font-display);
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* O fundo "Aurora" - uma bagunça quântica de cores */
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%), 
+        radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15), transparent 25%);
+}
+
+/* Container Principal */
+.universe-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: floatDown 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.header h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.header p {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    margin-top: 1rem;
+}
+
+/* O GLORIOSO BENTO GRID */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    grid-auto-rows: 240px; /* Altura base */
+}
+
+/* Cards com Glassmorphism 2.0 */
+.capy-card {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* Efeito Hover - Levitação Magnética */
+.capy-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+}
+
+/* Destaque de cards importantes (ocupam 2 colunas) */
+.capy-card.featured {
+    grid-column: span 2;
+    background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+}
+
+/* Tipografia dentro do Card */
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+}
+
+.card-desc {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Indicador de Status (Bolnha pulsante) */
+.status-dot {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981; /* Verde Ativo */
+    box-shadow: 0 0 10px #10b981;
+}
+
+/* Responsividade para telas pequenas (Mobile First é lei!) */
+@media (max-width: 768px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
+    .capy-card.featured {
+        grid-column: span 1;
+    }
+    .header h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@keyframes floatDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

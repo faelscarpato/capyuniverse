@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapyUniverse Hub | A Fronteira Final</title>
+    <link rel="stylesheet" href="modern-hub.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+    <div class="universe-container">
+        
+        <header class="header">
+            <h1>CapyUniverse</h1>
+            <p>O ecossistema definitivo de produtividade roedora.</p>
+        </header>
+
+        <main class="bento-grid">
+            
+            <a href="CapyFlow/index.html" class="capy-card featured">
+                <div class="status-dot"></div>
+                <div>
+                    <i class="ph-fill ph-kanban card-icon"></i>
+                    <h2 class="card-title">CapyFlow</h2>
+                    <p class="card-desc">Gerencie fluxos de trabalho com a serenidade de uma capivara em águas termais. Sistema de organização visual avançado.</p>
+                </div>
+            </a>
+
+            <a href="CapyChat.html" class="capy-card">
+                <div>
+                    <i class="ph-fill ph-chat-circle-text card-icon"></i>
+                    <h2 class="card-title">CapyChat</h2>
+                    <p class="card-desc">Comunicação neural direta (ou quase isso). IA assistente integrada.</p>
+                </div>
+            </a>
+
+            <a href="CapyFiscal.html" class="capy-card">
+                <div>
+                    <i class="ph-fill ph-calculator card-icon"></i>
+                    <h2 class="card-title">CapyFiscal</h2>
+                    <p class="card-desc">Contabilidade sem dor. Porque impostos não deveriam morder.</p>
+                </div>
+            </a>
+
+            <a href="capyprompt.html" class="capy-card">
+                <div>
+                    <i class="ph-fill ph-magic-wand card-icon"></i>
+                    <h2 class="card-title">CapyPrompts</h2>
+                    <p class="card-desc">Engenharia de prompt para mentes brilhantes.</p>
+                </div>
+            </a>
+
+             <a href="capyapmaker.html" class="capy-card">
+                <div>
+                    <i class="ph-fill ph-code card-icon"></i>
+                    <h2 class="card-title">App Maker</h2>
+                    <p class="card-desc">Construa o impossível. No code? Low code? Capy code.</p>
+                </div>
+            </a>
+
+            <a href="README.md" class="capy-card">
+                <div>
+                    <i class="ph-fill ph-read-cv-logo card-icon"></i>
+                    <h2 class="card-title">Docs</h2>
+                    <p class="card-desc">O manual sagrado do universo.</p>
+                </div>
+            </a>
+
+        </main>
+    </div>
+
+    <script>
+        // Script Insano para adicionar efeito de "Glow" que segue o mouse
+        // Cuidado: Isso usa matemática vetorial básica!
+        document.querySelectorAll('.capy-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+
+    <style>
+        .capy-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(
+                800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                rgba(255, 255, 255, 0.06),
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .capy-card:hover::before {
+            opacity: 1;
+        }
+    </style>
+</body>
+</html>
