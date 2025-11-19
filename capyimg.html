@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CapyVision | Nano Banana Core 🍌</title>
     
+    <!-- Fontes e Ícones -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -30,6 +31,7 @@
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
+            /* Fundo Aurora "Radioativo" */
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.1), transparent 40%), 
                 radial-gradient(circle at 80% 70%, rgba(217, 70, 239, 0.15), transparent 40%);
@@ -110,6 +112,35 @@
             padding: 15px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Upload Area */
+        .upload-zone {
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            transition: all 0.3s;
+            cursor: pointer;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary-glow);
+            background: rgba(251, 191, 36, 0.05);
+            color: #fff;
+        }
+        .preview-thumb {
+            max-height: 80px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .prompt-box {
@@ -287,7 +318,6 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes floatDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
@@ -312,19 +342,32 @@
         
         <div class="header-art">
             <h1>CapyVision</h1>
-            <p>Motor <span style="color: var(--primary-glow); font-weight:bold;">Nano Banana</span> Híbrido.</p>
+            <p>Atelier <span style="color: var(--primary-glow); font-weight:bold;">Nano Banana</span> com Vision.</p>
         </div>
 
         <div class="composer-container glass-panel">
+            
+            <!-- Upload Zone -->
+            <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <div id="uploadContent">
+                    <i class="ph-duotone ph-image text-3xl mb-2"></i>
+                    <p class="text-xs">Clique para carregar uma referência (opcional)</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/*" hidden>
+            </div>
+
+            <!-- Prompt Input -->
             <div class="prompt-box">
-                <input type="text" id="promptInput" class="prompt-input" placeholder="Descreva sua imaginação..." autocomplete="off">
+                <input type="text" id="promptInput" class="prompt-input" placeholder="Descreva sua visão... (ex: Transforme em Cyberpunk)" autocomplete="off">
                 <button id="generateBtn" class="generate-btn">
                     <i class="ph-bold ph-lightning"></i> <span class="btn-text">Criar</span>
                 </button>
             </div>
 
+            <!-- Controls -->
             <div class="settings-bar">
                 
+                <!-- Proporção -->
                 <div class="control-group">
                     <span class="control-label"><i class="ph-bold ph-frame-corners"></i> Proporção</span>
                     <div class="options-list" id="ratioSelector">
@@ -335,6 +378,7 @@
                     </div>
                 </div>
 
+                <!-- Estilos -->
                 <div class="control-group">
                     <span class="control-label"><i class="ph-bold ph-paint-brush"></i> Estilo</span>
                     <div class="options-list" id="styleSelector">
@@ -345,10 +389,11 @@
                     </div>
                 </div>
 
+                <!-- Magic Toggle -->
                 <div class="control-group" style="margin-left: auto;">
                     <span class="control-label">&nbsp;</span>
                     <button class="option-pill enhancer-pill active" id="enhanceToggle" onclick="toggleEnhance()">
-                        <i class="ph-fill ph-magic-wand"></i> Magic: ON
+                        <i class="ph-fill ph-magic-wand"></i> Vision: ON
                     </button>
                 </div>
 
@@ -356,20 +401,23 @@
         </div>
 
         <div class="gallery-grid" id="galleryGrid">
-            </div>
+            <!-- Cards serão gerados aqui -->
+        </div>
 
     </main>
 
+    <!-- Lightbox -->
     <div class="lightbox" id="lightbox">
         <div class="close-lb" onclick="closeLightbox()">&times;</div>
         <img id="lbImage" src="">
     </div>
 
+    <!-- API Modal -->
     <div class="api-modal" id="apiModal">
         <div class="modal-box">
             <i class="ph-fill ph-lock-key" style="font-size: 3rem; color: var(--primary-glow); margin-bottom: 15px;"></i>
             <h3 style="color:#fff; margin:0 0 10px 0;">Gemini API Key</h3>
-            <p style="color:var(--text-muted); font-size:0.9rem;">Necessária para o modo "Magic" (Melhoria de Prompt).</p>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Necessária para o modo "Vision" (Análise de Imagem).</p>
             <input type="password" id="apiKeyInput" placeholder="AIzaSy..." style="width:100%; padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); color:#fff; border-radius:10px; margin:15px 0;">
             <button onclick="saveKey()" style="width:100%; padding:12px; background:var(--primary-glow); border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Salvar</button>
             <button onclick="closeApiModal()" style="margin-top:10px; background:transparent; color:var(--text-muted); border:none; cursor:pointer;">Fechar</button>
@@ -383,7 +431,8 @@
             enhance: true,
             width: 1024,
             height: 1024,
-            style: ''
+            style: '',
+            imgBase64: null // Armazena a imagem de upload
         };
 
         const els = {
@@ -395,12 +444,40 @@
             apiModal: document.getElementById('apiModal'),
             keyInput: document.getElementById('apiKeyInput'),
             ratios: document.querySelectorAll('#ratioSelector .option-pill'),
-            styles: document.querySelectorAll('#styleSelector .option-pill')
+            styles: document.querySelectorAll('#styleSelector .option-pill'),
+            uploadZone: document.getElementById('dropZone'),
+            uploadContent: document.getElementById('uploadContent'),
+            fileInput: document.getElementById('fileInput')
         };
 
         // --- EVENT LISTENERS ---
         
-        // Proporção
+        // 1. Upload Logic
+        els.fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        
+        els.uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); els.uploadZone.classList.add('dragover'); });
+        els.uploadZone.addEventListener('dragleave', (e) => { e.preventDefault(); els.uploadZone.classList.remove('dragover'); });
+        els.uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault(); els.uploadZone.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                state.imgBase64 = e.target.result; // Data URL completo (data:image/png;base64,...)
+                // Preview
+                els.uploadContent.innerHTML = `
+                    <img src="${state.imgBase64}" class="preview-thumb">
+                    <p class="text-xs mt-2 text-green-400">Imagem carregada! (Clique para trocar)</p>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 2. Configurações
         els.ratios.forEach(btn => {
             btn.addEventListener('click', () => {
                 els.ratios.forEach(b => b.classList.remove('active'));
@@ -410,7 +487,6 @@
             });
         });
 
-        // Estilo
         els.styles.forEach(btn => {
             btn.addEventListener('click', () => {
                 els.styles.forEach(b => b.classList.remove('active'));
@@ -419,111 +495,74 @@
             });
         });
 
-        // Magic Toggle
         window.toggleEnhance = () => {
             state.enhance = !state.enhance;
             const btn = document.getElementById('enhanceToggle');
             if(state.enhance) {
                 btn.classList.add('active');
-                btn.innerHTML = '<i class="ph-fill ph-magic-wand"></i> Magic: ON';
+                btn.innerHTML = '<i class="ph-fill ph-magic-wand"></i> Vision: ON';
             } else {
                 btn.classList.remove('active');
-                btn.innerHTML = '<i class="ph-bold ph-magic-wand"></i> Magic: OFF';
+                btn.innerHTML = '<i class="ph-bold ph-magic-wand"></i> Vision: OFF';
             }
         };
 
-        // --- ENGINE ---
+        // --- ENGINE (O CÉREBRO HÍBRIDO) ---
 
-        async function enhancePrompt(originalPrompt) {
-            if (!state.apiKey || !state.enhance) return originalPrompt;
+        async function analyzeWithGemini(userPrompt, base64Image) {
+            if (!state.apiKey) return userPrompt;
             
-            els.prompt.value = "✨ Otimizando prompt...";
+            els.prompt.value = "🤖 Gemini analisando imagem...";
             els.prompt.disabled = true;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`, {
+                // Prepara o payload. Se tiver imagem, manda Vision.
+                const parts = [];
+                
+                if (base64Image) {
+                    // Remove o prefixo 'data:image/png;base64,' para enviar só o hash
+                    const base64Data = base64Image.split(',')[1];
+                    const mimeType = base64Image.split(';')[0].split(':')[1];
+                    
+                    parts.push({
+                        inline_data: {
+                            mime_type: mimeType,
+                            data: base64Data
+                        }
+                    });
+                    parts.push({
+                        text: `Analyze this image. Based on the user's request: "${userPrompt}", create a highly detailed descriptive prompt for an image generator to recreate this scene but with the requested changes. Describe the composition, colors, lighting, and subjects in detail. Return ONLY the English prompt, under 60 words.`
+                    });
+                } else {
+                    // Modo Texto Puro
+                    parts.push({
+                        text: `You are an expert AI Art Prompt Engineer. Rewrite this simple user prompt into a highly detailed, English prompt suitable for Flux/Midjourney. Include details about lighting, texture, composition, and style. Keep it under 50 words. Return ONLY the prompt text. User Prompt: "${userPrompt}"`
+                    });
+                }
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `You are an AI Art Prompt expert. Rewrite this simple user prompt into a highly detailed, English prompt suitable for Flux/Midjourney. Include details about lighting, texture, composition, and style. Keep it under 50 words. Return ONLY the prompt text.
-                                User Prompt: "${originalPrompt}"`
-                            }]
-                        }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
+
                 const data = await response.json();
-                const enhanced = data.candidates?.[0]?.content?.parts?.[0]?.text || originalPrompt;
+                const enhanced = data.candidates?.[0]?.content?.parts?.[0]?.text || userPrompt;
                 return enhanced.trim();
 
             } catch (e) {
-                return originalPrompt;
+                console.error("Erro Gemini:", e);
+                return userPrompt;
             } finally {
                 els.prompt.disabled = false;
-                els.prompt.value = originalPrompt;
+                els.prompt.value = userPrompt;
             }
         }
 
-        // --- DOWNLOAD COM WATERMARK (FIX) ---
-        async function processAndDownload(url) {
-            // Notifica início do processamento
-            const btn = document.activeElement;
-            const oldHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i>';
-            
-            const img = new Image();
-            img.crossOrigin = "Anonymous"; // Crucial para CORS
-            img.src = url;
-
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-
-                // 1. Desenha imagem original
-                ctx.drawImage(img, 0, 0);
-
-                // 2. Adiciona Watermark
-                const fontSize = Math.max(24, img.width * 0.03); // Escala com a imagem
-                ctx.font = `bold ${fontSize}px "Space Grotesk", sans-serif`;
-                ctx.textAlign = 'right';
-                ctx.textBaseline = 'bottom';
-                
-                // Sombra para contraste
-                ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-                ctx.shadowBlur = 4;
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-                
-                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                ctx.fillText("CapyUniverse", img.width - 20, img.height - 20);
-
-                // 3. Exporta e Baixa
-                canvas.toBlob((blob) => {
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = `capy-art-${Date.now()}.jpg`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    // Restaura botão
-                    btn.innerHTML = oldHtml;
-                }, 'image/jpeg', 0.95);
-            };
-
-            img.onerror = () => {
-                alert("Erro ao processar imagem (CORS). Tentando download direto.");
-                window.open(url, '_blank');
-                btn.innerHTML = oldHtml;
-            };
-        }
-
+        // --- GERAÇÃO ---
         els.btn.addEventListener('click', async () => {
             const rawPrompt = els.prompt.value.trim();
-            if (!rawPrompt) return;
+            if (!rawPrompt && !state.imgBase64) return;
 
             if (state.enhance && !state.apiKey) {
                 openApiModal();
@@ -532,14 +571,19 @@
 
             setLoading(true);
 
-            const magicPrompt = await enhancePrompt(rawPrompt);
-            const finalPrompt = state.style ? `${magicPrompt}, ${state.style} style` : magicPrompt;
+            // 1. Processamento Inteligente (Vision/Enhance)
+            const magicPrompt = await analyzeWithGemini(rawPrompt, state.imgBase64);
+            console.log("Prompt Gerado:", magicPrompt);
 
-            // Incluindo width/height na URL
+            // 2. Monta Prompt Final
+            const finalPrompt = state.style ? `${magicPrompt}, ${state.style} style, masterpiece, 8k` : magicPrompt;
+
+            // 3. Gera URL (Pollinations/Flux)
             const seed = Math.floor(Math.random() * 999999);
             const safePrompt = encodeURIComponent(finalPrompt);
             const imageUrl = `https://image.pollinations.ai/prompt/${safePrompt}?width=${state.width}&height=${state.height}&seed=${seed}&nologo=true&model=flux`;
 
+            // 4. Renderiza
             const card = createCardElement(imageUrl, finalPrompt, true);
             els.grid.prepend(card);
 
@@ -557,10 +601,9 @@
                 alert("Erro na geração.");
                 setLoading(false);
             };
-
-            els.prompt.value = '';
         });
 
+        // --- UI ---
         function createCardElement(url, prompt, isLoading) {
             const div = document.createElement('div');
             div.className = 'art-card';
@@ -569,20 +612,14 @@
                 ${isLoading ? `
                 <div class="loader-container">
                     <div class="dna-spinner"></div>
-                    <span style="margin-top:10px; color:rgba(255,255,255,0.7); font-size:0.8rem;">Renderizando...</span>
+                    <span style="margin-top:10px; color:rgba(255,255,255,0.7); font-size:0.8rem;">Sintetizando...</span>
                 </div>` : ''}
-                
                 <img src="${url}" class="art-img" loading="lazy" onclick="openLightbox('${url}')">
-                
                 <div class="art-overlay">
                     <p class="art-prompt">${prompt}</p>
                     <div class="action-row">
-                        <button class="action-btn" onclick="processAndDownload('${url}')">
-                            <i class="ph-bold ph-download-simple"></i> Baixar
-                        </button>
-                        <button class="action-btn" onclick="copyUrl('${url}')">
-                            <i class="ph-bold ph-copy"></i> Link
-                        </button>
+                        <button class="action-btn" onclick="processAndDownload('${url}')"><i class="ph-bold ph-download-simple"></i> Baixar</button>
+                        <button class="action-btn" onclick="copyUrl('${url}')"><i class="ph-bold ph-copy"></i> Link</button>
                     </div>
                 </div>
             `;
@@ -595,27 +632,59 @@
             els.btn.querySelector('.btn-text').textContent = bool ? "Criando..." : "Criar";
         }
 
-        // UTILS
+        // Download com Canvas (Evita bloqueio iframe)
+        async function processAndDownload(url) {
+            const btn = document.activeElement;
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i>';
+            
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.src = url;
+
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+
+                ctx.drawImage(img, 0, 0);
+                
+                // Marca D'água
+                const fontSize = Math.max(24, img.width * 0.03);
+                ctx.font = `bold ${fontSize}px "Space Grotesk", sans-serif`;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                ctx.fillText("CapyUniverse", img.width - 20, img.height - 20);
+
+                canvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `capy-art-${Date.now()}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    btn.innerHTML = oldHtml;
+                }, 'image/jpeg', 0.95);
+            };
+            img.onerror = () => { window.open(url, '_blank'); btn.innerHTML = oldHtml; };
+        }
+
+        // Modais e Utils
         window.openLightbox = (url) => { els.lbImg.src = url; els.lightbox.classList.add('open'); }
         window.closeLightbox = () => els.lightbox.classList.remove('open');
+        window.copyUrl = (url) => { navigator.clipboard.writeText(url); alert("Link copiado!"); };
         
-        window.copyUrl = (url) => {
-            navigator.clipboard.writeText(url);
-            alert("Link copiado!");
-        };
-
         window.openApiModal = () => { els.apiModal.classList.add('open'); if(state.apiKey) els.keyInput.value = state.apiKey; };
         window.closeApiModal = () => els.apiModal.classList.remove('open');
-
+        
         window.saveKey = () => {
             const k = els.keyInput.value.trim();
-            if(k) { localStorage.setItem('capyide_gemini_key', k); state.apiKey = k; closeApiModal(); }
+            if(k) { localStorage.setItem('capyide_gemini_key', k); state.apiKey = k; closeApiModal(); alert("Núcleo Vision Ativado!"); }
         };
-
-        els.prompt.addEventListener('keydown', (e) => { if(e.key === 'Enter') els.btn.click(); });
-
-        // Check API
-        if(!state.apiKey) setTimeout(() => {}, 1000);
 
     </script>
 </body>
