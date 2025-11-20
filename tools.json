@@ -96,7 +96,7 @@
     "title": "Chat Geral",
     "imageUrl": "img/capychat.webp",
     "description": "Converse com uma IA sobre qualquer tópico que desejar.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capychat.html",
     "color": "violet-400",
     "iconUrl": "img/logo.png"
@@ -201,7 +201,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-sky-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><line x1=\"17\" y1=\"10\" x2=\"22\" y2=\"10\"/><line x1=\"19.5\" y1=\"7.5\" x2=\"19.5\" y2=\"12.5\"/></svg>",
     "imageUrl": "img/capycv.webp",
     "description": "Melhore o seu currículo com sugestões personalizadas da IA.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capycurriculo.html",
     "color": "sky-400",
     "iconUrl": "img/capycv.webp"
@@ -228,12 +228,23 @@
     "iconUrl": "img/capydados.webp"
   },
   {
+    "id": "capydeal",
+    "title": "CapyDeal",
+    "icon": "<svg class=\"w-5 h-5 mr-2 text-blue-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"></line><line x1=\"11\" y1=\"8\" x2=\"11\" y2=\"14\"></line><line x1=\"8\" y1=\"11\" x2=\"14\" y2=\"11\"></line></svg>",
+    "imageUrl": "img/capydeal.webp",
+    "description": "Caçadora de Preços & Cupons",
+    "category": "Compras & Economia",
+    "pageUrl": "capydeal/index.html",
+    "color": "blue-400",
+    "iconUrl": "img/capydeal.webp"
+  },
+  {
     "id": "CapyDebate",
     "title": "Simulador de Debates",
     "icon": "<svg class=\"w-5 h-5 mr-2 text-violet-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path><path d=\"M3 15a2 2 0 0 0 2 2h12l4 4V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z\"></path></svg>",
     "imageUrl": "img/capydebate.webp",
     "description": "Treine as suas capacidades de argumentação com um debatedor IA.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capydebate.html",
     "color": "violet-400",
     "iconUrl": "img/capydebate.webp"
@@ -243,7 +254,7 @@
     "title": "CapyDecisao",
     "description": "Ferramenta Capy Decisao do ecossistema CapyUniverse.",
     "imageUrl": "assets/capy/CapyDecisao.png",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "CapyDecisao.html",
     "color": "#EAB308",
     "iconUrl": "assets/capy/CapyDecisao.png"
@@ -265,7 +276,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-blue-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path></svg>",
     "imageUrl": "img/capydiario.webp",
     "description": "Registe os seus pensamentos e obtenha insights com o diário IA.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capydiario.html",
     "color": "blue-400",
     "iconUrl": "img/capydiario.webp"
@@ -276,7 +287,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-emerald-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path><path d=\"M12 14l6-3-6-3-6 3 6 3z\"></path><path d=\"M12 14v7\"></path><path d=\"M6 12.5L12 17l6-4.5\"></path></svg>",
     "imageUrl": "img/capylearn.webp",
     "description": "Crie planos de aula estruturados e criativos com a ajuda da IA.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capydidatica.html",
     "color": "emerald-400",
     "iconUrl": "img/capylearn.webp"
@@ -351,7 +362,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-emerald-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>",
     "imageUrl": "img/capyexcel.webp",
     "description": "Aprenda fórmulas e truques de Excel com um tutor IA.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capyexcel.html",
     "color": "emerald-400",
     "iconUrl": "img/capyexcel.webp"
@@ -373,7 +384,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-green-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\"></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\"></line></svg>",
     "imageUrl": "img/capyfiscal.webp",
     "description": "Tire dúvidas e obtenha informações sobre questões fiscais e tributárias.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capyfiscal.html",
     "color": "green-400",
     "iconUrl": "img/capyfiscal.webp"
@@ -395,7 +406,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-yellow-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path></svg>",
     "imageUrl": "img/capyflashcard.webp",
     "description": "Crie flashcards para os teus estudos com a ajuda da Capy-IA!",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capyflashcards.html",
     "color": "yellow-400",
     "iconUrl": "img/capyflashcard.webp"
@@ -416,7 +427,7 @@
     "icon": "<i class='fa-solid fa-bullseye w-5 h-5 mr-2 text-orange-400'></i>",
     "imageUrl": "img/capyfocal.webp",
     "description": "Plataforma de marketing data-driven: gera campanhas, textos, visuais e planos de automação.",
-    "category": "Marketing",
+    "category": "Mídia & Marketing",
     "pageUrl": "capyfocal.html",
     "color": "orange-400"
   },
@@ -437,7 +448,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-green-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" x2=\"12\" y1=\"1\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
     "imageUrl": "img/capygrana.webp",
     "description": "O seu consultor financeiro pessoal com a sabedoria de uma capivara próspera!",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capygrana.html",
     "color": "green-400",
     "iconUrl": "img/capygrana.webp"
@@ -446,7 +457,7 @@
     "id": "CapyGuia",
     "title": "CapyGuia (G-IA)",
     "description": "Copiloto inteligente para produtividade e aprendizado, sintetiza intenções em planos e conteúdos.",
-    "category": "Produtividade e Organização",
+    "category": "Produtividade",
 "imageUrl": "img/capyguia.webp",
     "pageUrl": "capyguia.html",
     "icon": "<i class='fa-solid fa-lightbulb w-5 h-5 mr-2 text-amber-400'></i>",
@@ -458,7 +469,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-amber-300\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"></line><path d=\"M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z\"></path></svg>",
     "imageUrl": "img/capyhistoriador.webp",
     "description": "Desvende os segredos do passado com o nosso historiador IA.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capyhistoriador.html",
     "color": "amber-300",
     "iconUrl": "img/capyhistoriador.webp"
@@ -533,7 +544,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-orange-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"6\"></circle><circle cx=\"12\" cy=\"12\" r=\"2\"></circle></svg>",
     "imageUrl": "img/capymetas.webp",
     "description": "Defina e alcance os seus objetivos com a ajuda da Capy-IA.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capymetas.html",
     "color": "orange-400",
     "iconUrl": "img/capymetas.webp"
@@ -555,7 +566,7 @@
   "imageUrl": "img/capymuse.webp",
   "iconUrl": "icon/capymuse.png",
   "description": "Galerias temáticas, desafios criativos e caderno de ideias para nunca mais travar na hora de criar.",
-  "category": "Criatividade & Inspiração",
+  "category": "Criatividade",
   "pageUrl": "capymuse.html",
   "color": "violet-400"
 },
@@ -565,7 +576,7 @@
     "icon": "<i class='fa-solid fa-chart-pie w-5 h-5 mr-2 text-amber-400'></i>",
     "imageUrl": "img/capynarrativas.webp",
     "description": "Narrativas de dados: gere dashboards e textos explicativos de seus dados.",
-    "category": "Análise de Dados",
+    "category": "Dados & Analytics",
     "pageUrl": "capynarrativas.html",
     "color": "amber-400"
   },
@@ -606,7 +617,7 @@
     "description": "Transforme imagens em dados e dashboards em tempo real.",
 "imageUrl": "img/capypercepcao.webp",
     "pageUrl": "capypercepcao.html",
-    "category": "Análise de Dados",
+    "category": "Dados & Analytics",
     "icon": "<i class='fa-solid fa-eye w-5 h-5 mr-2 text-emerald-400'></i>",
     "color": "emerald-400"
   },
@@ -616,7 +627,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-cyan-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\"></line><line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\"></line><line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\"></line></svg>",
     "imageUrl": "img/capyplanner.webp",
     "description": "O teu estratega pessoal para conquistar qualquer objetivo.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capyplanner.html",
     "color": "cyan-400",
     "iconUrl": "img/capyplanner.webp"
@@ -625,7 +636,7 @@
     "id": "CapyProfa",
     "title": "CapyProfessor",
     "description": "Assistente de ensino inteligente que cria experiências interativas e personalizadas de aprendizado.",
-    "category": "Aprendizagem e Educação",
+    "category": "Educação",
 "imageUrl": "img/capyprofessor.webp",
     "pageUrl": "capyprofa.html",
     "icon": "<i class='fa-solid fa-chalkboard-user w-5 h-5 mr-2 text-emerald-400'></i>",
@@ -648,7 +659,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-emerald-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z\"></path><path d=\"M9 12h.01\"></path><path d=\"M15 12h.01\"></path><path d=\"M10 16s.5-1 2-1 2 1 2 1\"></path></svg>",
     "imageUrl": "img/capypsico.webp",
     "description": "Um espaço seguro para conversar e refletir com apoio emocional IA.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capypsico.html",
     "color": "emerald-400",
     "iconUrl": "img/capypsico.webp"
@@ -659,7 +670,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-fuchsia-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path><path d=\"M12 11.17L12 8\"></path><path d=\"M12 15h.01\"></path></svg>",
     "imageUrl": "img/capyquiz.webp",
     "description": "Crie quizzes desafiantes e divertidos com a ajuda da IA.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capyquiz.html",
     "color": "fuchsia-400",
     "iconUrl": "img/capyquiz.webp"
@@ -688,7 +699,7 @@
     "id": "CapyRelato",
     "title": "Relator Inteligente",
     "description": "Transforme documentos complexos em insights acionáveis e resumos por voz.",
-    "category": "Produtividade e Organização",
+    "category": "Produtividade",
 "imageUrl": "img/capyrelator.webp",
     "pageUrl": "capyrelato.html",
     "icon": "<i class='fa-solid fa-file-contract w-5 h-5 mr-2 text-pink-400'></i>",
@@ -733,7 +744,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-red-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\"></path><line x1=\"12\" y1=\"22\" x2=\"12\" y2=\"17\"></line><line x1=\"12\" y1=\"12\" x2=\"20\" y2=\"8\"></line><line x1=\"12\" y1=\"12\" x2=\"4\" y2=\"8\"></line></svg>",
     "imageUrl": "img/capyslide.webp",
     "description": "Sua Capivara geradora de apresentações em PPTX editavel.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capyslides.html",
     "color": "red-400",
     "iconUrl": "img/capyslide.webp"
@@ -765,7 +776,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-red-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\"></path><line x1=\"12\" y1=\"22\" x2=\"12\" y2=\"17\"></line><line x1=\"12\" y1=\"12\" x2=\"20\" y2=\"8\"></line><line x1=\"12\" y1=\"12\" x2=\"4\" y2=\"8\"></line></svg>",
     "imageUrl": "img/capysolucao.webp",
     "description": "O teu professor de matemática particular, com a paciência de uma capivara.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capysolucao.html",
     "color": "red-400",
     "iconUrl": "img/capysolucao.webp"
@@ -812,7 +823,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-emerald-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\"></line><line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\"></line><line x1=\"9\" y1=\"3\" x2=\"9\" y2=\"21\"></line><line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\"></line></svg>",
     "imageUrl": "img/capytabela.webp",
     "description": "Transforme listas em tabelas formatadas, com funções e opção de exportação (XLS/XLSX).",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capytabela.html",
     "color": "emerald-400",
     "iconUrl": "img/capytabela.webp"
@@ -823,7 +834,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-indigo-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2 0 0 1 4 19.5v-15A2.5 2 0 0 1 6.5 2z\"></path><path d=\"M12 13L12 7\"></path><path d=\"M9 10L15 10\"></path></svg>",
     "imageUrl": "img/capytcc.webp",
     "description": "O teu orientador de TCC com inteligência de capivara!",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capytcc.html",
     "color": "indigo-400",
     "iconUrl": "img/capytcc.webp"
@@ -834,7 +845,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-purple-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z\"></path><polyline points=\"13 2 13 9 20 9\"></polyline><path d=\"m9 14 2 2 4-4\"></path></svg>",
     "imageUrl": "img/capyteste.webp",
     "description": "Crie avaliações personalizadas com o poder da IA.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capyteste.html",
     "color": "purple-400",
     "iconUrl": "img/capyteste.webp"
@@ -867,7 +878,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-cyan-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M5 12h14M12 5l7 7-7 7\"></path><path d=\"M12 19l-7-7 7-7\"></path></svg>",
     "imageUrl": "img/capytradutor.webp",
     "description": "Traduções inteligentes para um mundo sem fronteiras.",
-    "category": "Educação & Aprendizagem",
+    "category": "Educação",
     "pageUrl": "capytradutor.html",
     "color": "cyan-400",
     "iconUrl": "img/capytradutor.webp"
@@ -878,7 +889,7 @@
     "icon": "<i class='fa-solid fa-chart-line w-5 h-5 mr-2 text-violet-400'></i>",
     "imageUrl": "img/capytrama.webp",
     "description": "Narrador de dados: converta bases em narrativas e relatórios impactantes.",
-    "category": "Análise de Dados",
+    "category": "Dados & Analytics",
     "pageUrl": "capytrama.html",
     "color": "violet-400"
   },
@@ -888,7 +899,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-green-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /><circle cx=\"9\" cy=\"7\" r=\"4\" /><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /><path d=\"M16 3.13a4 4 0 0 1 0 7.75\" /></svg>",
     "imageUrl": "img/capyvagamatch.webp",
     "description": "Analise a compatibilidade entre um CV e uma descrição de vaga.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capyvagamatch.html",
     "color": "green-400",
     "iconUrl": "img/capyvagamatch.webp"
@@ -899,7 +910,7 @@
     "icon": "<svg class=\"w-5 h-5 mr-2 text-amber-400\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z\"></path><line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\"></line><line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\"></line></svg>",
     "imageUrl": "img/capyvalor.webp",
     "description": "O seu consultor de precificação inteligente para produtos e serviços.",
-    "category": "Produtividade & Organização",
+    "category": "Produtividade",
     "pageUrl": "capyvalor.html",
     "color": "amber-400",
     "iconUrl": "img/capyvalor.webp"

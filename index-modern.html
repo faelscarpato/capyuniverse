@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,63 +8,108 @@
     <link rel="stylesheet" href="modern-hub.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- gtag -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments) }
+        gtag('js', new Date()); gtag('config', 'G-3FFD7ZEBN1', { page_path: location.pathname });
+    </script>
+
 </head>
-<body>
 
-    <div class="universe-container">
-        
-        <header class="header">
-            <h1>CapyUniverse</h1>
-            <p>O ecossistema definitivo de produtividade roedora.</p>
-        </header>
+<body class="antialiased text-white bg-[#050511]">
 
-        <main class="bento-grid">
-            
-            <a href="CapyFlow/index.html" class="capy-card featured">
+    <!-- Fixed Header -->
+    <header
+        class="header fixed top-0 left-0 w-full z-50 px-6 py-4 border-b border-white/10 glass-card transparent transition-all duration-500">
+        <div class="max-w-[1400px] mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="ph-bold ph-planet text-white"></i>
+                </div>
+                <span class="font-bold text-lg tracking-tight">CapyUniverse</span>
+            </div>
+            <nav class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
+                <a href="#" class="hover:text-white transition-colors">Início</a>
+                <a href="#agentes" class="hover:text-white transition-colors">Agentes</a>
+                <a href="README.md" class="hover:text-white transition-colors">Docs</a>
+            </nav>
+            <button
+                class="hidden md:block px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold uppercase tracking-wider transition-all hover:scale-105 active:scale-95">
+                Conectar
+            </button>
+        </div>
+    </header>
+
+    <div class="universe-container pt-32">
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="intro-animate opacity-0 translate-y-6 transition-all duration-700 delay-200">CapyUniverse</h1>
+            <p class="intro-animate opacity-0 translate-y-6 transition-all duration-700 delay-300">O ecossistema
+                definitivo de produtividade roedora.</p>
+        </section>
+
+        <main class="bento-grid" id="agentes">
+
+            <a href="CapyFlow/index.html"
+                class="capy-card featured reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out hover:border-cyan-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div class="status-dot"></div>
                 <div>
-                    <i class="ph-fill ph-kanban card-icon"></i>
-                    <h2 class="card-title">CapyFlow</h2>
-                    <p class="card-desc">Gerencie fluxos de trabalho com a serenidade de uma capivara em águas termais. Sistema de organização visual avançado.</p>
+                    <i class="ph-fill ph-kanban card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-cyan-300 transition-colors">CapyFlow</h2>
+                    <p class="card-desc">Gerencie fluxos de trabalho com a serenidade de uma capivara em águas termais.
+                        Sistema de organização visual avançado.</p>
                 </div>
             </a>
 
-            <a href="CapyChat.html" class="capy-card">
+            <a href="CapyChat.html"
+                class="capy-card reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out delay-100 hover:border-purple-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div>
-                    <i class="ph-fill ph-chat-circle-text card-icon"></i>
-                    <h2 class="card-title">CapyChat</h2>
+                    <i
+                        class="ph-fill ph-chat-circle-text card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-purple-300 transition-colors">CapyChat</h2>
                     <p class="card-desc">Comunicação neural direta (ou quase isso). IA assistente integrada.</p>
                 </div>
             </a>
 
-            <a href="CapyFiscal.html" class="capy-card">
+            <a href="CapyFiscal.html"
+                class="capy-card reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out delay-200 hover:border-green-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div>
-                    <i class="ph-fill ph-calculator card-icon"></i>
-                    <h2 class="card-title">CapyFiscal</h2>
-                    <p class="card-desc">Contabilidade sem dor. Porque impostos não deveriam morder.</p>
+                    <i
+                        class="ph-fill ph-calculator card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-green-300 transition-colors">CapyFiscal</h2>
+                    <p class="card-desc">Contabilidade sem dolor. Porque impostos não deveriam morder.</p>
                 </div>
             </a>
 
-            <a href="capyprompt.html" class="capy-card">
+            <a href="capyprompt.html"
+                class="capy-card reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out delay-300 hover:border-pink-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div>
-                    <i class="ph-fill ph-magic-wand card-icon"></i>
-                    <h2 class="card-title">CapyPrompts</h2>
+                    <i
+                        class="ph-fill ph-magic-wand card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-pink-300 transition-colors">CapyPrompts</h2>
                     <p class="card-desc">Engenharia de prompt para mentes brilhantes.</p>
                 </div>
             </a>
 
-             <a href="capyapmaker.html" class="capy-card">
+            <a href="capyapmaker.html"
+                class="capy-card reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out delay-400 hover:border-yellow-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div>
-                    <i class="ph-fill ph-code card-icon"></i>
-                    <h2 class="card-title">App Maker</h2>
+                    <i class="ph-fill ph-code card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-yellow-300 transition-colors">App Maker</h2>
                     <p class="card-desc">Construa o impossível. No code? Low code? Capy code.</p>
                 </div>
             </a>
 
-            <a href="README.md" class="capy-card">
+            <a href="README.md"
+                class="capy-card reveal-on-scroll opacity-0 translate-y-6 transition-all duration-700 ease-out delay-500 hover:border-gray-400/60 hover:shadow-xl hover:-translate-y-1 group">
                 <div>
-                    <i class="ph-fill ph-read-cv-logo card-icon"></i>
-                    <h2 class="card-title">Docs</h2>
+                    <i
+                        class="ph-fill ph-read-cv-logo card-icon group-hover:scale-110 transition-transform duration-300"></i>
+                    <h2 class="card-title group-hover:text-gray-300 transition-colors">Docs</h2>
                     <p class="card-desc">O manual sagrado do universo.</p>
                 </div>
             </a>
@@ -72,14 +118,47 @@
     </div>
 
     <script>
-        // Script Insano para adicionar efeito de "Glow" que segue o mouse
-        // Cuidado: Isso usa matemática vetorial básica!
+        // 1. Scroll Animations (Reveal on Scroll)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-6');
+                    observer.unobserve(entry.target); // anima apenas uma vez
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 2. Header Fade Logic
+        const headerEl = document.querySelector('header.header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                headerEl.classList.remove('transparent');
+            } else {
+                headerEl.classList.add('transparent');
+            }
+        });
+
+        // 3. Load Staggering (Hero Animation)
+        window.addEventListener('DOMContentLoaded', () => {
+            // Small delay to ensure CSS is ready
+            setTimeout(() => {
+                document.querySelectorAll('.intro-animate').forEach(el => {
+                    el.classList.remove('opacity-0', 'translate-y-6');
+                });
+            }, 100);
+        });
+
+        // 4. Mouse Glow Effect (Existing + Enhanced)
         document.querySelectorAll('.capy-card').forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                
+
                 card.style.setProperty('--mouse-x', `${x}px`);
                 card.style.setProperty('--mouse-y', `${y}px`);
             });
@@ -90,20 +169,23 @@
         .capy-card::before {
             content: "";
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(
-                800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-                rgba(255, 255, 255, 0.06),
-                transparent 40%
-            );
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+                    rgba(255, 255, 255, 0.06),
+                    transparent 40%);
             opacity: 0;
             transition: opacity 0.5s;
             pointer-events: none;
             z-index: 1;
         }
+
         .capy-card:hover::before {
             opacity: 1;
         }
     </style>
 </body>
+
 </html>
