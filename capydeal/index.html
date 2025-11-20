@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CapyDeal — Caçadora de Preços & Cupons</title>
+  <link rel="stylesheet" href="style.css" />
+<!-- gtag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
+    gtag('js', new Date()); gtag('config','G-3FFD7ZEBN1',{page_path:location.pathname});
+  </script>
+
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-pill">Capy</span>
+        <span class="logo-text">Deal</span>
+      </div>
+      <p class="subtitle">Caçadora de preços, produtos e cupons em tempo real usando Gemini 2.5 Flash + Google Search & Maps.</p>
+    </header>
+
+    <main class="app-main">
+      <section class="panel panel-input">
+        <h2>Nova busca inteligente</h2>
+        <form id="search-form">
+          <div class="field-grid">
+            <div class="field">
+              <label for="product">O que você quer encontrar?</label>
+              <input id="product" type="text" placeholder="Ex: notebook gamer, celular até 1500, cadeira ergonômica..." required />
+            </div>
+
+            <div class="field">
+              <label for="compare">Comparar com (opcional)</label>
+              <input id="compare" type="text" placeholder="Ex: outro modelo ou referência" />
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="budget">Orçamento máximo (R$)</label>
+              <input id="budget" type="number" min="0" step="50" placeholder="Ex: 2500" />
+            </div>
+            <div class="field">
+              <label for="location">CEP, cidade ou bairro</label>
+              <input id="location" type="text" placeholder="Ex: 13920-000, Campinas - SP" />
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="image">Foto / print do produto (opcional)</label>
+              <input id="image" type="file" accept="image/*" />
+              <span class="field-hint">Use para buscar por um produto que você viu em rede social ou print da tela.</span>
+            </div>
+            <div class="field checkbox-field">
+              <label>
+                <input id="want-coupons" type="checkbox" checked />
+                Quero que a CapyDeal também cace cupons de desconto
+              </label>
+              <label>
+                <input id="only-nearby" type="checkbox" />
+                Priorizar lojas próximas de mim
+              </label>
+            </div>
+          </div>
+
+          <div class="field api-key-field">
+            <label for="api-key">Chave da API Gemini</label>
+            <input id="api-key" type="password" placeholder="Cole aqui sua GEMINI_API_KEY (não é enviada para nenhum servidor próprio)" />
+            <span class="field-hint">A chave fica 100% local no navegador. Recomendo usar uma chave de projeto separado só para testes.</span>
+          </div>
+
+          <div class="actions-row">
+            <button id="btn-run" type="submit" class="btn-primary">
+              <span class="btn-dot"></span>
+              Rodar busca com Gemini
+            </button>
+            <button id="btn-clear" type="button" class="btn-ghost">Limpar resultados</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel panel-output">
+        <div class="output-header">
+          <h2>Resultado da CapyDeal</h2>
+          <span id="status-indicator" class="status-badge status-idle">Aguardando consulta...</span>
+        </div>
+
+        <div id="loading" class="loading hidden">
+          <div class="loading-spinner"></div>
+          <p>Consultando Gemini + Google Search/Maps, caçando preços e cupons... </p>
+        </div>
+
+        <div id="results" class="results hidden">
+          <article class="result-block">
+            <h3>Resposta da IA</h3>
+            <div id="ai-answer" class="answer markdown"></div>
+          </article>
+
+          <article class="result-block">
+            <h3>Fontes e links</h3>
+            <ul id="sources-list" class="sources-list"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>CapyDeal faz parte do ecossistema <strong>CapyUniverse</strong>. Use com responsabilidade: sempre confira os preços direto nas lojas.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
