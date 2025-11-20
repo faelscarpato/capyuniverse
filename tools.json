@@ -314,13 +314,15 @@
     "iconUrl": "img/capydockit.webp"
   },
 {
-  "id": "capydrama",
-  "title": "CapyDrama",
-  "category": "Escrita & Narrativas",
-"description": "gere contos, novelas e séries dramáticas em clima de suspense, paranoia e tensão psicológica.",
- "pageUrl": "capydockit.html",
- "imageUrl": "img/capydockit.webp"
-}, 
+  "id": "CapyDrama",
+  "title": "Sua Novela Diária",
+  "imageUrl": "img/capydrama.webp",
+  "iconUrl": "img/logo.png",
+  "description": "Crie novelas e séries dramáticas em clima de suspense, paranoia e tensão psicológica.",
+  "category": "Escrita & Storytelling",
+  "pageUrl": "capydrama.html",
+  "color": "amber-400"
+},
   {
     "id": "CapyEmail",
     "title": "Gerador de E-mails",
