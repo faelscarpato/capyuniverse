@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="capyuniverse" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>CapyDrama — Sua Leitura todo dia!</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- jsPDF para Exportação -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cu: {
+              bg: '#02040a',
+              card: '#0f172a',
+              accent: '#22d3ee',
+              pink: '#f472d0',
+              amber: '#fbbf24',
+              success: '#4ade80',
+              danger: '#f87171'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Merriweather', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            display: ['Syne', 'sans-serif'],
+          },
+          animation: {
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'pulse-audio': 'pulseAudio 1.5s infinite',
+          },
+          keyframes: {
+            slideUp: {
+              '0%': { transform: 'translateY(50px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            pulseAudio: {
+              '0%, 100%': { height: '10%' },
+              '50%': { height: '80%' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&family=Merriweather:ital,wght@0,300;0,400;1,300&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    html, body { height: 100%; overflow: hidden; background: #02040a; color: #e2e8f0; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .glass-header { background: rgba(2, 4, 10, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .glass-panel { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+    
+    /* Audio Wave Animation */
+    .wave-bar { width: 3px; background: #22d3ee; border-radius: 99px; animation: pulseAudio 1s ease-in-out infinite; }
+    .wave-bar:nth-child(1) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.5s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.2s; }
+    .wave-stop .wave-bar { animation: none; height: 20%; }
+
+    /* Sheet transitions */
+    .sheet-hidden { transform: translateY(100%); }
+    .sheet-visible { transform: translateY(0); }
+  </style>
+</head>
+
+<body class="flex flex-col relative">
+
+  <!-- HEADER -->
+  <header class="glass-header h-14 shrink-0 flex items-center justify-between px-4 z-30">
+    <div class="flex items-center gap-2" onclick="location.reload()">
+      <i class="fas fa-film text-cu-amber text-lg"></i>
+      <span class="font-display font-bold text-lg tracking-wide">Capy<span class="text-cu-amber">Drama</span></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="btnVoiceSettings" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-cu-accent hover:bg-white/10 transition-colors">
+        <i class="fas fa-microphone-lines"></i>
+      </button>
+      <button id="btnExportMenu" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-cu-pink hover:bg-white/10 transition-colors">
+        <i class="fas fa-file-export"></i>
+      </button>
+      <button id="btnApiKey" class="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors">
+        <i class="fas fa-key text-xs"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN AREA -->
+  <main id="storyContainer" class="flex-1 overflow-y-auto overflow-x-hidden relative w-full pb-40 no-scrollbar scroll-smooth">
+    
+    <!-- Empty State -->
+    <div id="welcomeState" class="flex flex-col items-center justify-center h-full p-8 text-center animate-slide-up">
+      <div class="relative mb-6">
+        <div class="absolute inset-0 bg-cu-accent blur-[50px] opacity-10 rounded-full"></div>
+        <div class="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-2xl border border-white/10 flex items-center justify-center relative z-10 shadow-2xl">
+          <i class="fas fa-clapperboard text-3xl text-zinc-400"></i>
+        </div>
+      </div>
+      <h2 class="text-xl font-bold text-white mb-2 font-display">O Palco está Vazio</h2>
+      <p class="text-sm text-zinc-400 mb-8 max-w-xs leading-relaxed">
+        Defina o cenário, escolha os atores e grite "Ação!".
+      </p>
+      <button onclick="toggleSheet(true)" class="px-6 py-3 bg-cu-accent text-black font-bold rounded-full shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+        <i class="fas fa-play"></i> Criar Nova História
+      </button>
+    </div>
+
+    <!-- Story Content -->
+    <div id="storyContent" class="hidden flex flex-col gap-6 p-4 pb-10">
+      <!-- Scenes injected here -->
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div id="loadingState" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-20">
+        <div class="glass-panel px-5 py-3 rounded-full flex items-center gap-3 shadow-xl border border-cu-accent/20">
+            <div class="flex gap-1 h-3 items-center">
+              <div class="w-1 h-full bg-cu-accent animate-pulse"></div>
+              <div class="w-1 h-2/3 bg-cu-pink animate-pulse delay-75"></div>
+              <div class="w-1 h-full bg-cu-amber animate-pulse delay-150"></div>
+            </div>
+            <span class="text-[10px] text-zinc-200 font-mono tracking-widest uppercase">Renderizando...</span>
+        </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM CONTROL BAR -->
+  <div class="fixed bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-[#02040a] via-[#02040a] to-transparent">
+    <div class="flex items-center gap-3 max-w-md mx-auto">
+      
+      <!-- Botão Undo -->
+      <button id="btnUndo" class="h-12 w-12 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-500 flex items-center justify-center hover:text-white disabled:opacity-30 transition-colors" disabled>
+        <i class="fas fa-undo"></i>
+      </button>
+
+      <!-- Botão Principal (Avançar) -->
+      <button id="btnMainAction" class="flex-1 h-14 bg-gradient-to-r from-cu-card to-zinc-900 border border-cu-accent/30 rounded-xl flex items-center justify-center gap-3 shadow-[0_0_15px_rgba(34,211,238,0.1)] text-white font-bold text-sm active:scale-[0.98] transition-all disabled:opacity-50">
+        <span id="btnMainLabel">Próximo Ato</span>
+        <i class="fas fa-chevron-right text-cu-accent"></i>
+      </button>
+
+      <!-- Botão Diretor (Config) -->
+      <button id="btnDirector" onclick="toggleSheet(true)" class="h-12 w-12 rounded-xl bg-zinc-900 border border-cu-amber/30 text-cu-amber flex items-center justify-center hover:bg-cu-amber/10 active:scale-90 transition-all shadow-[0_0_10px_rgba(251,191,36,0.1)] relative">
+        <i class="fas fa-sliders"></i>
+        <span id="directorBadge" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black hidden"></span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- CONFIG / DIRECTOR SHEET -->
+  <div id="sheetBackdrop" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300" onclick="toggleSheet(false)"></div>
+  
+  <div id="configSheet" class="fixed inset-x-0 bottom-0 z-50 bg-[#0b0f1f] border-t border-white/10 rounded-t-3xl transform translate-y-full transition-transform duration-300 flex flex-col max-h-[90vh] shadow-2xl">
+    
+    <!-- Handle -->
+    <div class="w-full h-8 flex items-center justify-center shrink-0 cursor-grab bg-white/5 rounded-t-3xl" onclick="toggleSheet(false)">
+      <div class="w-12 h-1.5 bg-zinc-600 rounded-full"></div>
+    </div>
+    
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto px-6 pb-8 pt-2">
+      
+      <!-- Seção 1: Intervenção Imediata (Só aparece se já houver história) -->
+      <div id="interventionSection" class="hidden mb-8 border-b border-white/5 pb-6">
+        <h3 class="text-xs font-bold text-cu-amber uppercase tracking-widest mb-4 flex items-center gap-2">
+          <i class="fas fa-bolt"></i> Intervenção Divina
+        </h3>
+        
+        <div class="space-y-4">
+          <!-- Evento Imediato -->
+          <div class="relative group">
+            <label class="text-[10px] text-zinc-400 font-semibold uppercase mb-1 block">Obrigatório na Próxima Cena</label>
+            <div class="flex gap-2">
+              <input id="inputEvent" type="text" class="flex-1 bg-black/40 border border-cu-amber/30 rounded-lg p-3 text-sm text-white focus:border-cu-amber outline-none placeholder-zinc-600" placeholder="Ex: Um dragão cai do céu...">
+            </div>
+            <p class="text-[10px] text-zinc-500 mt-1">Isso será forçado na narrativa e limpo depois.</p>
+          </div>
+
+          <!-- Adicionar Personagem -->
+          <div>
+            <label class="text-[10px] text-zinc-400 font-semibold uppercase mb-1 block">Inserir Novo Personagem</label>
+            <div class="flex gap-2">
+              <input id="inputNewChar" type="text" class="flex-1 bg-black/40 border border-zinc-700 rounded-lg p-3 text-sm text-white focus:border-cu-success outline-none" placeholder="Nome e descrição...">
+              <button onclick="addCharacter()" class="bg-zinc-800 hover:bg-cu-success/20 hover:text-cu-success text-zinc-400 px-4 rounded-lg transition-colors border border-zinc-700">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção 2: Parâmetros Globais (Sempre visível) -->
+      <div>
+        <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <i class="fas fa-sliders-h"></i> Parâmetros Globais
+        </h3>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] text-zinc-400 font-semibold uppercase mb-1 block">Protagonista / Foco</label>
+                <textarea id="inputPersona" rows="2" class="w-full bg-black/40 border border-zinc-700 rounded-lg p-3 text-sm text-zinc-200 focus:border-cu-accent outline-none resize-none" placeholder="Quem vive a história?"></textarea>
+            </div>
+            <div>
+                <label class="text-[10px] text-zinc-400 font-semibold uppercase mb-1 block">Contexto (Lore)</label>
+                <textarea id="inputLore" rows="3" class="w-full bg-black/40 border border-zinc-700 rounded-lg p-3 text-sm text-zinc-200 focus:border-cu-pink outline-none resize-none" placeholder="Regras do mundo e eventos passados..."></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-semibold uppercase mb-1 block">Gênero</label>
+                    <select id="selectGenre" class="w-full bg-black/40 border border-zinc-700 rounded-lg p-3 text-sm text-zinc-300 outline-none">
+                        <option>Cyberpunk</option><option>Terror Cósmico</option><option>Fantasia Medieval</option><option>Thriller Policial</option><option>Comédia Absurda</option><option>Romance Sombrio</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] text-zinc-500 font-semibold uppercase mb-1 block">Tom da Narrativa</label>
+                    <select id="selectTone" class="w-full bg-black/40 border border-zinc-700 rounded-lg p-3 text-sm text-zinc-300 outline-none">
+                        <option>Sombrio e Cru</option><option>Irônico</option><option>Melancólico</option><option>Épico e Grandioso</option><option>Tenso e Rápido</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div class="sticky bottom-0 bg-[#0b0f1f] pt-4 mt-4 border-t border-white/5">
+        <button onclick="confirmSettings()" class="w-full py-3 rounded-xl bg-cu-accent text-black text-sm font-bold hover:bg-cyan-300 transition-colors shadow-lg shadow-cyan-500/20">
+          <i class="fas fa-check mr-2"></i> Aplicar Alterações
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT MODAL -->
+  <div id="exportModal" class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center hidden p-6">
+    <div class="w-full max-w-xs bg-zinc-900 border border-zinc-700 rounded-2xl p-6 animate-slide-up">
+      <h3 class="text-lg font-bold text-white mb-4">Exportar</h3>
+      <div class="space-y-3">
+        <button onclick="exportPDF()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-red-500/10 border border-zinc-700 hover:border-red-500/50 text-zinc-300 hover:text-red-400 transition-all">
+          <i class="fas fa-file-pdf text-xl"></i> <span>Salvar como PDF</span>
+        </button>
+        <button onclick="exportTXT()" class="w-full flex items-center gap-3 p-3 rounded-lg bg-zinc-800 hover:bg-blue-500/10 border border-zinc-700 hover:border-blue-500/50 text-zinc-300 hover:text-blue-400 transition-all">
+          <i class="fas fa-file-lines text-xl"></i> <span>Salvar como TXT</span>
+        </button>
+        <button onclick="$('exportModal').classList.add('hidden')" class="w-full py-2 text-xs text-zinc-500">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API MODAL -->
+  <div id="apiModal" class="hidden fixed inset-0 z-[70] bg-black/95 flex items-center justify-center p-6">
+    <div class="w-full max-w-sm bg-zinc-900 p-6 rounded-xl border border-zinc-800">
+        <h3 class="text-white font-bold mb-2 flex items-center gap-2"><i class="fas fa-key text-cu-amber"></i> Google API</h3>
+        <p class="text-xs text-zinc-500 mb-4">Sua chave é armazenada apenas no seu navegador.</p>
+        <input type="password" id="apiKeyInput" class="w-full bg-black border border-zinc-700 rounded p-3 text-white mb-4 focus:border-cu-accent outline-none" placeholder="Cole sua chave Gemini aqui...">
+        <div class="flex gap-2">
+            <button onclick="$('apiModal').classList.add('hidden')" class="flex-1 py-2 text-zinc-400">Cancelar</button>
+            <button onclick="saveApiKey()" class="flex-1 py-2 bg-cu-accent text-black rounded-lg font-bold">Salvar</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- VOICE SETTINGS (Hidden Logic mainly) -->
+  <div id="voiceModal" class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center hidden p-6">
+    <div class="w-full max-w-sm bg-[#0b0f1f] rounded-2xl border border-white/10 p-6">
+       <h3 class="text-white font-bold mb-4">Configurar Narrador</h3>
+       <select id="voiceSelect" class="w-full bg-black border border-zinc-700 rounded p-2 text-sm text-white mb-4"></select>
+       <div class="mb-4">
+         <label class="text-xs text-zinc-500">Velocidade</label>
+         <input type="range" id="voiceRate" min="0.5" max="2" step="0.1" value="1" class="w-full accent-cu-accent">
+       </div>
+       <div class="flex gap-2">
+          <button onclick="testVoice()" class="flex-1 py-2 bg-zinc-800 rounded text-xs text-white">Testar</button>
+          <button onclick="$('voiceModal').classList.add('hidden')" class="flex-1 py-2 bg-cu-accent text-black rounded font-bold text-xs">Ok</button>
+       </div>
+    </div>
+  </div>
+
+  <!-- LOGIC -->
+  <script>
+    /**
+     * CAPYCONTOS: DIRECTOR'S CUT
+     */
+    
+    const CONFIG = { storageKey: 'capy_director_v2', apiKeyKey: 'capyUniverseApiKey_gemini' };
+    let state = {
+        scenes: [],
+        params: { persona: '', lore: '', genre: 'Cyberpunk', tone: 'Sombrio e Cru' },
+        tempEvent: '', // O "Plot Twist" imediato
+        isGenerating: false
+    };
+    let synth = window.speechSynthesis;
+    let voices = [];
+
+    const $ = id => document.getElementById(id);
+
+    // INIT
+    window.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        renderStory();
+        initTTS();
+        setupListeners();
+    });
+
+    function setupListeners() {
+        $('btnDirector').onclick = () => toggleSheet(true);
+        $('btnExportMenu').onclick = () => $('exportModal').classList.remove('hidden');
+        $('btnVoiceSettings').onclick = () => $('voiceModal').classList.remove('hidden');
+        $('btnApiKey').onclick = () => $('apiModal').classList.remove('hidden');
+        
+        $('btnMainAction').onclick = handleMainAction;
+        $('btnUndo').onclick = handleUndo;
+        
+        // Auto-save inputs on blur
+        ['inputPersona', 'inputLore', 'selectGenre', 'selectTone'].forEach(id => {
+             $(id).addEventListener('blur', syncParamsFromUI);
+        });
+    }
+
+    function syncParamsFromUI() {
+        state.params = {
+            persona: $('inputPersona').value,
+            lore: $('inputLore').value,
+            genre: $('selectGenre').value,
+            tone: $('selectTone').value
+        };
+        // tempEvent is handled separately
+        saveState();
+    }
+
+    function addCharacter() {
+        const input = $('inputNewChar');
+        const name = input.value.trim();
+        if(!name) return;
+        
+        const loreInput = $('inputLore');
+        loreInput.value += `\n- Novo Personagem: ${name}`;
+        input.value = '';
+        
+        // Flash effect
+        loreInput.classList.add('border-cu-success');
+        setTimeout(() => loreInput.classList.remove('border-cu-success'), 500);
+        
+        syncParamsFromUI(); // Save immediately
+        alert(`Personagem "${name}" adicionado à Lore!`);
+    }
+
+    function confirmSettings() {
+        syncParamsFromUI();
+        state.tempEvent = $('inputEvent').value.trim();
+        toggleSheet(false);
+        if(state.tempEvent) {
+            $('directorBadge').classList.remove('hidden'); // Indicar que há um evento pendente
+        } else {
+            $('directorBadge').classList.add('hidden');
+        }
+    }
+
+    // --- CORE LOGIC ---
+
+    async function handleMainAction() {
+        if(state.isGenerating) return;
+        
+        // Se for o início
+        if(state.scenes.length === 0) {
+             // Validação simples
+             if(!$('inputPersona').value && !$('inputLore').value) {
+                 toggleSheet(true);
+                 return;
+             }
+        }
+
+        toggleLoading(true);
+        syncParamsFromUI();
+        state.tempEvent = $('inputEvent').value.trim(); // Pega evento se tiver
+
+        try {
+            const key = getApiKey();
+            if(!key) return;
+
+            let prompt = '';
+            const { persona, lore, genre, tone } = state.params;
+
+            if(state.scenes.length === 0) {
+                prompt = `
+                  Escreva a PRIMEIRA CENA de um conto interativo.
+                  Gênero: ${genre}. Tom: ${tone}.
+                  Protagonista: ${persona}.
+                  Lore/Contexto: ${lore}.
+                  
+                  MANDATÓRIO: ${state.tempEvent ? `O seguinte evento DEVE acontecer agora: "${state.tempEvent}"` : ''}
+                  
+                  Regras: Máximo 200 palavras. Narrativa imersiva. Sem títulos.
+                `;
+            } else {
+                const context = state.scenes.slice(-2).join('\n');
+                prompt = `
+                  Continue a história a partir daqui.
+                  
+                  [Contexto Recente]:
+                  ${context}
+                  
+                  [Configuração Atual]:
+                  Gênero: ${genre}. Tom: ${tone} (O tom pode ter mudado, adapte-se).
+                  Lore Global: ${lore}.
+                  
+                  [DIRETOR INTERVEIO - ACONTECIMENTO OBRIGATÓRIO]:
+                  ${state.tempEvent ? `"${state.tempEvent}"` : "Apenas continue a trama logicamente."}
+                  
+                  Regras: Máximo 200 palavras. Avance a trama.
+                `;
+            }
+
+            const text = await callGemini(prompt, key);
+            
+            state.scenes.push(text);
+            
+            // Limpar evento temporário após uso
+            if(state.tempEvent) {
+                state.tempEvent = '';
+                $('inputEvent').value = '';
+                $('directorBadge').classList.add('hidden');
+            }
+
+            saveState();
+            renderStory();
+            setTimeout(() => $('storyContainer').scrollTo({ top: $('storyContainer').scrollHeight, behavior: 'smooth' }), 100);
+
+        } catch(e) {
+            alert("Erro: " + e.message);
+        } finally {
+            toggleLoading(false);
+        }
+    }
+
+    async function callGemini(prompt, key) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        if(!res.ok) throw new Error("Falha na API");
+        const data = await res.json();
+        return data.candidates[0].content.parts[0].text.trim();
+    }
+
+    function handleUndo() {
+        if(state.scenes.length === 0) return;
+        if(confirm("Apagar o último trecho e tentar de novo?")) {
+            state.scenes.pop();
+            saveState();
+            renderStory();
+        }
+    }
+
+    // --- RENDER ---
+
+    function renderStory() {
+        const container = $('storyContent');
+        const welcome = $('welcomeState');
+        const interventionUI = $('interventionSection');
+
+        if(state.scenes.length === 0) {
+            container.classList.add('hidden');
+            welcome.classList.remove('hidden');
+            interventionUI.classList.add('hidden'); // Esconde "Intervenção" no setup inicial
+            $('btnMainLabel').textContent = "Iniciar Aventura";
+            $('btnUndo').disabled = true;
+        } else {
+            container.classList.remove('hidden');
+            welcome.classList.add('hidden');
+            interventionUI.classList.remove('hidden'); // Mostra "Intervenção" se já tem história
+            $('btnMainLabel').textContent = "Próximo Ato";
+            $('btnUndo').disabled = false;
+
+            container.innerHTML = state.scenes.map((text, i) => `
+                <div class="relative group animate-slide-up">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-zinc-800 to-transparent group-hover:via-cu-accent transition-all"></div>
+                    <div class="pl-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-mono text-zinc-500 uppercase">Cena ${i+1}</span>
+                            <button onclick="speak('${escapeText(text)}')" class="text-zinc-600 hover:text-cu-accent transition-colors"><i class="fas fa-volume-high"></i></button>
+                        </div>
+                        <p class="font-serif text-zinc-300 leading-relaxed text-[0.95rem] md:text-base">
+                            ${text.replace(/\n/g, '<br>')}
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Populate inputs
+        $('inputPersona').value = state.params.persona;
+        $('inputLore').value = state.params.lore;
+        $('selectGenre').value = state.params.genre;
+        $('selectTone').value = state.params.tone;
+    }
+
+    // --- TTS & EXPORT ---
+
+    function initTTS() {
+        const load = () => {
+            voices = synth.getVoices().filter(v => v.lang.includes('pt') || v.name.includes('Brazil'));
+            const sel = $('voiceSelect');
+            sel.innerHTML = voices.map((v,i) => `<option value="${i}">${v.name}</option>`).join('');
+            if(!sel.innerHTML) sel.innerHTML = '<option>Padrão do Sistema</option>';
+        };
+        load();
+        speechSynthesis.onvoiceschanged = load;
+    }
+
+    function speak(text) {
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        const idx = $('voiceSelect').value;
+        if(voices[idx]) u.voice = voices[idx];
+        u.rate = $('voiceRate').value;
+        synth.speak(u);
+    }
+    
+    function testVoice() { speak("Testando síntese neural."); }
+
+    function exportTXT() {
+        const content = `TÍTULO: CapyDrama\n\n${state.scenes.join('\n\n***\n\n')}`;
+        downloadFile('conto.txt', content);
+    }
+    
+    function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const marginLeft = 15;
+  const marginTop = 20;
+  const marginBottom = 20;          // margem inferior
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  const usableWidth = pageWidth - marginLeft * 2;
+  const lineHeight = 5;
+
+  let y = marginTop;
+
+  doc.setFontSize(18);
+  doc.text("CapyDrama", marginLeft, y);
+  y += 15;
+  doc.setFontSize(11);
+
+  state.scenes.forEach((s, i) => {
+    const title = `Cena ${i + 1}`;
+    const lines = doc.splitTextToSize(s, usableWidth);
+
+    // altura que esse bloco vai ocupar (título + texto + espaçamento)
+    const blockHeight = 9 + (lines.length * lineHeight) + 10;
+
+    // se não couber na página atual, cria outra respeitando a margem inferior
+    if (y + blockHeight > pageHeight - marginBottom) {
+      doc.addPage();
+      y = marginTop;
+    }
+
+    doc.setFont(undefined, 'bold');
+    doc.text(title, marginLeft, y);
+    y += 9;
+
+    doc.setFont(undefined, 'normal');
+    doc.text(lines, marginLeft, y);
+    y += (lines.length * lineHeight) + 10;
+  });
+
+  doc.save('conto.pdf');
+}
+
+    // --- UTILS ---
+    
+    function toggleSheet(show) {
+        const el = $('configSheet');
+        const bg = $('sheetBackdrop');
+        if(show) {
+            bg.classList.remove('hidden');
+            setTimeout(()=> bg.classList.remove('opacity-0'), 10);
+            el.classList.remove('translate-y-full');
+        } else {
+            bg.classList.add('opacity-0');
+            el.classList.add('translate-y-full');
+            setTimeout(()=> bg.classList.add('hidden'), 300);
+        }
+    }
+
+    function toggleLoading(show) { $('loadingState').classList.toggle('hidden', !show); }
+    
+    function getApiKey() {
+        const k = localStorage.getItem(CONFIG.apiKeyKey);
+        if(!k) $('apiModal').classList.remove('hidden');
+        return k;
+    }
+    function saveApiKey() {
+        localStorage.setItem(CONFIG.apiKeyKey, $('apiKeyInput').value.trim());
+        $('apiModal').classList.add('hidden');
+    }
+    
+    function saveState() { localStorage.setItem(CONFIG.storageKey, JSON.stringify(state)); }
+    function loadState() {
+        const r = localStorage.getItem(CONFIG.storageKey);
+        if(r) state = {...state, ...JSON.parse(r)};
+    }
+    function downloadFile(name, content) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([content], {type: 'text/plain'}));
+        a.download = name;
+        a.click();
+    }
+    function escapeText(t) { return t.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+  </script>
+</body>
+</html>
