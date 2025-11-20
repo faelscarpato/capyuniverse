@@ -313,6 +313,14 @@
     "icon": "<i class='fa-solid fa-file-pdf w-5 h-5 mr-2 text-emerald-400'></i>",
     "iconUrl": "img/capydockit.webp"
   },
+{
+  "id": "capydrama",
+  "title": "CapyDrama",
+  "category": "Escrita & Narrativas",
+"description": "gere contos, novelas e séries dramáticas em clima de suspense, paranoia e tensão psicológica.",
+ "pageUrl": "capydockit.html",
+ "imageUrl": "img/capydockit.webp"
+}, 
   {
     "id": "CapyEmail",
     "title": "Gerador de E-mails",
