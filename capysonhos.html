@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark" data-theme="capyuniverse">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CapySonhos - Interpretador de Sonhos com IA</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts / Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://raw.githubusercontent.com/faelscarpato/capyuniverse/main/2.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Libs para extração de conteúdo -->
+  <!-- PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js"></script>
+  <!-- DOCX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- Markdown render -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
+
+  <!-- CapyUniverse styles / shell -->
+  <link rel="stylesheet" href="cu-style.css">
+  <script src="cu-init.js"></script>
+  <script src="cu-app.js" defer></script>
+
+  <style>
+    body{font-family:'Inter',sans-serif;}
+    .font-mono{font-family:'JetBrains Mono',monospace;}
+    .glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.1);border-radius:1.25rem;box-shadow:0 8px 32px rgba(0,0,0,.35)}
+    .badge{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(120deg, rgba(34,211,238,.16), rgba(139,92,246,.16))}
+    .section-title{font-weight:800;letter-spacing:-.01em}
+    .btn{display:inline-flex;align-items:center;gap:.6rem;padding:.75rem 1rem;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:linear-gradient(130deg, rgba(34,211,238,.18), rgba(244,114,208,.18));transition:.2s transform;}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(140deg,#0ea5e9 0%,#22d3ee 40%,#a855f7 100%);color:#fff;border:1px solid rgba(255,255,255,.18)}
+    .chip{font-size:.75rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:.25rem .6rem;border-radius:999px}
+    .drop{border:2px dashed #4b5563;border-radius:14px;padding:14px;transition:all .2s}
+    .drop.dragover{border-color:#a78bfa;background:rgba(167,139,250,.08)}
+    .mini{font-size:.8rem;opacity:.8}
+    .scrollbar-thin::-webkit-scrollbar{width:8px;height:8px}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:#303441;border-radius:999px}
+    .result-card{background:rgba(15,15,30,.55);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px}
+    .avatar{width:48px;height:48px;border-radius:12px;background:radial-gradient(circle at 30% 30%, #a78bfa 10%, #22d3ee 50%, transparent 60%), #0f1024;border:1px solid rgba(255,255,255,.12);display:grid;place-items:center}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-[15px]">
+
+  <!-- Header Unificado -->
+  <header class="cu-header">
+    <div class="cu-brand">
+      <button id="sidebarToggleBtn" class="lg:hidden p-2 rounded-md text-gray-300 hover:bg-white/10 focus:outline-none"><i class="fas fa-bars text-xl"></i></button>
+      <div class="flex items-center gap-2">
+        <span class="cu-appname text-xl">CapySonhos</span>
+        <span class="cu-chip hidden sm:inline-flex">CapyUniverse</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="location.href='index.html'" class="cu-btn hidden sm:inline-flex">Início</button>
+      <button id="openApiKeysModalButton" class="cu-btn primary">🔑</button>
+    </div>
+  </header>
+
+  <!-- Layout -->
+  <div class="flex flex-1 pt-4">
+    <!-- Sidebar (preenchida via cu-app.js se necessário) -->
+    <aside id="sidebar" class="sidebar-glass text-gray-300 w-64 space-y-1 p-3 fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 transition-transform duration-300 ease-in-out z-30 shadow-lg overflow-y-auto scrollbar-thin pt-4">
+      <p class="text-xs text-center text-zinc-500 p-2">Carregando menu...</p>
+    </aside>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
+    <!-- Main -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full">
+      <section class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1.15fr_.85fr] gap-6 items-start">
+        <!-- Coluna Esquerda: Entrada -->
+        <div class="glass p-6">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="avatar text-xl">💤</div>
+            <div>
+              <h1 class="section-title text-2xl">Interpretador de Sonhos</h1>
+              <p class="text-zinc-400 mini">Descreva seu sonho e (opcional) anexe arquivos para contexto.</p>
+            </div>
+          </div>
+
+          <!-- Sonho -->
+          <label class="block text-sm font-semibold mb-1 text-zinc-200">Descrição do sonho</label>
+          <textarea id="dreamInput" class="w-full bg-zinc-900/70 border border-zinc-700 text-zinc-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-violet-500 min-h-[140px]" placeholder="Ex.: Estava num barco em um mar agitado, via uma lua enorme e um lobo ao longe…"></textarea>
+
+          <!-- Arquivos -->
+          <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-semibold text-zinc-200">Anexar arquivos (PDF, DOCX, TXT)</label>
+                <span class="chip">opcional</span>
+              </div>
+              <div id="docDrop" class="drop">
+                <p class="text-zinc-400 mini mb-2">Arraste ou clique para selecionar</p>
+                <input type="file" id="docInput" accept=".pdf,.docx,.txt" multiple class="hidden">
+                <button class="btn mini" id="btnSelectDocs"><i class="fa-solid fa-paperclip"></i> Selecionar</button>
+                <div id="docList" class="mt-3 space-y-1 text-zinc-300 mini"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-semibold text-zinc-200">Imagens (OCR)</label>
+                <span class="chip">máx. 10</span>
+              </div>
+              <div id="imgDrop" class="drop">
+                <p class="text-zinc-400 mini mb-2">Arraste ou clique para selecionar</p>
+                <input type="file" id="imgInput" accept="image/*" multiple class="hidden">
+                <button class="btn mini" id="btnSelectImgs"><i class="fa-solid fa-image"></i> Selecionar</button>
+                <div id="imgList" class="mt-3 grid grid-cols-5 gap-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opções -->
+          <div class="mt-5 flex flex-wrap gap-3">
+            <label class="inline-flex items-center gap-2 text-zinc-300 mini">
+              <input id="toggleDiary" type="checkbox" class="accent-violet-500">
+              Salvar este sonho no Diário (local)
+            </label>
+            <label class="inline-flex items-center gap-2 text-zinc-300 mini">
+              <input id="includeDiary" type="checkbox" class="accent-violet-500" checked>
+              Incluir sonhos anteriores como contexto
+            </label>
+          </div>
+
+          <!-- Ações -->
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <button id="btnInterpret" class="btn btn-primary">
+              <span>Interpretar Sonho</span> <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+            <button id="btnClear" class="btn">Limpar</button>
+            <span id="apiStatus" class="badge mini">API: <b class="ml-1" id="apiStatusText">não definida</b></span>
+          </div>
+        </div>
+
+        <!-- Coluna Direita: Resultado -->
+        <div class="glass p-6">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="section-title text-xl">Interpretação</h2>
+            <div class="flex gap-2">
+              <button id="btnCopy" class="btn mini"><i class="fa-regular fa-copy"></i> Copiar</button>
+              <button id="btnExport" class="btn mini"><i class="fa-regular fa-file-lines"></i> Exportar .MD</button>
+            </div>
+          </div>
+          <div id="status" class="text-zinc-400 mini mb-2">Pronto para analisar ✨</div>
+          <div id="result" class="result-card prose prose-invert max-w-none text-zinc-100"></div>
+
+          <!-- Contexto usado (colapsável) -->
+          <details class="mt-4">
+            <summary class="cursor-pointer text-zinc-300 mini">Ver contexto agregado (arquivos + OCR + diário)</summary>
+            <pre id="ctxPreview" class="bg-black/30 border border-white/10 rounded-lg p-3 text-zinc-300 whitespace-pre-wrap font-mono text-xs mt-2 max-h-[220px] overflow-auto scrollbar-thin"></pre>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de API Keys (padrão Capy) -->
+  <div id="apiKeysModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+    <div class="glass border border-zinc-800 p-7 rounded-2xl shadow-glass w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-purple-400">Gerenciar Chaves de API</h2>
+        <button id="closeApiKeysModalButton" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div class="space-y-3">
+        <div class="p-3 border border-zinc-700 rounded-md bg-zinc-900">
+          <h3 class="text-md font-medium text-sky-400 mb-1.5">Google Gemini</h3>
+          <label for="geminiApiKeyInputModal" class="block text-xs font-medium text-gray-300 mb-1">API Key Gemini:</label>
+          <div class="flex">
+            <input id="geminiApiKeyInputModal" type="password" placeholder="Sua API Key Gemini" class="font-mono p-1.5 text-xs flex-grow rounded-l-md focus:ring-1 focus:ring-sky-500 outline-none bg-zinc-800 text-white border border-zinc-700"/>
+            <button id="saveGeminiKey" class="bg-sky-500 hover:bg-sky-600 px-2.5 py-1.5 rounded-r-md text-xs text-white">Salvar</button>
+          </div>
+          <p class="mini text-zinc-400 mt-2">A chave fica salva localmente no navegador (localStorage).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Config & helpers ======
+    const API_KEY_STORAGE_KEY = 'capyUniverseApiKey_gemini';
+    let GEMINI_KEY = localStorage.getItem(API_KEY_STORAGE_KEY) || '';
+    const MAX_IMG = 10;
+
+    const $ = sel => document.querySelector(sel);
+    const el = {
+      dream: $('#dreamInput'),
+      btnInterpret: $('#btnInterpret'),
+      btnClear: $('#btnClear'),
+      apiKeysModal: $('#apiKeysModal'),
+      openApiBtn: $('#openApiKeysModalButton'),
+      closeApiBtn: $('#closeApiKeysModalButton'),
+      geminiInput: $('#geminiApiKeyInputModal'),
+      geminiSave: $('#saveGeminiKey'),
+      apiStatusText: $('#apiStatusText'),
+      status: $('#status'),
+      result: $('#result'),
+      ctxPreview: $('#ctxPreview'),
+      docDrop: $('#docDrop'),
+      docInput: $('#docInput'),
+      btnSelectDocs: $('#btnSelectDocs'),
+      docList: $('#docList'),
+      imgDrop: $('#imgDrop'),
+      imgInput: $('#imgInput'),
+      btnSelectImgs: $('#btnSelectImgs'),
+      imgList: $('#imgList'),
+      toggleDiary: $('#toggleDiary'),
+      includeDiary: $('#includeDiary'),
+      btnCopy: $('#btnCopy'),
+      btnExport: $('#btnExport')
+    };
+
+    function updateApiBadge() {
+      el.apiStatusText.textContent = GEMINI_KEY ? 'definida' : 'não definida';
+      el.apiStatusText.style.color = GEMINI_KEY ? '#22c55e' : '#f59e0b';
+    }
+    updateApiBadge();
+
+    // ====== Modal API Key ======
+    el.openApiBtn?.addEventListener('click', ()=> el.apiKeysModal.classList.remove('hidden'));
+    el.closeApiBtn?.addEventListener('click', ()=> el.apiKeysModal.classList.add('hidden'));
+    el.geminiSave?.addEventListener('click', ()=>{
+      const key = el.geminiInput.value.trim();
+      if(!key){ alert('Informe a API Key do Gemini.'); return; }
+      localStorage.setItem(API_KEY_STORAGE_KEY, key);
+      GEMINI_KEY = key;
+      updateApiBadge();
+      el.apiKeysModal.classList.add('hidden');
+    });
+
+    // ====== Diário local ======
+    const DIARY_KEY = 'capySonhosDiary';
+    function addToDiary(entry){
+      try{
+        const arr = JSON.parse(localStorage.getItem(DIARY_KEY) || '[]');
+        arr.unshift({ ts: Date.now(), dream: entry });
+        localStorage.setItem(DIARY_KEY, JSON.stringify(arr.slice(0,200)));
+      }catch(e){}
+    }
+    function getDiaryContext(limit=8){
+      try{
+        const arr = JSON.parse(localStorage.getItem(DIARY_KEY) || '[]');
+        return arr.slice(0,limit).map(i => `• ${new Date(i.ts).toLocaleString()}: ${i.dream}`).join('\n');
+      }catch(e){ return ''; }
+    }
+
+    // ====== Uploads e extração ======
+    const docs = [];  // {name, type, text}
+    const imgs = [];  // {name, dataUrl, ocrText}
+
+    function makeItemLine(name, extra=''){
+      const p = document.createElement('p');
+      p.className = 'mini text-zinc-300 flex items-center gap-2';
+      p.innerHTML = `<i class="fa-regular fa-file-lines"></i> <span class="truncate">${name}</span> ${extra ? `<span class="text-zinc-500">— ${extra}</span>`:''}`;
+      return p;
+    }
+
+    // DOCS
+    el.btnSelectDocs.addEventListener('click', ()=> el.docInput.click());
+    el.docDrop.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('dragover'); });
+    el.docDrop.addEventListener('dragleave', e => e.currentTarget.classList.remove('dragover'));
+    el.docDrop.addEventListener('drop', e => {
+      e.preventDefault(); e.currentTarget.classList.remove('dragover');
+      handleDocs(e.dataTransfer.files);
+    });
+    el.docInput.addEventListener('change', e => handleDocs(e.target.files));
+
+    async function handleDocs(fileList){
+      for(const file of fileList){
+        if(!/\.(pdf|docx|txt)$/i.test(file.name)) continue;
+        const rec = { name:file.name, type:file.type || 'application/octet-stream', text:'' };
+        el.docList.appendChild(makeItemLine(file.name, 'lendo...'));
+
+        if(/\.pdf$/i.test(file.name)) rec.text = await readPdf(file);
+        else if(/\.docx$/i.test(file.name)) rec.text = await readDocx(file);
+        else if(/\.txt$/i.test(file.name)) rec.text = await readTxt(file);
+
+        docs.push(rec);
+        const last = el.docList.lastElementChild; if(last) last.remove();
+        el.docList.appendChild(makeItemLine(file.name, `${(rec.text||'').slice(0,60)}${rec.text.length>60?'…':''}`));
+        refreshContextPreview();
+      }
+    }
+
+    async function readTxt(file){
+      return new Promise(res=>{
+        const fr = new FileReader();
+        fr.onload = () => res(String(fr.result||''));
+        fr.readAsText(file, 'utf-8');
+      });
+    }
+
+    async function readDocx(file){
+      const arrayBuf = await file.arrayBuffer();
+      const { value } = await window.mammoth.extractRawText({ arrayBuffer: arrayBuf });
+      return value || '';
+    }
+
+    async function readPdf(file){
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let full = '';
+      for(let p=1; p<=pdf.numPages; p++){
+        const page = await pdf.getPage(p);
+        const txt = await page.getTextContent();
+        const line = txt.items.map(i => i.str).join(' ');
+        full += '\n' + line;
+      }
+      return full.trim();
+    }
+
+    // IMAGENS (OCR)
+    el.btnSelectImgs.addEventListener('click', ()=> el.imgInput.click());
+    el.imgDrop.addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('dragover'); });
+    el.imgDrop.addEventListener('dragleave', e => e.currentTarget.classList.remove('dragover'));
+    el.imgDrop.addEventListener('drop', e => {
+      e.preventDefault(); e.currentTarget.classList.remove('dragover');
+      handleImgs(e.dataTransfer.files);
+    });
+    el.imgInput.addEventListener('change', e => handleImgs(e.target.files));
+
+    async function handleImgs(fileList){
+      for(const file of fileList){
+        if(!file.type.startsWith('image/')) continue;
+        if(imgs.length >= MAX_IMG) { alert('Limite de 10 imagens.'); break; }
+        const dataUrl = await fileToDataURL(file);
+        const item = { name:file.name, dataUrl, ocrText:'(extraindo...)' };
+        imgs.push(item);
+        renderImgThumbs();
+        // OCR assíncrono
+        try{
+          const workerRes = await Tesseract.recognize(dataUrl, 'por+eng', {logger:()=>{}});
+          item.ocrText = (workerRes.data.text || '').trim();
+        }catch(e){
+          item.ocrText = '';
+        }
+        renderImgThumbs();
+        refreshContextPreview();
+      }
+    }
+
+    function renderImgThumbs(){
+      el.imgList.innerHTML = '';
+      imgs.forEach((it, idx)=>{
+        const wrap = document.createElement('div');
+        wrap.className = 'relative';
+        wrap.innerHTML = `
+          <img src="${it.dataUrl}" alt="" class="w-full h-16 object-cover rounded-md border border-white/10"/>
+          <span class="absolute bottom-1 left-1 bg-black/60 text-[10px] px-1 rounded">${idx+1}</span>
+          <button class="absolute -top-2 -right-2 bg-black/70 border border-white/15 rounded-full w-6 h-6 text-xs">×</button>
+        `;
+        wrap.querySelector('button').onclick = ()=>{
+          imgs.splice(idx,1);
+          renderImgThumbs();
+          refreshContextPreview();
+        };
+        el.imgList.appendChild(wrap);
+      });
+    }
+
+    function fileToDataURL(file){ return new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(file); }); }
+
+    // ====== Prompt ======
+    function buildSystemPrompt(){
+      return `Você é um renomado interpretador de sonhos com acesso a arquivos de conhecimento sobre simbologia onírica.
+Diante da descrição de um sonho, sua missão é realizar uma análise aprofundada e oferecer uma interpretação significativa e fácil de entender.
+
+Diretrizes:
+1) Pesquise símbolos/arquétipos no contexto fornecido (arquivos anexos, OCR e diário, se houver).
+2) Faça interpretação considerando aspectos psicológicos, emocionais e espirituais.
+3) Linguagem simples, com analogias e exemplos.
+4) Reconheça a subjetividade e adapte ao contexto do usuário.
+5) Não faça previsões nem aconselhamento médico/psicológico.
+6) Formato: Introdução breve; Análise detalhada (tópicos); Conclusão com 3-5 pontos práticos.`;
+    }
+
+    function aggregateContext(){
+      const parts = [];
+      if(docs.length){
+        parts.push('### Arquivos de Texto (PDF/DOCX/TXT)\n' + docs.map(d=>`- ${d.name}\n${(d.text||'').slice(0,4000)}`).join('\n\n'));
+      }
+      if(imgs.length){
+        parts.push('### OCR de Imagens\n' + imgs.map((im,i)=>`- [${i+1}] ${im.name}\n${(im.ocrText||'').slice(0,3000)}`).join('\n\n'));
+      }
+      if(el.includeDiary.checked){
+        const diary = getDiaryContext(8);
+        if(diary) parts.push('### Diário Local (últimos)\n' + diary);
+      }
+      return parts.join('\n\n').trim();
+    }
+
+    function refreshContextPreview(){
+      el.ctxPreview.textContent = aggregateContext() || '(sem contexto adicional)';
+    }
+
+    // ====== Chamada Gemini ======
+    async function callGemini(promptSystem, dreamText, contextText){
+      if(!GEMINI_KEY) throw new Error('API Key Gemini não definida.');
+      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(GEMINI_KEY);
+
+      const input = [
+        { role: 'user', parts: [{text: promptSystem}] },
+        { role: 'user', parts: [{text: `Contexto adicional (use para pesquisa simbólica):\n${contextText || '(nenhum)'}\n\n---\nSonho do usuário:\n${dreamText}`} ] }
+      ];
+
+      const body = { contents: input, generationConfig: { temperature: 0.7, top_p: 0.9, maxOutputTokens: 1024 } };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify(body)
+      });
+      if(!res.ok){
+        const t = await res.text().catch(()=> '');
+        throw new Error('Falha Gemini: '+res.status+' '+t);
+      }
+      const data = await res.json();
+      const out = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || '(sem resposta)';
+      return out;
+    }
+
+    // ====== Ações ======
+    el.btnClear.addEventListener('click', ()=>{
+      el.dream.value = '';
+      docs.splice(0,docs.length);
+      imgs.splice(0,imgs.length);
+      el.docList.innerHTML = '';
+      el.imgList.innerHTML = '';
+      el.result.innerHTML = '';
+      el.ctxPreview.textContent = '';
+      el.status.textContent = 'Pronto para analisar ✨';
+    });
+
+    el.btnCopy.addEventListener('click', async ()=>{
+      const txt = el.result.textContent || '';
+      if(!txt.trim()) return;
+      await navigator.clipboard.writeText(txt);
+      el.status.textContent = 'Interpretação copiada para a área de transferência.';
+      setTimeout(()=> el.status.textContent = 'Pronto para analisar ✨', 2000);
+    });
+
+    el.btnExport.addEventListener('click', ()=>{
+      const md = el.result.dataset.md || '';
+      if(!md.trim()) return;
+      const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'capysonhos_interpretacao.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    el.btnInterpret.addEventListener('click', async ()=>{
+      try{
+        const dream = (el.dream.value || '').trim();
+        if(!dream){ alert('Descreva seu sonho primeiro.'); return; }
+        if(!GEMINI_KEY){ alert('Defina a API Key do Gemini (ícone 🔑).'); return; }
+
+        // salvar no diário se marcado
+        if(el.toggleDiary.checked) addToDiary(dream);
+
+        const ctx = aggregateContext();
+        refreshContextPreview();
+
+        const sys = buildSystemPrompt();
+        el.status.textContent = 'Analisando sonho com IA…';
+        el.btnInterpret.disabled = true; el.btnInterpret.style.opacity = .7;
+
+        const raw = await callGemini(sys, dream, ctx);
+        const md = raw.trim();
+        el.result.dataset.md = md;
+        el.result.innerHTML = marked.parse(md);
+        el.status.textContent = 'Interpretação concluída.';
+      }catch(err){
+        console.error(err);
+        el.status.textContent = 'Erro: '+ (err?.message || err);
+      }finally{
+        el.btnInterpret.disabled = false; el.btnInterpret.style.opacity = 1;
+      }
+    });
+
+    // Mostrar contexto inicial vazio
+    refreshContextPreview();
+  </script>
+</body>
+</html>
