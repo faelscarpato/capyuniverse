@@ -312,7 +312,7 @@
     </div>
   </div>
 
-    <div id="modalInfo" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="closeModal('modalInfo')">
+      <!-- FIM BLOCO NOVO <div id="modalInfo" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="closeModal('modalInfo')">
      <div class="bg-[#13131f] border border-white/10 p-6 rounded-2xl w-full max-w-sm relative" onclick="event.stopPropagation()">
         <h3 class="text-lg font-bold text-white mb-2">Sobre o OS</h3>
         <p class="text-gray-400 text-sm mb-4">CapyUniverse v4.0. Um sistema operacional de agentes descentralizados rodando localmente no seu navegador.</p>
@@ -320,7 +320,55 @@
             <a href="https://github.com/faelscarpato" target="_blank" class="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white text-sm text-center">GitHub</a>
             <button onclick="closeModal('modalInfo')" class="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm">Fechar</button>
         </div>
+    </div> -->
+
+      <div id="modalInfo" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="closeModal('modalInfo')">
+  <div class="bg-[#13131f] border border-white/10 p-6 rounded-2xl w-full max-w-sm relative" onclick="event.stopPropagation()">
+    <h3 class="text-lg font-bold text-white mb-2">Sobre o OS</h3>
+    <p class="text-gray-400 text-sm mb-4">
+      CapyUniverse v4.0. Um sistema operacional de agentes descentralizados rodando localmente no seu navegador.
+    </p>
+
+    <!-- BLOCO NOVO: links de Política & Termos -->
+    <div class="mb-4 rounded-xl bg-white/5 border border-white/10 p-3">
+      <p class="text-[11px] uppercase tracking-wide text-gray-400 mb-2">
+        Documentos legais
+      </p>
+      <div class="flex flex-col gap-2">
+        <a
+          href="politica-privacidade.html"
+          class="w-full py-2 rounded-lg text-sm font-medium text-white text-center bg-gradient-to-r from-cyan-500/80 to-purple-500/80 hover:from-cyan-400 hover:to-purple-400 transition-colors"
+        >
+          Política de Privacidade
+        </a>
+        <a
+          href="termos-servico.html"
+          class="w-full py-2 rounded-lg text-sm font-medium text-gray-200 text-center bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+        >
+          Termos de Serviço
+        </a>
+      </div>
     </div>
+    <!-- FIM BLOCO NOVO -->
+
+    <div class="flex gap-2">
+      <a
+        href="https://github.com/faelscarpato"
+        target="_blank"
+        class="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white text-sm text-center"
+      >
+        GitHub
+      </a>
+      <button
+        onclick="closeModal('modalInfo')"
+        class="flex-1 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm"
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+</div>
+
 
   <script>
     // --- LÓGICA PRINCIPAL ---
@@ -539,3 +587,4 @@
   </script>
 </body>
 </html>
+
