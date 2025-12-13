@@ -1,4 +1,14 @@
 [
+{
+    "id": "cappydavinci",
+    "title": "CapyDaVinci",
+    "imageUrl": "img/capyapmaker.webp",
+    "description": "Gere aplicativos e ideias únicas com DaVinci, sob demanda.",
+    "category": "Desenvolvimento & TI",
+    "pageUrl": "geniodavinci.html",
+    "color": "purple-400",
+    "iconUrl": "img/logo.png"
+  },
   {
     "id": "capyappmaker",
     "title": "CapyAppmaker",
