@@ -1,5 +1,15 @@
 [
 {
+    "id": "capybusca",
+    "title": "CapyDeepBusca",
+    "imageUrl": "img/capyapmaker.webp",
+    "description": "Faça pesquisas profundas e aprenda com elas.",
+    "category": "Desenvolvimento & TI",
+    "pageUrl": "deepsearch.html",
+    "color": "purple-400",
+    "iconUrl": "img/logo.png"
+  },
+{
     "id": "cappydavinci",
     "title": "CapyDaVinci",
     "imageUrl": "img/capyapmaker.webp",
