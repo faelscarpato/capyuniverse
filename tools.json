@@ -1,4 +1,14 @@
 [
+    {
+    "id": "auracode",
+    "title": "AuraCode",
+    "imageUrl": "img/capyapmaker.webp",
+    "description": "Crie software com Inteligência.",
+    "category": "Desenvolvimento & TI",
+    "pageUrl": "auracode.html",
+    "color": "purple-400",
+    "iconUrl": "img/logo.png"
+  },
 {
     "id": "capybusca",
     "title": "CapyDeepBusca",
