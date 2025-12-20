@@ -238,11 +238,49 @@ padding-right: 54px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-  <!-- gtag -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3FFD7ZEBN1"></script>
-  <script>
-    window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
-    gtag('js', new Date()); gtag('config','G-3FFD7ZEBN1',{page_path:location.pathname});
+  <!-- GA4 (CapyUniverse) - medição correta / sem DEV -->
+<script>
+(() => {
+  const GA_ID = "G-3FFD7ZEBN1";
+
+  const host = location.hostname;
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.endsWith(".local");
+
+  const isHttp = location.protocol === "http:" || location.protocol === "https:";
+  const isProd = isHttp && !isLocal; // se quiser incluir staging, ajusta aqui
+
+  window.__capyAnalytics = { enabled: isProd, id: GA_ID };
+  if (!isProd) return; // não mede dev/local (zera o ruído)
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+
+  // carrega o gtag.js dinamicamente
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+  document.head.appendChild(s);
+
+  gtag("js", new Date());
+
+  // IMPORTANTÍSSIMO: evita page_view automático duplicar / bagunçar SPA
+  gtag("config", GA_ID, {
+    send_page_view: false,
+    anonymize_ip: true
+  });
+
+  // (opcional) se você quiser marcar sessões internas via toggle:
+  // localStorage.setItem("GA_INTERNAL","1")  -> marca como internal
+  // localStorage.removeItem("GA_INTERNAL")  -> normal
+  if (localStorage.getItem("GA_INTERNAL") === "1") {
+    gtag("set", { traffic_type: "internal" });
+  }
+})();
+
   </script>
 </head>
 <body class="selection:bg-purple-500/30 selection:text-white">
@@ -438,7 +476,31 @@ padding-right: 54px;
             { "id": "CapyVisaoCriativa", "title": "Visão Criativa", "description": "Marketing visual.", "pageUrl": "capyvisao.html", "category": "Mídia & Marketing", "color": "purple-400" },
             { "id": "CapyWatermark", "title": "Marca D'água", "description": "Proteja imagens.", "pageUrl": "capywatermark.html", "category": "Criação & Conteúdo", "color": "cyan-400" }
         ];
+// --- ANALYTICS (GA4) ---
+let __capyLastView = null;
 
+function capyEvent(name, params = {}) {
+  if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
+  window.gtag("event", name, params);
+}
+
+function capyTrackView(view) {
+  if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
+  if (__capyLastView === view) return; // evita duplicar quando re-render/closeApp chama navigate('home')
+  __capyLastView = view;
+
+  const titles = { home: "Início", hub: "Hub", tempo: "Tempo", config: "Ajustes" };
+  const label = titles[view] || view;
+
+  const virtualPath = location.pathname + "#" + view;
+  const virtualLocation = location.origin + virtualPath;
+
+  window.gtag("event", "page_view", {
+    page_title: `CapyUniverse | ${label}`,
+    page_path: virtualPath,
+    page_location: virtualLocation
+  });
+}
         // --- FUNÇÕES AUXILIARES ---
         function getIcon(tool) {
             const idMap = {
@@ -853,9 +915,16 @@ padding-right: 54px;
         }
 
         function saveKey() {
-            State.setApiKey(document.getElementById('api-input').value);
-            alert('Salvo!');
-        }
+  const key = document.getElementById('api-input').value;
+  State.setApiKey(key);
+
+  capyEvent("api_key_save", {
+    provider: "gemini",
+    has_key: !!key && key.length > 10
+  });
+
+  alert('Salvo!');
+}
 
         // --- INICIALIZAÇÃO SEGURA ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -870,9 +939,9 @@ padding-right: 54px;
             // Garante que os ícones carreguem após um pequeno delay
             setTimeout(() => {
                 if (window.lucide) lucide.createIcons();
+capyTrackView(view);
             }, 100);
         });
     </script>
 </body>
 </html>
-
