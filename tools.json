@@ -1,4 +1,14 @@
 [
+     {
+    "id": "capyuni",
+    "title": "CapyUNI - Codium",
+    "imageUrl": "img/capyapmaker.webp",
+    "description": "IDE versatil, Mobile e Desktop - em teste",
+    "category": "Desenvolvimento & TI",
+    "pageUrl": "capyuni.html",
+    "color": "purple-400",
+    "iconUrl": "img/logo.png"
+  },
     {
     "id": "genios",
     "title": "Genios Ideais",
