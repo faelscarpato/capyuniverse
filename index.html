@@ -1,3 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CapyUniverse | Agent OS</title>
+     <meta name="description" content="O Sistema Operacional para seus Agentes de IA.">
+    <link rel="icon" type="image/webp" href="img/logo.webp">  
+  <link rel="manifest" href="manifest.webmanifest">
+  <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+  <style>
+        /* --- CORE STYLES --- */
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            overscroll-behavior: none;
+            background-color: #000;
+            color: #f5f5f7;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- INTRO / LOADING SCREEN STYLES --- */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999; /* Acima de tudo */
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
+        }
+
+        /* Fundo com efeito de estrelas sutis */
+        #boot-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(white 1px, transparent 1px),
+                radial-gradient(rgba(147, 51, 234, 0.5) 1px, transparent 1px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            opacity: 0.1;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        }
+
+        /* Logo Pulsante */
+        .intro-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00aeff, #8d00c4);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); transform: scale(1); }
+            100% { box-shadow: 0 0 60px rgba(168, 85, 247, 0.6); transform: scale(1.05); }
+        }
+
+        /* Texto com efeito Glitch/Typing */
+        .intro-text {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 10;
+        }
+
+        .intro-sub {
+            font-size: 0.75rem;
+            color: #6b7280;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Barra de Progresso Futurista */
+        .loader-track {
+            width: 200px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .loader-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #b530a0);
+            box-shadow: 0 0 10px #a855f7;
+            transition: width 2.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* --- CLASSE PARA ESCONDER O LOADER --- */
+        .boot-hidden {
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+
+        /* --- RESTO DO SISTEMA (GLASSMOPHISM) --- */
+        #main-bg {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #000 80%);
+            background-size: cover;
+            z-index: -1;
+        }
+
+        #main-scroll-container {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 120px;
+        }
+
+        .glass-panel {
+            background: rgba(30, 30, 32, 0.6);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-nav {
+            background: rgba(15, 15, 17, 0.103);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 50;
+        }
+
+       @media (min-width: 768px) {
+            .glass-nav {
+                border-top: none;
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+            }
+body{padding-right: 54px;}
+            #main-scroll-container {
+                padding-bottom: 2rem; /* Menos padding no desktop */
+            }
+        }
+
+        .nav-btn.active {
+            background-color: rgba(255, 255, 255, 0.075);
+            color: #cc00ff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .interactive-card { transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .interactive-card:active { transform: scale(0.98); }
+        @media (hover: hover) {
+            .interactive-card:hover {
+                transform: translateY(-6px) scale(1.02);
+                background: rgba(60, 60, 65, 0.226);
+                border-color: rgba(255, 255, 255, 0.25);
+            }
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* App Window */
+        #app-window {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 60;
+            background: #09091b7e;
+            transform: translateY(110%);
+            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        @media (min-width: 768px) {
+            #app-window {
+                left: 8rem; top: 1rem; bottom: 1rem; right: 1rem;
+                border-radius: 24px;
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: -20px 0 50px rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+        }
+
+        #app-window.open {
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; background: transparent; }
+
+        .loader {
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 2px solid #a855f7;
+            width: 20px; height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  <!-- GA4 (CapyUniverse) - medição correta / sem DEV -->
+<script>
+(() => {
+  const GA_ID = "G-3FFD7ZEBN1";
+
+  const host = location.hostname;
+  const isLocal =
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.endsWith(".local");
+
+  const isHttp = location.protocol === "http:" || location.protocol === "https:";
+  const isProd = isHttp && !isLocal; // se quiser incluir staging, ajusta aqui
+
+  window.__capyAnalytics = { enabled: isProd, id: GA_ID };
+  if (!isProd) return; // não mede dev/local (zera o ruído)
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  window.gtag = gtag;
+
+  // carrega o gtag.js dinamicamente
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+  document.head.appendChild(s);
+
+  gtag("js", new Date());
+
+  // IMPORTANTÍSSIMO: evita page_view automático duplicar / bagunçar SPA
+  gtag("config", GA_ID, {
+    send_page_view: false,
+    anonymize_ip: true
+  });
+
+  // (opcional) se você quiser marcar sessões internas via toggle:
+  // localStorage.setItem("GA_INTERNAL","1")  -> marca como internal
+  // localStorage.removeItem("GA_INTERNAL")  -> normal
+  if (localStorage.getItem("GA_INTERNAL") === "1") {
+    gtag("set", { traffic_type: "internal" });
+  }
+})();
+
+  </script>
+</head>
+<body class="selection:bg-purple-500/30 selection:text-white">
+
+    <div id="boot-screen">
+        <div class="intro-logo">
+            <i data-lucide="zap" class="w-10 h-10 text-white fill-white"></i>
+        </div>
+        <div class="intro-text">CapyUniverse</div>
+        <div class="intro-sub">INITIALIZING SYSTEM v3.0</div>
+        
+        <div class="loader-track">
+            <div id="intro-bar" class="loader-bar"></div>
+        </div>
+    </div>
+
+    <div id="main-bg"></div>
+
+    <nav class="fixed bottom-0 w-full md:w-24 md:h-full md:left-0 glass-nav flex md:flex-col justify-between items-center px-6 py-4 md:py-8 transition-all duration-300">
+        <div class="hidden md:flex flex-col items-center gap-1 mb-8 cursor-pointer group" onclick="if(document.getElementById('app-window').classList.contains('open')) closeApp(); else navigate('home')">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-purple-900/20 group-hover:shadow-purple-500/40 transition-shadow">
+                <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
+            </div>
+        </div>
+
+        <div class="flex md:flex-col w-full md:w-auto justify-between md:justify-center md:gap-8 items-center">
+            <button onclick="navigate('home')" id="btn-home" class="nav-btn active p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
+                <i data-lucide="home" class="w-6 h-6 md:w-5 md:h-5"></i>
+            </button>
+            <button onclick="navigate('hub')" id="btn-hub" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
+                <i data-lucide="layout-grid" class="w-6 h-6 md:w-5 md:h-5"></i>
+            </button>
+            <button onclick="navigate('tempo')" id="btn-tempo" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
+                <i data-lucide="history" class="w-6 h-6 md:w-5 md:h-5"></i>
+            </button>
+            <button onclick="navigate('config')" id="btn-config" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group md:mt-auto relative">
+                <i data-lucide="settings" class="w-6 h-6 md:w-5 md:h-5"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 md:ml-24 h-full w-full">
+        <div id="main-scroll-container" class="p-6 md:p-12 w-full">
+            <div class="max-w-7xl mx-auto w-full min-h-full flex flex-col">
+                
+                <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 mt-4 md:mt-0 fade-in">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
+                            <p class="text-xs font-bold tracking-widest text-gray-500 uppercase">CapyUniverse OS</p>
+                        </div>
+                        <h1 id="page-title" class="text-3xl md:text-5xl font-semibold tracking-tight text-gradient">Bem-vindo</h1>
+                    </div>
+                    
+                    <div id="search-container" class="w-full md:w-96 relative group hidden fade-in">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="search" class="text-gray-500 w-4 h-4 group-focus-within:text-white transition-colors"></i>
+                        </div>
+                        <input type="text" id="global-search" oninput="filterHub()"
+                            class="w-full glass-panel rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all hover:bg-white/5"
+                            placeholder="Buscar ferramenta...">
+                    </div>
+                </header>
+
+                <div id="content-area" class="flex-1 fade-in"></div>
+
+                <footer class="mt-auto pt-12 pb-8 border-t border-white/5 text-center md:text-left text-xs text-gray-600">
+                    <p>&copy; 2024 CapyUniverse. Mobile Optimized.</p>
+                </footer>
+            </div>
+        </div>
+    </main>
+
+    <div id="app-window">
+        <div class="h-14 glass-panel border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-10 shrink-0 md:rounded-t-[24px]">
+            <div class="flex items-center gap-3">
+                <button onclick="closeApp()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <div class="h-4 w-[1px] bg-white/10"></div>
+                <div class="flex items-center gap-2">
+                    <span id="app-icon-display" class="text-purple-400"></span>
+                    <span id="app-title-display" class="font-medium text-white text-sm line-clamp-1">Carregando...</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1">
+                <div id="app-loader" class="loader hidden mr-2"></div>
+                <button onclick="reloadApp()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+        
+        <iframe id="tool-frame" src="about:blank" allow="clipboard-read; clipboard-write; microphone; camera; geolocation"></iframe>
+    </div>
+
+
 <script>
   // --- CONFIGURAÇÃO E DADOS ---
   const toolsData = [
