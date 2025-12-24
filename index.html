@@ -1,951 +1,618 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>CapyUniverse | Agent OS</title>
-     <meta name="description" content="O Sistema Operacional para seus Agentes de IA.">
-    <link rel="icon" type="image/webp" href="img/logo.webp">  
-  <link rel="manifest" href="manifest.webmanifest">
-  <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-  <style>
-        /* --- CORE STYLES --- */
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
-            overscroll-behavior: none;
-            background-color: #000;
-            color: #f5f5f7;
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* --- INTRO / LOADING SCREEN STYLES --- */
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999; /* Acima de tudo */
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.8s ease;
-        }
-
-        /* Fundo com efeito de estrelas sutis */
-        #boot-screen::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: 
-                radial-gradient(white 1px, transparent 1px),
-                radial-gradient(rgba(147, 51, 234, 0.5) 1px, transparent 1px);
-            background-size: 50px 50px;
-            background-position: 0 0, 25px 25px;
-            opacity: 0.1;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
-        }
-
-        /* Logo Pulsante */
-        .intro-logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #00aeff, #8d00c4);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-            animation: pulse-glow 2s infinite alternate;
-            margin-bottom: 2rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); transform: scale(1); }
-            100% { box-shadow: 0 0 60px rgba(168, 85, 247, 0.6); transform: scale(1.05); }
-        }
-
-        /* Texto com efeito Glitch/Typing */
-        .intro-text {
-            font-family: monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 4px;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            position: relative;
-            z-index: 10;
-        }
-
-        .intro-sub {
-            font-size: 0.75rem;
-            color: #6b7280;
-            letter-spacing: 2px;
-            margin-bottom: 3rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Barra de Progresso Futurista */
-        .loader-track {
-            width: 200px;
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-            border-radius: 4px;
-        }
-
-        .loader-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #6366f1, #a855f7, #b530a0);
-            box-shadow: 0 0 10px #a855f7;
-            transition: width 2.5s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        /* --- CLASSE PARA ESCONDER O LOADER --- */
-        .boot-hidden {
-            transform: translateY(-100%);
-            pointer-events: none;
-        }
-
-        /* --- RESTO DO SISTEMA (GLASSMOPHISM) --- */
-        #main-bg {
-            position: fixed;
-            inset: 0;
-            background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #000 80%);
-            background-size: cover;
-            z-index: -1;
-        }
-
-        #main-scroll-container {
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 120px;
-        }
-
-        .glass-panel {
-            background: rgba(30, 30, 32, 0.6);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .glass-nav {
-            background: rgba(15, 15, 17, 0.103);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 50;
-        }
-
-       @media (min-width: 768px) {
-            .glass-nav {
-                border-top: none;
-                border-right: 1px solid rgba(255, 255, 255, 0.1);
-            }
-body{padding-right: 54px;}
-            #main-scroll-container {
-                padding-bottom: 2rem; /* Menos padding no desktop */
-            }
-        }
-
-        .nav-btn.active {
-            background-color: rgba(255, 255, 255, 0.075);
-            color: #cc00ff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-        }
-
-        .interactive-card { transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .interactive-card:active { transform: scale(0.98); }
-        @media (hover: hover) {
-            .interactive-card:hover {
-                transform: translateY(-6px) scale(1.02);
-                background: rgba(60, 60, 65, 0.226);
-                border-color: rgba(255, 255, 255, 0.25);
-            }
-        }
-
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        .text-gradient {
-            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            opacity: 0;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* App Window */
-        #app-window {
-            position: fixed;
-            top: 0; right: 0; bottom: 0; left: 0;
-            z-index: 60;
-            background: #09091b7e;
-            transform: translateY(110%);
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-            display: flex;
-            flex-direction: column;
-            pointer-events: none;
-        }
-
-        @media (min-width: 768px) {
-            #app-window {
-                left: 8rem; top: 1rem; bottom: 1rem; right: 1rem;
-                border-radius: 24px;
-                border: 1px solid rgba(255,255,255,0.1);
-                box-shadow: -20px 0 50px rgba(0,0,0,0.5);
-                z-index: 40;
-            }
-        }
-
-        #app-window.open {
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        iframe { width: 100%; height: 100%; border: none; background: transparent; }
-
-        .loader {
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top: 2px solid #a855f7;
-            width: 20px; height: 20px;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-  <!-- GA4 (CapyUniverse) - medição correta / sem DEV -->
 <script>
-(() => {
-  const GA_ID = "G-3FFD7ZEBN1";
+  // --- CONFIGURAÇÃO E DADOS ---
+  const toolsData = [
+    { "id": "capyuni", "title": "CapyUNI V.2 - Codium", "description": "IDE versatil, Mobile e Desktop - Versão 2.0 - em teste.", "category": "Desenvolvimento & TI", "pageUrl": "capyuni.html", "color": "purple-400" },
+    { "id": "capystudio", "title": "Creative Studio", "description": "Geração de assets visuais e design.", "category": "Mídia & Marketing", "pageUrl": "capystudio.html", "color": "cyan-400" },
+    { "id": "cappydavinci", "title": "CapyDaVinci", "description": "Gere aplicativos e ideias únicas.", "category": "Desenvolvimento & TI", "pageUrl": "geniodavinci.html", "color": "purple-400" },
+    { "id": "CapyPrompt", "title": "Prompt Eng", "description": "Engenharia de prompts.", "category": "Desenvolvimento & TI", "pageUrl": "capyprompt.html", "color": "purple-400" },
+    { "id": "capyappmaker", "title": "CapyAppmaker", "description": "Gere aplicativos funcionais.", "category": "Desenvolvimento & TI", "pageUrl": "capyapmaker.html", "color": "purple-400" },
+    { "id": "capyimg", "title": "CapyIMG", "description": "Gerador de imagens.", "category": "Criação & Conteúdo", "pageUrl": "capyimg.html", "color": "purple-400" },
+    { "id": "CapyIMG/TXT", "title": "Img to Text", "description": "Gere prompts de imagens.", "category": "Desenvolvimento & TI", "pageUrl": "capyimgtxt.html", "color": "purple-400" },
+    { "id": "CapyLanding", "title": "Landing Page", "description": "Gerador de páginas.", "pageUrl": "capylanding.html", "category": "Mídia & Marketing", "color": "violet-400" },
 
-  const host = location.hostname;
-  const isLocal =
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host.endsWith(".local");
+    { "id": "CapyAto", "title": "CapyAto", "description": "Controle ações jurídicas por voz.", "category": "Jurídico", "pageUrl": "capyato.html", "color": "indigo-400" },
+    { "id": "CapyAudiencias", "title": "Analisador de Atas", "description": "Analise atas de audiência.", "category": "Jurídico", "pageUrl": "capyaudiencias.html", "color": "indigo-400" },
 
-  const isHttp = location.protocol === "http:" || location.protocol === "https:";
-  const isProd = isHttp && !isLocal; // se quiser incluir staging, ajusta aqui
+    { "id": "CapyBranding", "title": "CapyBranding", "pageUrl": "capybranding.html", "description": "Consultas sobre identidade visual.", "category": "Mídia & Marketing", "color": "blue-400" },
+    { "id": "CapyBula", "title": "Bulário Inteligente", "description": "Consulte informações de medicamentos.", "category": "Saúde & Bem-Estar", "pageUrl": "capybula.html", "color": "blue-400" },
+    { "id": "capybussola", "title": "Capy Bussola", "description": "Tome melhor suas decisões.", "category": "Desenvolvimento & TI", "pageUrl": "capybussola.html", "color": "purple-400" },
 
-  window.__capyAnalytics = { enabled: isProd, id: GA_ID };
-  if (!isProd) return; // não mede dev/local (zera o ruído)
+    { "id": "CapyByte", "title": "Oráculo Tech", "description": "Diagnósticos e soluções tech.", "category": "Desenvolvimento & TI", "pageUrl": "capybyte.html", "color": "orange-400" },
+    { "id": "CapyCaption", "title": "CapyCaption", "description": "Gere legendas para redes.", "pageUrl": "capycaption.html", "category": "Mídia & Marketing", "color": "pink-400" },
+    { "id": "CapyChart", "title": "Dashboard IA", "description": "Transforme dados em gráficos.", "category": "Dados & Analytics", "pageUrl": "capychart.html", "color": "blue-400" },
+    { "id": "CapyChat", "title": "Chat Geral", "description": "Converse sobre qualquer tópico.", "category": "Produtividade", "pageUrl": "capychat.html", "color": "violet-400" },
+    { "id": "CapyCID", "title": "Info CID", "description": "Informe-se sobre CIDs médicos.", "category": "Saúde & Bem-Estar", "pageUrl": "capycid.html", "color": "blue-400" },
 
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){ dataLayer.push(arguments); }
-  window.gtag = gtag;
+    { "id": "CapyCLT", "title": "CapyCLT", "description": "Converse com as leis trabalhistas.", "category": "Jurídico", "pageUrl": "capyclt.html", "color": "pink-400" },
+    { "id": "CapyConciliaFacil", "title": "Conciliador", "description": "Sugestões para acordos.", "category": "Jurídico", "pageUrl": "capyconciliador.html", "color": "indigo-400" },
 
-  // carrega o gtag.js dinamicamente
-  const s = document.createElement("script");
-  s.async = true;
-  s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
-  document.head.appendChild(s);
+    { "id": "CapyContos", "title": "Narrativas", "description": "Crie histórias interativas.", "category": "Escrita & Storytelling", "pageUrl": "capycontos.html", "color": "amber-400" },
+    { "id": "CapyContrato", "title": "Contratos", "description": "Crie modelos de contrato.", "category": "Documentos & Leitura", "pageUrl": "capycontrato.html", "color": "violet-400" },
+    { "id": "CapyConverter", "title": "CapyConverter", "description": "Converta arquivos.", "pageUrl": "capyconverter.html", "category": "Documentos & Leitura", "color": "emerald-400" },
+    { "id": "CapyCopywriterAds", "title": "Gerador de Copy", "description": "Textos de anúncio que vendem.", "category": "Mídia & Marketing", "pageUrl": "capycopy.html", "color": "pink-400" },
+    { "id": "CapyCronosLegal", "title": "Prazos Legais", "description": "Gerenciamento de prazos.", "category": "Jurídico", "pageUrl": "capycronos.html", "color": "amber-400" },
+    { "id": "CapyCSV", "title": "CapyCSV", "description": "Limpeza de CSV/XLSX.", "pageUrl": "capycsv.html", "category": "Dados & Analytics", "color": "emerald-400" },
+    { "id": "CapyCurriculo", "title": "CV Otimizer", "description": "Melhore seu currículo.", "category": "Produtividade", "pageUrl": "capycurriculo.html", "color": "sky-400" },
+    { "id": "CapyDados", "title": "Data Analyst", "description": "Insights de dados.", "category": "Dados & Analytics", "pageUrl": "capydados.html", "color": "blue-400" },
+    { "id": "capydeal", "title": "CapyDeal", "description": "Caçadora de Preços.", "category": "Compras & Economia", "pageUrl": "capydeal/index.html", "color": "blue-400" },
 
-  gtag("js", new Date());
+    { "id": "CapyDebate", "title": "Debates", "description": "Treine argumentação.", "category": "Educação", "pageUrl": "capydebate.html", "color": "violet-400" },
+    { "id": "capydecisao", "title": "CapyDecisao", "description": "Ferramenta de Decisão.", "category": "Produtividade", "pageUrl": "CapyDecisao.html", "color": "yellow-400" },
+    { "id": "CapyDetector", "title": "Detector IA", "description": "Verifique texto de IA.", "category": "Documentos & Leitura", "pageUrl": "capydetector.html", "color": "purple-400" },
+    { "id": "CapyDiario", "title": "Diário", "description": "Registe pensamentos.", "category": "Produtividade", "pageUrl": "capydiario.html", "color": "blue-400" },
+    { "id": "CapyDidatica", "title": "Planos Aula", "description": "Planos de aula estruturados.", "category": "Educação", "pageUrl": "capydidatica.html", "color": "emerald-400" },
+    { "id": "CapyDoc", "title": "Docs Chat", "description": "Interaja com documentos.", "category": "Documentos & Leitura", "pageUrl": "capydoc.html", "color": "indigo-400" },
+    { "id": "CapyDocKit", "title": "CapyDocKit", "description": "Merge e split PDFs.", "pageUrl": "capydockit.html", "category": "Documentos & Leitura", "color": "emerald-400" },
+    { "id": "CapyDrama", "title": "Novelas", "description": "Crie séries dramáticas.", "category": "Escrita & Storytelling", "pageUrl": "capydrama.html", "color": "amber-400" },
+    { "id": "CapyEmail", "title": "Email Gen", "description": "Crie e-mails profissionais.", "category": "Criação & Conteúdo", "pageUrl": "capyemail.html", "color": "pink-400" },
+    { "id": "CapyEngenheiro", "title": "Engenharia", "description": "Simulador estrutural.", "category": "Dados & Analytics", "pageUrl": "capysimulador.html", "color": "sky-400" },
+    { "id": "CapyEscreve", "title": "CapyEscreve", "description": "Escrita assistida.", "category": "Produtividade", "pageUrl": "capyescreve.html", "color": "sky-400" },
+    { "id": "CapyEscritor", "title": "Escritor", "description": "Ajuda para artigos.", "category": "Criação & Conteúdo", "pageUrl": "capyescritor.html", "color": "rose-400" },
+    { "id": "CapyExcel", "title": "Tutor Excel", "description": "Aprenda fórmulas.", "category": "Educação", "pageUrl": "capyexcel.html", "color": "emerald-400" },
+    { "id": "CapyExplica", "title": "Explicador", "description": "Descomplique temas.", "category": "Documentos & Leitura", "pageUrl": "capyexplica.html", "color": "yellow-400" },
+    { "id": "CapyFiscal", "title": "Fiscal", "description": "Dúvidas tributárias.", "category": "Produtividade", "pageUrl": "capyfiscal.html", "color": "green-400" },
+    { "id": "CapyFix", "title": "Code Fix", "description": "Corretor de código.", "category": "Desenvolvimento & TI", "pageUrl": "capyfix.html", "color": "cyan-400" },
+    { "id": "CapyFlashcards", "title": "Flashcards", "description": "Crie flashcards.", "category": "Educação", "pageUrl": "capyflashcards.html", "color": "yellow-400" },
+    { "id": "CapyFlow", "title": "CapyFlow", "description": "Fluxos e automação.", "pageUrl": "https://faelscarpato.github.io/CapyFlow/", "category": "Plataforma", "color": "cyan-400" },
+    { "id": "CapyFocal", "title": "CapyFocal", "description": "Marketing data-driven.", "category": "Mídia & Marketing", "pageUrl": "capyfocal.html", "color": "orange-400" },
+    { "id": "CapyGens", "title": "Personas", "description": "Crie personas de IA.", "category": "Desenvolvimento & TI", "pageUrl": "capygem.html", "color": "teal-400" },
+    { "id": "CapyGrana", "title": "Finanças", "description": "Gestor financeiro.", "category": "Produtividade", "pageUrl": "capygrana.html", "color": "green-400" },
+    { "id": "CapyGuia", "title": "CapyGuia", "description": "Copiloto de produtividade.", "category": "Produtividade", "pageUrl": "capyguia.html", "color": "amber-400" },
+    { "id": "CapyHistoriador", "title": "Historiador", "description": "Segredos do passado.", "category": "Produtividade", "pageUrl": "capyhistoriador.html", "color": "amber-300" },
+    { "id": "CapyIDE", "title": "IDE AI", "description": "Ambiente de dev com IA.", "category": "Desenvolvimento & TI", "pageUrl": "capyide.html", "color": "purple-400" },
+    { "id": "CapyMarkdown", "title": "Markdown", "description": "Editor Markdown.", "category": "Criação & Conteúdo", "pageUrl": "capymarkdown.html", "color": "pink-400" },
+    { "id": "CapyMeditacao", "title": "Meditação", "description": "Guia de meditação.", "category": "Saúde & Bem-Estar", "pageUrl": "capymeditacao.html", "color": "teal-300" },
+    { "id": "CapyMetas", "title": "Metas", "description": "Definidor de objetivos.", "category": "Produtividade", "pageUrl": "capymetas.html", "color": "orange-400" },
+    { "id": "CapyMinuta", "title": "Atas", "description": "Gerador de atas.", "category": "Documentos & Leitura", "pageUrl": "capyminuta.html", "color": "slate-400" },
+    { "id": "CapyMuse", "title": "Museu", "description": "Inspirações criativas.", "category": "Criatividade", "pageUrl": "capymuse.html", "color": "violet-400" },
+    { "id": "CapyNarrativas", "title": "Narrativas", "description": "Dados em histórias.", "category": "Dados & Analytics", "pageUrl": "capynarrativas.html", "color": "amber-400" },
+    { "id": "CapyOCR", "title": "OCR", "description": "Extraia texto de img.", "category": "Documentos & Leitura", "pageUrl": "capyocr.html", "color": "blue-400" },
+    { "id": "CapyPDF", "title": "Chat PDF", "description": "Converse com PDFs.", "category": "Documentos & Leitura", "pageUrl": "capypdf.html", "color": "red-500" },
+    { "id": "CapyPDFLab", "title": "PDF Lab", "description": "Ferramentas PDF.", "pageUrl": "capypdflab.html", "category": "Documentos & Leitura", "color": "rose-400" },
+    { "id": "CapyPercepcao", "title": "Percepção", "description": "Visão computacional.", "pageUrl": "capypercepcao.html", "category": "Dados & Analytics", "color": "emerald-400" },
+    { "id": "CapyPlanner", "title": "Planner", "description": "Planejador inteligente.", "category": "Produtividade", "pageUrl": "capyplanner.html", "color": "cyan-400" },
+    { "id": "CapyProfa", "title": "Professor", "description": "Ensino personalizado.", "category": "Educação", "pageUrl": "capyprofa.html", "color": "emerald-400" },
+    { "id": "CapyPsico", "title": "Psicólogo", "description": "Apoio emocional.", "category": "Produtividade", "pageUrl": "capypsico.html", "color": "emerald-400" },
+    { "id": "CapyQuiz", "title": "Quiz Gen", "description": "Crie quizzes.", "category": "Educação", "pageUrl": "capyquiz.html", "color": "fuchsia-400" },
+    { "id": "CapyReceita", "title": "Cheff", "description": "Receitas culinárias.", "category": "Saúde & Bem-Estar", "pageUrl": "capyreceita.html", "color": "blue-400" },
+    { "id": "CapyRegex", "title": "Regex", "description": "Teste expressões.", "pageUrl": "capyregex.html", "category": "Desenvolvimento & TI", "color": "indigo-400" },
+    { "id": "CapyRelato", "title": "Relator", "description": "Resumos de voz.", "category": "Produtividade", "pageUrl": "capyrelato.html", "color": "pink-400" },
+    { "id": "CapyResumo", "title": "Resumidor", "description": "Resuma textos.", "category": "Documentos & Leitura", "pageUrl": "capyresumo.html", "color": "blue-400" },
+    { "id": "CapyRoteiro", "title": "Roteiros", "description": "Ideias para vídeos.", "category": "Criação & Conteúdo", "pageUrl": "capyroteiro.html", "color": "orange-400" },
+    { "id": "CapySEO", "title": "SEO", "description": "Otimização de busca.", "category": "Mídia & Marketing", "pageUrl": "capyseo.html", "color": "teal-400" },
+    { "id": "CapySlides", "title": "Slides", "description": "Gerador de PPTX.", "category": "Educação", "pageUrl": "capyslides.html", "color": "red-400" },
+    { "id": "CapySolar", "title": "Solar", "description": "Calculadora solar.", "category": "Dados & Analytics", "pageUrl": "capysolar.html", "color": "amber-400" },
+    { "id": "CapySonhos", "title": "Sonhos", "description": "Interprete sonhos.", "category": "Saúde & Bem-Estar", "pageUrl": "capysonhos.html", "color": "violet-400" },
+    { "id": "CapySolucao", "title": "Matemática", "description": "Professor de math.", "category": "Educação", "pageUrl": "capysolucao.html", "color": "red-400" },
+    { "id": "CapySQLCoach", "title": "SQL Coach", "description": "Aprenda SQL.", "pageUrl": "capysqlcoach.html", "category": "Desenvolvimento & TI", "color": "blue-400" },
+    { "id": "capystoryboard", "title": "Storyboard", "category": "Criatividade", "description": "Crie storyboards.", "pageUrl": "capystoryboard.html", "color": "cyan-400" },
+    { "id": "CapySub", "title": "Legendas", "description": "Converta SRT/VTT.", "pageUrl": "capysub.html", "category": "Criação & Conteúdo", "color": "amber-400" },
+    { "id": "CapyTabela", "title": "Tabelas", "description": "Formate tabelas.", "category": "Produtividade", "pageUrl": "capytabela.html", "color": "emerald-400" },
+    { "id": "CapyTCC", "title": "Tutor TCC", "description": "Ajuda acadêmica.", "category": "Educação", "pageUrl": "capytcc.html", "color": "indigo-400" },
+    { "id": "CapyTeste", "title": "Provas", "description": "Gerador de avaliações.", "category": "Educação", "pageUrl": "capyteste.html", "color": "purple-400" },
+    { "id": "CapyTI", "title": "Suporte TI", "description": "Técnico virtual.", "category": "Desenvolvimento & TI", "pageUrl": "capyti.html", "color": "indigo-400" },
+    { "id": "CapyTone", "title": "Tom de Voz", "description": "Humanizador de texto.", "category": "Criação & Conteúdo", "pageUrl": "capytone.html", "color": "lime-400" },
+    { "id": "CapyTradutor", "title": "Tradutor", "description": "Tradução IA.", "category": "Educação", "pageUrl": "capytradutor.html", "color": "cyan-400" },
+    { "id": "CapyTrama", "title": "Trama", "description": "Dados em narrativa.", "category": "Dados & Analytics", "pageUrl": "capytrama.html", "color": "violet-400" },
+    { "id": "CapyVagaMatch", "title": "Vaga Match", "description": "Compatibilidade CV.", "category": "Produtividade", "pageUrl": "capyvagamatch.html", "color": "green-400" },
+    { "id": "CapyValor", "title": "Preço", "description": "Precificação.", "category": "Produtividade", "pageUrl": "capyvalor.html", "color": "amber-400" },
+    { "id": "CapyVisaoCriativa", "title": "Visão Criativa", "description": "Marketing visual.", "pageUrl": "capyvisao.html", "category": "Mídia & Marketing", "color": "purple-400" },
+    { "id": "CapyWatermark", "title": "Marca D'água", "description": "Proteja imagens.", "pageUrl": "capywatermark.html", "category": "Criação & Conteúdo", "color": "cyan-400" }
+  ];
 
-  // IMPORTANTÍSSIMO: evita page_view automático duplicar / bagunçar SPA
-  gtag("config", GA_ID, {
-    send_page_view: false,
-    anonymize_ip: true
-  });
+  // --- ANALYTICS (GA4) ---
+  let __capyLastView = null;
 
-  // (opcional) se você quiser marcar sessões internas via toggle:
-  // localStorage.setItem("GA_INTERNAL","1")  -> marca como internal
-  // localStorage.removeItem("GA_INTERNAL")  -> normal
-  if (localStorage.getItem("GA_INTERNAL") === "1") {
-    gtag("set", { traffic_type: "internal" });
+  function capyEvent(name, params = {}) {
+    if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
+    window.gtag("event", name, params);
   }
-})();
 
-  </script>
-</head>
-<body class="selection:bg-purple-500/30 selection:text-white">
+  function capyTrackView(view) {
+    if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
+    if (__capyLastView === view) return;
+    __capyLastView = view;
 
-    <div id="boot-screen">
-        <div class="intro-logo">
-            <i data-lucide="zap" class="w-10 h-10 text-white fill-white"></i>
+    const titles = { home: "Início", hub: "Hub", tempo: "Tempo", config: "Ajustes" };
+    const label = titles[view] || view;
+
+    const virtualPath = location.pathname + "#" + view;
+    const virtualLocation = location.origin + virtualPath;
+
+    window.gtag("event", "page_view", {
+      page_title: `CapyUniverse | ${label}`,
+      page_path: virtualPath,
+      page_location: virtualLocation
+    });
+  }
+
+  // --- FUNÇÕES AUXILIARES ---
+  function getIcon(tool) {
+    const idMap = {
+      'genios': 'terminal', 'minhavaga': 'users', 'capystudio': 'wand-2', 'auracode': 'code-2',
+      'CapyAto': 'gavel', 'CapyChat': 'message-square', 'CapyGrana': 'dollar-sign',
+      'CapyPDF': 'file-text', 'CapyReceita': 'utensils', 'CapyTone': 'smile'
+    };
+    if (idMap[tool.id]) return idMap[tool.id];
+
+    const catMap = {
+      'Desenvolvimento & TI': 'code', 'Jurídico': 'scale', 'Mídia & Marketing': 'megaphone',
+      'Saúde & Bem-Estar': 'heart', 'Dados & Analytics': 'bar-chart', 'Produtividade': 'zap',
+      'Escrita & Storytelling': 'feather', 'Documentos & Leitura': 'file', 'Criação & Conteúdo': 'palette',
+      'Educação': 'book-open', 'Compras & Economia': 'shopping-bag'
+    };
+    return catMap[tool.category] || 'box';
+  }
+
+  const State = {
+    getRecents: () => {
+      try {
+        const data = localStorage.getItem('capy_recents');
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        console.warn("Histórico resetado.", e);
+        localStorage.removeItem('capy_recents');
+        return [];
+      }
+    },
+    addRecent: (toolId) => {
+      let recents = State.getRecents().filter(id => id !== toolId);
+      recents.unshift(toolId);
+      if (recents.length > 8) recents.pop();
+      localStorage.setItem('capy_recents', JSON.stringify(recents));
+      State.incrementUsage(toolId);
+    },
+    getUsage: () => {
+      try { return JSON.parse(localStorage.getItem('capy_usage')) || {}; }
+      catch (e) { return {}; }
+    },
+    incrementUsage: (toolId) => {
+      const usage = State.getUsage();
+      usage[toolId] = (usage[toolId] || 0) + 1;
+      localStorage.setItem('capy_usage', JSON.stringify(usage));
+      if (!localStorage.getItem('capy_start_date')) localStorage.setItem('capy_start_date', new Date().toISOString());
+    },
+    getApiKey: () => localStorage.getItem('capy_gemini_key') || '',
+    setApiKey: (key) => localStorage.setItem('capy_gemini_key', key),
+    clearData: () => {
+      if (confirm('Apagar histórico e dados?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    },
+    init: () => {
+      if (!localStorage.getItem('capy_start_date')) {
+        localStorage.setItem('capy_start_date', new Date().toISOString());
+      }
+    }
+  };
+
+  // --- LÓGICA DA INTRO (LOADER) ---
+  function runIntro() {
+    setTimeout(() => {
+      const bar = document.getElementById('intro-bar');
+      if (bar) bar.style.width = '100%';
+    }, 100);
+
+    setTimeout(() => {
+      const boot = document.getElementById('boot-screen');
+      if (boot) boot.classList.add('boot-hidden');
+    }, 2500);
+  }
+
+  // --- NAVEGAÇÃO ---
+  function navigate(view) {
+    // Fecha app se estiver aberto
+    if (document.getElementById('app-window').classList.contains('open')) closeApp(true);
+
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const btn = document.getElementById(`btn-${view}`);
+    if (btn) btn.classList.add('active');
+
+    const content = document.getElementById('content-area');
+    const searchContainer = document.getElementById('search-container');
+    const pageTitle = document.getElementById('page-title');
+
+    if (content) {
+      content.classList.remove('fade-in');
+      void content.offsetWidth;
+      content.classList.add('fade-in');
+    }
+    if (searchContainer) searchContainer.classList.add('hidden');
+
+    const scroller = document.getElementById('main-scroll-container');
+    if (scroller) scroller.scrollTop = 0;
+
+    if (pageTitle) {
+      if (view === 'home') pageTitle.innerText = "Início";
+      if (view === 'hub') pageTitle.innerText = "Hub";
+      if (view === 'tempo') pageTitle.innerText = "Tempo";
+      if (view === 'config') pageTitle.innerText = "Ajustes";
+    }
+
+    if (view === 'home') renderHome();
+    else if (view === 'hub') {
+      if (searchContainer) searchContainer.classList.remove('hidden');
+      renderHub();
+    }
+    else if (view === 'tempo') renderTempo();
+    else if (view === 'config') renderConfig();
+
+    // ✅ tracking correto: aqui view existe
+    capyTrackView(view);
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // --- APP IFRAME ---
+  function openTool(url, id) {
+    State.addRecent(id);
+    const tool = toolsData.find(t => t.id === id);
+
+    document.getElementById('app-title-display').innerText = tool ? tool.title : 'Aplicativo';
+
+    const iconContainer = document.getElementById('app-icon-display');
+    const iconName = tool ? getIcon(tool) : 'box';
+    if (iconContainer) iconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
+
+    if (window.lucide) lucide.createIcons();
+
+    const loader = document.getElementById('app-loader');
+    if (loader) loader.classList.remove('hidden');
+
+    const frame = document.getElementById('tool-frame');
+    frame.src = url;
+    frame.onload = () => {
+      const l = document.getElementById('app-loader');
+      if (l) l.classList.add('hidden');
+    };
+
+    document.getElementById('app-window').classList.add('open');
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+    capyEvent("open_tool", { tool_id: id, tool_title: tool?.title || "unknown" });
+  }
+
+  // closeApp(true) = fechar sem navegar de novo
+  function closeApp(skipNavigate = false) {
+    document.getElementById('app-window').classList.remove('open');
+    setTimeout(() => {
+      const frame = document.getElementById('tool-frame');
+      if (frame) frame.src = 'about:blank';
+    }, 500);
+
+    if (!skipNavigate) navigate('home');
+  }
+
+  function reloadApp() {
+    const loader = document.getElementById('app-loader');
+    if (loader) loader.classList.remove('hidden');
+
+    const frame = document.getElementById('tool-frame');
+    if (!frame || !frame.contentWindow) return;
+
+    try { frame.contentWindow.location.reload(); }
+    catch (e) { frame.src = frame.src; }
+  }
+
+  // --- RENDERIZADORES ---
+  function createCard(tool, badge = null) {
+    const iconName = getIcon(tool);
+    const colorName = tool.color ? tool.color.split('-')[0] : 'gray';
+
+    return `
+      <div onclick="openTool('${tool.pageUrl}', '${tool.id}')"
+        class="glass-panel p-5 rounded-[20px] interactive-card relative overflow-hidden group flex flex-col h-full cursor-pointer min-h-[180px] border border-white/5 active:bg-white/10">
+        ${badge === 'new' ? '<div class="absolute top-3 right-3 bg-green-500/20 text-green-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-green-500/20 z-20">NOVO</div>' : ''}
+
+        <div class="absolute -top-2 -right-2 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity transform group-hover:rotate-12 pointer-events-none">
+          <i data-lucide="${iconName}" class="w-24 h-24 text-${colorName}-400"></i>
         </div>
-        <div class="intro-text">CapyUniverse</div>
-        <div class="intro-sub">INITIALIZING SYSTEM v3.0</div>
-        
-        <div class="loader-track">
-            <div id="intro-bar" class="loader-bar"></div>
-        </div>
-    </div>
 
-    <div id="main-bg"></div>
-
-    <nav class="fixed bottom-0 w-full md:w-24 md:h-full md:left-0 glass-nav flex md:flex-col justify-between items-center px-6 py-4 md:py-8 transition-all duration-300">
-        <div class="hidden md:flex flex-col items-center gap-1 mb-8 cursor-pointer group" onclick="if(document.getElementById('app-window').classList.contains('open')) closeApp(); else navigate('home')">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-purple-900/20 group-hover:shadow-purple-500/40 transition-shadow">
-                <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
-            </div>
+        <div class="w-10 h-10 rounded-xl bg-${colorName}-500/10 border border-${colorName}-500/20 text-${colorName}-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <i data-lucide="${iconName}" class="w-5 h-5"></i>
         </div>
 
-        <div class="flex md:flex-col w-full md:w-auto justify-between md:justify-center md:gap-8 items-center">
-            <button onclick="navigate('home')" id="btn-home" class="nav-btn active p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
-                <i data-lucide="home" class="w-6 h-6 md:w-5 md:h-5"></i>
-            </button>
-            <button onclick="navigate('hub')" id="btn-hub" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
-                <i data-lucide="layout-grid" class="w-6 h-6 md:w-5 md:h-5"></i>
-            </button>
-            <button onclick="navigate('tempo')" id="btn-tempo" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group relative">
-                <i data-lucide="history" class="w-6 h-6 md:w-5 md:h-5"></i>
-            </button>
-            <button onclick="navigate('config')" id="btn-config" class="nav-btn p-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/5 transition-all md:hover:bg-white/10 group md:mt-auto relative">
-                <i data-lucide="settings" class="w-6 h-6 md:w-5 md:h-5"></i>
-            </button>
+        <div class="relative z-10 flex-1">
+          <h3 class="text-base font-semibold text-white mb-1 group-hover:text-${colorName}-400 transition-colors">${tool.title}</h3>
+          <p class="text-gray-400 text-[11px] leading-relaxed line-clamp-2">${tool.description}</p>
         </div>
-    </nav>
 
-    <main class="flex-1 md:ml-24 h-full w-full">
-        <div id="main-scroll-container" class="p-6 md:p-12 w-full">
-            <div class="max-w-7xl mx-auto w-full min-h-full flex flex-col">
-                
-                <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 mt-4 md:mt-0 fade-in">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></span>
-                            <p class="text-xs font-bold tracking-widest text-gray-500 uppercase">CapyUniverse OS</p>
-                        </div>
-                        <h1 id="page-title" class="text-3xl md:text-5xl font-semibold tracking-tight text-gradient">Bem-vindo</h1>
-                    </div>
-                    
-                    <div id="search-container" class="w-full md:w-96 relative group hidden fade-in">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="text-gray-500 w-4 h-4 group-focus-within:text-white transition-colors"></i>
-                        </div>
-                        <input type="text" id="global-search" oninput="filterHub()"
-                            class="w-full glass-panel rounded-2xl py-3.5 pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all hover:bg-white/5"
-                            placeholder="Buscar ferramenta...">
-                    </div>
-                </header>
-
-                <div id="content-area" class="flex-1 fade-in"></div>
-
-                <footer class="mt-auto pt-12 pb-8 border-t border-white/5 text-center md:text-left text-xs text-gray-600">
-                    <p>&copy; 2024 CapyUniverse. Mobile Optimized.</p>
-                </footer>
-            </div>
+        <div class="flex items-center justify-between pt-3 border-t border-white/5 relative z-10 mt-3">
+          <span class="text-[9px] text-gray-500 bg-white/5 px-2 py-0.5 rounded truncate max-w-[100px] font-mono">${tool.category}</span>
+          <i data-lucide="arrow-right" class="w-3 h-3 text-gray-500"></i>
         </div>
-    </main>
+      </div>
+    `;
+  }
 
-    <div id="app-window">
-        <div class="h-14 glass-panel border-b border-white/5 flex items-center justify-between px-4 md:px-6 z-10 shrink-0 md:rounded-t-[24px]">
-            <div class="flex items-center gap-3">
-                <button onclick="closeApp()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                <div class="h-4 w-[1px] bg-white/10"></div>
-                <div class="flex items-center gap-2">
-                    <span id="app-icon-display" class="text-purple-400"></span>
-                    <span id="app-title-display" class="font-medium text-white text-sm line-clamp-1">Carregando...</span>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-1">
-                <div id="app-loader" class="loader hidden mr-2"></div>
-                <button onclick="reloadApp()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                </button>
-            </div>
+  function renderHome() {
+    const recents = State.getRecents().map(id => toolsData.find(t => t.id === id)).filter(Boolean);
+    const news = toolsData.slice(0, 4);
+
+    let html = `<div class="space-y-8">`;
+    html += `<section>
+      <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i> Destaques
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        ${news.map(t => createCard(t, 'new')).join('')}
+      </div>
+    </section>`;
+
+    if (recents.length > 0) {
+      html += `<section>
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i> Recentes
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          ${recents.map(t => createCard(t)).join('')}
         </div>
-        
-        <iframe id="tool-frame" src="about:blank" allow="clipboard-read; clipboard-write; microphone; camera; geolocation"></iframe>
-    </div>
+      </section>`;
+    }
 
-    <script>
-        // --- CONFIGURAÇÃO E DADOS ---
-        const toolsData = [
-           { "id": "capyuni", "title": "CapyUNI V.2 - Codium", "description": "IDE versatil, Mobile e Desktop - Versão 2.0 - em teste.", "category": "Desenvolvimento & TI", "pageUrl": "capyuni.html", "color": "purple-400" },
-           { "id": "capystudio", "title": "Creative Studio", "description": "Geração de assets visuais e design.", "category": "Mídia & Marketing", "pageUrl": "capystudio.html", "color": "cyan-400" },
-           { "id": "cappydavinci", "title": "CapyDaVinci", "description": "Gere aplicativos e ideias únicas.", "category": "Desenvolvimento & TI", "pageUrl": "geniodavinci.html", "color": "purple-400" },
-            { "id": "CapyPrompt", "title": "Prompt Eng", "description": "Engenharia de prompts.", "category": "Desenvolvimento & TI", "pageUrl": "capyprompt.html", "color": "purple-400" },
-          { "id": "capyappmaker", "title": "CapyAppmaker", "description": "Gere aplicativos funcionais.", "category": "Desenvolvimento & TI", "pageUrl": "capyapmaker.html", "color": "purple-400" },
-             { "id": "capyimg", "title": "CapyIMG", "description": "Gerador de imagens.", "category": "Criação & Conteúdo", "pageUrl": "capyimg.html", "color": "purple-400" },
-            { "id": "CapyIMG/TXT", "title": "Img to Text", "description": "Gere prompts de imagens.", "category": "Desenvolvimento & TI", "pageUrl": "capyimgtxt.html", "color": "purple-400" },
-            { "id": "CapyLanding", "title": "Landing Page", "description": "Gerador de páginas.", "pageUrl": "capylanding.html", "category": "Mídia & Marketing", "color": "violet-400" },
-          { "id": "CapyAto", "title": "CapyAto", "description": "Controle ações jurídicas por voz.", "category": "Jurídico", "pageUrl": "capyato.html", "color": "indigo-400" },
-            { "id": "CapyAudiencias", "title": "Analisador de Atas", "description": "Analise atas de audiência.", "category": "Jurídico", "pageUrl": "capyaudiencias.html", "color": "indigo-400" },
-            { "id": "CapyBranding", "title": "CapyBranding", "pageUrl": "capybranding.html", "description": "Consultas sobre identidade visual.", "category": "Mídia & Marketing", "color": "blue-400" },
-            { "id": "CapyBula", "title": "Bulário Inteligente", "description": "Consulte informações de medicamentos.", "category": "Saúde & Bem-Estar", "pageUrl": "capybula.html", "color": "blue-400" },
-            { "id": "capybussola", "title": "Capy Bussola", "description": "Tome melhor suas decisões.", "category": "Desenvolvimento & TI", "pageUrl": "capybussola.html", "color": "purple-400" },
-            { "id": "CapyByte", "title": "Oráculo Tech", "description": "Diagnósticos e soluções tech.", "category": "Desenvolvimento & TI", "pageUrl": "capybyte.html", "color": "orange-400" },
-            { "id": "CapyCaption", "title": "CapyCaption", "description": "Gere legendas para redes.", "pageUrl": "capycaption.html", "category": "Mídia & Marketing", "color": "pink-400" },
-            { "id": "CapyChart", "title": "Dashboard IA", "description": "Transforme dados em gráficos.", "category": "Dados & Analytics", "pageUrl": "capychart.html", "color": "blue-400" },
-            { "id": "CapyChat", "title": "Chat Geral", "description": "Converse sobre qualquer tópico.", "category": "Produtividade", "pageUrl": "capychat.html", "color": "violet-400" },
-            { "id": "CapyCID", "title": "Info CID", "description": "Informe-se sobre CIDs médicos.", "category": "Saúde & Bem-Estar", "pageUrl": "capycid.html", "color": "blue-400" },
-            { "id": "CapyCLT", "title": "CapyCLT", "description": "Converse com as leis trabalhistas.", "category": "Jurídico", "pageUrl": "capyclt.html", "color": "pink-400" },
-            { "id": "CapyConciliaFacil", "title": "Conciliador", "description": "Sugestões para acordos.", "category": "Jurídico", "pageUrl": "capyconciliador.html", "color": "indigo-400" },
-            { "id": "CapyContos", "title": "Narrativas", "description": "Crie histórias interativas.", "category": "Escrita & Storytelling", "pageUrl": "capycontos.html", "color": "amber-400" },
-            { "id": "CapyContrato", "title": "Contratos", "description": "Crie modelos de contrato.", "category": "Documentos & Leitura", "pageUrl": "capycontrato.html", "color": "violet-400" },
-            { "id": "CapyConverter", "title": "CapyConverter", "description": "Converta arquivos.", "pageUrl": "capyconverter.html", "category": "Documentos & Leitura", "color": "emerald-400" },
-            { "id": "CapyCopywriterAds", "title": "Gerador de Copy", "description": "Textos de anúncio que vendem.", "category": "Mídia & Marketing", "pageUrl": "capycopy.html", "color": "pink-400" },
-            { "id": "CapyCronosLegal", "title": "Prazos Legais", "description": "Gerenciamento de prazos.", "category": "Jurídico", "pageUrl": "capycronos.html", "color": "amber-400" },
-            { "id": "CapyCSV", "title": "CapyCSV", "description": "Limpeza de CSV/XLSX.", "pageUrl": "capycsv.html", "category": "Dados & Analytics", "color": "emerald-400" },
-            { "id": "CapyCurriculo", "title": "CV Otimizer", "description": "Melhore seu currículo.", "category": "Produtividade", "pageUrl": "capycurriculo.html", "color": "sky-400" },
-            { "id": "CapyDados", "title": "Data Analyst", "description": "Insights de dados.", "category": "Dados & Analytics", "pageUrl": "capydados.html", "color": "blue-400" },
-            { "id": "capydeal", "title": "CapyDeal", "description": "Caçadora de Preços.", "category": "Compras & Economia", "pageUrl": "capydeal/index.html", "color": "blue-400" },
-            { "id": "CapyDebate", "title": "Debates", "description": "Treine argumentação.", "category": "Educação", "pageUrl": "capydebate.html", "color": "violet-400" },
-            { "id": "capydecisao", "title": "CapyDecisao", "description": "Ferramenta de Decisão.", "category": "Produtividade", "pageUrl": "CapyDecisao.html", "color": "yellow-400" },
-            { "id": "CapyDetector", "title": "Detector IA", "description": "Verifique texto de IA.", "category": "Documentos & Leitura", "pageUrl": "capydetector.html", "color": "purple-400" },
-            { "id": "CapyDiario", "title": "Diário", "description": "Registe pensamentos.", "category": "Produtividade", "pageUrl": "capydiario.html", "color": "blue-400" },
-            { "id": "CapyDidatica", "title": "Planos Aula", "description": "Planos de aula estruturados.", "category": "Educação", "pageUrl": "capydidatica.html", "color": "emerald-400" },
-            { "id": "CapyDoc", "title": "Docs Chat", "description": "Interaja com documentos.", "category": "Documentos & Leitura", "pageUrl": "capydoc.html", "color": "indigo-400" },
-            { "id": "CapyDocKit", "title": "CapyDocKit", "description": "Merge e split PDFs.", "pageUrl": "capydockit.html", "category": "Documentos & Leitura", "color": "emerald-400" },
-            { "id": "CapyDrama", "title": "Novelas", "description": "Crie séries dramáticas.", "category": "Escrita & Storytelling", "pageUrl": "capydrama.html", "color": "amber-400" },
-            { "id": "CapyEmail", "title": "Email Gen", "description": "Crie e-mails profissionais.", "category": "Criação & Conteúdo", "pageUrl": "capyemail.html", "color": "pink-400" },
-            { "id": "CapyEngenheiro", "title": "Engenharia", "description": "Simulador estrutural.", "category": "Dados & Analytics", "pageUrl": "capysimulador.html", "color": "sky-400" },
-            { "id": "CapyEscreve", "title": "CapyEscreve", "description": "Escrita assistida.", "category": "Produtividade", "pageUrl": "capyescreve.html", "color": "sky-400" },
-            { "id": "CapyEscritor", "title": "Escritor", "description": "Ajuda para artigos.", "category": "Criação & Conteúdo", "pageUrl": "capyescritor.html", "color": "rose-400" },
-            { "id": "CapyExcel", "title": "Tutor Excel", "description": "Aprenda fórmulas.", "category": "Educação", "pageUrl": "capyexcel.html", "color": "emerald-400" },
-            { "id": "CapyExplica", "title": "Explicador", "description": "Descomplique temas.", "category": "Documentos & Leitura", "pageUrl": "capyexplica.html", "color": "yellow-400" },
-            { "id": "CapyFiscal", "title": "Fiscal", "description": "Dúvidas tributárias.", "category": "Produtividade", "pageUrl": "capyfiscal.html", "color": "green-400" },
-            { "id": "CapyFix", "title": "Code Fix", "description": "Corretor de código.", "category": "Desenvolvimento & TI", "pageUrl": "capyfix.html", "color": "cyan-400" },
-            { "id": "CapyFlashcards", "title": "Flashcards", "description": "Crie flashcards.", "category": "Educação", "pageUrl": "capyflashcards.html", "color": "yellow-400" },
-            { "id": "CapyFlow", "title": "CapyFlow", "description": "Fluxos e automação.", "pageUrl": "https://faelscarpato.github.io/CapyFlow/", "category": "Plataforma", "color": "cyan-400" },
-            { "id": "CapyFocal", "title": "CapyFocal", "description": "Marketing data-driven.", "category": "Mídia & Marketing", "pageUrl": "capyfocal.html", "color": "orange-400" },
-            { "id": "CapyGens", "title": "Personas", "description": "Crie personas de IA.", "category": "Desenvolvimento & TI", "pageUrl": "capygem.html", "color": "teal-400" },
-            { "id": "CapyGrana", "title": "Finanças", "description": "Gestor financeiro.", "category": "Produtividade", "pageUrl": "capygrana.html", "color": "green-400" },
-            { "id": "CapyGuia", "title": "CapyGuia", "description": "Copiloto de produtividade.", "category": "Produtividade", "pageUrl": "capyguia.html", "color": "amber-400" },
-            { "id": "CapyHistoriador", "title": "Historiador", "description": "Segredos do passado.", "category": "Produtividade", "pageUrl": "capyhistoriador.html", "color": "amber-300" },
-            { "id": "CapyIDE", "title": "IDE AI", "description": "Ambiente de dev com IA.", "category": "Desenvolvimento & TI", "pageUrl": "capyide.html", "color": "purple-400" },
-           { "id": "CapyMarkdown", "title": "Markdown", "description": "Editor Markdown.", "category": "Criação & Conteúdo", "pageUrl": "capymarkdown.html", "color": "pink-400" },
-            { "id": "CapyMeditacao", "title": "Meditação", "description": "Guia de meditação.", "category": "Saúde & Bem-Estar", "pageUrl": "capymeditacao.html", "color": "teal-300" },
-            { "id": "CapyMetas", "title": "Metas", "description": "Definidor de objetivos.", "category": "Produtividade", "pageUrl": "capymetas.html", "color": "orange-400" },
-            { "id": "CapyMinuta", "title": "Atas", "description": "Gerador de atas.", "category": "Documentos & Leitura", "pageUrl": "capyminuta.html", "color": "slate-400" },
-            { "id": "CapyMuse", "title": "Museu", "description": "Inspirações criativas.", "category": "Criatividade", "pageUrl": "capymuse.html", "color": "violet-400" },
-            { "id": "CapyNarrativas", "title": "Narrativas", "description": "Dados em histórias.", "category": "Dados & Analytics", "pageUrl": "capynarrativas.html", "color": "amber-400" },
-            { "id": "CapyOCR", "title": "OCR", "description": "Extraia texto de img.", "category": "Documentos & Leitura", "pageUrl": "capyocr.html", "color": "blue-400" },
-            { "id": "CapyPDF", "title": "Chat PDF", "description": "Converse com PDFs.", "category": "Documentos & Leitura", "pageUrl": "capypdf.html", "color": "red-500" },
-            { "id": "CapyPDFLab", "title": "PDF Lab", "description": "Ferramentas PDF.", "pageUrl": "capypdflab.html", "category": "Documentos & Leitura", "color": "rose-400" },
-            { "id": "CapyPercepcao", "title": "Percepção", "description": "Visão computacional.", "pageUrl": "capypercepcao.html", "category": "Dados & Analytics", "color": "emerald-400" },
-            { "id": "CapyPlanner", "title": "Planner", "description": "Planejador inteligente.", "category": "Produtividade", "pageUrl": "capyplanner.html", "color": "cyan-400" },
-            { "id": "CapyProfa", "title": "Professor", "description": "Ensino personalizado.", "category": "Educação", "pageUrl": "capyprofa.html", "color": "emerald-400" },
-            { "id": "CapyPsico", "title": "Psicólogo", "description": "Apoio emocional.", "category": "Produtividade", "pageUrl": "capypsico.html", "color": "emerald-400" },
-            { "id": "CapyQuiz", "title": "Quiz Gen", "description": "Crie quizzes.", "category": "Educação", "pageUrl": "capyquiz.html", "color": "fuchsia-400" },
-            { "id": "CapyReceita", "title": "Cheff", "description": "Receitas culinárias.", "category": "Saúde & Bem-Estar", "pageUrl": "capyreceita.html", "color": "blue-400" },
-            { "id": "CapyRegex", "title": "Regex", "description": "Teste expressões.", "pageUrl": "capyregex.html", "category": "Desenvolvimento & TI", "color": "indigo-400" },
-            { "id": "CapyRelato", "title": "Relator", "description": "Resumos de voz.", "category": "Produtividade", "pageUrl": "capyrelato.html", "color": "pink-400" },
-            { "id": "CapyResumo", "title": "Resumidor", "description": "Resuma textos.", "category": "Documentos & Leitura", "pageUrl": "capyresumo.html", "color": "blue-400" },
-            { "id": "CapyRoteiro", "title": "Roteiros", "description": "Ideias para vídeos.", "category": "Criação & Conteúdo", "pageUrl": "capyroteiro.html", "color": "orange-400" },
-            { "id": "CapySEO", "title": "SEO", "description": "Otimização de busca.", "category": "Mídia & Marketing", "pageUrl": "capyseo.html", "color": "teal-400" },
-            { "id": "CapySlides", "title": "Slides", "description": "Gerador de PPTX.", "category": "Educação", "pageUrl": "capyslides.html", "color": "red-400" },
-            { "id": "CapySolar", "title": "Solar", "description": "Calculadora solar.", "category": "Dados & Analytics", "pageUrl": "capysolar.html", "color": "amber-400" },
-            { "id": "CapySonhos", "title": "Sonhos", "description": "Interprete sonhos.", "category": "Saúde & Bem-Estar", "pageUrl": "capysonhos.html", "color": "violet-400" },
-            { "id": "CapySolucao", "title": "Matemática", "description": "Professor de math.", "category": "Educação", "pageUrl": "capysolucao.html", "color": "red-400" },
-            { "id": "CapySQLCoach", "title": "SQL Coach", "description": "Aprenda SQL.", "pageUrl": "capysqlcoach.html", "category": "Desenvolvimento & TI", "color": "blue-400" },
-            { "id": "capystoryboard", "title": "Storyboard", "category": "Criatividade", "description": "Crie storyboards.", "pageUrl": "capystoryboard.html", "color": "cyan-400" },
-            { "id": "CapySub", "title": "Legendas", "description": "Converta SRT/VTT.", "pageUrl": "capysub.html", "category": "Criação & Conteúdo", "color": "amber-400" },
-            { "id": "CapyTabela", "title": "Tabelas", "description": "Formate tabelas.", "category": "Produtividade", "pageUrl": "capytabela.html", "color": "emerald-400" },
-            { "id": "CapyTCC", "title": "Tutor TCC", "description": "Ajuda acadêmica.", "category": "Educação", "pageUrl": "capytcc.html", "color": "indigo-400" },
-            { "id": "CapyTeste", "title": "Provas", "description": "Gerador de avaliações.", "category": "Educação", "pageUrl": "capyteste.html", "color": "purple-400" },
-            { "id": "CapyTI", "title": "Suporte TI", "description": "Técnico virtual.", "category": "Desenvolvimento & TI", "pageUrl": "capyti.html", "color": "indigo-400" },
-            { "id": "CapyTone", "title": "Tom de Voz", "description": "Humanizador de texto.", "category": "Criação & Conteúdo", "pageUrl": "capytone.html", "color": "lime-400" },
-            { "id": "CapyTradutor", "title": "Tradutor", "description": "Tradução IA.", "category": "Educação", "pageUrl": "capytradutor.html", "color": "cyan-400" },
-            { "id": "CapyTrama", "title": "Trama", "description": "Dados em narrativa.", "category": "Dados & Analytics", "pageUrl": "capytrama.html", "color": "violet-400" },
-            { "id": "CapyVagaMatch", "title": "Vaga Match", "description": "Compatibilidade CV.", "category": "Produtividade", "pageUrl": "capyvagamatch.html", "color": "green-400" },
-            { "id": "CapyValor", "title": "Preço", "description": "Precificação.", "category": "Produtividade", "pageUrl": "capyvalor.html", "color": "amber-400" },
-            { "id": "CapyVisaoCriativa", "title": "Visão Criativa", "description": "Marketing visual.", "pageUrl": "capyvisao.html", "category": "Mídia & Marketing", "color": "purple-400" },
-            { "id": "CapyWatermark", "title": "Marca D'água", "description": "Proteja imagens.", "pageUrl": "capywatermark.html", "category": "Criação & Conteúdo", "color": "cyan-400" }
-        ];
-// --- ANALYTICS (GA4) ---
-let __capyLastView = null;
+    html += `</div>`;
+    const area = document.getElementById('content-area');
+    if (area) area.innerHTML = html;
+  }
 
-function capyEvent(name, params = {}) {
-  if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
-  window.gtag("event", name, params);
-}
+  function renderHub() {
+    const categories = ['Todos', ...new Set(toolsData.map(t => t.category))];
 
-function capyTrackView(view) {
-  if (!window.__capyAnalytics?.enabled || typeof window.gtag !== "function") return;
-  if (__capyLastView === view) return; // evita duplicar quando re-render/closeApp chama navigate('home')
-  __capyLastView = view;
+    let html = `
+      <div class="flex gap-3 overflow-x-auto hide-scrollbar mb-8 pb-2">
+        ${categories.map(cat => `
+          <button onclick="filterCategory('${cat}')"
+            class="cat-btn px-6 py-2.5 rounded-full glass-panel text-gray-300 text-sm font-medium hover:bg-white/10 hover:text-white transition-all whitespace-nowrap border-transparent hover:border-white/20 ${cat === 'Todos' ? 'bg-white/10 text-white border-white/20' : ''}"
+            data-category="${cat}">
+            ${cat}
+          </button>
+        `).join('')}
+      </div>
 
-  const titles = { home: "Início", hub: "Hub", tempo: "Tempo", config: "Ajustes" };
-  const label = titles[view] || view;
+      <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        ${toolsData.map(t => createCard(t)).join('')}
+      </div>
+    `;
 
-  const virtualPath = location.pathname + "#" + view;
-  const virtualLocation = location.origin + virtualPath;
+    const area = document.getElementById('content-area');
+    if (area) area.innerHTML = html;
+  }
 
-  window.gtag("event", "page_view", {
-    page_title: `CapyUniverse | ${label}`,
-    page_path: virtualPath,
-    page_location: virtualLocation
-  });
-}
-        // --- FUNÇÕES AUXILIARES ---
-        function getIcon(tool) {
-            const idMap = {
-                'genios': 'terminal', 'minhavaga': 'users', 'capystudio': 'wand-2', 'auracode': 'code-2',
-                'CapyAto': 'gavel', 'CapyChat': 'message-square', 'CapyGrana': 'dollar-sign',
-                'CapyPDF': 'file-text', 'CapyReceita': 'utensils', 'CapyTone': 'smile'
-            };
-            if (idMap[tool.id]) return idMap[tool.id];
-            
-            const catMap = {
-                'Desenvolvimento & TI': 'code', 'Jurídico': 'scale', 'Mídia & Marketing': 'megaphone',
-                'Saúde & Bem-Estar': 'heart', 'Dados & Analytics': 'bar-chart', 'Produtividade': 'zap',
-                'Escrita & Storytelling': 'feather', 'Documentos & Leitura': 'file', 'Criação & Conteúdo': 'palette',
-                'Educação': 'book-open', 'Compras & Economia': 'shopping-bag'
-            };
-            return catMap[tool.category] || 'box';
-        }
+  function renderTempo() {
+    const usage = State.getUsage();
+    const totalClicks = Object.values(usage).reduce((a, b) => a + b, 0);
+    const startDateStr = localStorage.getItem('capy_start_date');
 
-        const State = {
-            getRecents: () => {
-                try {
-                    const data = localStorage.getItem('capy_recents');
-                    return data ? JSON.parse(data) : [];
-                } catch (e) {
-                    console.warn("Histórico resetado.", e);
-                    localStorage.removeItem('capy_recents');
-                    return [];
-                }
-            },
-            addRecent: (toolId) => {
-                let recents = State.getRecents().filter(id => id !== toolId);
-                recents.unshift(toolId);
-                if (recents.length > 8) recents.pop();
-                localStorage.setItem('capy_recents', JSON.stringify(recents));
-                State.incrementUsage(toolId);
-            },
-            getUsage: () => {
-                try {
-                    return JSON.parse(localStorage.getItem('capy_usage')) || {};
-                } catch (e) { return {}; }
-            },
-            incrementUsage: (toolId) => {
-                const usage = State.getUsage();
-                usage[toolId] = (usage[toolId] || 0) + 1;
-                localStorage.setItem('capy_usage', JSON.stringify(usage));
-                if (!localStorage.getItem('capy_start_date')) localStorage.setItem('capy_start_date', new Date().toISOString());
-            },
-            getApiKey: () => localStorage.getItem('capy_gemini_key') || '',
-            setApiKey: (key) => localStorage.setItem('capy_gemini_key', key),
-            clearData: () => {
-                if(confirm('Apagar histórico e dados?')) {
-                    localStorage.clear();
-                    location.reload();
-                }
-            },
-            init: () => {
-                if (!localStorage.getItem('capy_start_date')) {
-                    localStorage.setItem('capy_start_date', new Date().toISOString());
-                }
-            }
-        };
+    let daysActive = 0;
+    if (startDateStr) {
+      const diff = new Date() - new Date(startDateStr);
+      daysActive = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
 
-        // --- LÓGICA DA INTRO (LOADER) ---
-        function runIntro() {
-            // Anima a barra de progresso
-            setTimeout(() => {
-                document.getElementById('intro-bar').style.width = '100%';
-            }, 100);
+    const sortedUsage = Object.entries(usage).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const favoriteToolId = sortedUsage[0] ? sortedUsage[0][0] : null;
+    const favoriteTool = favoriteToolId ? toolsData.find(t => t.id === favoriteToolId) : null;
 
-            // Remove a tela de intro após o tempo
-            setTimeout(() => {
-                document.getElementById('boot-screen').classList.add('boot-hidden');
-            }, 2500); // 2.5 segundos de loading
-        }
+    let html = `
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
+          <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 text-blue-400 relative z-10">
+            <i data-lucide="calendar-days" class="w-7 h-7"></i>
+          </div>
+          <h3 class="text-4xl font-bold text-white mb-1 relative z-10">${daysActive}</h3>
+          <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Dias Ativo</p>
+        </div>
 
-        // --- NAVEGAÇÃO ---
-        function navigate(view) {
-            if(document.getElementById('app-window').classList.contains('open')) closeApp();
+        <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors"></div>
+          <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-4 text-purple-400 relative z-10">
+            <i data-lucide="mouse-pointer-click" class="w-7 h-7"></i>
+          </div>
+          <h3 class="text-4xl font-bold text-white mb-1 relative z-10">${totalClicks}</h3>
+          <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Acessos Totais</p>
+        </div>
 
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`btn-${view}`).classList.add('active');
+        <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
+          <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
+          <div class="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 text-green-400 relative z-10">
+            <i data-lucide="trophy" class="w-7 h-7"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-1 line-clamp-1 px-2 relative z-10">${favoriteTool ? favoriteTool.title : '-'}</h3>
+          <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Ferramenta Favorita</p>
+        </div>
+      </div>
 
-            const content = document.getElementById('content-area');
-            const searchContainer = document.getElementById('search-container');
-            const pageTitle = document.getElementById('page-title');
-            
-            content.classList.remove('fade-in');
-            void content.offsetWidth; // Reflow
-            content.classList.add('fade-in');
-            searchContainer.classList.add('hidden');
-            
-            document.getElementById('main-scroll-container').scrollTop = 0;
+      <div class="glass-panel p-8 rounded-3xl pb-20">
+        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-5 h-5 text-gray-400"></i> Ranking de Utilização
+        </h3>
 
-            if (view === 'home') {
-                pageTitle.innerText = "Início";
-                renderHome();
-            } else if (view === 'hub') {
-                pageTitle.innerText = "Hub";
-                searchContainer.classList.remove('hidden');
-                renderHub();
-            } else if (view === 'tempo') {
-                pageTitle.innerText = "Tempo";
-                renderTempo();
-            } else if (view === 'config') {
-                pageTitle.innerText = "Ajustes";
-                renderConfig();
-            }
-            
-            if (window.lucide) lucide.createIcons();
-        }
-
-        // --- APP IFRAME ---
-        function openTool(url, id) {
-            State.addRecent(id);
+        <div class="space-y-5">
+          ${sortedUsage.map(([id, count], index) => {
             const tool = toolsData.find(t => t.id === id);
-            
-            document.getElementById('app-title-display').innerText = tool ? tool.title : 'Aplicativo';
-            const iconContainer = document.getElementById('app-icon-display');
-            // Check if tool exists to prevent errors
-            const iconName = tool ? getIcon(tool) : 'box';
-            iconContainer.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4"></i>`;
-            
-            if (window.lucide) lucide.createIcons();
-
-            document.getElementById('app-loader').classList.remove('hidden');
-            const frame = document.getElementById('tool-frame');
-            frame.src = url;
-            frame.onload = () => document.getElementById('app-loader').classList.add('hidden');
-
-            document.getElementById('app-window').classList.add('open');
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        }
-
-        function closeApp() {
-            document.getElementById('app-window').classList.remove('open');
-            setTimeout(() => {
-                document.getElementById('tool-frame').src = 'about:blank';
-            }, 500);
-            navigate('home');
-        }
-
-        function reloadApp() {
-            document.getElementById('app-loader').classList.remove('hidden');
-            document.getElementById('tool-frame').contentWindow.location.reload();
-        }
-
-        // --- RENDERIZADORES ---
-        function createCard(tool, badge = null) {
-            const iconName = getIcon(tool);
-            const colorName = tool.color ? tool.color.split('-')[0] : 'gray';
-            
+            if (!tool) return '';
+            const percent = totalClicks ? Math.min(100, (count / totalClicks) * 100) : 0;
+            const icon = getIcon(tool);
+            const color = tool.color ? tool.color.split('-')[0] : 'gray';
             return `
-                <div onclick="openTool('${tool.pageUrl}', '${tool.id}')" 
-                     class="glass-panel p-5 rounded-[20px] interactive-card relative overflow-hidden group flex flex-col h-full cursor-pointer min-h-[180px] border border-white/5 active:bg-white/10">
-                    ${badge === 'new' ? '<div class="absolute top-3 right-3 bg-green-500/20 text-green-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-green-500/20 z-20">NOVO</div>' : ''}
-                    <div class="absolute -top-2 -right-2 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity transform group-hover:rotate-12 pointer-events-none">
-                        <i data-lucide="${iconName}" class="w-24 h-24 text-${colorName}-400"></i>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-${colorName}-500/10 border border-${colorName}-500/20 text-${colorName}-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <i data-lucide="${iconName}" class="w-5 h-5"></i>
-                    </div>
-                    <div class="relative z-10 flex-1">
-                        <h3 class="text-base font-semibold text-white mb-1 group-hover:text-${colorName}-400 transition-colors">${tool.title}</h3>
-                        <p class="text-gray-400 text-[11px] leading-relaxed line-clamp-2">${tool.description}</p>
-                    </div>
-                    <div class="flex items-center justify-between pt-3 border-t border-white/5 relative z-10 mt-3">
-                        <span class="text-[9px] text-gray-500 bg-white/5 px-2 py-0.5 rounded truncate max-w-[100px] font-mono">${tool.category}</span>
-                        <i data-lucide="arrow-right" class="w-3 h-3 text-gray-500"></i>
-                    </div>
+              <div class="flex items-center gap-4 group">
+                <span class="text-gray-600 font-mono w-4 text-sm font-bold">#${index + 1}</span>
+                <div class="w-10 h-10 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-400 shrink-0">
+                  <i data-lucide="${icon}" class="w-5 h-5"></i>
                 </div>
+                <div class="flex-1">
+                  <div class="flex justify-between mb-1.5">
+                    <span class="text-white font-medium text-sm group-hover:text-${color}-400 transition-colors">${tool.title}</span>
+                    <span class="text-gray-500 text-xs">${count} usos</span>
+                  </div>
+                  <div class="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-gradient-to-r from-${color}-500 to-${color}-400 h-1.5 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
+                  </div>
+                </div>
+              </div>
             `;
-        }
+          }).join('') || '<div class="text-center py-10 text-gray-500">Utilize algumas ferramentas para gerar estatísticas.</div>'}
+        </div>
+      </div>
+    `;
 
-        function renderHome() {
-            const recents = State.getRecents().map(id => toolsData.find(t => t.id === id)).filter(t => t);
-            const news = toolsData.slice(0, 4);
+    const area = document.getElementById('content-area');
+    if (area) area.innerHTML = html;
+  }
 
-            let html = `<div class="space-y-8">`;
-            html += `<section><h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i> Destaques</h2><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">${news.map(t => createCard(t, 'new')).join('')}</div></section>`;
-            
-            if (recents.length > 0) {
-                html += `<section><h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-blue-400"></i> Recentes</h2><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">${recents.map(t => createCard(t)).join('')}</div></section>`;
-            }
-            html += `</div>`;
-            document.getElementById('content-area').innerHTML = html;
-        }
+  function renderConfig() {
+    const currentKey = State.getApiKey();
 
-          function renderHub() {
-          const categories = ['Todos', ...new Set(toolsData.map(t => t.category))];
-            let html = `
-               <div class="flex gap-3 overflow-x-auto hide-scrollbar mb-8 pb-2">
-                    ${categories.map(cat => `
-                        <button onclick="filterCategory('${cat}')" 
-                                class="cat-btn px-6 py-2.5 rounded-full glass-panel text-gray-300 text-sm font-medium hover:bg-white/10 hover:text-white transition-all whitespace-nowrap border-transparent hover:border-white/20 ${cat === 'Todos' ? 'bg-white/10 text-white border-white/20' : ''}"
-                                data-category="${cat}">
-                            ${cat}
-                        </button>
-                    `).join('')}
-                </div>
-                <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">${toolsData.map(t => createCard(t)).join('')}</div>
-            `;
-            document.getElementById('content-area').innerHTML = html;
-        }
-            function renderTempo() {
-            const usage = State.getUsage();
-            const totalClicks = Object.values(usage).reduce((a, b) => a + b, 0);
-            const startDateStr = localStorage.getItem('capy_start_date');
-            
-            let daysActive = 0;
-            if (startDateStr) {
-                const diff = new Date() - new Date(startDateStr);
-                daysActive = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-            }
+    const html = `
+      <div class="max-w-3xl mx-auto space-y-6 pb-20">
 
-            // Top 5 Ferramentas
-            const sortedUsage = Object.entries(usage).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const favoriteToolId = sortedUsage[0] ? sortedUsage[0][0] : null;
-            const favoriteTool = favoriteToolId ? toolsData.find(t => t.id === favoriteToolId) : null;
+        <div class="glass-panel p-8 rounded-3xl border-l-4 border-l-yellow-500">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 shrink-0">
+              <i data-lucide="key" class="w-6 h-6"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-white mb-2">Chave API Gemini</h3>
+              <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                Para ativar a inteligência artificial em todas as ferramentas do sistema, insira sua chave API do Google Gemini abaixo.
+                Ela será salva apenas no seu navegador.
+              </p>
+              <div class="flex gap-3 flex-col sm:flex-row">
+                <input type="password" id="api-input" value="${currentKey}"
+                  class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/20 transition-all text-sm font-mono placeholder-gray-600"
+                  placeholder="AIzaSy...">
+                <button onclick="saveKey()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-xl font-semibold transition-colors text-sm shadow-lg shadow-white/5">
+                  Salvar Chave
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            let html = `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
-                        <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 text-blue-400 relative z-10">
-                            <i data-lucide="calendar-days" class="w-7 h-7"></i>
-                        </div>
-                        <h3 class="text-4xl font-bold text-white mb-1 relative z-10">${daysActive}</h3>
-                        <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Dias Ativo</p>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="glass-panel p-6 rounded-2xl">
+            <h4 class="text-white font-medium mb-4 flex items-center gap-2">
+              <i data-lucide="book-open" class="w-4 h-4 text-blue-400"></i> Documentação
+            </h4>
+            <ul class="space-y-2">
+              <li>
+                <a href="politica-privacidade.html" onclick="event.preventDefault(); openTool(this.href, 'privacy')"
+                   class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group cursor-pointer transition-colors">
+                  <span class="text-sm text-gray-400 group-hover:text-white">Política de Privacidade</span>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600 group-hover:text-white"></i>
+                </a>
+              </li>
+              <li>
+                <a href="termos-servico.html" onclick="event.preventDefault(); openTool(this.href, 'terms')"
+                   class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group cursor-pointer transition-colors">
+                  <span class="text-sm text-gray-400 group-hover:text-white">Termos de Serviço</span>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600 group-hover:text-white"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
 
-                    <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
-                        <div class="absolute inset-0 bg-purple-500/5 group-hover:bg-purple-500/10 transition-colors"></div>
-                        <div class="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mb-4 text-purple-400 relative z-10">
-                            <i data-lucide="mouse-pointer-click" class="w-7 h-7"></i>
-                        </div>
-                        <h3 class="text-4xl font-bold text-white mb-1 relative z-10">${totalClicks}</h3>
-                        <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Acessos Totais</p>
-                    </div>
+          <div class="glass-panel p-6 rounded-2xl">
+            <h4 class="text-white font-medium mb-4 flex items-center gap-2">
+              <i data-lucide="help-circle" class="w-4 h-4 text-purple-400"></i> Ajuda Rápida
+            </h4>
+            <div class="text-sm text-gray-400 space-y-3">
+              <p>• Use <strong>⌘K</strong> para buscar ferramentas rapidamente no Hub.</p>
+              <p>• Ferramentas abrem em janelas internas para não perder o foco.</p>
+              <p>• O histórico é salvo localmente no seu dispositivo.</p>
+            </div>
+          </div>
+        </div>
 
-                    <div class="glass-panel p-6 rounded-3xl flex flex-col items-center justify-center text-center py-8 relative overflow-hidden group">
-                         <div class="absolute inset-0 bg-green-500/5 group-hover:bg-green-500/10 transition-colors"></div>
-                        <div class="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4 text-green-400 relative z-10">
-                            <i data-lucide="trophy" class="w-7 h-7"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-white mb-1 line-clamp-1 px-2 relative z-10">${favoriteTool ? favoriteTool.title : '-'}</h3>
-                        <p class="text-gray-400 text-xs uppercase tracking-wider relative z-10">Ferramenta Favorita</p>
-                    </div>
-                </div>
+        <div class="glass-panel p-8 rounded-3xl border border-red-500/20 bg-red-500/5 mt-8">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h3 class="text-red-400 font-semibold flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-5 h-5"></i> Zona de Dados
+              </h3>
+              <p class="text-gray-500 text-xs mt-1">Apagar histórico de uso, ranking e chave API.</p>
+            </div>
+            <button onclick="State.clearData()" class="px-5 py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-all text-sm font-medium">
+              Resetar Sistema
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
 
-                <div class="glass-panel p-8 rounded-3xl pb-20">
-                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-gray-400"></i> Ranking de Utilização
-                    </h3>
-                    <div class="space-y-5">
-                        ${sortedUsage.map(([id, count], index) => {
-                            const tool = toolsData.find(t => t.id === id);
-                            if(!tool) return '';
-                            const percent = Math.min(100, (count / totalClicks) * 100);
-                            const icon = getIcon(tool);
-                            const color = tool.color ? tool.color.split('-')[0] : 'gray';
-                            
-                            return `
-                                <div class="flex items-center gap-4 group">
-                                    <span class="text-gray-600 font-mono w-4 text-sm font-bold">#${index + 1}</span>
-                                    
-                                    <div class="w-10 h-10 rounded-lg bg-${color}-500/10 flex items-center justify-center text-${color}-400 shrink-0">
-                                        <i data-lucide="${icon}" class="w-5 h-5"></i>
-                                    </div>
-                                    
-                                    <div class="flex-1">
-                                        <div class="flex justify-between mb-1.5">
-                                            <span class="text-white font-medium text-sm group-hover:text-${color}-400 transition-colors">${tool.title}</span>
-                                            <span class="text-gray-500 text-xs">${count} usos</span>
-                                        </div>
-                                        <div class="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
-                                            <div class="bg-gradient-to-r from-${color}-500 to-${color}-400 h-1.5 rounded-full transition-all duration-1000" style="width: ${percent}%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('') || '<div class="text-center py-10 text-gray-500">Utilize algumas ferramentas para gerar estatísticas.</div>'}
-                    </div>
-                </div>
-            `;
-            document.getElementById('content-area').innerHTML = html;
-        }
-           function renderConfig() {
-            const currentKey = State.getApiKey();
-            let html = `
-                <div class="max-w-3xl mx-auto space-y-6 pb-20">
-                    
-                    <div class="glass-panel p-8 rounded-3xl border-l-4 border-l-yellow-500">
-                        <div class="flex items-start gap-4">
-                            <div class="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 shrink-0">
-                                <i data-lucide="key" class="w-6 h-6"></i>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-white mb-2">Chave API Gemini</h3>
-                                <p class="text-gray-400 text-sm mb-4 leading-relaxed">
-                                    Para ativar a inteligência artificial em todas as ferramentas do sistema, insira sua chave API do Google Gemini abaixo. 
-                                    Ela será salva apenas no seu navegador.
-                                </p>
-                                <div class="flex gap-3 flex-col sm:flex-row">
-                                    <input type="password" id="api-input" value="${currentKey}" 
-                                        class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500/50 focus:ring-1 focus:ring-yellow-500/20 transition-all text-sm font-mono placeholder-gray-600"
-                                        placeholder="AIzaSy...">
-                                    <button onclick="saveKey()" class="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-xl font-semibold transition-colors text-sm shadow-lg shadow-white/5">
-                                        Salvar Chave
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    const area = document.getElementById('content-area');
+    if (area) area.innerHTML = html;
+  }
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass-panel p-6 rounded-2xl">
-                            <h4 class="text-white font-medium mb-4 flex items-center gap-2">
-                                <i data-lucide="book-open" class="w-4 h-4 text-blue-400"></i> Documentação
-                            </h4>
-                            <ul class="space-y-2">
-                                <li>
-                                    <a href="politica-privacidade.html" onclick="event.preventDefault(); openTool(this.href, 'privacy')" class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group cursor-pointer transition-colors">
-                                        <span class="text-sm text-gray-400 group-hover:text-white">Política de Privacidade</span>
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600 group-hover:text-white"></i>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="termos-servico.html" onclick="event.preventDefault(); openTool(this.href, 'terms')" class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group cursor-pointer transition-colors">
-                                        <span class="text-sm text-gray-400 group-hover:text-white">Termos de Serviço</span>
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600 group-hover:text-white"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+  // --- FILTROS ---
+  function filterCategory(category) {
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      const isActive = btn.dataset.category === category;
+      if (isActive) {
+        btn.classList.add('bg-white/10', 'text-white', 'border-white/20', 'shadow-lg');
+        btn.classList.remove('text-gray-400', 'border-transparent');
+      } else {
+        btn.classList.remove('bg-white/10', 'text-white', 'border-white/20', 'shadow-lg');
+        btn.classList.add('text-gray-400', 'border-transparent');
+      }
+    });
 
-                        <div class="glass-panel p-6 rounded-2xl">
-                             <h4 class="text-white font-medium mb-4 flex items-center gap-2">
-                                <i data-lucide="help-circle" class="w-4 h-4 text-purple-400"></i> Ajuda Rápida
-                            </h4>
-                            <div class="text-sm text-gray-400 space-y-3">
-                                <p>• Use <strong>⌘K</strong> para buscar ferramentas rapidamente no Hub.</p>
-                                <p>• Ferramentas abrem em janelas internas para não perder o foco.</p>
-                                <p>• O histórico é salvo localmente no seu dispositivo.</p>
-                            </div>
-                        </div>
-                    </div>
+    const grid = document.getElementById('hub-grid');
+    if (!grid) return;
 
-                    <div class="glass-panel p-8 rounded-3xl border border-red-500/20 bg-red-500/5 mt-8">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
-                            <div>
-                                <h3 class="text-red-400 font-semibold flex items-center gap-2">
-                                    <i data-lucide="trash-2" class="w-5 h-5"></i> Zona de Dados
-                                </h3>
-                                <p class="text-gray-500 text-xs mt-1">Apagar histórico de uso, ranking e chave API.</p>
-                            </div>
-                            <button onclick="State.clearData()" class="px-5 py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white transition-all text-sm font-medium">
-                                Resetar Sistema
-                            </button>
-                        </div>
-                    </div>
+    const filtered = category === 'Todos' ? toolsData : toolsData.filter(t => t.category === category);
+    grid.innerHTML = filtered.length
+      ? filtered.map(t => createCard(t)).join('')
+      : `<div class="col-span-full text-center py-20 text-gray-500">Nenhuma ferramenta encontrada nesta categoria.</div>`;
 
-                </div>
-            `;
-            document.getElementById('content-area').innerHTML = html;
-        }
+    if (window.lucide) lucide.createIcons();
+  }
 
-        // --- FILTROS ---
-      function filterCategory(category) {
-            // Atualiza estado visual dos botões
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                const isActive = btn.dataset.category === category;
-                if(isActive) {
-                    btn.classList.add('bg-white/10', 'text-white', 'border-white/20', 'shadow-lg');
-                    btn.classList.remove('text-gray-400', 'border-transparent');
-                } else {
-                    btn.classList.remove('bg-white/10', 'text-white', 'border-white/20', 'shadow-lg');
-                    btn.classList.add('text-gray-400', 'border-transparent');
-                }
-            });
+  function filterHub() {
+    const input = document.getElementById('global-search');
+    const term = (input?.value || "").toLowerCase();
 
-            // Filtra o grid
-            const grid = document.getElementById('hub-grid');
-            const filtered = category === 'Todos' ? toolsData : toolsData.filter(t => t.category === category);
-            
-            // Re-render
-            grid.innerHTML = filtered.map(t => createCard(t)).join('');
-            
-            // Feedback visual se vazio
-            if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">Nenhuma ferramenta encontrada nesta categoria.</div>`;
-            }
+    const grid = document.getElementById('hub-grid');
+    if (!grid) return; // ✅ evita "Cannot set properties of null"
 
-            if (window.lucide) lucide.createIcons();
-        }
+    const filtered = toolsData.filter(t =>
+      (t.title || "").toLowerCase().includes(term) ||
+      (t.description || "").toLowerCase().includes(term) ||
+      (t.category || "").toLowerCase().includes(term)
+    );
 
-        function filterHub() {
-            const term = document.getElementById('global-search').value.toLowerCase();
-            const filtered = toolsData.filter(t => 
-                (t.title || "").toLowerCase().includes(term) || 
-                (t.description || "").toLowerCase().includes(term) ||
-                (t.category || "").toLowerCase().includes(term)
-            );
-            
-            const grid = document.getElementById('hub-grid');
-            grid.innerHTML = filtered.map(t => createCard(t)).join('');
-            
-             if(filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500">Nenhum resultado para "${term}".</div>`;
-            }
+    grid.innerHTML = filtered.length
+      ? filtered.map(t => createCard(t)).join('')
+      : `<div class="col-span-full text-center py-20 text-gray-500">Nenhum resultado para "${term}".</div>`;
 
-            if (window.lucide) lucide.createIcons();           
-        }
+    if (window.lucide) lucide.createIcons();
+  }
 
-        function saveKey() {
-  const key = document.getElementById('api-input').value;
-  State.setApiKey(key);
+  function saveKey() {
+    const key = document.getElementById('api-input')?.value || '';
+    State.setApiKey(key);
 
-  capyEvent("api_key_save", {
-    provider: "gemini",
-    has_key: !!key && key.length > 10
+    capyEvent("api_key_save", {
+      provider: "gemini",
+      has_key: !!key && key.length > 10
+    });
+
+    alert('Salvo!');
+  }
+
+  // --- INICIALIZAÇÃO SEGURA ---
+  document.addEventListener('DOMContentLoaded', () => {
+    State.init();
+    runIntro();
+
+    // ✅ inicia em home e já trackeia corretamente dentro do navigate
+    navigate('home');
+
+    setTimeout(() => {
+      if (window.lucide) lucide.createIcons();
+      // ❌ removido: capyTrackView(view) (view não existe aqui)
+    }, 100);
   });
-
-  alert('Salvo!');
-}
-
-        // --- INICIALIZAÇÃO SEGURA ---
-        document.addEventListener('DOMContentLoaded', () => {
-            State.init();
-            
-            // Inicia a animação de loading
-            runIntro();
-
-            // Renderiza a Home (por trás do loader)
-            navigate('home');
-            
-            // Garante que os ícones carreguem após um pequeno delay
-            setTimeout(() => {
-                if (window.lucide) lucide.createIcons();
-capyTrackView(view);
-            }, 100);
-        });
-    </script>
-</body>
-</html>
-
-
-
-
-
-
-
-
+</script>
