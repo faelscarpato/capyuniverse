@@ -48,6 +48,7 @@ O foco está na **arquitetura e no aprendizado**, não no nome de cada módulo.
 
 ---
 
+
 ## 🧱 Arquitetura Conceitual
 
 O projeto segue princípios simples:
