@@ -1,89 +1,76 @@
+
 # 🐹 CapyUniverse
 
-Ecossistema modular de ferramentas web com **Inteligência Artificial aplicada a problemas reais**, focado em **produtividade, desenvolvimento, análise de dados e automação**, com arquitetura orientada a agentes.
+Plataforma experimental e modular para **Inteligência Artificial aplicada**, focada em desenvolvimento de ferramentas, automações e experiências web com LLMs, dados e interfaces modernas.
 
-🔗 **Demo:** https://faelscarpato.github.io/capyuniverse/
+🔗 Demo: https://faelscarpato.github.io/capyuniverse/
 
 ---
 
 ## 🚀 Visão Geral
 
-CapyUniverse é um **hub de aplicações de IA** que concentra múltiplas ferramentas especializadas (CapyTools), todas construídas para explorar **integração prática de LLMs**, pipelines simples de dados e experiências web modernas.
+CapyUniverse **não é uma ferramenta única** e **não é um produto fechado**.
 
-O projeto funciona como um **laboratório de engenharia de IA aplicada**, onde cada ferramenta resolve um problema específico, mas compartilha princípios comuns de arquitetura, integração com APIs e experimentação contínua.
+É um **hub experimental de IA aplicada**, criado para estudar, testar e evoluir:
+- integrações com modelos de linguagem (LLMs)
+- fluxos de dados simples
+- automações orientadas a contexto
+- interfaces web para uso real de IA
 
----
-
-## 🧠 CapyTools Principais (Atual)
-
-### 🧩 **CapyChat**
-Chat inteligente com suporte a múltiplos modelos de linguagem.
-- Integração com **Gemini API e OpenAI**
-- Controle de contexto e prompts
-- Base para testes de UX conversacional e agentes
+O projeto funciona como um **laboratório contínuo de engenharia**, onde diferentes ferramentas e experimentos convivem, evoluem ou são substituídos conforme aprendizados técnicos e necessidades reais.
 
 ---
 
-### 📄 **CapyDoc / CapyPDF**
-Ferramentas de análise e interpretação de documentos.
-- Upload e leitura de PDFs e textos
-- Extração de informações com IA
-- Resumos, insights e respostas baseadas no conteúdo
-- Exploração de pipelines simples: documento → processamento → IA → output
+## 🎯 Objetivo do Projeto
+
+O objetivo principal do CapyUniverse é **transformar IA em algo utilizável**, indo além de demos isoladas ou notebooks, explorando:
+
+- IA integrada a aplicações web reais
+- Fluxos completos: input → processamento → IA → output
+- Experimentação com UX para sistemas inteligentes
+- Arquitetura flexível para múltiplos casos de uso
 
 ---
 
-### 💻 **CapyIDE**
-IDE web com assistência de IA para desenvolvimento.
-- Geração e correção de código via LLM
-- Análise de trechos de código
-- Suporte a múltiplas linguagens
-- Experimentação de IA como copiloto de desenvolvimento
+## 🧩 O que existe hoje no CapyUniverse
+
+O ecossistema é composto por **múltiplas ferramentas e experimentos**, que podem variar ao longo do tempo, incluindo:
+
+- Interfaces conversacionais com IA (não limitadas a um único chat)
+- Ferramentas de leitura, análise e transformação de conteúdo
+- Ambientes de apoio ao desenvolvimento com IA
+- Utilitários para experimentação de prompts e contexto
+- Experimentos com OCR, análise de texto e dados
+- Prototipação rápida de ideias baseadas em LLMs
+
+👉 As ferramentas **não são fixas**, nem todas estão sempre ativas.  
+O foco está na **arquitetura e no aprendizado**, não no nome de cada módulo.
 
 ---
 
-### 🧠 **CapyPrompt**
-Ferramenta focada em engenharia de prompts.
-- Criação, refinamento e organização de prompts
-- Testes rápidos com diferentes modelos
-- Apoio ao design de prompts reutilizáveis
+## 🧱 Arquitetura Conceitual
 
----
+O projeto segue princípios simples:
 
-### 📊 **CapyVersus**
-Comparador inteligente com apoio de IA.
-- Comparação de produtos, ideias ou conceitos
-- Estruturação de critérios e análises
-- Uso de IA para síntese e avaliação comparativa
+- Estrutura **modular**
+- Ferramentas independentes, porém reutilizando lógica comum
+- Camada de IA desacoplada da interface
+- Facilidade para trocar modelos e provedores
+- Pipelines simples de processamento de dados
 
----
+Fluxo típico:
 
-### 🧪 **Outras CapyTools**
-O ecossistema inclui ferramentas experimentais voltadas a:
-- OCR e extração de texto
-- Análise visual e de imagens
-- Geração de conteúdo
-- Dashboards e utilitários baseados em IA
+Usuário → Interface Web → Serviço de IA → Processamento → Resposta
 
----
-
-## 🧱 Arquitetura Geral
-
-- Estrutura **modular**, onde cada CapyTool funciona de forma independente
-- Serviços de IA desacoplados da interface
-- Integração via APIs REST
-- Facilidade para troca de modelos de IA
-- Pipelines simples para processamento e análise de dados
-
-📄 Detalhes técnicos completos em `docs/ARCHITECTURE.md`
+📄 Detalhamento técnico em `docs/ARCHITECTURE.md`
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend:** HTML, CSS, JavaScript, React, Vite
-- **IA:** Gemini API, OpenAI API, LLMs via HTTP
-- **Dados:** JSON, estruturas em memória, pipelines simples
+- **IA:** Gemini API, OpenAI API (via HTTP)
+- **Dados:** JSON, estado em memória, pipelines simples
 - **Outros:** Git, APIs REST, experimentação local
 
 ---
