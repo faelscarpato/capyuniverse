@@ -1,9 +1,10 @@
-
 # 🐹 CapyUniverse
 
-Plataforma experimental e modular para **Inteligência Artificial aplicada**, focada em desenvolvimento de ferramentas, automações e experiências web com LLMs, dados e interfaces modernas.
+<img width="1366" height="708" alt="CapyUniverse Hero" src="https://github.com/user-attachments/assets/68894afd-07c5-4866-82db-594502ffe948" />
 
-🔗 Demo: https://faelscarpato.github.io/capyuniverse/
+> Plataforma experimental e modular para **Inteligência Artificial aplicada**, focada no desenvolvimento de ferramentas, automações e experiências web utilizando LLMs, dados e interfaces modernas.
+
+🔗 **Demo:** https://faelscarpato.github.io/capyuniverse/
 
 ---
 
@@ -11,23 +12,24 @@ Plataforma experimental e modular para **Inteligência Artificial aplicada**, fo
 
 CapyUniverse **não é uma ferramenta única** e **não é um produto fechado**.
 
-É um **hub experimental de IA aplicada**, criado para estudar, testar e evoluir:
-- integrações com modelos de linguagem (LLMs)
-- fluxos de dados simples
-- automações orientadas a contexto
-- interfaces web para uso real de IA
+É um **hub experimental de IA aplicada**, criado para estudar, testar e evoluir soluções que envolvem:
 
-O projeto funciona como um **laboratório contínuo de engenharia**, onde diferentes ferramentas e experimentos convivem, evoluem ou são substituídos conforme aprendizados técnicos e necessidades reais.
+- Integração com modelos de linguagem (LLMs)
+- Fluxos simples de dados e contexto
+- Automações orientadas a uso real
+- Interfaces web para interação prática com IA
+
+O projeto funciona como um **laboratório contínuo de engenharia**, onde ferramentas e experimentos surgem, evoluem ou são descartados conforme aprendizados técnicos e necessidades reais.
 
 ---
 
 ## 🎯 Objetivo do Projeto
 
-O objetivo principal do CapyUniverse é **transformar IA em algo utilizável**, indo além de demos isoladas ou notebooks, explorando:
+O objetivo do CapyUniverse é **transformar IA em algo utilizável**, indo além de demos isoladas ou notebooks, explorando:
 
 - IA integrada a aplicações web reais
-- Fluxos completos: input → processamento → IA → output
-- Experimentação com UX para sistemas inteligentes
+- Fluxos completos: **input → processamento → IA → output**
+- Experimentação de UX para sistemas inteligentes
 - Arquitetura flexível para múltiplos casos de uso
 
 ---
@@ -44,24 +46,24 @@ O ecossistema é composto por **múltiplas ferramentas e experimentos**, que pod
 - Prototipação rápida de ideias baseadas em LLMs
 
 👉 As ferramentas **não são fixas**, nem todas estão sempre ativas.  
-O foco está na **arquitetura e no aprendizado**, não no nome de cada módulo.
+O foco está na **arquitetura, experimentação e aprendizado**, não no nome de cada módulo.
 
 ---
 
-
 ## 🧱 Arquitetura Conceitual
 
-O projeto segue princípios simples:
+O projeto segue princípios simples e intencionais:
 
 - Estrutura **modular**
-- Ferramentas independentes, porém reutilizando lógica comum
+- Ferramentas independentes reutilizando lógica comum
 - Camada de IA desacoplada da interface
 - Facilidade para trocar modelos e provedores
 - Pipelines simples de processamento de dados
 
-Fluxo típico:
+**Fluxo típico:**
 
 Usuário → Interface Web → Serviço de IA → Processamento → Resposta
+
 
 📄 Detalhamento técnico em `docs/ARCHITECTURE.md`
 
@@ -76,15 +78,22 @@ Usuário → Interface Web → Serviço de IA → Processamento → Resposta
 
 ---
 
+## 🖼️ Capturas de Tela
+
+<img width="410" height="231" alt="CapyUniverse Screenshot 1" src="https://github.com/user-attachments/assets/23383370-37b6-4be9-9ed9-5e531629fde5" />
+<img width="410" height="231" alt="CapyUniverse Screenshot 2" src="https://github.com/user-attachments/assets/7f61d300-daa5-4729-9302-ee99d4345f66" />
+
+---
+
 ## ▶️ Como Rodar Localmente
 
 ```bash
 npm install
 npm run dev
-````
+```
+---
 
-
-## Configure as variáveis de ambiente usando .env.example.
+Configure as variáveis de ambiente usando .env.example.
 
 ## 🔐 Variáveis de Ambiente
 ```
@@ -95,13 +104,13 @@ VITE_OPENAI_API_KEY=
 ## 🗺️ Direção Técnica (Roadmap Aberto)
 
 - Consolidação da camada de serviços de IA
-- Melhoria dos fluxos de dados e contexto
-- Organização do projeto como hub/monorepo
+- Melhoria dos fluxos de dados e gerenciamento de contexto
+- Organização do projeto como hub / monorepo
 - Integração opcional com persistência de dados
-- Testes e validações de serviços de IA
+- Testes e validações dos serviços de IA
 
 ## 📜 Licença
 
-- MIT
+MIT
 
 ---
