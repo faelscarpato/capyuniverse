@@ -81,3 +81,27 @@ Usuário → Interface Web → Serviço de IA → Processamento → Resposta
 ```bash
 npm install
 npm run dev
+````
+
+
+## Configure as variáveis de ambiente usando .env.example.
+
+## 🔐 Variáveis de Ambiente
+```
+VITE_GEMINI_API_KEY=
+VITE_OPENAI_API_KEY=
+```
+
+## 🗺️ Direção Técnica (Roadmap Aberto)
+
+- Consolidação da camada de serviços de IA
+- Melhoria dos fluxos de dados e contexto
+- Organização do projeto como hub/monorepo
+- Integração opcional com persistência de dados
+- Testes e validações de serviços de IA
+
+## 📜 Licença
+
+- MIT
+
+---
