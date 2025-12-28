@@ -1,112 +1,95 @@
-# 🐿️ CapyUniverse
+# 🐹 CapyUniverse
 
-**O ecossistema definitivo de ferramentas inteligentes e criativas com a alma de uma capivara astronauta.**  
-Desenvolvido por [@faelscarpato](https://github.com/faelscarpato) com 💡 inovação, 🛠️ código afiado e 🧠 IA de verdade.
+Ecossistema modular de ferramentas web com **Inteligência Artificial aplicada a problemas reais**, focado em **produtividade, desenvolvimento, análise de dados e automação**, com arquitetura orientada a agentes.
 
-![CapyUniverse Banner](https://faelscarpato.github.io/capyuniverse/img/banner-capyuniverse.png)
+🔗 **Demo:** https://faelscarpato.github.io/capyuniverse/
 
 ---
 
 ## 🚀 Visão Geral
 
-O **CapyUniverse** é um superapp web que une várias ferramentas baseadas em IA e automação, com foco em produtividade, criatividade e inovação digital.  
-É como se o ChatGPT, o Figma, o Notion e a NASA tivessem tido um filho... e ele virasse uma capivara futurista.
+CapyUniverse é um **hub de aplicações de IA** que concentra múltiplas ferramentas especializadas (CapyTools), todas construídas para explorar **integração prática de LLMs**, pipelines simples de dados e experiências web modernas.
+
+O projeto funciona como um **laboratório de engenharia de IA aplicada**, onde cada ferramenta resolve um problema específico, mas compartilha princípios comuns de arquitetura, integração com APIs e experimentação contínua.
 
 ---
 
-## 🧠 Funcionalidades
+## 🧠 CapyTools Principais (Atual)
 
-- 🔥 **CapyChat** – Chat com IA Gemini ou ChatGPT
-- 📄 **CapyDoc / CapyPDF** – Análise de documentos e PDFs
-- 🧠 **CapyIDE** – IDE com geração e correção de código via IA
-- 🧪 **CapyPrompt** – Refinador e criador de prompts insanos
-- 📊 **CapyChart** – Geração de dashboards com IA
-- 👨‍🍳 **CapyCheff** – Criação de receitas com o que tem na geladeira
-- 💊 **CapyBula** – IA que lê bulas e atestados médicos
-- 🎓 **CapyTCC** – Suporte completo para criação de TCC (com ABNT)
-- 🔍 **CapyVersus** – Comparador inteligente estilo versus.com
-- 🧩 E muito mais com o poder da **CapyAI**...
+### 🧩 **CapyChat**
+Chat inteligente com suporte a múltiplos modelos de linguagem.
+- Integração com **Gemini API e OpenAI**
+- Controle de contexto e prompts
+- Base para testes de UX conversacional e agentes
 
 ---
 
-## 🌐 Demonstração
-
-[🔗 Acesse a versão atual (se disponível)](https://capyuniverse.pages.dev/)  
-> *Ou rode localmente e entre nesse universo insano de IA.*
-
----
-
-## ⚙️ Tecnologias Utilizadas
-
-- `HTML5` + `TailwindCSS` para um visual futurista e responsivo  
-- `JavaScript` moderno com módulos separados  
-- `Supabase` como backend (auth, storage e banco de dados)  
-- `Gemini AI` + `OpenAI` (dependendo da escolha do usuário)  
-- `PDF.js`, `html2canvas`, `docx` e outras libs inteligentes  
-- 🔀 Sistema de carregamento dinâmico via IFrames e tema global via API  
+### 📄 **CapyDoc / CapyPDF**
+Ferramentas de análise e interpretação de documentos.
+- Upload e leitura de PDFs e textos
+- Extração de informações com IA
+- Resumos, insights e respostas baseadas no conteúdo
+- Exploração de pipelines simples: documento → processamento → IA → output
 
 ---
 
-## 🧱 Estrutura do Projeto
-
-```
-/public
-  /images        # Imagens do projeto
-/src
-  /apps          # Ferramentas Capy (CapyPDF, CapyIDE, etc.)
-  /components    # Componentes reutilizáveis (CapyModal, CapyDock, CapyMate...)
-  /pages         # Interface geral (Home, Login, Config, etc.)
-  /styles        # Tailwind + temas personalizados
-  /utils         # Funções auxiliares e helpers (API, IA, Supabase...)
-.env.local       # Chaves de API e configs locais
-```
+### 💻 **CapyIDE**
+IDE web com assistência de IA para desenvolvimento.
+- Geração e correção de código via LLM
+- Análise de trechos de código
+- Suporte a múltiplas linguagens
+- Experimentação de IA como copiloto de desenvolvimento
 
 ---
 
-## 🧪 Como Rodar Localmente
+### 🧠 **CapyPrompt**
+Ferramenta focada em engenharia de prompts.
+- Criação, refinamento e organização de prompts
+- Testes rápidos com diferentes modelos
+- Apoio ao design de prompts reutilizáveis
+
+---
+
+### 📊 **CapyVersus**
+Comparador inteligente com apoio de IA.
+- Comparação de produtos, ideias ou conceitos
+- Estruturação de critérios e análises
+- Uso de IA para síntese e avaliação comparativa
+
+---
+
+### 🧪 **Outras CapyTools**
+O ecossistema inclui ferramentas experimentais voltadas a:
+- OCR e extração de texto
+- Análise visual e de imagens
+- Geração de conteúdo
+- Dashboards e utilitários baseados em IA
+
+---
+
+## 🧱 Arquitetura Geral
+
+- Estrutura **modular**, onde cada CapyTool funciona de forma independente
+- Serviços de IA desacoplados da interface
+- Integração via APIs REST
+- Facilidade para troca de modelos de IA
+- Pipelines simples para processamento e análise de dados
+
+📄 Detalhes técnicos completos em `docs/ARCHITECTURE.md`
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** HTML, CSS, JavaScript, React, Vite
+- **IA:** Gemini API, OpenAI API, LLMs via HTTP
+- **Dados:** JSON, estruturas em memória, pipelines simples
+- **Outros:** Git, APIs REST, experimentação local
+
+---
+
+## ▶️ Como Rodar Localmente
 
 ```bash
-git clone https://github.com/faelscarpato/capyuniverse.git
-cd capyuniverse
 npm install
 npm run dev
-```
-
-> ⚠️ Você precisará de uma `.env.local` com as seguintes variáveis:
-```env
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-OPENAI_API_KEY=  (ou)
-GEMINI_API_KEY=
-```
-
----
-
-## 📦 Recursos Futuramente (modo CapyHyper™️)
-
-- [ ] Área de trabalho estilo OS (CapyOS)
-- [ ] Múltiplas janelas arrastáveis
-- [ ] CapyStore com plugins e apps
-- [ ] Editor de temas visuais
-- [ ] Controle de acesso e planos pagos
-- [ ] CapySugestão™️: IA que recomenda apps pra você
-- [ ] Integração com CapyMate, o copiloto definitivo
-
----
-
-## 🦛 Créditos
-
-Criado com ❤️ por **Rafael Scarpato** – um dev, designer e visionário movido por capivaras e curiosidade.
-
-> [Instagram](https://instagram.com/scarpatodesigner) • [GitHub](https://github.com/faelscarpato) • [Behance](https://www.behance.net/faelscarpato)
-
----
-
-## 📜 Licença
-
-MIT — Use, melhore e compartilhe com a comunidade.  
-Mas não esquece de dar os créditos pro capivara original 😎
-
----
-
-> **"CapyUniverse é mais que um sistema. É uma constelação de ideias vivas."**
