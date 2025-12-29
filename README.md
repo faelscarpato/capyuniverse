@@ -5,6 +5,7 @@
 > Plataforma experimental e modular para **Inteligência Artificial aplicada**, focada no desenvolvimento de ferramentas, automações e experiências web utilizando LLMs, dados e interfaces modernas.
 
 🔗 **Demo:** https://faelscarpato.github.io/capyuniverse/
+🔗 **Eng** https://github.com/faelscarpato/capyuniverse/docs/README_EN.md
 
 ---
 
