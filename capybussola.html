@@ -117,7 +117,7 @@
 
     async function callLLM_JSON(prompt) {
         if (!state.apiKey) { toast('Configure sua chave de API.'); throw new Error('Sem chave'); }
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${state.model}:generateContent?key=${state.apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
         const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } }) });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
