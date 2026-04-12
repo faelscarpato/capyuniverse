@@ -20,12 +20,12 @@
     "iconUrl": "img/logo.png"
   },
     {
-    "id": "minhavaga",
-    "title": "TalentMach",
+    "id": "portfolio",
+    "title": "Portfólio Rafael",
     "imageUrl": "img/capyapmaker.webp",
-    "description": "Analise candidatos com sua Vaga, Melhore seu Curriculo para a vaga.",
+    "description": "Portfólio Dev/Design - website com dois portfólio pronto para visualização de projetos e criações gráficas.",
     "category": "Desenvolvimento & TI",
-    "pageUrl": "minhavaga.html",
+    "pageUrl": "portfolio.html",
     "color": "purple-400",
     "iconUrl": "img/logo.png"
   },
