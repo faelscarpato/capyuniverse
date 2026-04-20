@@ -1,0 +1,106 @@
+<UserControl x:Class="CapyOS.Controls.AppWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sel="clr-namespace:CapyOS.Selectors"
+             xmlns:models="clr-namespace:CapyOS.Models">
+    <UserControl.Resources>
+        <Style TargetType="Border">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Background" Value="{DynamicResource App.SurfaceBrush}"/>
+        </Style>
+    </UserControl.Resources>
+    <Border x:Name="Root"
+            Panel.ZIndex="{Binding ZIndex}"
+            Opacity="1"
+            Width="{Binding Width}"
+            Height="{Binding Height}"
+            Canvas.Left="{Binding X}"
+            Canvas.Top="{Binding Y}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Border x:Name="Header" Grid.Row="0" Background="{DynamicResource App.SurfaceBrush}">
+                <Border.ContextMenu>
+                    <ContextMenu ItemsSource="{Binding DataContext.Workspaces, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <ContextMenu.ItemContainerStyle>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding Name}"/>
+                                <Setter Property="Command" Value="{Binding DataContext.MoveWindowToWorkspaceCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <Setter Property="CommandParameter">
+                                    <Setter.Value>
+                                        <MultiBinding StringFormat="{}{0}|{1}">
+                                            <Binding RelativeSource="{RelativeSource AncestorType=ContextMenu}" Path="PlacementTarget.DataContext.Id"/>
+                                            <Binding Path="Index"/>
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ContextMenu.ItemContainerStyle>
+                    </ContextMenu>
+                </Border.ContextMenu>
+                <DockPanel Margin="8,0" Height="32">
+                    <TextBlock Text="{Binding Icon}" FontSize="16" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource App.ForegroundBrush}" Margin="8,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                        <Button Content="_" Width="24" Height="24" Command="{Binding DataContext.MinimizeWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                        <Button Content="✕" Width="24" Height="24" Margin="4,0,0,0" Command="{Binding DataContext.CloseWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"/>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Grid.Row="1" Background="{DynamicResource App.SurfaceBrush}" CornerRadius="0,0,8,8">
+                <ContentPresenter Content="{Binding}" ContentTemplateSelector="{StaticResource AppContentSelector}"/>
+            </Border>
+        </Grid>
+        <Border.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="0.96" To="1" Duration="0:0:0.2"/>
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.96" To="1" Duration="0:0:0.2"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Border.Triggers>
+        <Border.RenderTransform>
+            <ScaleTransform ScaleX="1" ScaleY="1"/>
+        </Border.RenderTransform>
+    </Border>
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="IsHitTestVisible" Value="True"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.4"/>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMinimized}" Value="True">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMinimized}" Value="False">
+                    <Setter Property="IsHitTestVisible" Value="True"/>
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.18"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </DataTrigger.EnterActions>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
+</UserControl>
